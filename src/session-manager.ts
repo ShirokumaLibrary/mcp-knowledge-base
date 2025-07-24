@@ -6,7 +6,6 @@
  * @ai-assumption Sessions organized by date (YYYY-MM-DD folders)
  */
 
-import * as path from 'path';
 import { 
   WorkSession, 
   DailySummary 
@@ -15,6 +14,7 @@ import { FileIssueDatabase } from './database.js';
 import { SessionRepository } from './repositories/session-repository.js';
 import { SessionSearchService } from './services/session-search-service.js';
 import { SessionMarkdownFormatter } from './formatters/session-markdown-formatter.js';
+import { getConfig } from './config.js';
 
 /**
  * @ai-context Central manager for work tracking and daily summaries
@@ -31,12 +31,12 @@ export class WorkSessionManager {
   /**
    * @ai-intent Initialize session management system
    * @ai-flow 1. Create repository -> 2. Setup search -> 3. Init formatter
-   * @ai-defaults Sessions stored in database/sessions directory
+   * @ai-defaults Sessions stored in .shirokuma/data/sessions directory
    * @ai-dependencies Database required for SQLite search sync
    * @ai-assumption Directory will be created if missing
    */
   constructor(
-    sessionsDir: string = path.join(process.cwd(), 'database', 'sessions'),
+    sessionsDir: string = getConfig().database.sessionsPath,
     private db: FileIssueDatabase
   ) {
     this.repository = new SessionRepository(sessionsDir, db);

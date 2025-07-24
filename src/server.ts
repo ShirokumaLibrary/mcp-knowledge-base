@@ -47,7 +47,6 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import * as path from 'path';
 
 import { FileIssueDatabase } from './database.js';
 import { WorkSessionManager } from './session-manager.js';
@@ -89,7 +88,7 @@ class IssueTrackerServer {
     const config = getConfig();
     this.db = new FileIssueDatabase(config.database.path);
     this.sessionManager = new WorkSessionManager(
-      path.join(config.database.path, 'sessions'),
+      config.database.sessionsPath,
       this.db
     );
     

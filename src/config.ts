@@ -18,6 +18,12 @@ export interface Config {
   database: {
     path: string;        // @ai-logic: Base directory for all data files
     sqlitePath: string;  // @ai-logic: Full path to SQLite search index
+    // @ai-logic: Subdirectory paths for different entity types
+    issuesPath: string;
+    plansPath: string;
+    docsPath: string;
+    knowledgePath: string;
+    sessionsPath: string;
   };
   server: {
     name: string;    // @ai-logic: MCP server identifier
@@ -40,13 +46,19 @@ export interface Config {
  */
 export function getConfig(): Config {
   // @ai-logic: Database base directory from env or relative to CWD
-  const baseDir = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), 'database');
+  const baseDir = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
   
   return {
     database: {
       path: baseDir,
       // @ai-logic: SQLite can be relocated independently
-      sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db')
+      sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db'),
+      // @ai-logic: Entity-specific subdirectories
+      issuesPath: path.join(baseDir, 'issues'),
+      plansPath: path.join(baseDir, 'plans'),
+      docsPath: path.join(baseDir, 'docs'),
+      knowledgePath: path.join(baseDir, 'knowledge'),
+      sessionsPath: path.join(baseDir, 'sessions')
     },
     server: {
       // @ai-default: Shirokuma knowledge base server

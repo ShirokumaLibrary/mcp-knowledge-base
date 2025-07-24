@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3] - 2025-07-24
+
+### Changed
+- **BREAKING**: Changed default data directory from `database` to `.shirokuma/data`
+  - Avoids naming conflicts with project directories
+  - Uses hidden directory for cleaner project structure
+  - All data files are now stored under `.shirokuma/data/`
+- Centralized all path configurations in `src/config.ts`
+  - All components now use config for path resolution
+  - Removed hardcoded paths from individual modules
+- Improved configuration management
+  - Environment variable `MCP_DATABASE_PATH` to customize data directory
+  - Environment variable `MCP_SQLITE_PATH` to customize SQLite location
+
+### Added
+- Comprehensive path configuration in config module
+  - `issuesPath`, `plansPath`, `docsPath`, `knowledgePath`, `sessionsPath`
+  - All paths derived from base data directory
+
+### Fixed
+- Path resolution consistency across all modules
+- Session manager now uses centralized config
+
 ## [0.0.2] - 2025-07-24
 
 ### Added

@@ -52,6 +52,7 @@ Thumbs.db
 # Shirokuma MCP Issue Tracker specific
 # User data directory - should not be committed to version control
 /database/*
+/.shirokuma/*
 
 # Development scripts - temporary debugging tools
 /scripts/
