@@ -1,0 +1,731 @@
+import * as path from 'path';
+import { DatabaseConnection } from './base.js';
+import { StatusRepository } from './status-repository.js';
+import { TagRepository } from './tag-repository.js';
+import { IssueRepository } from './issue-repository.js';
+import { PlanRepository } from './plan-repository.js';
+import { KnowledgeRepository } from './knowledge-repository.js';
+import { DocRepository } from './doc-repository.js';
+import { SearchRepository } from './search-repository.js';
+
+// Re-export types
+export * from '../types/domain-types.js';
+
+/**
+ * @ai-context Main database facade coordinating all repositories
+ * @ai-pattern Facade pattern hiding repository complexity from handlers
+ * @ai-critical Central data access layer - all data operations go through here
+ * @ai-lifecycle Lazy initialization ensures DB ready before operations
+ * @ai-dependencies All repository types, manages their lifecycle
+ * @ai-assumption Single database instance per process
+ * 
+ * @ai-repository-overview
+ * This facade coordinates multiple specialized repositories:
+ * - StatusRepository: Workflow states (Open, In Progress, Done, etc.)
+ * - TagRepository: Tag management with auto-registration
+ * - IssueRepository: Bug/feature/task tracking with priority
+ * - PlanRepository: Project plans with start/end dates
+ * - KnowledgeRepository: Reference documentation (requires content)
+ * - DocRepository: Technical documentation
+ * - SearchRepository: Cross-type search functionality
+ * 
+ * @ai-storage-strategy
+ * 1. Primary data in markdown files with YAML frontmatter
+ * 2. SQLite for search indexes and relationships
+ * 3. Each repository handles its own sync between file <-> SQLite
+ * 4. Tag auto-registration happens on create/update operations
+ * 
+ * @ai-database-schema
+ * Tables: statuses, tags, search_issues, search_plans, search_docs, 
+ *         search_knowledge, work_sessions, daily_summaries
+ * Tag relationships stored via comma-separated IDs in search tables
+ * 
+ * @ai-error-patterns
+ * - File operations return null/false on not found
+ * - Database operations throw errors on SQL failures
+ * - All methods are async due to file I/O
+ */
+export class FileIssueDatabase {
+  private connection: DatabaseConnection;
+  private statusRepo!: StatusRepository;  // @ai-logic: Initialized in initializeAsync
+  private tagRepo!: TagRepository;
+  private issueRepo!: IssueRepository;
+  private planRepo!: PlanRepository;
+  private knowledgeRepo!: KnowledgeRepository;
+  private docRepo!: DocRepository;
+  private searchRepo!: SearchRepository;
+  private initializationPromise: Promise<void> | null = null;
+
+  constructor(
+    private dataDir: string,
+    private dbPath: string = path.join(dataDir, 'search.db')
+  ) {
+    this.connection = new DatabaseConnection(this.dbPath);
+  }
+
+  /**
+   * @ai-intent Initialize database and all repositories
+   * @ai-flow 1. Check if initializing -> 2. Start init -> 3. Cache promise
+   * @ai-pattern Singleton initialization pattern
+   * @ai-critical Must complete before any operations
+   * @ai-why Prevents race conditions from concurrent initialization
+   */
+  async initialize(): Promise<void> {
+    if (this.initializationPromise) {
+      return this.initializationPromise;  // @ai-logic: Reuse existing initialization
+    }
+
+    this.initializationPromise = this.initializeAsync();
+    return this.initializationPromise;
+  }
+
+  /**
+   * @ai-intent Actual initialization logic
+   * @ai-flow 1. Init connection -> 2. Create repos -> 3. Wire dependencies
+   * @ai-critical Repository creation order matters - base repos first
+   * @ai-side-effects Creates database tables, initializes all repos
+   * @ai-assumption Database directory exists or can be created
+   */
+  private async initializeAsync(): Promise<void> {
+    await this.connection.initialize();
+    const db = this.connection.getDatabase();
+
+    // @ai-logic: Initialize in dependency order
+    this.statusRepo = new StatusRepository(db);  // @ai-logic: No dependencies
+    this.tagRepo = new TagRepository(db);        // @ai-logic: No dependencies
+    this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
+    this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
+    this.knowledgeRepo = new KnowledgeRepository(db, path.join(this.dataDir, 'knowledge'), this.tagRepo);
+    this.docRepo = new DocRepository(db, path.join(this.dataDir, 'docs'), this.tagRepo);
+    this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.knowledgeRepo, this.docRepo);
+  }
+
+  /**
+   * @ai-intent Facade method for status retrieval
+   * @ai-flow 1. Ensure initialized -> 2. Delegate to repository
+   * @ai-pattern Delegation with initialization guard
+   * @ai-why All public methods must wait for initialization
+   * @ai-return Array of all workflow statuses
+   */
+  async getAllStatuses() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;  // @ai-critical: Must wait for DB ready
+    }
+    return this.statusRepo.getAllStatuses();
+  }
+
+  /**
+   * @ai-intent Legacy async method for backward compatibility
+   * @ai-flow Simple delegation to getAllStatuses
+   * @ai-deprecated Use getAllStatuses() directly
+   * @ai-why Historical API - kept for compatibility
+   */
+  async getAllStatusesAsync() {
+    return this.getAllStatuses();
+  }
+
+  /**
+   * @ai-intent Create new workflow status
+   * @ai-flow 1. Wait for init -> 2. Create in SQLite -> 3. Return with ID
+   * @ai-side-effects Inserts into statuses table
+   * @ai-validation Name uniqueness checked by repository
+   * @ai-return New status object with generated ID
+   */
+  async createStatus(name: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.statusRepo.createStatus(name);
+  }
+
+  /**
+   * @ai-intent Update existing status name
+   * @ai-flow 1. Wait for init -> 2. Update in SQLite -> 3. Return updated
+   * @ai-validation Status must exist, name must be unique
+   * @ai-critical Cannot update if status in use by items
+   * @ai-return Updated status object or null if not found
+   */
+  async updateStatus(id: number, name: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.statusRepo.updateStatus(id, name);
+  }
+
+  /**
+   * @ai-intent Delete workflow status
+   * @ai-flow 1. Wait for init -> 2. Check usage -> 3. Delete if unused
+   * @ai-validation Fails if status is referenced by any items
+   * @ai-critical Preserves referential integrity
+   * @ai-return true if deleted, false if not found or in use
+   */
+  async deleteStatus(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.statusRepo.deleteStatus(id);
+  }
+
+  /**
+   * @ai-section Tag Operations
+   * @ai-intent Retrieve all tags with usage counts
+   * @ai-flow 1. Wait for init -> 2. Query tags table -> 3. Return with counts
+   * @ai-performance Counts calculated via SQL joins
+   * @ai-return Array of tags with name and usage count
+   */
+  async getTags() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.tagRepo.getTags();
+  }
+
+  /**
+   * @ai-intent Create new tag for categorization
+   * @ai-flow 1. Wait for init -> 2. Insert into tags table
+   * @ai-validation Tag names must be unique (case-insensitive)
+   * @ai-side-effects Creates tag in SQLite only
+   * @ai-return Created tag object
+   */
+  async createTag(name: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.tagRepo.createTag(name);
+  }
+
+
+  /**
+   * @ai-intent Delete tag by name (not ID despite parameter name)
+   * @ai-flow 1. Wait for init -> 2. Delete from tags table
+   * @ai-critical Parameter is tag NAME not ID - naming inconsistency
+   * @ai-side-effects Removes tag associations from all items
+   * @ai-return true if deleted, false if not found
+   */
+  async deleteTag(id: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;  // @ai-bug: Misleading parameter name
+    }
+    return this.tagRepo.deleteTag(id);
+  }
+
+  /**
+   * @ai-intent Search tags by name pattern
+   * @ai-flow 1. Wait for init -> 2. SQL LIKE query -> 3. Return matches
+   * @ai-pattern Case-insensitive substring matching
+   * @ai-performance Uses SQL LIKE operator with % wildcards
+   * @ai-return Array of matching tags with usage counts
+   */
+  async searchTags(pattern: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.tagRepo.getTagsByPattern(pattern);
+  }
+
+  /**
+   * @ai-section Issue Operations
+   * @ai-intent Retrieve all issues with full details
+   * @ai-flow 1. Wait for init -> 2. Read all markdown files -> 3. Parse and return
+   * @ai-performance O(n) file reads - consider pagination for scale
+   * @ai-return Array of complete issue objects sorted by ID
+   */
+  async getAllIssues() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.getAllIssues();
+  }
+
+  /**
+   * @ai-intent Get lightweight issue list for UI display
+   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
+   * @ai-performance Uses indexed SQLite query vs file reads
+   * @ai-return Array with id, title, priority, status fields only
+   */
+  async getAllIssuesSummary() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.getAllIssuesSummary();
+  }
+
+  /**
+   * @ai-intent Create new issue with optional metadata
+   * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Write markdown -> 4. Sync SQLite
+   * @ai-side-effects Creates markdown file and SQLite record
+   * @ai-defaults Priority: 'medium', Status: 1 (default status)
+   * @ai-return Complete issue object with generated ID
+   */
+  async createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.createIssue(title, description, priority, status_id, tags);
+  }
+
+  /**
+   * @ai-intent Update existing issue with partial changes
+   * @ai-flow 1. Wait for init -> 2. Read current -> 3. Merge changes -> 4. Write both stores
+   * @ai-pattern Partial update - undefined values preserve existing
+   * @ai-validation Issue must exist, status_id must be valid
+   * @ai-return Updated issue object or null if not found
+   */
+  async updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.updateIssue(id, title, description, priority, status_id, tags);
+  }
+
+  /**
+   * @ai-intent Delete issue permanently
+   * @ai-flow 1. Wait for init -> 2. Delete markdown -> 3. Delete from SQLite
+   * @ai-side-effects Removes file and database record
+   * @ai-critical No soft delete - permanent removal
+   * @ai-return true if deleted, false if not found
+   */
+  async deleteIssue(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.deleteIssue(id);
+  }
+
+  /**
+   * @ai-intent Retrieve single issue by ID
+   * @ai-flow 1. Wait for init -> 2. Read markdown file -> 3. Parse and return
+   * @ai-source Markdown file is source of truth
+   * @ai-return Complete issue object or null if not found
+   */
+  async getIssue(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.getIssue(id);
+  }
+
+  /**
+   * @ai-section Plan Operations
+   * @ai-intent Retrieve all plans with timeline data
+   * @ai-flow 1. Wait for init -> 2. Read plan files -> 3. Parse with dates
+   * @ai-critical Plans include start/end dates for scheduling
+   * @ai-return Array of plan objects sorted by ID
+   */
+  async getAllPlans() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.getAllPlans();
+  }
+
+  /**
+   * @ai-intent Create new plan with timeline
+   * @ai-flow 1. Wait for init -> 2. Validate dates -> 3. Create files -> 4. Sync
+   * @ai-validation Start date must be before end date
+   * @ai-pattern Dates in YYYY-MM-DD format
+   * @ai-return Complete plan object with generated ID
+   */
+  async createPlan(title: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.createPlan(title, description, priority, status_id, start_date, end_date, tags);
+  }
+
+  /**
+   * @ai-intent Update plan including timeline adjustments
+   * @ai-flow 1. Wait for init -> 2. Read current -> 3. Validate changes -> 4. Update
+   * @ai-validation New dates must maintain start <= end relationship
+   * @ai-pattern Partial updates preserve unspecified fields
+   * @ai-return Updated plan or null if not found
+   */
+  async updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.updatePlan(id, title, description, priority, status_id, start_date, end_date, tags);
+  }
+
+  /**
+   * @ai-intent Delete plan permanently
+   * @ai-flow 1. Wait for init -> 2. Remove markdown -> 3. Clean SQLite
+   * @ai-critical No cascade to related items
+   * @ai-return true if deleted, false if not found
+   */
+  async deletePlan(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.deletePlan(id);
+  }
+
+  /**
+   * @ai-intent Retrieve single plan with timeline
+   * @ai-flow 1. Wait for init -> 2. Read from markdown
+   * @ai-return Complete plan object or null
+   */
+  async getPlan(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.getPlan(id);
+  }
+
+  /**
+   * @ai-intent Find issues with specific tag
+   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Filter exact matches
+   * @ai-pattern Exact tag match, case-sensitive
+   * @ai-performance Uses SQLite index on tags column
+   * @ai-return Array of matching issues
+   */
+  async searchIssuesByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.issueRepo.searchIssuesByTag(tag);
+  }
+
+  /**
+   * @ai-intent Find plans with specific tag
+   * @ai-flow 1. Wait for init -> 2. Query search_plans -> 3. Filter matches
+   * @ai-pattern Exact tag match within JSON array
+   * @ai-return Array of matching plans with timeline data
+   */
+  async searchPlansByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.searchPlansByTag(tag);
+  }
+
+  /**
+   * @ai-section Knowledge Base Operations
+   * @ai-intent Retrieve all knowledge articles
+   * @ai-flow 1. Wait for init -> 2. Read knowledge files -> 3. Parse content
+   * @ai-pattern Knowledge items are reference documentation
+   * @ai-return Array of knowledge objects with content
+   */
+  async getAllKnowledge() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.getAllKnowledge();
+  }
+
+  /**
+   * @ai-intent Create new knowledge article
+   * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save markdown -> 4. Index
+   * @ai-validation Content is required for knowledge items
+   * @ai-side-effects Creates file and search index entry
+   * @ai-return Complete knowledge object
+   */
+  async createKnowledge(title: string, content: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.createKnowledge(title, content, tags);
+  }
+
+  /**
+   * @ai-intent Update knowledge article content
+   * @ai-flow 1. Wait for init -> 2. Read current -> 3. Apply changes -> 4. Reindex
+   * @ai-pattern Partial updates allowed
+   * @ai-return Updated knowledge or null
+   */
+  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.updateKnowledge(id, title, content, tags);
+  }
+
+  /**
+   * @ai-intent Delete knowledge article
+   * @ai-flow 1. Wait for init -> 2. Delete files and index
+   * @ai-critical Permanent deletion
+   * @ai-return true if deleted, false if not found
+   */
+  async deleteKnowledge(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.deleteKnowledge(id);
+  }
+
+  /**
+   * @ai-intent Retrieve single knowledge article
+   * @ai-flow 1. Wait for init -> 2. Read from markdown
+   * @ai-return Complete knowledge object or null
+   */
+  async getKnowledge(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.getKnowledge(id);
+  }
+
+  /**
+   * @ai-intent Find knowledge articles by tag
+   * @ai-flow 1. Wait for init -> 2. Query search index -> 3. Filter exact
+   * @ai-pattern Tag exact match in JSON array
+   * @ai-return Array of matching knowledge items
+   */
+  async searchKnowledgeByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.knowledgeRepo.searchKnowledgeByTag(tag);
+  }
+
+  /**
+   * @ai-section Documentation Operations
+   * @ai-intent Retrieve all technical documentation
+   * @ai-flow 1. Wait for init -> 2. Read doc files -> 3. Parse all
+   * @ai-critical Docs can be large - memory consideration
+   * @ai-return Array of complete doc objects
+   */
+  async getAllDocs() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.getAllDocs();
+  }
+
+  /**
+   * @ai-intent Get doc list without content
+   * @ai-flow 1. Wait for init -> 2. Get all docs -> 3. Extract summaries
+   * @ai-performance Avoids loading full content
+   * @ai-return Array of {id, title} objects only
+   */
+  async getDocsSummary() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.getDocsSummary();
+  }
+
+  /**
+   * @ai-intent Create new documentation
+   * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save -> 4. Index
+   * @ai-validation Content required for docs
+   * @ai-return Complete doc object
+   */
+  async createDoc(title: string, content: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.createDoc(title, content, tags);
+  }
+
+  /**
+   * @ai-intent Update documentation content
+   * @ai-flow 1. Wait for init -> 2. Update markdown and index
+   * @ai-pattern Partial updates supported
+   * @ai-return Updated doc or null
+   */
+  async updateDoc(id: number, title?: string, content?: string, tags?: string[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.updateDoc(id, title, content, tags);
+  }
+
+  /**
+   * @ai-intent Delete documentation
+   * @ai-flow 1. Wait for init -> 2. Remove files and index
+   * @ai-return true if deleted, false if not found
+   */
+  async deleteDoc(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.deleteDoc(id);
+  }
+
+  /**
+   * @ai-intent Retrieve single documentation
+   * @ai-flow 1. Wait for init -> 2. Read from markdown
+   * @ai-return Complete doc object or null
+   */
+  async getDoc(id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.getDoc(id);
+  }
+
+  /**
+   * @ai-intent Find docs by tag
+   * @ai-flow 1. Wait for init -> 2. Query search_docs table
+   * @ai-return Array of matching docs
+   */
+  async searchDocsByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.docRepo.searchDocsByTag(tag);
+  }
+
+  /**
+   * @ai-section Global Search Operations
+   * @ai-intent Full-text search across all content types
+   * @ai-flow 1. Wait for init -> 2. Search all tables -> 3. Merge results
+   * @ai-performance Uses SQLite FTS for efficiency
+   * @ai-return Categorized results by type
+   */
+  async searchAll(query: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.searchAll(query);
+  }
+
+  /**
+   * @ai-intent Search all content types by tag
+   * @ai-flow 1. Wait for init -> 2. Query each type -> 3. Aggregate
+   * @ai-pattern Exact tag match across all repositories
+   * @ai-return Categorized results by content type
+   */
+  async searchAllByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.searchAllByTag(tag);
+  }
+
+  /**
+   * @ai-intent Full-text search work sessions
+   * @ai-flow 1. Wait for init -> 2. Query search_sessions
+   * @ai-performance SQLite query on indexed content
+   * @ai-return Array of matching sessions
+   */
+  async searchSessions(query: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.searchSessions(query);
+  }
+
+  /**
+   * @ai-intent Search daily summaries content
+   * @ai-flow 1. Wait for init -> 2. Query search_daily_summaries
+   * @ai-return Array of matching summaries
+   */
+  async searchDailySummaries(query: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.searchDailySummaries(query);
+  }
+
+  /**
+   * @ai-intent Find sessions with specific tag
+   * @ai-flow 1. Wait for init -> 2. Tag search in sessions
+   * @ai-return Array of matching sessions
+   */
+  async searchSessionsByTag(tag: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.searchSessionsByTag(tag);
+  }
+
+  /**
+   * @ai-intent Rebuild SQLite search index from markdown files
+   * @ai-flow 1. Wait for init -> 2. Clear tables -> 3. Re-sync all content
+   * @ai-critical Used for database recovery
+   * @ai-side-effects Recreates all search tables
+   * @ai-performance Can be slow with many files
+   */
+  async rebuildSearchIndex() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.searchRepo.rebuildSearchIndex();
+  }
+
+  /**
+   * @ai-section Session Management
+   * @ai-intent Sync work session to SQLite for searching
+   * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT to search table
+   * @ai-side-effects Creates tags if needed, updates search_sessions
+   * @ai-critical Called after markdown write for consistency
+   * @ai-assumption Session object has expected properties
+   */
+  async syncSessionToSQLite(session: any): Promise<void> {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    
+    // @ai-logic: Tags must exist before foreign key reference
+    if (session.tags && session.tags.length > 0) {
+      await this.tagRepo.ensureTagsExist(session.tags);
+    }
+    
+    const db = this.connection.getDatabase();
+    const tags = session.tags ? session.tags.join(',') : '';  // @ai-pattern: CSV for LIKE queries
+    
+    await db.runAsync(
+      `INSERT OR REPLACE INTO search_sessions 
+       (id, title, description, category, tags, date, start_time, end_time, summary) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        session.id,
+        session.title,
+        session.description || '',
+        session.category || '',
+        tags,
+        session.date,
+        session.startTime,
+        session.endTime || '',
+        session.summary || ''
+      ]
+    );
+  }
+
+  /**
+   * @ai-intent Sync daily summary to SQLite
+   * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary
+   * @ai-side-effects Updates search_daily_summaries table
+   * @ai-critical Date is primary key - one summary per day
+   * @ai-assumption Summary has required date and title fields
+   */
+  async syncDailySummaryToSQLite(summary: any): Promise<void> {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    
+    // @ai-logic: Create tags before referencing
+    if (summary.tags && summary.tags.length > 0) {
+      await this.tagRepo.ensureTagsExist(summary.tags);
+    }
+    
+    const db = this.connection.getDatabase();
+    const tags = summary.tags ? summary.tags.join(',') : '';
+    
+    await db.runAsync(
+      `INSERT OR REPLACE INTO search_daily_summaries 
+       (date, title, content, tags, created_at, updated_at) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        summary.date,      // @ai-critical: Primary key
+        summary.title,
+        summary.content,
+        tags,
+        summary.createdAt,
+        summary.updatedAt || ''
+      ]
+    );
+  }
+
+  /**
+   * @ai-intent Clean shutdown of database connections
+   * @ai-flow 1. Close SQLite connection -> 2. Flush pending writes
+   * @ai-critical Must be called on process exit
+   * @ai-side-effects Terminates all database operations
+   */
+  close(): void {
+    this.connection.close();
+  }
+}

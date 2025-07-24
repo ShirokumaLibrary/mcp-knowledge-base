@@ -1,0 +1,257 @@
+/**
+ * @ai-context Markdown formatter for session and summary persistence
+ * @ai-pattern Custom markdown format with YAML frontmatter
+ * @ai-critical Handles serialization/deserialization for file storage
+ * @ai-assumption Sessions use complex format, summaries use simple format
+ * @ai-why Human-readable format allows manual editing
+ */
+
+import { WorkSession, DailySummary } from '../types/session-types.js';
+
+/**
+ * @ai-context Formats work sessions and daily summaries to/from markdown
+ * @ai-pattern Two-way conversion maintaining data integrity
+ * @ai-critical Parsing must handle legacy and modern formats
+ * @ai-lifecycle Sessions evolve: legacy -> frontmatter format
+ * @ai-why Markdown provides version control friendly storage
+ */
+export class SessionMarkdownFormatter {
+  /**
+   * @ai-intent Generate modern markdown format with frontmatter
+   * @ai-flow 1. Build YAML header -> 2. Add title -> 3. Add metadata -> 4. Add content
+   * @ai-pattern YAML frontmatter + markdown body
+   * @ai-critical Quotes prevent YAML parsing errors
+   * @ai-assumption All string values quoted for safety
+   * @ai-return Complete markdown file content
+   */
+  generateSessionMarkdown(session: WorkSession): string {
+    let content = '---\n';
+    content += `id: ${session.id}\n`;  // @ai-logic: ID unquoted (alphanumeric)
+    content += `title: "${session.title}"\n`;  // @ai-critical: Quote for special chars
+    if (session.description) content += `description: "${session.description}"\n`;
+    if (session.tags && session.tags.length > 0) {
+      content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`;  // @ai-pattern: JSON array format
+    }
+    if (session.category) content += `category: "${session.category}"\n`;
+    content += `date: ${session.date}\n`;  // @ai-pattern: YYYY-MM-DD unquoted
+    content += `createdAt: ${session.createdAt}\n`;  // @ai-pattern: ISO 8601 unquoted
+    if (session.updatedAt) content += `updatedAt: ${session.updatedAt}\n`;
+    content += '---\n\n';
+    
+    // @ai-logic: Markdown body for human readability
+    content += `# ${session.title}\n\n`;
+    if (session.description) {
+      content += `## Overview\n${session.description}\n\n`;  // @ai-ux: Structured sections
+    }
+    
+    content += `**Created**: ${session.createdAt}\n`;
+    if (session.updatedAt) {
+      content += `**Updated**: ${session.updatedAt}\n`;
+    }
+    content += '\n';
+    
+    if (session.content) {
+      content += `\n${session.content}\n`;  // @ai-logic: Main content last
+    }
+
+    return content;
+  }
+
+  /**
+   * @ai-intent Generate legacy format without frontmatter
+   * @ai-flow Simple markdown with inline metadata
+   * @ai-pattern Used for minimal sessions
+   * @ai-deprecated Prefer generateSessionMarkdown for new sessions
+   * @ai-why Backward compatibility with older files
+   */
+  generateLegacySessionMarkdown(session: WorkSession): string {
+    let markdown = `# ${session.title}\n\n`;
+    markdown += `**Created**: ${session.createdAt}\n`;
+    if (session.updatedAt) {
+      markdown += `**Updated**: ${session.updatedAt}\n`;
+    }
+    markdown += '\n';
+
+    if (session.content) {
+      markdown += `\n${session.content}\n`;
+    }
+
+    return markdown;
+  }
+
+  /**
+   * @ai-intent Parse markdown back to WorkSession object
+   * @ai-flow 1. Detect format -> 2. Route to parser -> 3. Return session
+   * @ai-pattern Auto-detects frontmatter vs legacy format
+   * @ai-critical Must handle both formats for compatibility
+   * @ai-return Always returns valid session (no null)
+   */
+  parseSessionFromMarkdown(content: string, sessionId: string, date: string): WorkSession {
+    const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);  // @ai-pattern: Frontmatter detection
+    
+    if (frontMatterMatch) {
+      return this.parseFrontMatterSession(frontMatterMatch, sessionId, date);
+    } else {
+      return this.parseLegacySession(content, sessionId, date);  // @ai-fallback: Legacy format
+    }
+  }
+
+  /**
+   * @ai-intent Parse modern format with YAML frontmatter
+   * @ai-flow 1. Extract metadata -> 2. Parse body -> 3. Build session
+   * @ai-complexity Complex parsing to extract clean content
+   * @ai-critical Must skip redundant body metadata
+   * @ai-assumption Frontmatter values follow exact format
+   */
+  private parseFrontMatterSession(match: RegExpMatchArray, sessionId: string, date: string): WorkSession {
+    const frontMatter = match[1];
+    const bodyContent = match[2];
+    
+    // @ai-logic: Extract each field with specific regex
+    const titleMatch = frontMatter.match(/title: "(.+)"/);
+    const descriptionMatch = frontMatter.match(/description: "(.+)"/);
+    const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
+    const categoryMatch = frontMatter.match(/category: "(.+)"/);
+    const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
+    const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
+    
+    // Get content after title (get the part after header information as content)
+    const lines = bodyContent.split('\n');
+    let contentStart = -1;
+    let skipSection = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Skip overview section
+      if (line === '## Overview') {
+        skipSection = true;
+        continue;
+      }
+      
+      // End of overview section (until next empty line)
+      if (skipSection && line.trim() === '') {
+        skipSection = false;
+        continue;
+      }
+      
+      // Skip content within overview section
+      if (skipSection) {
+        continue;
+      }
+      
+      // Skip created/updated date lines
+      if (line.startsWith('**Created**:') || line.startsWith('**Updated**:')) {
+        continue;
+      }
+      
+      // Find the first actual content after meta information
+      if (!skipSection && line.trim() !== '' && !line.startsWith('#') && contentStart === -1) {
+        contentStart = i;
+        break;
+      }
+    }
+    
+    const content = contentStart !== -1 ? lines.slice(contentStart).join('\n').trim() : '';
+    
+    return {
+      id: sessionId,
+      title: titleMatch?.[1] || 'Unknown Session',
+      description: descriptionMatch?.[1],
+      content: content || undefined,
+      tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : undefined,
+      category: categoryMatch?.[1],
+      date,
+      createdAt: createdAtMatch?.[1] || '',
+      updatedAt: updatedAtMatch?.[1]
+    };
+  }
+
+  /**
+   * @ai-intent Parse legacy format without frontmatter
+   * @ai-flow 1. Extract title -> 2. Find metadata -> 3. Get content
+   * @ai-pattern Simple regex-based extraction
+   * @ai-fallback Default values for missing fields
+   * @ai-return Minimal session object
+   */
+  private parseLegacySession(content: string, sessionId: string, date: string): WorkSession {
+    const lines = content.split('\n');
+    
+    const titleMatch = lines[0].match(/^# (.+)$/);  // @ai-pattern: Markdown h1
+    const title = titleMatch ? titleMatch[1] : 'Unknown Session';  // @ai-fallback: Default title
+    
+    const createdAtMatch = content.match(/\*\*Created\*\*: (.+)/);
+    const updatedAtMatch = content.match(/\*\*Updated\*\*: (.+)/);
+    
+    // Get content after title
+    const contentStart = content.indexOf('\n\n', content.indexOf('\n\n') + 2);
+    const bodyContent = contentStart !== -1 ? content.substring(contentStart).trim() : '';
+    
+    return {
+      id: sessionId,
+      title,
+      date,
+      createdAt: createdAtMatch?.[1] || '',
+      updatedAt: updatedAtMatch?.[1],
+      content: bodyContent || undefined
+    };
+  }
+
+  /**
+   * @ai-intent Generate markdown for daily summary
+   * @ai-flow 1. YAML header -> 2. Title -> 3. Content
+   * @ai-pattern Simpler than sessions - no redundant metadata
+   * @ai-critical Date is primary key in frontmatter
+   * @ai-return Complete markdown file content
+   */
+  generateDailySummaryMarkdown(summary: DailySummary): string {
+    let content = '---\n';
+    content += `date: ${summary.date}\n`;  // @ai-critical: Primary key
+    content += `title: "${summary.title}"\n`;
+    if (summary.tags.length > 0) {
+      content += `tags: [${summary.tags.map(tag => `"${tag}"`).join(', ')}]\n`;
+    }
+    content += `createdAt: ${summary.createdAt}\n`;
+    if (summary.updatedAt) content += `updatedAt: ${summary.updatedAt}\n`;
+    content += '---\n\n';
+    
+    content += `# ${summary.title}\n\n`;  // @ai-ux: Visual title
+    content += summary.content;  // @ai-logic: Main summary text
+    
+    return content;
+  }
+
+  /**
+   * @ai-intent Parse markdown back to DailySummary
+   * @ai-flow 1. Extract frontmatter -> 2. Parse fields -> 3. Build summary
+   * @ai-validation Returns null if no frontmatter
+   * @ai-pattern Only supports frontmatter format
+   * @ai-return Summary object or null
+   */
+  parseDailySummaryFromMarkdown(content: string, date: string): DailySummary | null {
+    const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    
+    if (!frontMatterMatch) {
+      return null;  // @ai-validation: No legacy format for summaries
+    }
+
+    const frontMatter = frontMatterMatch[1];
+    const bodyContent = frontMatterMatch[2];
+    
+    const dateMatch = frontMatter.match(/date: (.+)/);
+    const titleMatch = frontMatter.match(/title: "(.+)"/);
+    const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
+    const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
+    const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
+    
+    return {
+      date: dateMatch?.[1] || date,
+      title: titleMatch?.[1] || 'Untitled',
+      content: bodyContent.replace(/^# .+\n\n/, '').trim(),
+      tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : [],
+      createdAt: createdAtMatch?.[1] || '',
+      updatedAt: updatedAtMatch?.[1]
+    };
+  }
+
+}

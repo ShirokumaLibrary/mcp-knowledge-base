@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "shirokuma-knowledge-base": {
+      "command": "node",
+      "args": ["/path/to/mcp/dist/server.js"],
+      "cwd": "/path/to/mcp"
+    }
+  }
+}

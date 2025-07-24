@@ -1,0 +1,216 @@
+import * as fsPromises from 'fs/promises';
+import * as path from 'path';
+import { BaseRepository, Database } from './base.js';
+import { Knowledge } from '../types/domain-types.js';
+import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
+import { TagRepository } from './tag-repository.js';
+
+/**
+ * @ai-context Repository for organizational knowledge and documentation
+ * @ai-pattern Simple content repository without status workflow
+ * @ai-critical Knowledge entries are immutable references - updates create new versions
+ * @ai-dependencies TagRepository for categorization only
+ * @ai-why Simpler than issues/plans - no status tracking or relationships
+ */
+export class KnowledgeRepository extends BaseRepository {
+  private knowledgeDir: string;
+  private tagRepository: TagRepository;
+
+  constructor(db: Database, knowledgeDir: string, tagRepository?: TagRepository) {
+    super(db, 'KnowledgeRepository');
+    this.knowledgeDir = knowledgeDir;
+    this.tagRepository = tagRepository || new TagRepository(db);
+    // @ai-async: Directory creation deferred to first operation
+  }
+
+  private async ensureDirectoryExists(): Promise<void> {
+    try {
+      await fsPromises.access(this.knowledgeDir);
+    } catch {
+      await fsPromises.mkdir(this.knowledgeDir, { recursive: true });
+    }
+  }
+
+  private async getKnowledgeNextId(): Promise<number> {
+    return this.getNextSequenceValue('knowledge');
+  }
+
+  private getKnowledgeFilePath(id: number): string {
+    return path.join(this.knowledgeDir, `knowledge-${id}.md`);
+  }
+
+  /**
+   * @ai-intent Parse knowledge entry from markdown file
+   * @ai-flow 1. Extract metadata -> 2. Validate essentials -> 3. Return structured data
+   * @ai-edge-case Content is required for knowledge (unlike issues/plans)
+   * @ai-assumption Knowledge always has content body, not just metadata
+   * @ai-return Null for invalid entries to maintain system stability
+   */
+  private parseMarkdownKnowledge(content: string): Knowledge | null {
+    const { metadata, content: knowledgeContent } = parseMarkdown(content);
+    
+    // @ai-logic: Knowledge requires both ID/title AND content
+    if (!metadata.id || !metadata.title) return null;
+
+    return {
+      id: metadata.id,
+      title: metadata.title,
+      content: knowledgeContent,  // @ai-critical: Main value is in the content
+      tags: Array.isArray(metadata.tags) ? metadata.tags : [],
+      created_at: metadata.created_at || new Date().toISOString(),
+      updated_at: metadata.updated_at || new Date().toISOString()
+    };
+  }
+
+  private async writeMarkdownKnowledge(knowledge: Knowledge): Promise<void> {
+    const metadata = {
+      id: knowledge.id,
+      title: knowledge.title,
+      tags: knowledge.tags,
+      created_at: knowledge.created_at,
+      updated_at: knowledge.updated_at
+    };
+    
+    const content = generateMarkdown(metadata, knowledge.content);
+    await fsPromises.writeFile(this.getKnowledgeFilePath(knowledge.id), content, 'utf8');
+  }
+
+  /**
+   * @ai-intent Enable full-text search on knowledge content
+   * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update search index
+   * @ai-side-effects Updates search_knowledge table with full content
+   * @ai-performance Full content stored for text search capabilities
+   * @ai-critical Content field can be large - ensure adequate DB limits
+   */
+  async syncKnowledgeToSQLite(knowledge: Knowledge): Promise<void> {
+    await this.db.runAsync(`
+      INSERT OR REPLACE INTO search_knowledge 
+      (id, title, content, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        knowledge.id, knowledge.title, knowledge.content,
+        JSON.stringify(knowledge.tags),  // @ai-logic: Tags as JSON for flexible queries
+        knowledge.created_at, knowledge.updated_at
+      ]
+    );
+  }
+
+  async getAllKnowledge(): Promise<Knowledge[]> {
+    await this.ensureDirectoryExists();
+    const files = await fsPromises.readdir(this.knowledgeDir);
+    const knowledgeFiles = files.filter(f => f.startsWith('knowledge-') && f.endsWith('.md'));
+    
+    const knowledgePromises = knowledgeFiles.map(async (file) => {
+      try {
+        const content = await fsPromises.readFile(path.join(this.knowledgeDir, file), 'utf8');
+        return this.parseMarkdownKnowledge(content);
+      } catch (error) {
+        this.logger.error(`Error reading knowledge file ${file}:`, { error });
+        return null;
+      }
+    });
+
+    const results = await Promise.all(knowledgePromises);
+    const knowledgeList = results.filter((knowledge): knowledge is Knowledge => knowledge !== null);
+    return knowledgeList.sort((a, b) => a.id - b.id);
+  }
+
+  /**
+   * @ai-intent Create new knowledge entry with auto-generated ID
+   * @ai-flow 1. Generate ID -> 2. Create object -> 3. Save to file -> 4. Sync to DB
+   * @ai-side-effects Creates markdown file, updates SQLite, registers tags
+   * @ai-assumption Content is already validated and safe to store
+   * @ai-critical Knowledge is append-only - no in-place updates
+   */
+  async createKnowledge(title: string, content: string, tags: string[] = []): Promise<Knowledge> {
+    await this.ensureDirectoryExists();
+    
+    const now = new Date().toISOString();
+    const knowledge: Knowledge = {
+      id: await this.getKnowledgeNextId(),
+      title,
+      content,
+      tags,
+      created_at: now,
+      updated_at: now
+    };
+
+    // Ensure tags exist before writing knowledge
+    if (knowledge.tags && knowledge.tags.length > 0) {
+      await this.tagRepository.ensureTagsExist(knowledge.tags);
+    }
+
+    await this.writeMarkdownKnowledge(knowledge);
+    await this.syncKnowledgeToSQLite(knowledge);
+    return knowledge;
+  }
+
+  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      await fsPromises.access(filePath);
+    } catch {
+      return false;
+    }
+
+    try {
+      const fileContent = await fsPromises.readFile(filePath, 'utf8');
+      const knowledge = this.parseMarkdownKnowledge(fileContent);
+      if (!knowledge) return false;
+
+      if (title !== undefined) knowledge.title = title;
+      if (content !== undefined) knowledge.content = content;
+      if (tags !== undefined) knowledge.tags = tags;
+      knowledge.updated_at = new Date().toISOString();
+
+      // Ensure tags exist before writing knowledge
+      if (knowledge.tags && knowledge.tags.length > 0) {
+        await this.tagRepository.ensureTagsExist(knowledge.tags);
+      }
+
+      await this.writeMarkdownKnowledge(knowledge);
+      await this.syncKnowledgeToSQLite(knowledge);
+      return true;
+    } catch (error) {
+      this.logger.error(`Error updating knowledge ${id}:`, { error });
+      return false;
+    }
+  }
+
+  async deleteKnowledge(id: number): Promise<boolean> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      await fsPromises.access(filePath);
+    } catch {
+      return false;
+    }
+
+    try {
+      await fsPromises.unlink(filePath);
+      await this.db.runAsync('DELETE FROM search_knowledge WHERE id = ?', [id]);
+      return true;
+    } catch (error) {
+      this.logger.error(`Error deleting knowledge ${id}:`, { error });
+      return false;
+    }
+  }
+
+  async getKnowledge(id: number): Promise<Knowledge | null> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      const content = await fsPromises.readFile(filePath, 'utf8');
+      return this.parseMarkdownKnowledge(content);
+    } catch (error) {
+      this.logger.error(`Error reading knowledge ${id}:`, { error });
+      return null;
+    }
+  }
+
+  async searchKnowledgeByTag(tag: string): Promise<Knowledge[]> {
+    const allKnowledge = await this.getAllKnowledge();
+    return allKnowledge.filter(k => k.tags.includes(tag));
+  }
+}
