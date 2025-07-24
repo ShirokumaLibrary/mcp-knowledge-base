@@ -5,10 +5,10 @@
  * @ai-dependencies Repository for storage, SearchService for queries
  * @ai-assumption Sessions organized by date (YYYY-MM-DD folders)
  */
-import * as path from 'path';
 import { SessionRepository } from './repositories/session-repository.js';
 import { SessionSearchService } from './services/session-search-service.js';
 import { SessionMarkdownFormatter } from './formatters/session-markdown-formatter.js';
+import { getConfig } from './config.js';
 /**
  * @ai-context Central manager for work tracking and daily summaries
  * @ai-pattern Service layer coordinating multiple subsystems
@@ -24,11 +24,11 @@ export class WorkSessionManager {
     /**
      * @ai-intent Initialize session management system
      * @ai-flow 1. Create repository -> 2. Setup search -> 3. Init formatter
-     * @ai-defaults Sessions stored in database/sessions directory
+     * @ai-defaults Sessions stored in .shirokuma/data/sessions directory
      * @ai-dependencies Database required for SQLite search sync
      * @ai-assumption Directory will be created if missing
      */
-    constructor(sessionsDir = path.join(process.cwd(), 'database', 'sessions'), db) {
+    constructor(sessionsDir = getConfig().database.sessionsPath, db) {
         this.db = db;
         this.repository = new SessionRepository(sessionsDir, db);
         this.searchService = new SessionSearchService(db, this.repository);

@@ -15,6 +15,11 @@ export interface Config {
     database: {
         path: string;
         sqlitePath: string;
+        issuesPath: string;
+        plansPath: string;
+        docsPath: string;
+        knowledgePath: string;
+        sessionsPath: string;
     };
     server: {
         name: string;

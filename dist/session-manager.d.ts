@@ -22,7 +22,7 @@ export declare class WorkSessionManager {
     /**
      * @ai-intent Initialize session management system
      * @ai-flow 1. Create repository -> 2. Setup search -> 3. Init formatter
-     * @ai-defaults Sessions stored in database/sessions directory
+     * @ai-defaults Sessions stored in .shirokuma/data/sessions directory
      * @ai-dependencies Database required for SQLite search sync
      * @ai-assumption Directory will be created if missing
      */

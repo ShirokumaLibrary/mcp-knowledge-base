@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { DatabaseConnection } from './base.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
@@ -7,6 +6,7 @@ import { PlanRepository } from './plan-repository.js';
 import { KnowledgeRepository } from './knowledge-repository.js';
 import { DocRepository } from './doc-repository.js';
 import { SearchRepository } from './search-repository.js';
+import { getConfig } from '../config.js';
 // Re-export types
 export * from '../types/domain-types.js';
 /**
@@ -55,7 +55,7 @@ export class FileIssueDatabase {
     docRepo;
     searchRepo;
     initializationPromise = null;
-    constructor(dataDir, dbPath = path.join(dataDir, 'search.db')) {
+    constructor(dataDir, dbPath = getConfig().database.sqlitePath) {
         this.dataDir = dataDir;
         this.dbPath = dbPath;
         this.connection = new DatabaseConnection(this.dbPath);
@@ -85,12 +85,13 @@ export class FileIssueDatabase {
         await this.connection.initialize();
         const db = this.connection.getDatabase();
         // @ai-logic: Initialize in dependency order
+        const config = getConfig();
         this.statusRepo = new StatusRepository(db); // @ai-logic: No dependencies
         this.tagRepo = new TagRepository(db); // @ai-logic: No dependencies
-        this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
-        this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
-        this.knowledgeRepo = new KnowledgeRepository(db, path.join(this.dataDir, 'knowledge'), this.tagRepo);
-        this.docRepo = new DocRepository(db, path.join(this.dataDir, 'docs'), this.tagRepo);
+        this.issueRepo = new IssueRepository(db, config.database.issuesPath, this.statusRepo, this.tagRepo);
+        this.planRepo = new PlanRepository(db, config.database.plansPath, this.statusRepo, this.tagRepo);
+        this.knowledgeRepo = new KnowledgeRepository(db, config.database.knowledgePath, this.tagRepo);
+        this.docRepo = new DocRepository(db, config.database.docsPath, this.tagRepo);
         this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.knowledgeRepo, this.docRepo);
     }
     /**

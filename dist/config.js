@@ -16,12 +16,18 @@ import * as path from 'path';
  */
 export function getConfig() {
     // @ai-logic: Database base directory from env or relative to CWD
-    const baseDir = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), 'database');
+    const baseDir = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
     return {
         database: {
             path: baseDir,
             // @ai-logic: SQLite can be relocated independently
-            sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db')
+            sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db'),
+            // @ai-logic: Entity-specific subdirectories
+            issuesPath: path.join(baseDir, 'issues'),
+            plansPath: path.join(baseDir, 'plans'),
+            docsPath: path.join(baseDir, 'docs'),
+            knowledgePath: path.join(baseDir, 'knowledge'),
+            sessionsPath: path.join(baseDir, 'sessions')
         },
         server: {
             // @ai-default: Shirokuma knowledge base server

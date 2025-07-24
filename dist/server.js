@@ -40,7 +40,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError, } from '@modelcontextprotocol/sdk/types.js';
-import * as path from 'path';
 import { FileIssueDatabase } from './database.js';
 import { WorkSessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
@@ -76,7 +75,7 @@ class IssueTrackerServer {
     constructor() {
         const config = getConfig();
         this.db = new FileIssueDatabase(config.database.path);
-        this.sessionManager = new WorkSessionManager(path.join(config.database.path, 'sessions'), this.db);
+        this.sessionManager = new WorkSessionManager(config.database.sessionsPath, this.db);
         // @ai-logic: Handler initialization order doesn't matter - no dependencies
         this.unifiedHandlers = new UnifiedHandlers(this.db);
         this.statusHandlers = new StatusHandlers(this.db);
