@@ -99,7 +99,6 @@ describe('Daily Summary Validation', () => {
       const validPlan = CreateItemSchema.parse({
         type: 'plan',
         title: 'Valid Date Test',
-        content: 'Test content',
         start_date: '2025-01-01',
         end_date: '2025-12-31'
       });
@@ -117,7 +116,6 @@ describe('Daily Summary Validation', () => {
         CreateItemSchema.parse({
           type: 'plan',
           title: 'Invalid Date Test',
-          content: 'Test content',
           start_date: '2025/01/01'
         });
       }).toThrow('Date must be in YYYY-MM-DD format');
@@ -141,7 +139,6 @@ describe('Daily Summary Validation', () => {
           CreateItemSchema.parse({
             type: 'plan',
             title: 'Test',
-            content: 'Test',
             start_date: format
           });
         }).toThrow('Date must be in YYYY-MM-DD format');
@@ -157,7 +154,6 @@ describe('Daily Summary Validation', () => {
         CreateItemSchema.parse({
           type: 'plan',
           title: 'Test',
-          content: 'Test',
           start_date: '2025-01-01', // Valid
           end_date: '2025/12/31'     // Invalid
         });
