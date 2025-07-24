@@ -33,6 +33,13 @@ export declare class SessionRepository {
      */
     getSessionsForDate(date: string): WorkSession[];
     saveDailySummary(summary: DailySummary): void;
+    /**
+     * @ai-intent Update existing daily summary by overwriting file
+     * @ai-flow 1. Ensure dir exists -> 2. Write file -> 3. Sync to SQLite
+     * @ai-side-effects Overwrites existing file, updates SQLite
+     * @ai-validation Caller must ensure summary exists
+     */
+    updateDailySummary(summary: DailySummary): void;
     loadDailySummary(date: string): DailySummary | null;
     /**
      * @ai-intent Find all sessions tagged with specific tag across all dates

@@ -40,13 +40,6 @@ export declare const GetItemDetailSchema: z.ZodObject<{
     id: number;
     type: "knowledge" | "issue" | "plan" | "doc";
 }>;
-/**
- * @ai-intent Schema for create_item tool
- * @ai-validation Title required for all types
- * @ai-pattern Type-specific fields are optional
- * @ai-logic content: doc/knowledge, dates: plan, priority/status: issue/plan
- * @ai-defaults priority: 'medium', status_id: 1 (if applicable)
- */
 export declare const CreateItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     title: z.ZodString;

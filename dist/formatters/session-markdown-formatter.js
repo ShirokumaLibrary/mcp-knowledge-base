@@ -35,15 +35,9 @@ export class SessionMarkdownFormatter {
         if (session.updatedAt)
             content += `updatedAt: ${session.updatedAt}\n`;
         content += '---\n\n';
-        // @ai-logic: Markdown body for human readability
-        content += `# ${session.title}\n\n`;
-        content += `**Created**: ${session.createdAt}\n`;
-        if (session.updatedAt) {
-            content += `**Updated**: ${session.updatedAt}\n`;
-        }
-        content += '\n';
+        // @ai-logic: Content should be stored as-is without additional formatting
         if (session.content) {
-            content += `\n${session.content}\n`; // @ai-logic: Main content last
+            content += session.content;
         }
         return content;
     }
@@ -55,6 +49,7 @@ export class SessionMarkdownFormatter {
      * @ai-why Backward compatibility with older files
      */
     generateLegacySessionMarkdown(session) {
+        // @ai-logic: Legacy format still needs basic structure for sessions without frontmatter
         let markdown = `# ${session.title}\n\n`;
         markdown += `**Created**: ${session.createdAt}\n`;
         if (session.updatedAt) {
