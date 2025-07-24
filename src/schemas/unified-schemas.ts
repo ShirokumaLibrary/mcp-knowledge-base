@@ -42,6 +42,13 @@ export const GetItemDetailSchema = z.object({
  * @ai-logic content: doc/knowledge, dates: plan, priority/status: issue/plan
  * @ai-defaults priority: 'medium', status_id: 1 (if applicable)
  */
+// @ai-intent Date format validation helper
+// @ai-pattern Strict YYYY-MM-DD format validation
+const dateFormatSchema = z.string().regex(
+  /^\d{4}-\d{2}-\d{2}$/,
+  'Date must be in YYYY-MM-DD format'
+);
+
 export const CreateItemSchema = z.object({
   type: ItemTypeSchema,
   title: z.string().min(1, 'Title is required'),  // @ai-validation: Non-empty
@@ -49,8 +56,8 @@ export const CreateItemSchema = z.object({
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status_id: z.number().int().positive().optional(),
   tags: z.array(z.string()).optional(),
-  start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD for plans
-  end_date: z.string().optional(),   // @ai-pattern: YYYY-MM-DD for plans
+  start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for plans
+  end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for plans
 });
 
 /**
@@ -68,8 +75,8 @@ export const UpdateItemSchema = z.object({
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status_id: z.number().int().positive().optional(),
   tags: z.array(z.string()).optional(),
-  start_date: z.string().optional(), // @ai-logic: For plan timeline changes
-  end_date: z.string().optional(),   // @ai-logic: For plan timeline changes
+  start_date: dateFormatSchema.optional(), // @ai-logic: For plan timeline changes
+  end_date: dateFormatSchema.optional(),   // @ai-logic: For plan timeline changes
 });
 
 /**

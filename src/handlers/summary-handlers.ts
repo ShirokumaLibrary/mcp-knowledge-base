@@ -43,21 +43,30 @@ export class SummaryHandlers {
    */
   async handleCreateDailySummary(args: any): Promise<ToolResponse> {
     const validatedArgs = CreateDailySummarySchema.parse(args);  // @ai-validation: Strict date format
-    const summary = this.sessionManager.createDailySummary(
-      validatedArgs.date,     // @ai-critical: Primary key
-      validatedArgs.title,    // @ai-validation: Required
-      validatedArgs.content,  // @ai-validation: Required
-      validatedArgs.tags      // @ai-default: Empty array
-    );
     
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' }, null, 2),
-        },
-      ],
-    };
+    try {
+      const summary = this.sessionManager.createDailySummary(
+        validatedArgs.date,     // @ai-critical: Primary key
+        validatedArgs.title,    // @ai-validation: Required
+        validatedArgs.content,  // @ai-validation: Required
+        validatedArgs.tags      // @ai-default: Empty array
+      );
+      
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' }, null, 2),
+          },
+        ],
+      };
+    } catch (error: any) {
+      // @ai-error-handling: Convert duplicate error to MCP format
+      if (error.message && error.message.includes('already exists')) {
+        throw new McpError(ErrorCode.InvalidRequest, error.message);
+      }
+      throw error;
+    }
   }
 
   /**

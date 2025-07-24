@@ -186,7 +186,7 @@ export class WorkSessionManager {
       createdAt: now
     };
 
-    this.repository.saveDailySummary(summary);  // @ai-side-effect: Overwrites if exists
+    this.repository.saveDailySummary(summary);  // @ai-side-effect: Creates new, throws if exists
     return summary;
   }
 
@@ -206,14 +206,14 @@ export class WorkSessionManager {
 
     const updated: DailySummary = {
       ...existing,
-      // @ai-bug: || operator prevents clearing values with empty strings
-      title: title || existing.title,
-      content: content || existing.content,
-      tags: tags || existing.tags,
+      // @ai-fix: Use !== undefined to allow empty string updates
+      title: title !== undefined ? title : existing.title,
+      content: content !== undefined ? content : existing.content,
+      tags: tags !== undefined ? tags : existing.tags,
       updatedAt: new Date().toISOString()
     };
 
-    this.repository.saveDailySummary(updated);
+    this.repository.updateDailySummary(updated);
     return updated;
   }
 

@@ -9,7 +9,7 @@
 const issue = await mcp.create_item({
   type: "issue",
   title: "Fix login bug",
-  description: "Users cannot login with special characters",
+  content: "Users cannot login with special characters",
   priority: "high",
   tags: ["bug", "auth"]
 });
@@ -34,7 +34,7 @@ const knowledge = await mcp.create_item({
 const plan = await mcp.create_item({
   type: "plan",
   title: "Q1 2025 Roadmap",
-  description: "Major features for Q1",
+  content: "Major features for Q1",
   priority: "high",
   start_date: "2025-01-01",
   end_date: "2025-03-31",
@@ -100,7 +100,6 @@ const allResults = await mcp.search_items_by_tag({
 // Create a new work session
 const session = await mcp.create_session({
   title: "Implementing authentication",
-  description: "Adding JWT authentication to API",
   content: "## Tasks completed\n- Set up JWT library\n- Created auth middleware",
   tags: ["auth", "backend"],
   category: "development"

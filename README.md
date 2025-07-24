@@ -57,7 +57,7 @@ This MCP server provides a unified knowledge base system that manages Issues, Pl
 
 ### Rebuilding the Database
 
-If the SQLite search database (`.shirokuma/data/search.db`) becomes corrupted or out of sync, you can rebuild it from the markdown files:
+If the SQLite search database becomes corrupted or out of sync, you can rebuild it from the markdown files:
 
 ```bash
 npm run rebuild-db
@@ -82,6 +82,8 @@ The rebuild process preserves:
 - [Examples](docs/examples.md) - Usage examples and code snippets
 - [Architecture](docs/architecture.md) - System design and implementation details
 - [Development](docs/development.md) - Development setup and guidelines
+- [Test Cases](docs/test-cases.md) - Comprehensive test cases for validation
+- [AI Annotation Rules](docs/ai-annotation-rules.md) - Guidelines for AI-friendly code annotations
 
 
 

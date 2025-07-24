@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4] - 2025-07-24
+
+### Added
+- Daily summary validation tests to ensure data integrity
+- Comprehensive test cases documentation (docs/test-cases.md) for systematic validation
+- updateDailySummary method in SessionRepository for proper file updates
+
+### Fixed
+- Daily summary update functionality now works correctly
+- Fixed issue where empty strings couldn't be used to update summary fields
+- Corrected expected default statuses in test cases (6 statuses instead of 3)
+
+### Changed
+- Improved update logic to use `!== undefined` instead of `||` operator for better field updates
+- Enhanced error handling in summary update operations
+
 ## [0.0.3] - 2025-07-24
 
 ### Changed

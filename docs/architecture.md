@@ -1,58 +1,76 @@
 # Architecture & Implementation Details
 
+## System Overview
+
+Shirokuma MCP Knowledge Base is a Model Context Protocol (MCP) server that provides comprehensive knowledge management capabilities. The system uses a dual-storage architecture with Markdown files as the primary storage and SQLite for fast searching and indexing.
+
+### Key Features
+- **Unified Content Management**: Issues, Plans, Documents, and Knowledge entries
+- **Work Session Tracking**: Daily work activities and summaries
+- **Tag-based Organization**: Cross-content type tagging and search
+- **Custom Workflow**: Configurable status system for Issues and Plans
+- **Consistent Field Naming**: All entity types use `content` field for multi-line text
+
 ## Recent Improvements (2025-07-24)
 
-### 1. Enhanced Type Safety
-- Eliminated `any` types in handlers
-- Created comprehensive type definitions in `types/handler-types.ts`
-- Implemented generic handler interfaces
-- Added strong typing for all API responses
+### 1. Unified Field Naming (v0.0.2)
+- Replaced `description` with `content` field across all entity types
+- Made `content` field required for Issues and Plans
+- Improved consistency for multi-line content support
 
-### 2. Unified Error Handling
-- Custom error class hierarchy in `utils/errors.ts`
-- Specialized error types (ValidationError, NotFoundError, DatabaseError, etc.)
-- Consistent error handling utilities
-- Proper error logging and transformation
+### 2. Centralized Configuration (v0.0.3)
+- Changed default data directory from `database` to `.shirokuma/data`
+- Centralized all path configurations in `src/config.ts`
+- Added environment variable support for path customization
 
-### 3. Refactored Architecture
-- Split large `FileIssueDatabase` class into feature-specific facades
-- Implemented facade pattern for better separation of concerns
-- Created `IssueFacade`, `PlanFacade`, `KnowledgeFacade`, and `DocFacade`
-- Maintained backward compatibility while improving maintainability
+### 3. Enhanced Type Safety
+- Strong typing for all handlers and API responses
+- Comprehensive type definitions in domain and handler types
+- Zod schema validation for all inputs
 
-### 4. Memory Optimization
-- Fixed EventEmitter memory leak warnings
-- Configured proper listener limits for production and test environments
-- Added `jest.setup.ts` for test environment configuration
-
-### 5. Internationalization
-- All code comments and messages are now in English
-- Consistent naming conventions throughout the codebase
-- Improved code readability for international contributors
+### 4. Repository Pattern Implementation
+- Separate repositories for each entity type
+- Clear separation between storage and business logic
+- Consistent CRUD interfaces across all repositories
 
 ## Code Organization
 
 ```
 src/
+├── server.ts                # MCP server entry point
+├── config.ts                # Centralized configuration
+├── session-manager.ts       # Work session management
 ├── database/
-│   ├── facades/         # Feature-specific database facades
-│   │   ├── base-facade.ts
-│   │   ├── issue-facade.ts
-│   │   ├── plan-facade.ts
-│   │   ├── knowledge-facade.ts
-│   │   └── doc-facade.ts
-│   ├── index.ts         # Main database class
-│   └── repositories/    # Individual repository implementations
-├── handlers/            # Request handlers
-├── schemas/             # Zod validation schemas
-├── types/               # TypeScript type definitions
-│   ├── domain-types.ts  # Domain model types
-│   ├── handler-types.ts # Handler-specific types
-│   └── repository-interfaces.ts
-├── utils/               # Utility functions
-│   ├── errors.ts        # Custom error classes
-│   └── logger.ts        # Logging configuration
-└── server.ts            # Main server entry point
+│   ├── index.ts            # Main database facade
+│   ├── base.ts             # Base repository class
+│   ├── issue-repository.ts # Issue-specific storage
+│   ├── plan-repository.ts  # Plan-specific storage
+│   ├── doc-repository.ts   # Document storage
+│   ├── knowledge-repository.ts # Knowledge base storage
+│   ├── status-repository.ts    # Status management
+│   └── tag-repository.ts       # Tag management
+├── handlers/                # MCP request handlers
+│   ├── unified-handlers.ts  # CRUD operations for all items
+│   ├── status-handlers.ts   # Status management
+│   ├── tag-handlers.ts      # Tag operations
+│   ├── session-handlers.ts  # Work session handling
+│   └── summary-handlers.ts  # Daily summary handling
+├── repositories/            # Session-specific repositories
+│   └── session-repository.ts
+├── schemas/                 # Zod validation schemas
+│   └── unified-schemas.ts   # Unified validation schemas
+├── types/                   # TypeScript type definitions
+│   ├── domain-types.ts      # Core domain models
+│   ├── handler-types.ts     # Handler interfaces
+│   └── session-types.ts     # Session-specific types
+├── formatters/              # Content formatters
+│   └── session-markdown-formatter.ts
+├── services/                # Business logic services
+│   └── session-search-service.ts
+└── utils/                   # Utility functions
+    ├── errors.ts           # Custom error classes
+    ├── logger.ts           # Logging configuration
+    └── markdown-parser.ts  # Markdown/YAML parsing
 ```
 
 ## Database Architecture
@@ -63,10 +81,9 @@ src/
 
 ### Directory Structure
 ```
-database/
+.shirokuma/data/     # Default data directory (configurable via MCP_DATABASE_PATH)
 ├── issues/          # Issue management
-│   ├── issue-*.md   # Individual issue files
-│   └── statuses.json # Status definitions
+│   └── issue-*.md   # Individual issue files
 ├── plans/           # Plan management
 │   └── plan-*.md    # Individual plan files
 ├── docs/            # Document management
@@ -80,23 +97,80 @@ database/
 └── search.db        # SQLite high-speed search database (includes tag management)
 ```
 
+Note: 
+- Status definitions are stored in the SQLite database, not in JSON files
+- All paths can be customized via environment variables
+- `MCP_DATABASE_PATH`: Override the base data directory
+- `MCP_SQLITE_PATH`: Override the SQLite database location
+
 ### Storage Features
 - **Front Matter**: YAML-formatted metadata for all content types
-- **SQLite Database**: Tag management and cross-references
-- **Markdown Files**: Primary content storage with full-text search capability
-- **Automatic Sync**: Changes to markdown files are automatically reflected in SQLite
+- **Markdown Content**: Body content stored after frontmatter separator (---)
+- **SQLite Database**: Search indexes, tag management, and status definitions
+- **Automatic Sync**: All create/update operations sync to SQLite automatically
+- **ID Generation**: Sequential IDs managed by SQLite sequences table
+
+### Data Model
+
+#### Common Fields (All Types)
+- `id`: Unique numeric identifier
+- `title`: Required title field
+- `tags`: Array of tag names (auto-registered)
+- `created_at`: ISO 8601 timestamp
+- `updated_at`: ISO 8601 timestamp (optional)
+
+#### Type-Specific Fields
+
+**Issues & Plans**:
+- `content`: Required multi-line content
+- `priority`: high, medium, or low
+- `status_id`: Reference to status table
+- `start_date` & `end_date`: (Plans only) YYYY-MM-DD format
+
+**Documents & Knowledge**:
+- `content`: Required multi-line content
+
+**Work Sessions**:
+- `id`: YYYYMMDD-HHMMSSsss format
+- `content`: Optional session details
+- `category`: Optional categorization
+- `date`: YYYY-MM-DD format
+
+**Daily Summaries**:
+- `date`: Primary key (YYYY-MM-DD format)
+- `content`: Required summary content
+
+## MCP Protocol Implementation
+
+### Tool Definitions
+All tools are defined in `unified-tool-definitions.ts` with:
+- Input validation using Zod schemas
+- Consistent error handling
+- Type-safe responses
+
+### Handler Architecture
+```
+MCP Client → server.ts → Handler → Database → Repository → File/SQLite
+```
+
+### Error Handling
+- MCP protocol errors (McpError) for client communication
+- Internal error types for debugging
+- Graceful fallbacks for file operations
 
 ## Testing Strategy
 
-- Comprehensive test coverage (61.42% overall)
-- All 72 tests passing
-- Test categories: unit tests for repositories, integration tests for database operations
+- Comprehensive test coverage
+- Unit tests for each repository
+- Integration tests for cross-repository operations
+- Session management tests
 - Automated testing with Jest and ts-jest
 
-### Test Structure
-- Repository tests: CRUD operations, error handling, concurrent operations
-- Database integration tests: Cross-repository operations, tag management
-- Session management tests: Work session creation, updates, daily summaries
+### Test Categories
+- **Repository Tests**: CRUD operations, error handling, concurrent operations
+- **Database Integration**: Cross-repository operations, tag management
+- **Session Management**: Work session creation, updates, daily summaries
+- **Search Operations**: SQLite queries, tag searches, full-text search
 
 ## Security Measures
 
@@ -108,19 +182,52 @@ database/
 
 ## Design Patterns
 
-### Facade Pattern
-The database layer uses the facade pattern to simplify complex subsystem interactions:
-- `FileIssueDatabase` acts as the main facade
-- Feature-specific facades handle individual domains
-- Repositories handle low-level data operations
-
 ### Repository Pattern
-Each data type has its own repository:
+Each entity type has its own repository:
 - Encapsulates data access logic
 - Provides consistent CRUD interfaces
-- Handles file I/O and database operations
+- Handles both file I/O and SQLite operations
+- Extends `BaseRepository` for common functionality
 
-### Factory Pattern
-Logger creation uses the factory pattern:
-- `createLogger` function creates configured logger instances
-- Consistent logging across all modules
+### Facade Pattern
+The database layer uses facades for simplified access:
+- `FileIssueDatabase` acts as the main facade
+- Delegates to specific repositories
+- Provides unified interface for handlers
+
+### Handler Pattern
+Separate handlers for different tool categories:
+- `UnifiedHandlers`: CRUD operations for all item types
+- `StatusHandlers`: Workflow status management
+- `TagHandlers`: Tag operations and searches
+- `SessionHandlers`: Work session tracking
+- `SummaryHandlers`: Daily summary management
+
+### Service Layer Pattern
+- `SessionSearchService`: Encapsulates search logic
+- `WorkSessionManager`: Orchestrates session operations
+- Clear separation of concerns
+
+## Configuration Management
+
+### Environment Variables
+- `MCP_DATABASE_PATH`: Base data directory (default: `.shirokuma/data`)
+- `MCP_SQLITE_PATH`: SQLite database path
+- `MCP_LOG_LEVEL`: Logging verbosity
+- `MCP_LOGGING_ENABLED`: Enable/disable logging
+
+### Path Resolution
+All paths centralized in `config.ts`:
+```typescript
+{
+  database: {
+    path: '.shirokuma/data',
+    sqlitePath: '.shirokuma/data/search.db',
+    issuesPath: '.shirokuma/data/issues',
+    plansPath: '.shirokuma/data/plans',
+    docsPath: '.shirokuma/data/docs',
+    knowledgePath: '.shirokuma/data/knowledge',
+    sessionsPath: '.shirokuma/data/sessions'
+  }
+}
+```

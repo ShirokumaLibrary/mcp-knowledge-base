@@ -109,6 +109,34 @@ export class SessionRepository {
     const dailyDir = this.ensureDailyDirectory(summary.date);
     const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
     
+    // @ai-critical: Check if summary already exists for this date
+    if (fs.existsSync(filePath)) {
+      throw new Error(`Daily summary for ${summary.date} already exists. Use update instead.`);
+    }
+    
+    const content = this.formatter.generateDailySummaryMarkdown(summary);
+    fs.writeFileSync(filePath, content, 'utf8');
+    
+    // Sync to SQLite (fire and forget for tests)
+    this.db.syncDailySummaryToSQLite(summary).catch(err => {
+      // Ignore SQLite errors in tests
+      if (err.message && (err.message.includes('SQLITE_READONLY') || err.message.includes('Failed to ensure tags exist'))) {
+        return;
+      }
+      throw err;
+    });
+  }
+
+  /**
+   * @ai-intent Update existing daily summary by overwriting file
+   * @ai-flow 1. Ensure dir exists -> 2. Write file -> 3. Sync to SQLite
+   * @ai-side-effects Overwrites existing file, updates SQLite
+   * @ai-validation Caller must ensure summary exists
+   */
+  updateDailySummary(summary: DailySummary): void {
+    const dailyDir = this.ensureDailyDirectory(summary.date);
+    const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
+    
     const content = this.formatter.generateDailySummaryMarkdown(summary);
     fs.writeFileSync(filePath, content, 'utf8');
     
