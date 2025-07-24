@@ -16,7 +16,6 @@ import { z } from 'zod';
 export declare const CreateWorkSessionSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     title: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
@@ -25,14 +24,12 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     title: string;
     id?: string | undefined;
     content?: string | undefined;
-    description?: string | undefined;
     category?: string | undefined;
 }, {
     title: string;
     id?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
-    description?: string | undefined;
     category?: string | undefined;
 }>;
 /**
@@ -45,7 +42,6 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
 export declare const UpdateWorkSessionSchema: z.ZodObject<{
     id: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
@@ -54,14 +50,12 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
-    description?: string | undefined;
     category?: string | undefined;
 }, {
     id: string;
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
-    description?: string | undefined;
     category?: string | undefined;
 }>;
 /**

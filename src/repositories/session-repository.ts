@@ -51,7 +51,7 @@ export class SessionRepository {
     const filePath = path.join(dailyDir, `session-${session.id}.md`);
     
     // @ai-logic: Choose format based on content richness
-    const content = session.tags || session.description || session.category
+    const content = session.tags || session.content || session.category
       ? this.formatter.generateSessionMarkdown(session)
       : this.formatter.generateLegacySessionMarkdown(session);
     

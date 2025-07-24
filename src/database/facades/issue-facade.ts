@@ -33,7 +33,7 @@ export class IssueFacade extends BaseFacade {
    */
   async createIssue(
     title: string,
-    description?: string,
+    content?: string,
     priority: string = 'medium',
     statusId?: number,
     tags: string[] = []
@@ -44,7 +44,7 @@ export class IssueFacade extends BaseFacade {
       const openStatus = statuses.find(s => s.name === 'Open');  // @ai-logic: Prefer 'Open' status
       statusId = openStatus ? openStatus.id : 1;  // @ai-fallback: Default to ID 1
     }
-    return this.issueRepo.createIssue(title, description || '', priority, statusId, tags);
+    return this.issueRepo.createIssue(title, content || '', priority, statusId, tags);
   }
 
   async getIssue(id: number): Promise<Issue | null> {
@@ -55,13 +55,13 @@ export class IssueFacade extends BaseFacade {
   async updateIssue(
     id: number,
     title?: string,
-    description?: string,
+    content?: string,
     priority?: string,
     statusId?: number,
     tags?: string[]
   ): Promise<boolean> {
     await this.ensureInitialized(this.initPromise);
-    return this.issueRepo.updateIssue(id, title, description, priority, statusId, tags);
+    return this.issueRepo.updateIssue(id, title, content, priority, statusId, tags);
   }
 
   async deleteIssue(id: number): Promise<boolean> {

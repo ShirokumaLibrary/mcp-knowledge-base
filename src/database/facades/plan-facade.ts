@@ -34,7 +34,7 @@ export class PlanFacade extends BaseFacade {
    */
   async createPlan(
     title: string,
-    description?: string,
+    content?: string,
     priority: string = 'medium',
     statusId?: number,
     startDate?: string,   // @ai-pattern: YYYY-MM-DD or undefined
@@ -47,7 +47,7 @@ export class PlanFacade extends BaseFacade {
       const plannedStatus = statuses.find(s => s.name === 'Planned');  // @ai-logic: Plans start as 'Planned'
       statusId = plannedStatus ? plannedStatus.id : 1;  // @ai-fallback: Default to ID 1
     }
-    return this.planRepo.createPlan(title, description || '', priority, statusId, startDate, endDate, tags);
+    return this.planRepo.createPlan(title, content || '', priority, statusId, startDate, endDate, tags);
   }
 
   async getPlan(id: number): Promise<Plan | null> {
@@ -58,7 +58,7 @@ export class PlanFacade extends BaseFacade {
   async updatePlan(
     id: number,
     title?: string,
-    description?: string,
+    content?: string,
     priority?: string,
     statusId?: number,
     startDate?: string,
@@ -66,7 +66,7 @@ export class PlanFacade extends BaseFacade {
     tags?: string[]
   ): Promise<boolean> {
     await this.ensureInitialized(this.initPromise);
-    return this.planRepo.updatePlan(id, title, description, priority, statusId, startDate, endDate, tags);
+    return this.planRepo.updatePlan(id, title, content, priority, statusId, startDate, endDate, tags);
   }
 
   async deletePlan(id: number): Promise<boolean> {

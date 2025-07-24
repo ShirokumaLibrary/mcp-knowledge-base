@@ -24,7 +24,7 @@ export class PlanFacade extends BaseFacade {
      * @ai-assumption start_date should be <= end_date (not enforced here)
      * @ai-side-effects Creates markdown file and SQLite record
      */
-    async createPlan(title, description, priority = 'medium', statusId, startDate, // @ai-pattern: YYYY-MM-DD or undefined
+    async createPlan(title, content, priority = 'medium', statusId, startDate, // @ai-pattern: YYYY-MM-DD or undefined
     endDate, // @ai-pattern: YYYY-MM-DD or undefined
     tags = []) {
         await this.ensureInitialized(this.initPromise);
@@ -33,15 +33,15 @@ export class PlanFacade extends BaseFacade {
             const plannedStatus = statuses.find(s => s.name === 'Planned'); // @ai-logic: Plans start as 'Planned'
             statusId = plannedStatus ? plannedStatus.id : 1; // @ai-fallback: Default to ID 1
         }
-        return this.planRepo.createPlan(title, description || '', priority, statusId, startDate, endDate, tags);
+        return this.planRepo.createPlan(title, content || '', priority, statusId, startDate, endDate, tags);
     }
     async getPlan(id) {
         await this.ensureInitialized(this.initPromise);
         return this.planRepo.getPlan(id);
     }
-    async updatePlan(id, title, description, priority, statusId, startDate, endDate, tags) {
+    async updatePlan(id, title, content, priority, statusId, startDate, endDate, tags) {
         await this.ensureInitialized(this.initPromise);
-        return this.planRepo.updatePlan(id, title, description, priority, statusId, startDate, endDate, tags);
+        return this.planRepo.updatePlan(id, title, content, priority, statusId, startDate, endDate, tags);
     }
     async deletePlan(id) {
         await this.ensureInitialized(this.initPromise);

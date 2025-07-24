@@ -1,6 +1,6 @@
 {
   "name": "shirokuma-mcp-knowledge-base",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shirokuma MCP Server for comprehensive knowledge management including issues, plans, documents, and work sessions. All stored data is structured for AI processing, not human readability.",
   "main": "dist/server.js",
   "type": "module",

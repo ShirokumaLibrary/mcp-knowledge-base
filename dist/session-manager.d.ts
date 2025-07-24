@@ -44,7 +44,7 @@ export declare class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title: string, description?: string, content?: string, tags?: string[], category?: string, id?: string): WorkSession;
+    createSession(title: string, content?: string, tags?: string[], category?: string, id?: string): WorkSession;
     /**
      * @ai-intent Update existing work session
      * @ai-flow 1. Extract date from ID -> 2. Load current -> 3. Merge changes -> 4. Save
@@ -53,7 +53,7 @@ export declare class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id: string, title?: string, description?: string, content?: string, tags?: string[], category?: string): WorkSession;
+    updateSession(id: string, title?: string, content?: string, tags?: string[], category?: string): WorkSession;
     /**
      * @ai-intent Retrieve session by ID
      * @ai-flow 1. Extract date from ID -> 2. Load from repository

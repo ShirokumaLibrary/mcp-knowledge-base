@@ -28,7 +28,6 @@ export class SessionMarkdownFormatter {
     let content = '---\n';
     content += `id: ${session.id}\n`;  // @ai-logic: ID unquoted (alphanumeric)
     content += `title: "${session.title}"\n`;  // @ai-critical: Quote for special chars
-    if (session.description) content += `description: "${session.description}"\n`;
     if (session.tags && session.tags.length > 0) {
       content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`;  // @ai-pattern: JSON array format
     }
@@ -40,9 +39,6 @@ export class SessionMarkdownFormatter {
     
     // @ai-logic: Markdown body for human readability
     content += `# ${session.title}\n\n`;
-    if (session.description) {
-      content += `## Overview\n${session.description}\n\n`;  // @ai-ux: Structured sections
-    }
     
     content += `**Created**: ${session.createdAt}\n`;
     if (session.updatedAt) {
@@ -109,56 +105,18 @@ export class SessionMarkdownFormatter {
     
     // @ai-logic: Extract each field with specific regex
     const titleMatch = frontMatter.match(/title: "(.+)"/);
-    const descriptionMatch = frontMatter.match(/description: "(.+)"/);
     const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
     const categoryMatch = frontMatter.match(/category: "(.+)"/);
     const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
     const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
     
-    // Get content after title (get the part after header information as content)
-    const lines = bodyContent.split('\n');
-    let contentStart = -1;
-    let skipSection = false;
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Skip overview section
-      if (line === '## Overview') {
-        skipSection = true;
-        continue;
-      }
-      
-      // End of overview section (until next empty line)
-      if (skipSection && line.trim() === '') {
-        skipSection = false;
-        continue;
-      }
-      
-      // Skip content within overview section
-      if (skipSection) {
-        continue;
-      }
-      
-      // Skip created/updated date lines
-      if (line.startsWith('**Created**:') || line.startsWith('**Updated**:')) {
-        continue;
-      }
-      
-      // Find the first actual content after meta information
-      if (!skipSection && line.trim() !== '' && !line.startsWith('#') && contentStart === -1) {
-        contentStart = i;
-        break;
-      }
-    }
-    
-    const content = contentStart !== -1 ? lines.slice(contentStart).join('\n').trim() : '';
+    // @ai-logic: Content is everything after the frontmatter
+    const content = bodyContent.trim() || undefined;
     
     return {
       id: sessionId,
       title: titleMatch?.[1] || 'Unknown Session',
-      description: descriptionMatch?.[1],
-      content: content || undefined,
+      content,
       tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : undefined,
       category: categoryMatch?.[1],
       date,

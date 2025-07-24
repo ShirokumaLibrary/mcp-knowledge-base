@@ -35,7 +35,7 @@ export class SessionHandlers {
      */
     async handleCreateWorkSession(args) {
         const validatedArgs = CreateWorkSessionSchema.parse(args); // @ai-critical: Validates required fields
-        const session = this.sessionManager.createSession(validatedArgs.title, validatedArgs.description, validatedArgs.content, validatedArgs.tags, validatedArgs.category, validatedArgs.id // @ai-logic: Optional custom ID
+        const session = this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.category, validatedArgs.id // @ai-logic: Optional custom ID
         );
         return {
             content: [
@@ -57,7 +57,7 @@ export class SessionHandlers {
     async handleUpdateWorkSession(args) {
         const validatedArgs = UpdateWorkSessionSchema.parse(args);
         const session = this.sessionManager.updateSession(validatedArgs.id, // @ai-critical: Required for lookup
-        validatedArgs.title, validatedArgs.description, validatedArgs.content, validatedArgs.tags, validatedArgs.category);
+        validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.category);
         return {
             content: [
                 {

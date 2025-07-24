@@ -61,7 +61,7 @@ export class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title, description, content, tags, category, id // @ai-logic: Custom ID for imports
+    createSession(title, content, tags, category, id // @ai-logic: Custom ID for imports
     ) {
         const now = new Date();
         const date = now.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
@@ -69,7 +69,6 @@ export class WorkSessionManager {
         const session = {
             id: sessionId,
             title,
-            description,
             content,
             tags,
             category,
@@ -87,7 +86,7 @@ export class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id, title, description, content, tags, category) {
+    updateSession(id, title, content, tags, category) {
         // @ai-logic: Parse YYYYMMDD from ID to get YYYY-MM-DD date
         const session = this.repository.loadSession(id, id.substring(0, 4) + '-' + id.substring(4, 6) + '-' + id.substring(6, 8));
         if (!session) {
@@ -97,7 +96,6 @@ export class WorkSessionManager {
             ...session,
             // @ai-pattern: Explicit undefined check for partial updates
             title: title !== undefined ? title : session.title,
-            description: description !== undefined ? description : session.description,
             content: content !== undefined ? content : session.content,
             tags: tags !== undefined ? tags : session.tags,
             category: category !== undefined ? category : session.category,

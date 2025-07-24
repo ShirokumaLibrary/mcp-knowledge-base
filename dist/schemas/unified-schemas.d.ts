@@ -50,7 +50,6 @@ export declare const GetItemDetailSchema: z.ZodObject<{
 export declare const CreateItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     title: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
     status_id: z.ZodOptional<z.ZodNumber>;
@@ -66,7 +65,6 @@ export declare const CreateItemSchema: z.ZodObject<{
     status_id?: number | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
-    description?: string | undefined;
 }, {
     title: string;
     type: "knowledge" | "issue" | "plan" | "doc";
@@ -76,7 +74,6 @@ export declare const CreateItemSchema: z.ZodObject<{
     status_id?: number | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
-    description?: string | undefined;
 }>;
 /**
  * @ai-intent Schema for update_item tool
@@ -89,7 +86,6 @@ export declare const UpdateItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     id: z.ZodNumber;
     title: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
     status_id: z.ZodOptional<z.ZodNumber>;
@@ -106,7 +102,6 @@ export declare const UpdateItemSchema: z.ZodObject<{
     status_id?: number | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
-    description?: string | undefined;
 }, {
     id: number;
     type: "knowledge" | "issue" | "plan" | "doc";
@@ -117,7 +112,6 @@ export declare const UpdateItemSchema: z.ZodObject<{
     status_id?: number | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
-    description?: string | undefined;
 }>;
 /**
  * @ai-intent Schema for delete_item tool

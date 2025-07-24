@@ -50,7 +50,7 @@ export class IssueRepository extends BaseRepository {
    * @ai-why Graceful handling of corrupted files prevents system crashes
    */
   private parseMarkdownIssue(content: string): Issue | null {
-    const { metadata, content: description } = parseMarkdown(content);
+    const { metadata, content: contentBody } = parseMarkdown(content);
     
     // @ai-logic: id and title are minimum required fields
     if (!metadata.id || !metadata.title) return null;
@@ -58,7 +58,7 @@ export class IssueRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
-      description: description || null,
+      content: contentBody || '',
       priority: metadata.priority || 'medium',
       status_id: metadata.status_id || 1,
       status: metadata.status,  // @ai-why: Preserves status name for database rebuilds
@@ -92,7 +92,7 @@ export class IssueRepository extends BaseRepository {
       updated_at: issue.updated_at
     };
     
-    const content = generateMarkdown(metadata, issue.description || '');
+    const content = generateMarkdown(metadata, issue.content || '');
     await fsPromises.writeFile(this.getIssueFilePath(issue.id), content, 'utf8');
   }
 
@@ -106,10 +106,10 @@ export class IssueRepository extends BaseRepository {
   async syncIssueToSQLite(issue: Issue): Promise<void> {
     await this.db.runAsync(`
       INSERT OR REPLACE INTO search_issues 
-      (id, title, description, priority, status_id, tags, created_at, updated_at)
+      (id, title, content, priority, status_id, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        issue.id, issue.title, issue.description || '', 
+        issue.id, issue.title, issue.content || '', 
         issue.priority, issue.status_id, 
         JSON.stringify(issue.tags || []),  // @ai-why: Tags stored as JSON for flexible querying
         issue.created_at, issue.updated_at
@@ -184,7 +184,7 @@ export class IssueRepository extends BaseRepository {
     return issues.sort((a, b) => a.id - b.id);
   }
 
-  async createIssue(title: string, description?: string, priority: string = 'medium', status_id?: number, tags?: string[]): Promise<Issue> {
+  async createIssue(title: string, content?: string, priority: string = 'medium', status_id?: number, tags?: string[]): Promise<Issue> {
     await this.ensureDirectoryExists();
     
     let finalStatusId: number;
@@ -199,7 +199,7 @@ export class IssueRepository extends BaseRepository {
     const issue: Issue = {
       id: await this.getNextId(),
       title,
-      description: description || null,
+      content: content || '',
       priority,
       status_id: finalStatusId,
       tags: tags || [],
@@ -220,7 +220,7 @@ export class IssueRepository extends BaseRepository {
     return issue;
   }
 
-  async updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean> {
+  async updateIssue(id: number, title?: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean> {
     const filePath = this.getIssueFilePath(id);
     
     try {
@@ -230,12 +230,12 @@ export class IssueRepository extends BaseRepository {
     }
 
     try {
-      const content = await fsPromises.readFile(filePath, 'utf8');
-      const issue = this.parseMarkdownIssue(content);
+      const fileContent = await fsPromises.readFile(filePath, 'utf8');
+      const issue = this.parseMarkdownIssue(fileContent);
       if (!issue) return false;
 
       if (title !== undefined) issue.title = title;
-      if (description !== undefined) issue.description = description;
+      if (content !== undefined) issue.content = content;
       if (priority !== undefined) issue.priority = priority;
       if (status_id !== undefined) issue.status_id = status_id;
       if (tags !== undefined) issue.tags = tags;

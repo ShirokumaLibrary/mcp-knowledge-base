@@ -38,8 +38,7 @@
 export interface WorkSession {
   id: string;           // @ai-pattern: YYYYMMDD-HHMMSSsss format
   title: string;        // @ai-validation: Required session name
-  description?: string; // @ai-logic: Optional work details
-  content?: string;     // @ai-logic: Extended notes/logs
+  content?: string;     // @ai-logic: Work details and extended notes/logs
   tags?: string[];      // @ai-pattern: Categorization
   category?: string;    // @ai-logic: Work type classification
   date: string;         // @ai-pattern: YYYY-MM-DD format

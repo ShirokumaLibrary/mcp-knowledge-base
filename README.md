@@ -28,6 +28,7 @@ This MCP server provides a unified knowledge base system that manages Issues, Pl
 - **Daily Summaries**: Create summaries of daily achievements
 - **Tag System**: Organize and search content across all types
 - **Status Management**: Customizable workflow statuses
+- **Unified Content Field**: All entity types use consistent `content` field for multi-line text
 
 ## Requirements
 

@@ -19,8 +19,7 @@
  * @ai-field-patterns
  * - id: Always number, auto-incremented from SQLite sequences table
  * - title: Always required string
- * - description: Optional string for Issue/Plan
- * - content: Required string for Knowledge/Doc
+ * - content: Required string for all types
  * - priority: 'high' | 'medium' | 'low' (Issue/Plan only)
  * - status_id: Foreign key to Status table (Issue/Plan only)
  * - tags: String array for categorization

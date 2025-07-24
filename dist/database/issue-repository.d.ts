@@ -57,8 +57,8 @@ export declare class IssueRepository extends BaseRepository {
         created_at: string;
         updated_at: string;
     }>>;
-    createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<Issue>;
-    updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
+    createIssue(title: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<Issue>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getIssue(id: number): Promise<Issue | null>;
     searchIssuesByTag(tag: string): Promise<Issue[]>;

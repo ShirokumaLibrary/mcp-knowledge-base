@@ -125,18 +125,24 @@ export class UnifiedHandlers {
     // @ai-logic: Type-specific field requirements enforced here
     switch (validatedArgs.type) {
       case 'issue':
+        if (!validatedArgs.content) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Content is required for issues');
+        }
         item = await this.db.createIssue(
           validatedArgs.title,
-          validatedArgs.description,
+          validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status_id,
           validatedArgs.tags
         );
         break;
       case 'plan':
+        if (!validatedArgs.content) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Content is required for plans');
+        }
         item = await this.db.createPlan(
           validatedArgs.title,
-          validatedArgs.description,
+          validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status_id,
           validatedArgs.start_date,
@@ -188,7 +194,7 @@ export class UnifiedHandlers {
         success = await this.db.updateIssue(
           validatedArgs.id,
           validatedArgs.title,
-          validatedArgs.description,
+          validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status_id,
           validatedArgs.tags
@@ -199,7 +205,7 @@ export class UnifiedHandlers {
         success = await this.db.updatePlan(
           validatedArgs.id,
           validatedArgs.title,
-          validatedArgs.description,
+          validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status_id,
           validatedArgs.start_date,

@@ -19,8 +19,7 @@
  * @ai-field-patterns
  * - id: Always number, auto-incremented from SQLite sequences table
  * - title: Always required string
- * - description: Optional string for Issue/Plan
- * - content: Required string for Knowledge/Doc
+ * - content: Required string for all types
  * - priority: 'high' | 'medium' | 'low' (Issue/Plan only)
  * - status_id: Foreign key to Status table (Issue/Plan only)
  * - tags: String array for categorization
@@ -54,7 +53,7 @@ export interface Status {
 export interface Issue {
   id: number;                      // @ai-logic: Sequential ID from markdown
   title: string;                   // @ai-validation: Required, non-empty
-  description: string | null;      // @ai-logic: Optional details
+  content: string;                 // @ai-validation: Required content
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
   status_id: number;               // @ai-relationship: Foreign key to Status
   status?: string;                 // @ai-logic: Denormalized status name
@@ -73,7 +72,7 @@ export interface Issue {
 export interface Plan {
   id: number;                      // @ai-logic: Sequential ID
   title: string;                   // @ai-validation: Required
-  description: string | null;      // @ai-logic: Optional details
+  content: string;                 // @ai-validation: Required content
   start_date: string | null;       // @ai-pattern: YYYY-MM-DD or null
   end_date: string | null;         // @ai-pattern: YYYY-MM-DD or null
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'

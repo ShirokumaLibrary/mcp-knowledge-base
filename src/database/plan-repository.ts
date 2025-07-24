@@ -50,7 +50,7 @@ export class PlanRepository extends BaseRepository {
    * @ai-logic Related issues are stored as numeric IDs for cross-referencing
    */
   private parseMarkdownPlan(content: string): Plan | null {
-    const { metadata, content: description } = parseMarkdown(content);
+    const { metadata, content: contentBody } = parseMarkdown(content);
     
     // @ai-logic: ID and title are mandatory for valid plans
     if (!metadata.id || !metadata.title) return null;
@@ -58,7 +58,7 @@ export class PlanRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
-      description: description || null,
+      content: contentBody || '',
       start_date: metadata.start_date || null,  // @ai-edge-case: Plans may not have dates initially
       end_date: metadata.end_date || null,
       priority: metadata.priority || 'medium',
@@ -92,7 +92,7 @@ export class PlanRepository extends BaseRepository {
       updated_at: plan.updated_at
     };
     
-    const content = generateMarkdown(metadata, plan.description || '');
+    const content = generateMarkdown(metadata, plan.content || '');
     await fsPromises.writeFile(this.getPlanFilePath(plan.id), content, 'utf8');
   }
 
@@ -106,10 +106,10 @@ export class PlanRepository extends BaseRepository {
   async syncPlanToSQLite(plan: Plan): Promise<void> {
     await this.db.runAsync(`
       INSERT OR REPLACE INTO search_plans 
-      (id, title, description, priority, status_id, start_date, end_date, tags, created_at, updated_at)
+      (id, title, content, priority, status_id, start_date, end_date, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        plan.id, plan.title, plan.description || '',
+        plan.id, plan.title, plan.content || '',
         plan.priority, plan.status_id, 
         plan.start_date || '', plan.end_date || '',  // @ai-logic: Empty strings for NULL dates
         JSON.stringify(plan.tags || []),
@@ -144,7 +144,7 @@ export class PlanRepository extends BaseRepository {
     return plans.sort((a, b) => a.id - b.id);
   }
 
-  async createPlan(title: string, description?: string, priority: string = 'medium', status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan> {
+  async createPlan(title: string, content?: string, priority: string = 'medium', status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan> {
     await this.ensureDirectoryExists();
     
     let finalStatusId: number;
@@ -159,7 +159,7 @@ export class PlanRepository extends BaseRepository {
     const plan: Plan = {
       id: await this.getPlanNextId(),
       title,
-      description: description || null,
+      content: content || '',
       start_date: start_date || null,
       end_date: end_date || null,
       priority,
@@ -183,7 +183,7 @@ export class PlanRepository extends BaseRepository {
     return plan;
   }
 
-  async updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean> {
+  async updatePlan(id: number, title?: string, content?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean> {
     const filePath = this.getPlanFilePath(id);
     
     try {
@@ -193,12 +193,12 @@ export class PlanRepository extends BaseRepository {
     }
 
     try {
-      const content = await fsPromises.readFile(filePath, 'utf8');
-      const plan = this.parseMarkdownPlan(content);
+      const fileContent = await fsPromises.readFile(filePath, 'utf8');
+      const plan = this.parseMarkdownPlan(fileContent);
       if (!plan) return false;
 
       if (title !== undefined) plan.title = title;
-      if (description !== undefined) plan.description = description;
+      if (content !== undefined) plan.content = content;
       if (priority !== undefined) plan.priority = priority;
       if (status_id !== undefined) plan.status_id = status_id;
       if (start_date !== undefined) plan.start_date = start_date;

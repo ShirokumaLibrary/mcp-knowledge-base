@@ -35,8 +35,8 @@ export declare class PlanRepository extends BaseRepository {
      */
     syncPlanToSQLite(plan: Plan): Promise<void>;
     getAllPlans(): Promise<Plan[]>;
-    createPlan(title: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan>;
-    updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
+    createPlan(title: string, content?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getPlan(id: number): Promise<Plan | null>;
     searchPlansByTag(tag: string): Promise<Plan[]>;

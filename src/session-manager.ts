@@ -75,7 +75,6 @@ export class WorkSessionManager {
    */
   createSession(
     title: string,
-    description?: string,
     content?: string,
     tags?: string[],
     category?: string,
@@ -88,7 +87,6 @@ export class WorkSessionManager {
     const session: WorkSession = {
       id: sessionId,
       title,
-      description,
       content,
       tags,
       category,
@@ -111,7 +109,6 @@ export class WorkSessionManager {
   updateSession(
     id: string,
     title?: string,
-    description?: string,
     content?: string,
     tags?: string[],
     category?: string
@@ -126,7 +123,6 @@ export class WorkSessionManager {
       ...session,
       // @ai-pattern: Explicit undefined check for partial updates
       title: title !== undefined ? title : session.title,
-      description: description !== undefined ? description : session.description,
       content: content !== undefined ? content : session.content,
       tags: tags !== undefined ? tags : session.tags,
       category: category !== undefined ? category : session.category,

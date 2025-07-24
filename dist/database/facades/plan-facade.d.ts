@@ -24,11 +24,11 @@ export declare class PlanFacade extends BaseFacade {
      * @ai-assumption start_date should be <= end_date (not enforced here)
      * @ai-side-effects Creates markdown file and SQLite record
      */
-    createPlan(title: string, description?: string, priority?: string, statusId?: number, startDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
+    createPlan(title: string, content?: string, priority?: string, statusId?: number, startDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
     endDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
     tags?: string[]): Promise<Plan>;
     getPlan(id: number): Promise<Plan | null>;
-    updatePlan(id: number, title?: string, description?: string, priority?: string, statusId?: number, startDate?: string, endDate?: string, tags?: string[]): Promise<boolean>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, statusId?: number, startDate?: string, endDate?: string, tags?: string[]): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getAllPlans(): Promise<Plan[]>;
     searchPlansByTag(tag: string): Promise<Plan[]>;

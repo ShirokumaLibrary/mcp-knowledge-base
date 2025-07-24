@@ -74,7 +74,7 @@ describe('PlanRepository Async Tests', () => {
             const retrieved = await db.getPlan(plan.id);
             expect(retrieved).not.toBeNull();
             expect(retrieved.title).toBe('Async Read Test');
-            expect(retrieved.description).toBe('Test Description'); // @ai-logic: Description preserved
+            expect(retrieved.content).toBe('Test Description'); // @ai-logic: Content preserved
         });
         /**
          * @ai-intent Test concurrent async plan operations
@@ -119,7 +119,7 @@ describe('PlanRepository Async Tests', () => {
             // @ai-validation: Verify changes persisted to file
             const updated = await db.getPlan(plan.id);
             expect(updated.title).toBe('Updated Title');
-            expect(updated.description).toBe('Updated Description');
+            expect(updated.content).toBe('Updated Description');
         });
         /**
          * @ai-intent Test async file and database deletion for plans

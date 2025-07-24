@@ -107,7 +107,7 @@ describe('FileIssueDatabase Async Tests', () => {
     test('should create new issue', async () => {
       const issue = await db.createIssue('Test Issue', 'This is a test issue', 'high');
       expect(issue.title).toBe('Test Issue');
-      expect(issue.description).toBe('This is a test issue');
+      expect(issue.content).toBe('This is a test issue');
       expect(issue.priority).toBe('high');  // @ai-pattern: high/medium/low
       expect(issue.id).toBeGreaterThan(0);  // @ai-validation: Sequential ID
       expect(issue.created_at).toBeDefined();  // @ai-pattern: ISO timestamp
@@ -136,7 +136,7 @@ describe('FileIssueDatabase Async Tests', () => {
       const issue = await db.getIssue(created.id);
       expect(issue).not.toBeNull();
       expect(issue!.title).toBe('Specific Issue');
-      expect(issue!.description).toBe('Details here');
+      expect(issue!.content).toBe('Details here');
     });
 
     /**
@@ -153,7 +153,7 @@ describe('FileIssueDatabase Async Tests', () => {
       const updated = await db.getIssue(issue.id);
       expect(updated).not.toBeNull();
       expect(updated!.title).toBe('New Title');
-      expect(updated!.description).toBe('New description');
+      expect(updated!.content).toBe('New description');
       expect(updated!.priority).toBe('low');  // @ai-logic: Priority changed
     });
 

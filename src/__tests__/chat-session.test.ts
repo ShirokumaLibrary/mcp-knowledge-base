@@ -90,14 +90,12 @@ describe('WorkSessionManager', () => {
     it('should create session with content', () => {
       const session = sessionManager.createSession(
         'Test Session',
-        'Description',
         '## Implementation\n\n- Task 1\n- Task 2',  // @ai-example: Markdown content
         ['test', 'session'],  // @ai-pattern: Tag array
         'development'         // @ai-pattern: Category string
       );
       
       expect(session.title).toBe('Test Session');
-      expect(session.description).toBe('Description');
       expect(session.content).toContain('Task 1');
       expect(session.tags).toEqual(['test', 'session']);
       expect(session.category).toBe('development');
@@ -112,7 +110,6 @@ describe('WorkSessionManager', () => {
       const customId = '20231201-120000000';  // @ai-example: Manual ID
       const session = sessionManager.createSession(
         'Custom ID Session',
-        'Custom description',
         'Custom content',
         undefined,
         undefined,
@@ -121,7 +118,6 @@ describe('WorkSessionManager', () => {
       
       expect(session.id).toBe(customId);
       expect(session.title).toBe('Custom ID Session');
-      expect(session.description).toBe('Custom description');
       expect(session.content).toBe('Custom content');
     });
 
@@ -130,7 +126,7 @@ describe('WorkSessionManager', () => {
      * @ai-validation Ensures tags work without other optional fields
      */
     it('should create session with tags', () => {
-      const session = sessionManager.createSession('Test Session', undefined, undefined, ['test', 'session']);
+      const session = sessionManager.createSession('Test Session', undefined, ['test', 'session']);
       
       expect(session.tags).toEqual(['test', 'session']);
     });
@@ -154,18 +150,16 @@ describe('WorkSessionManager', () => {
      * @ai-critical updatedAt timestamp must be set
      */
     it('should update session fields', () => {
-      const session = sessionManager.createSession('Original Title', 'Original description', 'Original content', ['tag1']);
+      const session = sessionManager.createSession('Original Title', 'Original content', ['tag1']);
       
       const updated = sessionManager.updateSession(
         session.id,
         'Updated Title',
-        'Updated description', 
         'Updated content',
         ['tag1', 'tag2']  // @ai-logic: Can add new tags
       );
       
       expect(updated.title).toBe('Updated Title');
-      expect(updated.description).toBe('Updated description');
       expect(updated.content).toBe('Updated content');
       expect(updated.tags).toEqual(['tag1', 'tag2']);
       expect(updated.updatedAt).toBeDefined();  // @ai-critical: Must track update time
@@ -177,12 +171,11 @@ describe('WorkSessionManager', () => {
      * @ai-pattern Partial updates common in UI
      */
     it('should preserve unchanged fields', () => {
-      const session = sessionManager.createSession('Title', 'Description', 'Content', ['tag1'], 'work');
+      const session = sessionManager.createSession('Title', 'Content', ['tag1'], 'work');
       
       const updated = sessionManager.updateSession(session.id, 'New Title');  // @ai-logic: Only title updated
       
       expect(updated.title).toBe('New Title');
-      expect(updated.description).toBe('Description');
       expect(updated.content).toBe('Content');
       expect(updated.tags).toEqual(['tag1']);
       expect(updated.category).toBe('work');
@@ -205,12 +198,11 @@ describe('WorkSessionManager', () => {
      * @ai-critical Core functionality for session management
      */
     it('should load saved session', () => {
-      const session = sessionManager.createSession('Test Session', 'Description', 'Content');
+      const session = sessionManager.createSession('Test Session', 'Content');
       
       const loaded = sessionManager.getSession(session.id);
       expect(loaded).not.toBeNull();
       expect(loaded?.title).toBe('Test Session');
-      expect(loaded?.description).toBe('Description');
       expect(loaded?.content).toBe('Content');
     });
 
@@ -228,12 +220,12 @@ describe('WorkSessionManager', () => {
      * @ai-timing Delays ensure unique timestamps
      */
     it('should find sessions by tag', async () => {
-      sessionManager.createSession('Session 1', undefined, undefined, ['tag1', 'tag2']);
+      sessionManager.createSession('Session 1', undefined, ['tag1', 'tag2']);
       // @ai-timing: Wait to ensure different IDs (timestamp-based)
       await new Promise(resolve => setTimeout(resolve, 10));
-      sessionManager.createSession('Session 2', undefined, undefined, ['tag2', 'tag3']);
+      sessionManager.createSession('Session 2', undefined, ['tag2', 'tag3']);
       await new Promise(resolve => setTimeout(resolve, 10));
-      sessionManager.createSession('Session 3', undefined, undefined, ['tag3']);
+      sessionManager.createSession('Session 3', undefined, ['tag3']);
       
       const results = sessionManager.searchSessionsByTag('tag2');
       

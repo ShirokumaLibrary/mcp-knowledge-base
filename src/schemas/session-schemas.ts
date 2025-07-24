@@ -18,8 +18,7 @@ import { z } from 'zod';
 export const CreateWorkSessionSchema = z.object({
   id: z.string().optional(),  // @ai-logic: Custom ID for imports
   title: z.string().min(1, 'Session title is required'),
-  description: z.string().optional(),
-  content: z.string().optional(),
+  content: z.string().optional(),  // @ai-logic: Work details and notes
   tags: z.array(z.string()).default([]),  // @ai-default: Empty array
   category: z.string().optional(),  // @ai-logic: Work categorization
 });
@@ -34,8 +33,7 @@ export const CreateWorkSessionSchema = z.object({
 export const UpdateWorkSessionSchema = z.object({
   id: z.string().min(1, 'Session ID is required'),  // @ai-critical: Must exist
   title: z.string().min(1).optional(),  // @ai-validation: Non-empty if provided
-  description: z.string().optional(),
-  content: z.string().optional(),
+  content: z.string().optional(),  // @ai-logic: Work details and notes
   tags: z.array(z.string()).optional(),
   category: z.string().optional(),
 });

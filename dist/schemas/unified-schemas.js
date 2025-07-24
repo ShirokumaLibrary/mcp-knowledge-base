@@ -40,8 +40,7 @@ export const GetItemDetailSchema = z.object({
 export const CreateItemSchema = z.object({
     type: ItemTypeSchema,
     title: z.string().min(1, 'Title is required'), // @ai-validation: Non-empty
-    description: z.string().optional(),
-    content: z.string().optional(), // @ai-logic: Required for doc/knowledge
+    content: z.string().optional(), // @ai-logic: Required for all types (validated in handler)
     priority: z.enum(['high', 'medium', 'low']).optional(),
     status_id: z.number().int().positive().optional(),
     tags: z.array(z.string()).optional(),
@@ -59,8 +58,7 @@ export const UpdateItemSchema = z.object({
     type: ItemTypeSchema,
     id: z.number().int().positive(), // @ai-critical: Must identify existing item
     title: z.string().min(1).optional(), // @ai-validation: Non-empty if provided
-    description: z.string().optional(),
-    content: z.string().optional(), // @ai-logic: For doc/knowledge updates
+    content: z.string().optional(), // @ai-logic: For all type updates
     priority: z.enum(['high', 'medium', 'low']).optional(),
     status_id: z.number().int().positive().optional(),
     tags: z.array(z.string()).optional(),

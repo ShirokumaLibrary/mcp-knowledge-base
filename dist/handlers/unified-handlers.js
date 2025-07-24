@@ -101,10 +101,16 @@ export class UnifiedHandlers {
         // @ai-logic: Type-specific field requirements enforced here
         switch (validatedArgs.type) {
             case 'issue':
-                item = await this.db.createIssue(validatedArgs.title, validatedArgs.description, validatedArgs.priority, validatedArgs.status_id, validatedArgs.tags);
+                if (!validatedArgs.content) {
+                    throw new McpError(ErrorCode.InvalidRequest, 'Content is required for issues');
+                }
+                item = await this.db.createIssue(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status_id, validatedArgs.tags);
                 break;
             case 'plan':
-                item = await this.db.createPlan(validatedArgs.title, validatedArgs.description, validatedArgs.priority, validatedArgs.status_id, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
+                if (!validatedArgs.content) {
+                    throw new McpError(ErrorCode.InvalidRequest, 'Content is required for plans');
+                }
+                item = await this.db.createPlan(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status_id, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
                 break;
             case 'doc':
                 if (!validatedArgs.content) {
@@ -136,12 +142,12 @@ export class UnifiedHandlers {
         let updatedItem;
         switch (validatedArgs.type) {
             case 'issue':
-                success = await this.db.updateIssue(validatedArgs.id, validatedArgs.title, validatedArgs.description, validatedArgs.priority, validatedArgs.status_id, validatedArgs.tags);
+                success = await this.db.updateIssue(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status_id, validatedArgs.tags);
                 if (success)
                     updatedItem = await this.db.getIssue(validatedArgs.id);
                 break;
             case 'plan':
-                success = await this.db.updatePlan(validatedArgs.id, validatedArgs.title, validatedArgs.description, validatedArgs.priority, validatedArgs.status_id, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
+                success = await this.db.updatePlan(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status_id, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
                 if (success)
                     updatedItem = await this.db.getPlan(validatedArgs.id);
                 break;

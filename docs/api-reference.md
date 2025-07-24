@@ -49,11 +49,10 @@ When using item-related commands, specify the type:
 - `id` - Numeric identifier for items
 - `type` - Item type (see above)
 - `title` - Title of the item
-- `description` - Detailed description (for issues/plans)
-- `content` - Main content (for docs/knowledge)
+- `content` - Main content (required for all item types)
 - `tags` - Array of tag names
-- `priority` - Priority level (high, medium, low)
-- `status_id` - Status identifier
+- `priority` - Priority level (high, medium, low) for issues/plans
+- `status_id` - Status identifier for issues/plans
 
 ### Date Parameters
 - `date` - Format: YYYY-MM-DD

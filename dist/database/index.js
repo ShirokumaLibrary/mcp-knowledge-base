@@ -615,11 +615,11 @@ export class FileIssueDatabase {
         const db = this.connection.getDatabase();
         const tags = session.tags ? session.tags.join(',') : ''; // @ai-pattern: CSV for LIKE queries
         await db.runAsync(`INSERT OR REPLACE INTO search_sessions 
-       (id, title, description, category, tags, date, start_time, end_time, summary) 
+       (id, title, content, category, tags, date, start_time, end_time, summary) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             session.id,
             session.title,
-            session.description || '',
+            session.content || '',
             session.category || '',
             tags,
             session.date,

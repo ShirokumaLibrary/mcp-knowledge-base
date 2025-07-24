@@ -42,7 +42,7 @@ export class SearchRepository extends BaseRepository {
   async searchAll(query: string): Promise<{ issues: Issue[], plans: Plan[], knowledge: Knowledge[] }> {
     // @ai-logic: Search issues by title and description
     const issueRows = await this.db.allAsync(
-      `SELECT id FROM search_issues WHERE title LIKE ? OR description LIKE ?`,
+      `SELECT id FROM search_issues WHERE title LIKE ? OR content LIKE ?`,
       [`%${query}%`, `%${query}%`]
     );
     const issuePromises = issueRows.map((row: any) => this.issueRepository.getIssue(row.id));
@@ -50,7 +50,7 @@ export class SearchRepository extends BaseRepository {
 
     // @ai-logic: Search plans similarly
     const planRows = await this.db.allAsync(
-      `SELECT id FROM search_plans WHERE title LIKE ? OR description LIKE ?`,
+      `SELECT id FROM search_plans WHERE title LIKE ? OR content LIKE ?`,
       [`%${query}%`, `%${query}%`]
     );
     const planPromises = planRows.map((row: any) => this.planRepository.getPlan(row.id));
@@ -99,14 +99,14 @@ export class SearchRepository extends BaseRepository {
     try {
       const rows = await this.db.allAsync(
         `SELECT * FROM search_sessions WHERE 
-         title LIKE ? OR description LIKE ? OR summary LIKE ? OR category LIKE ?`,
+         title LIKE ? OR content LIKE ? OR summary LIKE ? OR category LIKE ?`,
         [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]
       );
       
       return rows.map((row: any) => ({
         id: row.id,
         title: row.title,
-        description: row.description,
+        content: row.content,
         category: row.category,
         tags: row.tags ? row.tags.split(',') : [],
         date: row.date,
@@ -155,7 +155,7 @@ export class SearchRepository extends BaseRepository {
       }).map((row: any) => ({
         id: row.id,
         title: row.title,
-        description: row.description,
+        content: row.content,
         category: row.category,
         tags: row.tags ? row.tags.split(',') : [],
         date: row.date,
