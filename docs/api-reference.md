@@ -4,6 +4,9 @@
 
 ### Items (Issues, Plans, Documents, Knowledge)
 - `get_items`: Get items by type (issue, plan, doc, knowledge)
+  - For issues/plans: Default excludes closed statuses
+  - Optional: `includeClosedStatuses` (boolean) - Include items with closed statuses
+  - Optional: `statusIds` (array) - Filter by specific status IDs
 - `get_item_detail`: Get detailed information for specified item
 - `create_item`: Create new item of any type
 - `update_item`: Update existing item
@@ -31,10 +34,10 @@
 - `search_tags`: Search tags by pattern
 
 ### Statuses
-- `get_statuses`: Retrieve all statuses
-- `create_status`: Create new status
-- `update_status`: Update existing status
-- `delete_status`: Delete status
+- `get_statuses`: Retrieve all statuses (includes is_closed flag)
+- ~~`create_status`~~: (Disabled) Status creation is managed through database initialization
+- ~~`update_status`~~: (Disabled) Status updates are not supported
+- ~~`delete_status`~~: (Disabled) Status deletion is not supported
 
 ## API Parameters
 
@@ -52,7 +55,7 @@ When using item-related commands, specify the type:
 - `content` - Main content (required for all item types)
 - `tags` - Array of tag names
 - `priority` - Priority level (high, medium, low) for issues/plans
-- `status_id` - Status identifier for issues/plans
+- `status_id` - Status identifier for issues/plans (stored as name in markdown files)
 
 ### Date Parameters
 - `date` - Format: YYYY-MM-DD

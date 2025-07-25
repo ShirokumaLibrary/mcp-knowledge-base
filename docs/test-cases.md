@@ -44,15 +44,16 @@ Expected: Empty arrays are returned
 
 #### 1.3 Master Data Verification
 - [ ] Status list: `mcp__shirokuma-knowledge-base__get_statuses()`
-      Expected: Array containing default statuses:
+      Expected: Array containing default statuses with is_closed flags:
       ```json
       [
-        {"id": 1, "name": "Open"},
-        {"id": 2, "name": "In Progress"},
-        {"id": 3, "name": "Review"},
-        {"id": 4, "name": "Completed"},
-        {"id": 5, "name": "Closed"},
-        {"id": 6, "name": "On Hold"}
+        {"id": 1, "name": "Open", "is_closed": false},
+        {"id": 2, "name": "In Progress", "is_closed": false},
+        {"id": 3, "name": "Review", "is_closed": false},
+        {"id": 4, "name": "Completed", "is_closed": true},
+        {"id": 5, "name": "Closed", "is_closed": true},
+        {"id": 6, "name": "On Hold", "is_closed": false},
+        {"id": 7, "name": "Cancelled", "is_closed": true}
       ]
       ```
 - [ ] Tag list: `mcp__shirokuma-knowledge-base__get_tags()`
@@ -164,6 +165,18 @@ Create a knowledge base entry
 - [ ] Get Knowledge list: `mcp__shirokuma-knowledge-base__get_items(type: "knowledge")`
       Expected: Array containing the created knowledge entry
 
+#### 3.1.1 Status Filtering Tests (Issues and Plans)
+- [ ] Get Issues excluding closed statuses (default): `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
+      Expected: Array containing only issues with open statuses
+- [ ] Get Issues including closed statuses: `mcp__shirokuma-knowledge-base__get_items(type: "issue", includeClosedStatuses: true)`
+      Expected: Array containing all issues regardless of status
+- [ ] Get Issues with specific status IDs: `mcp__shirokuma-knowledge-base__get_items(type: "issue", statusIds: [1, 2])`
+      Expected: Array containing only issues with status IDs 1 or 2
+- [ ] Get Plans excluding closed statuses: `mcp__shirokuma-knowledge-base__get_items(type: "plan")`
+      Expected: Array containing only plans with open statuses
+- [ ] Get Plans including closed statuses: `mcp__shirokuma-knowledge-base__get_items(type: "plan", includeClosedStatuses: true)`
+      Expected: Array containing all plans
+
 #### 3.2 Detail Retrieval Verification
 - [ ] Get Issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issue", id: 1)`
       Expected: Complete issue object with all fields
@@ -231,22 +244,32 @@ Create a knowledge base entry
 
 ### 5. Status Management Tests
 
-#### 5.1 Custom Status
-- [ ] Create custom status: `mcp__shirokuma-knowledge-base__create_status(name: "Under Review")`
-      Expected: Success with new status id (likely 4)
-- [ ] Verify status list includes custom status: `mcp__shirokuma-knowledge-base__get_statuses()`
-      Expected: Array now contains "Under Review"
-- [ ] Update status name: `mcp__shirokuma-knowledge-base__update_status(id: 4, name: "Reviewing")`
-      Expected: Success with name changed
-- [ ] Use custom status in item:
+#### 5.1 Status Management (Read-Only)
+Note: Status creation, update, and deletion are disabled. Statuses can only be managed through database initialization.
+
+- [ ] Verify status list: `mcp__shirokuma-knowledge-base__get_statuses()`
+      Expected: Array contains default statuses with is_closed flags
+- [ ] Attempt to create custom status (should fail): `mcp__shirokuma-knowledge-base__create_status(name: "Under Review")`
+      Expected: Error - tool not available
+- [ ] Attempt to update status (should fail): `mcp__shirokuma-knowledge-base__update_status(id: 1, name: "New Name")`
+      Expected: Error - tool not available
+- [ ] Attempt to delete status (should fail): `mcp__shirokuma-knowledge-base__delete_status(id: 1)`
+      Expected: Error - tool not available
+
+#### 5.2 Status Usage Tests
+- [ ] Update issue to closed status:
   ```
   mcp__shirokuma-knowledge-base__update_item(
     type: "issue",
     id: 1,
-    status_id: 4
+    status_id: 5
   )
   ```
-  Expected: Success, item now shows "Reviewing" status
+  Expected: Success, item now has "Closed" status
+- [ ] Verify closed issue is excluded by default: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
+      Expected: Empty array (closed issue not shown)
+- [ ] Verify closed issue appears with flag: `mcp__shirokuma-knowledge-base__get_items(type: "issue", includeClosedStatuses: true)`
+      Expected: Array contains the closed issue
 
 ### 6. Session Management Tests
 
@@ -357,8 +380,8 @@ Create a knowledge base entry
       Expected: Plan still exists
 - [ ] Delete tag: `mcp__shirokuma-knowledge-base__delete_tag(name: "feature")`
       Expected: Success
-- [ ] Delete status: `mcp__shirokuma-knowledge-base__delete_status(id: 4)`
-      Expected: Success or error if in use
+- [ ] Attempt to delete status (should fail): `mcp__shirokuma-knowledge-base__delete_status(id: 7)`
+      Expected: Error - tool not available
 
 ### 10. Database Rebuild Tests
 
@@ -366,8 +389,9 @@ Create a knowledge base entry
 Note: This requires command line access, not MCP
 - [ ] Execute `npm run rebuild-db` (if you have shell access)
 - [ ] Verify all data is restored via MCP queries
-- [ ] Verify custom statuses are preserved
+- [ ] Verify default statuses are restored with correct is_closed flags
 - [ ] Verify sessions and summaries are correctly restored
+- [ ] Verify status names (not IDs) are preserved in markdown files
 
 ### 11. Edge Cases and Additional Tests
 
@@ -420,7 +444,24 @@ Note: This requires command line access, not MCP
 - [ ] Get sessions for wide date range: `start_date: "2020-01-01", end_date: "2030-12-31"`
 - [ ] Get summaries for future dates
 
-#### 11.5 Search Edge Cases
+#### 11.5 Status Filtering Edge Cases
+- [ ] Create issue with "Cancelled" status and verify default filtering:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "issue",
+    title: "Cancelled Feature",
+    content: "This feature was cancelled",
+    status_id: 7
+  )
+  ```
+  Then: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
+  Expected: Issue not shown (cancelled is closed)
+- [ ] Test filtering with empty statusIds array: `mcp__shirokuma-knowledge-base__get_items(type: "issue", statusIds: [])`
+  Expected: Empty result (no status IDs match)
+- [ ] Test filtering with invalid status ID: `mcp__shirokuma-knowledge-base__get_items(type: "issue", statusIds: [999])`
+  Expected: Empty result
+
+#### 11.6 Search Edge Cases
 - [ ] Search with empty pattern: `mcp__shirokuma-knowledge-base__search_tags(pattern: "")`
 - [ ] Search with special regex characters: `mcp__shirokuma-knowledge-base__search_tags(pattern: ".*")`
 - [ ] Case sensitivity test: search for "API" vs "api"
@@ -436,7 +477,10 @@ Note: This requires command line access, not MCP
 - Session content is saved as-is without additional formatting
 - All search functions return accurate results
 - Date-based queries work correctly
-- Custom statuses persist through database operations
+- Default statuses with is_closed flags work correctly
+- Status filtering for issues/plans works as expected (default excludes closed)
+- Status modification tools are properly disabled
+- Status names (not IDs) are stored in markdown files
 - Unicode and special characters are handled properly
 
 ### AI Testing Guidelines

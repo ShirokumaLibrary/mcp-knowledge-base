@@ -1,5 +1,8 @@
 # Shirokuma MCP Knowledge Base
 
+> ⚠️ **Project Under Development**  
+> This project is under active development and specifications/APIs may change significantly without notice.
+
 **Model Context Protocol (MCP) server for comprehensive knowledge management including issues, plans, documents, and work sessions.**
 
 ## Core Design Philosophy
@@ -57,15 +60,17 @@ This MCP server provides a unified knowledge base system that manages Issues, Pl
 
 ### Rebuilding the Database
 
-If the SQLite search database becomes corrupted or out of sync, you can rebuild it from the markdown files:
+If the SQLite search database becomes corrupted, out of sync, or when updating to a new version with database schema changes:
 
 ```bash
 npm run rebuild-db
 ```
 
+> ⚠️ **Important**: When updating to a new version, it's recommended to run `rebuild-db` as the database schema may have changed.
+
 This command will:
 - Back up the existing database (if present)
-- Create a fresh SQLite database
+- Create a fresh SQLite database with the latest schema
 - Scan all markdown files in the data directory
 - Restore all data including custom statuses
 - Rebuild search indexes for all content types
