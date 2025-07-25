@@ -227,9 +227,9 @@ describe('DocRepository Async Tests', () => {
       expect(shortDocSummary!.title).toBe(`Short Doc ${timestamp}`);
       expect(longDocSummary!.title).toBe(`Long Doc ${timestamp}`);
       
-      // @ai-validation: Summary should only include id and title
-      expect(Object.keys(shortDocSummary!)).toEqual(['id', 'title']);
-      expect(Object.keys(longDocSummary!)).toEqual(['id', 'title']);
+      // @ai-validation: Summary should include id, title, and summary
+      expect(Object.keys(shortDocSummary!).sort()).toEqual(['id', 'summary', 'title']);
+      expect(Object.keys(longDocSummary!).sort()).toEqual(['id', 'summary', 'title']);
     });
 
     /**
