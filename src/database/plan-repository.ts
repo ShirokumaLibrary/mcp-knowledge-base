@@ -17,6 +17,7 @@ export class PlanRepository extends BaseRepository {
   private plansDir: string;
   private statusRepository: IStatusRepository;
   private tagRepository: TagRepository;
+  private readonly sequenceType = 'plans';
 
   constructor(db: Database, plansDir: string, statusRepository: IStatusRepository, tagRepository?: TagRepository) {
     super(db, 'PlanRepository');
@@ -35,11 +36,11 @@ export class PlanRepository extends BaseRepository {
   }
 
   private async getPlanNextId(): Promise<number> {
-    return this.getNextSequenceValue('plans');
+    return this.getNextSequenceValue(this.sequenceType);
   }
 
   private getPlanFilePath(id: number): string {
-    return path.join(this.plansDir, `plan-${id}.md`);
+    return path.join(this.plansDir, this.getEntityFileName(this.sequenceType, id));
   }
 
   /**
@@ -68,7 +69,7 @@ export class PlanRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
-      summary: metadata.summary || undefined,
+      description: metadata.description || undefined,
       content: contentBody || '',
       start_date: metadata.start_date || null,  // @ai-edge-case: Plans may not have dates initially
       end_date: metadata.end_date || null,
@@ -102,7 +103,7 @@ export class PlanRepository extends BaseRepository {
     const metadata = {
       id: plan.id,
       title: plan.title,
-      summary: plan.summary,
+      description: plan.description,
       start_date: plan.start_date || '',
       end_date: plan.end_date || '',
       priority: plan.priority,
@@ -132,7 +133,7 @@ export class PlanRepository extends BaseRepository {
       (id, title, summary, content, priority, status_id, start_date, end_date, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        plan.id, plan.title, plan.summary || '',
+        plan.id, plan.title, plan.description || '',
         plan.content || '',
         plan.priority, plan.status_id, 
         plan.start_date || '', plan.end_date || '',  // @ai-logic: Empty strings for NULL dates
@@ -153,7 +154,7 @@ export class PlanRepository extends BaseRepository {
   async getAllPlans(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Plan[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.plansDir);
-    const planFiles = files.filter(f => f.startsWith('plan-') && f.endsWith('.md'));
+    const planFiles = files.filter(f => f.startsWith(`${this.sequenceType}-`) && f.endsWith('.md'));
     
     // Get all statuses to filter by is_closed if needed
     let closedStatusIds: number[] = [];
@@ -194,7 +195,7 @@ export class PlanRepository extends BaseRepository {
   async getAllPlansSummary(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<PlanSummary[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.plansDir);
-    const planFiles = files.filter(f => f.startsWith('plan-') && f.endsWith('.md'));
+    const planFiles = files.filter(f => f.startsWith(`${this.sequenceType}-`) && f.endsWith('.md'));
     
     // Get all statuses to filter by is_closed if needed
     let closedStatusIds: number[] = [];
@@ -220,7 +221,7 @@ export class PlanRepository extends BaseRepository {
           const summary: PlanSummary = {
             id: plan.id,
             title: plan.title,
-            summary: plan.summary,
+            description: plan.description,
             priority: plan.priority,
             status: status?.name,
             start_date: plan.start_date,
@@ -242,7 +243,7 @@ export class PlanRepository extends BaseRepository {
     return summaries.sort((a, b) => a.id - b.id);
   }
 
-  async createPlan(title: string, content?: string, priority: string = 'medium', status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<Plan> {
+  async createPlan(title: string, content?: string, priority: string = 'medium', status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<Plan> {
     await this.ensureDirectoryExists();
     
     // @ai-logic: Resolve status name to ID
@@ -267,7 +268,7 @@ export class PlanRepository extends BaseRepository {
     const plan: PlanInternal = {
       id: await this.getPlanNextId(),
       title,
-      summary,
+      description,
       content: content || '',
       start_date: start_date || null,
       end_date: end_date || null,
@@ -291,7 +292,7 @@ export class PlanRepository extends BaseRepository {
     return this.toExternalPlan(plan);
   }
 
-  async updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<boolean> {
+  async updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<boolean> {
     const filePath = this.getPlanFilePath(id);
     
     try {
@@ -306,7 +307,7 @@ export class PlanRepository extends BaseRepository {
       if (!plan) return false;
 
       if (title !== undefined) plan.title = title;
-      if (summary !== undefined) plan.summary = summary;
+      if (description !== undefined) plan.description = description;
       if (content !== undefined) plan.content = content;
       if (priority !== undefined) plan.priority = priority;
       if (status !== undefined) {

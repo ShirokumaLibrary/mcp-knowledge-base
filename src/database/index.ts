@@ -3,9 +3,9 @@ import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
 import { IssueRepository } from './issue-repository.js';
 import { PlanRepository } from './plan-repository.js';
-import { KnowledgeRepository } from './knowledge-repository.js';
-import { DocRepository } from './doc-repository.js';
+import { DocumentRepository } from './document-repository.js';
 import { SearchRepository } from './search-repository.js';
+import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
 import * as path from 'path';
 
@@ -52,9 +52,9 @@ export class FileIssueDatabase {
   private tagRepo!: TagRepository;
   private issueRepo!: IssueRepository;
   private planRepo!: PlanRepository;
-  private knowledgeRepo!: KnowledgeRepository;
-  private docRepo!: DocRepository;
+  private documentRepo!: DocumentRepository;  // @ai-logic: Unified doc/knowledge repository
   private searchRepo!: SearchRepository;
+  private typeRepo!: TypeRepository;  // @ai-logic: Dynamic type management
   private initializationPromise: Promise<void> | null = null;
 
   constructor(
@@ -62,6 +62,22 @@ export class FileIssueDatabase {
     private dbPath: string = getConfig().database.sqlitePath
   ) {
     this.connection = new DatabaseConnection(this.dbPath);
+  }
+
+  /**
+   * @ai-intent Get data directory for external access
+   * @ai-why TypeHandlers need this to create TypeRepository
+   */
+  get dataDirectory(): string {
+    return this.dataDir;
+  }
+
+  /**
+   * @ai-intent Expose database connection
+   * @ai-why TypeRepository needs direct database access
+   */
+  getDatabase() {
+    return this.connection.getDatabase();
   }
 
   /**
@@ -97,9 +113,13 @@ export class FileIssueDatabase {
     this.tagRepo = new TagRepository(db);        // @ai-logic: No dependencies
     this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
     this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
-    this.knowledgeRepo = new KnowledgeRepository(db, path.join(this.dataDir, 'knowledge'), this.tagRepo);
-    this.docRepo = new DocRepository(db, path.join(this.dataDir, 'docs'), this.tagRepo);
-    this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.knowledgeRepo, this.docRepo);
+    this.documentRepo = new DocumentRepository(db, path.join(this.dataDir, 'documents'));  // @ai-logic: Unified documents path
+    this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.documentRepo);
+    this.typeRepo = new TypeRepository(this);  // @ai-logic: Type definitions management
+    
+    // @ai-critical: Initialize document repository database tables
+    await this.documentRepo.initializeDatabase();
+    await this.typeRepo.init();
   }
 
   /**
@@ -259,11 +279,11 @@ export class FileIssueDatabase {
    * @ai-defaults Priority: 'medium', Status: 1 (default status)
    * @ai-return Complete issue object with generated ID
    */
-  async createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string) {
+  async createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.createIssue(title, description, priority, status, tags, summary);
+    return this.issueRepo.createIssue(title, content, priority, status, tags, description);
   }
 
   /**
@@ -273,11 +293,11 @@ export class FileIssueDatabase {
    * @ai-validation Issue must exist, status_id must be valid
    * @ai-return Updated issue object or null if not found
    */
-  async updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string) {
+  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.updateIssue(id, title, description, priority, status, tags, summary);
+    return this.issueRepo.updateIssue(id, title, content, priority, status, tags, description);
   }
 
   /**
@@ -328,11 +348,11 @@ export class FileIssueDatabase {
    * @ai-pattern Dates in YYYY-MM-DD format
    * @ai-return Complete plan object with generated ID
    */
-  async createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string) {
+  async createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags, summary);
+    return this.planRepo.createPlan(title, content, priority, status, start_date, end_date, tags, description);
   }
 
   /**
@@ -342,11 +362,11 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates preserve unspecified fields
    * @ai-return Updated plan or null if not found
    */
-  async updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string) {
+  async updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags, summary);
+    return this.planRepo.updatePlan(id, title, content, priority, status, start_date, end_date, tags, description);
   }
 
   /**
@@ -412,7 +432,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.getAllKnowledge();
+    return this.documentRepo.getAllDocuments('knowledge');
   }
 
   /**
@@ -422,11 +442,11 @@ export class FileIssueDatabase {
    * @ai-side-effects Creates file and search index entry
    * @ai-return Complete knowledge object
    */
-  async createKnowledge(title: string, content: string, tags?: string[], summary?: string) {
+  async createKnowledge(title: string, content: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.createKnowledge(title, content, tags, summary);
+    return this.documentRepo.createDocument('knowledge', title, content, tags, description);
   }
 
   /**
@@ -435,11 +455,12 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates allowed
    * @ai-return Updated knowledge or null
    */
-  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string) {
+  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.updateKnowledge(id, title, content, tags, summary);
+    const success = await this.documentRepo.updateDocument('knowledge', id, title, content, tags, description);
+    return success ? await this.documentRepo.getDocument('knowledge', id) : null;
   }
 
   /**
@@ -452,7 +473,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.deleteKnowledge(id);
+    return this.documentRepo.deleteDocument('knowledge', id);
   }
 
   /**
@@ -464,7 +485,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.getKnowledge(id);
+    return this.documentRepo.getDocument('knowledge', id);
   }
 
   /**
@@ -477,7 +498,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.searchKnowledgeByTag(tag);
+    return this.documentRepo.searchDocumentsByTag(tag, 'knowledge');
   }
 
   /**
@@ -491,7 +512,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.getAllDocs();
+    return this.documentRepo.getAllDocuments('doc');
   }
 
   /**
@@ -504,7 +525,8 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.getDocsSummary();
+    const docs = await this.documentRepo.getAllDocuments('doc');
+    return docs.map(d => ({ id: d.id, title: d.title, description: d.description }));
   }
 
   /**
@@ -513,11 +535,11 @@ export class FileIssueDatabase {
    * @ai-validation Content required for docs
    * @ai-return Complete doc object
    */
-  async createDoc(title: string, content: string, tags?: string[], summary?: string) {
+  async createDoc(title: string, content: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.createDoc(title, content, tags, summary);
+    return this.documentRepo.createDocument('doc', title, content, tags, description);
   }
 
   /**
@@ -526,11 +548,12 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates supported
    * @ai-return Updated doc or null
    */
-  async updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string) {
+  async updateDoc(id: number, title?: string, content?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.updateDoc(id, title, content, tags, summary);
+    const success = await this.documentRepo.updateDocument('doc', id, title, content, tags, description);
+    return success ? await this.documentRepo.getDocument('doc', id) : null;
   }
 
   /**
@@ -542,7 +565,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.deleteDoc(id);
+    return this.documentRepo.deleteDocument('doc', id);
   }
 
   /**
@@ -554,7 +577,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.getDoc(id);
+    return this.documentRepo.getDocument('doc', id);
   }
 
   /**
@@ -566,7 +589,7 @@ export class FileIssueDatabase {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.searchDocsByTag(tag);
+    return this.documentRepo.searchDocumentsByTag(tag, 'doc');
   }
 
   /**
@@ -750,6 +773,100 @@ export class FileIssueDatabase {
       // Clear all tag relationships if no tags
       await db.runAsync('DELETE FROM summary_tags WHERE summary_date = ?', [summary.date]);
     }
+  }
+
+  /**
+   * @ai-section Unified Document Operations
+   * @ai-intent Operations for unified doc/knowledge documents
+   * @ai-pattern Replaces separate doc and knowledge operations
+   * @ai-critical Uses composite key (type, id) for identification
+   */
+  
+  /**
+   * @ai-intent Get all documents of specific subtype
+   * @ai-flow 1. Wait for init -> 2. Query by type -> 3. Return sorted
+   * @ai-param type Optional filter by 'doc' or 'knowledge'
+   * @ai-return Array of Document objects
+   */
+  async getAllDocuments(type?: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.getAllDocuments(type);
+  }
+
+  /**
+   * @ai-intent Get document summaries for lists
+   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return lightweight
+   * @ai-performance Excludes content field
+   * @ai-return Array of DocumentSummary objects
+   */
+  async getAllDocumentsSummary(type?: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.getAllDocumentsSummary(type);
+  }
+
+  /**
+   * @ai-intent Create new document with subtype
+   * @ai-flow 1. Wait for init -> 2. Get type-specific ID -> 3. Save
+   * @ai-critical Type determines ID sequence
+   * @ai-return Complete Document object
+   */
+  async createDocument(type: string, title: string, content: string, tags?: string[], description?: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.createDocument(type, title, content, tags, description);
+  }
+
+  /**
+   * @ai-intent Get single document by type and ID
+   * @ai-flow 1. Wait for init -> 2. Load from file
+   * @ai-return Document object or null
+   */
+  async getDocument(type: string, id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.getDocument(type, id);
+  }
+
+  /**
+   * @ai-intent Update document with partial changes
+   * @ai-flow 1. Wait for init -> 2. Apply updates -> 3. Save
+   * @ai-return true if updated, false if not found
+   */
+  async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.updateDocument(type, id, title, content, tags, description);
+  }
+
+  /**
+   * @ai-intent Delete document by type and ID
+   * @ai-flow 1. Wait for init -> 2. Remove file and index
+   * @ai-return true if deleted, false if not found
+   */
+  async deleteDocument(type: string, id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.deleteDocument(type, id);
+  }
+
+  /**
+   * @ai-intent Search documents by tag
+   * @ai-flow 1. Wait for init -> 2. Query by tag -> 3. Filter by type
+   * @ai-return Array of matching documents
+   */
+  async searchDocumentsByTag(tag: string, type?: string) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.documentRepo.searchDocumentsByTag(tag, type);
   }
 
   /**

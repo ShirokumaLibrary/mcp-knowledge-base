@@ -61,13 +61,24 @@ export class TagRepository extends BaseRepository {
       return existing.id;
     }
     
-    // Create new tag
-    const result = await this.db.runAsync(
-      'INSERT INTO tags (name) VALUES (?)',
-      [name]
-    );
-    
-    return (result as any).lastID;
+    // Create new tag using regular INSERT since we already checked
+    try {
+      const result = await this.db.runAsync(
+        'INSERT INTO tags (name) VALUES (?)',
+        [name]
+      );
+      return (result as any).lastID;
+    } catch (err: any) {
+      // Handle race condition where another process created the tag
+      if (err.message && err.message.includes('UNIQUE constraint failed')) {
+        const existing = await this.db.getAsync(
+          'SELECT id FROM tags WHERE name = ?',
+          [name]
+        );
+        return existing.id;
+      }
+      throw err;
+    }
   }
 
   /**
@@ -105,19 +116,19 @@ export class TagRepository extends BaseRepository {
    * @ai-why Explicit error messages help UI provide better feedback
    */
   async createTag(name: string): Promise<string> {
-    try {
-      await this.db.runAsync(
-        'INSERT INTO tags (name) VALUES (?)', 
-        [name]
-      );
-      return name;
-    } catch (err: any) {
-      // @ai-logic: UNIQUE constraint = tag already exists (not an error)
-      if (err.message && err.message.includes('UNIQUE constraint failed')) {
-        throw new Error(`Tag "${name}" already exists`);
-      }
-      throw new Error(`Failed to create tag "${name}": ${err.message}`);
+    // Use INSERT OR IGNORE to avoid AUTOINCREMENT increase
+    const result = await this.db.runAsync(
+      'INSERT OR IGNORE INTO tags (name) VALUES (?)', 
+      [name]
+    );
+    
+    // Check if the tag was actually inserted
+    if ((result as any).changes === 0) {
+      // Tag already existed
+      throw new Error(`Tag "${name}" already exists`);
     }
+    
+    return name;
   }
 
 
@@ -222,13 +233,28 @@ export class TagRepository extends BaseRepository {
   async ensureTagsExist(tags: string[]): Promise<void> {
     if (!tags || tags.length === 0) return;  // @ai-edge-case: Empty arrays handled gracefully
     
-    // @ai-logic: Dynamic SQL but safe - tags array is from controlled input
-    const placeholders = tags.map(() => '(?)').join(',');
+    // First, check which tags already exist to minimize INSERT attempts
+    const placeholdersForSelect = tags.map(() => '?').join(',');
+    const existingRows = await this.db.allAsync(
+      `SELECT name FROM tags WHERE name IN (${placeholdersForSelect})`,
+      tags
+    );
+    
+    const existingNames = new Set(existingRows.map((row: any) => row.name));
+    const newTags = tags.filter(tag => !existingNames.has(tag));
+    
+    if (newTags.length === 0) {
+      this.logger.debug(`All tags already exist: ${tags.join(', ')}`);
+      return;
+    }
+    
+    // Only insert tags that don't exist
+    const placeholders = newTags.map(() => '(?)').join(',');
     const query = `INSERT OR IGNORE INTO tags (name) VALUES ${placeholders}`;
     
     try {
-      await this.db.runAsync(query, tags);
-      this.logger.debug(`Ensured tags exist: ${tags.join(', ')}`);
+      await this.db.runAsync(query, newTags);
+      this.logger.debug(`Ensured tags exist: ${tags.join(', ')} (${newTags.length} new)`);
     } catch (error) {
       this.logger.error('Error ensuring tags exist:', { error, tags });
       // @ai-error-recovery: Tag creation failure shouldn't block content creation

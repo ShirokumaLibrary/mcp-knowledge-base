@@ -18,5 +18,7 @@ export default {
     'src/**/*.ts',
     '!src/**/*.d.ts',
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  maxWorkers: 1,  // 並列実行を無効化
+  maxConcurrency: 1  // 並列実行を無効化
 };

@@ -57,6 +57,7 @@ import { StatusHandlers } from './handlers/status-handlers.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
+import { TypeHandlers } from './handlers/type-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
 
 /**
@@ -78,11 +79,13 @@ class IssueTrackerServer {
   // - TagHandlers: Tag management and cross-type search (get_tags, search_items_by_tag)
   // - SessionHandlers: Work session tracking (get_sessions, create_session)
   // - SummaryHandlers: Daily summary management (get_summaries, create_summary)
+  // - TypeHandlers: Dynamic type management (create_type, get_types, delete_type)
   private itemHandlers: ItemHandlers;
   private statusHandlers: StatusHandlers;
   private tagHandlers: TagHandlers;
   private sessionHandlers: SessionHandlers;
   private summaryHandlers: SummaryHandlers;
+  private typeHandlers: TypeHandlers;
 
   constructor() {
     const config = getConfig();
@@ -98,6 +101,7 @@ class IssueTrackerServer {
     this.tagHandlers = new TagHandlers(this.db);
     this.sessionHandlers = new SessionHandlers(this.sessionManager);
     this.summaryHandlers = new SummaryHandlers(this.sessionManager);
+    this.typeHandlers = new TypeHandlers(this.db);
     
     this.server = new Server(
       {
@@ -196,6 +200,11 @@ class IssueTrackerServer {
       case 'create_summary': return this.summaryHandlers.handleCreateDailySummary(args);
       case 'update_summary': return this.summaryHandlers.handleUpdateDailySummary(args);
       
+      // Type management handlers
+      case 'create_type': return this.typeHandlers.handleCreateType(args);
+      case 'get_types': return this.typeHandlers.handleGetTypes(args);
+      case 'delete_type': return this.typeHandlers.handleDeleteType(args);
+      
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
     }
@@ -205,6 +214,7 @@ class IssueTrackerServer {
     console.error('Starting Issue Tracker MCP Server...');
     console.error('Initializing database...');
     await this.db.initialize();
+    await this.typeHandlers.init();
     console.error('Database initialized');
     
     const transport = new StdioServerTransport();

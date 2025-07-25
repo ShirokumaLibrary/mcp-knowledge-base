@@ -40,13 +40,13 @@ export class PlanFacade extends BaseFacade {
     startDate?: string,   // @ai-pattern: YYYY-MM-DD or undefined
     endDate?: string,     // @ai-pattern: YYYY-MM-DD or undefined
     tags: string[] = [],
-    summary?: string
+    description?: string
   ): Promise<Plan> {
     await this.ensureInitialized(this.initPromise);
     if (!status) {
       status = 'Open';  // @ai-logic: Default to 'Open' status
     }
-    return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, summary);
+    return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, description);
   }
 
   async getPlan(id: number): Promise<Plan | null> {
@@ -63,10 +63,10 @@ export class PlanFacade extends BaseFacade {
     startDate?: string,
     endDate?: string,
     tags?: string[],
-    summary?: string
+    description?: string
   ): Promise<boolean> {
     await this.ensureInitialized(this.initPromise);
-    return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary);
+    return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, description);
   }
 
   async deletePlan(id: number): Promise<boolean> {

@@ -21,8 +21,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          enum: ['issue', 'plan', 'doc', 'knowledge'],
-          description: 'Type of items to retrieve',
+          description: 'Type of items to retrieve (use get_types to see available types)',
         },
         includeClosedStatuses: {
           type: 'boolean',
@@ -45,8 +44,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          enum: ['issue', 'plan', 'doc', 'knowledge'],
-          description: 'Type of item',
+          description: 'Type of item (use get_types to see available types)',
         },
         id: {
           type: 'number',
@@ -67,8 +65,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          enum: ['issue', 'plan', 'doc', 'knowledge'],
-          description: 'Type of item to create',
+          description: 'Type of item to create (use get_types to see available types)',
         },
         title: {
           type: 'string',
@@ -80,7 +77,7 @@ export const toolDefinitions = [
         },
         content: {
           type: 'string',
-          description: 'Item content (required for doc/knowledge)',
+          description: 'Item content (required for doc/knowledge/document)',
         },
         priority: {
           type: 'string',
@@ -116,8 +113,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          enum: ['issue', 'plan', 'doc', 'knowledge'],
-          description: 'Type of item to update',
+          description: 'Type of item to update (use get_types to see available types)',
         },
         id: {
           type: 'number',
@@ -133,7 +129,7 @@ export const toolDefinitions = [
         },
         content: {
           type: 'string',
-          description: 'New content (for doc/knowledge)',
+          description: 'New content (for doc/knowledge/document)',
         },
         priority: {
           type: 'string',
@@ -169,8 +165,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          enum: ['issue', 'plan', 'doc', 'knowledge'],
-          description: 'Type of item to delete',
+          description: 'Type of item to delete (use get_types to see available types)',
         },
         id: {
           type: 'number',
@@ -197,9 +192,8 @@ export const toolDefinitions = [
           type: 'array',
           items: {
             type: 'string',
-            enum: ['issue', 'plan', 'doc', 'knowledge'],
           },
-          description: 'Types to search (omit to search all types)',
+          description: 'Types to search (omit to search all types, use get_types to see available types)',
         },
       },
       required: ['tag'],
@@ -488,6 +482,52 @@ export const toolDefinitions = [
         },
       },
       required: ['date'],
+    },
+  },
+  // Type management tools
+  {
+    name: 'create_type',
+    description: 'Create a new custom content type',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Type name (lowercase letters, numbers, and underscores only)',
+        },
+      },
+      required: ['name'],
+    },
+  },
+  {
+    name: 'get_types',
+    description: 'Get all available content types',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        include_built_in: {
+          type: 'boolean',
+          description: 'Include built-in types (default: true)',
+        },
+        include_definitions: {
+          type: 'boolean',
+          description: 'Include full type definitions (default: false)',
+        },
+      },
+    },
+  },
+  {
+    name: 'delete_type',
+    description: 'Delete a custom content type',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Name of the type to delete',
+        },
+      },
+      required: ['name'],
     },
   },
 ];

@@ -16,7 +16,7 @@ import {
   SearchItemsByTagArgs
 } from '../schemas/item-schemas.js';
 import { Handler } from '../types/handler-types.js';
-import { Issue, Plan, Doc, Knowledge, IssueSummary, DocSummary, PlanSummary } from '../types/domain-types.js';
+import { Issue, Plan, Doc, Knowledge, Document, IssueSummary, DocSummary, PlanSummary, DocumentSummary } from '../types/domain-types.js';
 
 /**
  * @ai-context MCP tool handlers for all content types
@@ -26,7 +26,25 @@ import { Issue, Plan, Doc, Knowledge, IssueSummary, DocSummary, PlanSummary } fr
  * @ai-why Single handler class simplifies MCP tool registration and maintenance
  */
 export class ItemHandlers {
+  private builtInTypes = ['issue', 'plan', 'doc', 'knowledge'];
+  
   constructor(private db: FileIssueDatabase) {}
+
+  /**
+   * @ai-intent Check if a type exists in sequences table
+   * @ai-logic Skip check for built-in types, query DB for custom types
+   */
+  private async isValidCustomType(type: string): Promise<boolean> {
+    if (this.builtInTypes.includes(type)) {
+      return true;
+    }
+    const db = this.db.getDatabase();
+    const row = await db.getAsync(
+      `SELECT type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { type: string } | undefined;
+    return !!row;
+  }
 
   /**
    * @ai-intent List all items of specified type (issue/plan/doc/knowledge)
@@ -40,7 +58,7 @@ export class ItemHandlers {
    */
   async handleGetItems(args: unknown): Promise<ToolResponse> {
     const validatedArgs = GetItemsSchema.parse(args) as GetItemsArgs;
-    let data: IssueSummary[] | PlanSummary[] | DocSummary[] | Knowledge[];
+    let data: IssueSummary[] | PlanSummary[] | DocSummary[] | Knowledge[] | DocumentSummary[];
 
     // @ai-logic: Type-based strategy dispatch
     switch (validatedArgs.type) {
@@ -62,9 +80,21 @@ export class ItemHandlers {
       case 'knowledge':
         data = await this.db.getAllKnowledge();
         break;
+      case 'document':
+        // @ai-logic: Unified document type requires subtype
+        if (!validatedArgs.subtype) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Subtype is required for document type');
+        }
+        data = await this.db.getAllDocumentsSummary(validatedArgs.subtype);
+        break;
       default:
-        // @ai-edge-case: TypeScript should prevent this, but runtime safety is critical
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        // @ai-logic: Handle custom types as documents
+        const typeExists = await this.isValidCustomType(validatedArgs.type);
+        if (!typeExists) {
+          throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        }
+        data = await this.db.getAllDocumentsSummary(validatedArgs.type);
+        break;
     }
 
     return {
@@ -86,7 +116,7 @@ export class ItemHandlers {
    */
   async handleGetItemDetail(args: unknown): Promise<ToolResponse> {
     const validatedArgs = GetItemDetailSchema.parse(args) as GetItemDetailArgs;
-    let item: Issue | Plan | Doc | Knowledge | null;
+    let item: Issue | Plan | Doc | Knowledge | Document | null;
 
     switch (validatedArgs.type) {
       case 'issue':
@@ -101,8 +131,21 @@ export class ItemHandlers {
       case 'knowledge':
         item = await this.db.getKnowledge(validatedArgs.id);
         break;
+      case 'document':
+        // @ai-logic: Unified document type requires subtype
+        if (!validatedArgs.subtype) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Subtype is required for document type');
+        }
+        item = await this.db.getDocument(validatedArgs.subtype, validatedArgs.id);
+        break;
       default:
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        // @ai-logic: Handle custom types as documents
+        const typeExists = await this.isValidCustomType(validatedArgs.type);
+        if (!typeExists) {
+          throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        }
+        item = await this.db.getDocument(validatedArgs.type as any, validatedArgs.id);
+        break;
     }
 
     // @ai-logic: Explicit null check for clear error messages
@@ -129,7 +172,7 @@ export class ItemHandlers {
    */
   async handleCreateItem(args: unknown): Promise<ToolResponse> {
     const validatedArgs = CreateItemSchema.parse(args) as CreateItemArgs;
-    let item: Issue | Plan | Doc | Knowledge;
+    let item: Issue | Plan | Doc | Knowledge | Document;
 
     // @ai-logic: Type-specific field requirements enforced here
     switch (validatedArgs.type) {
@@ -143,7 +186,7 @@ export class ItemHandlers {
           validatedArgs.priority,
           validatedArgs.status,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         break;
       case 'plan':
@@ -158,7 +201,7 @@ export class ItemHandlers {
           validatedArgs.start_date,
           validatedArgs.end_date,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         break;
       case 'doc':
@@ -169,7 +212,7 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         break;
       case 'knowledge':
@@ -180,11 +223,43 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
+        );
+        break;
+      case 'document':
+        // @ai-logic: Unified document type requires subtype and content
+        if (!validatedArgs.subtype) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Subtype is required for document type');
+        }
+        if (!validatedArgs.content) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Content is required for documents');
+        }
+        item = await this.db.createDocument(
+          validatedArgs.subtype,
+          validatedArgs.title,
+          validatedArgs.content,
+          validatedArgs.tags,
+          validatedArgs.description
         );
         break;
       default:
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        // @ai-logic: Handle custom types as documents
+        if (!validatedArgs.content) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Content is required for custom types');
+        }
+        // Verify type exists in sequences table
+        const typeExists = await this.isValidCustomType(validatedArgs.type);
+        if (!typeExists) {
+          throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        }
+        item = await this.db.createDocument(
+          validatedArgs.type,
+          validatedArgs.title,
+          validatedArgs.content,
+          validatedArgs.tags,
+          validatedArgs.description
+        );
+        break;
     }
 
     return {
@@ -200,7 +275,7 @@ export class ItemHandlers {
   async handleUpdateItem(args: unknown): Promise<ToolResponse> {
     const validatedArgs = UpdateItemSchema.parse(args) as UpdateItemArgs;
     let success: boolean;
-    let updatedItem: Issue | Plan | Doc | Knowledge | null | undefined;
+    let updatedItem: Issue | Plan | Doc | Knowledge | Document | null | undefined;
 
     switch (validatedArgs.type) {
       case 'issue':
@@ -211,7 +286,7 @@ export class ItemHandlers {
           validatedArgs.priority,
           validatedArgs.status,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         if (success) updatedItem = await this.db.getIssue(validatedArgs.id);
         break;
@@ -225,7 +300,7 @@ export class ItemHandlers {
           validatedArgs.start_date,
           validatedArgs.end_date,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         if (success) updatedItem = await this.db.getPlan(validatedArgs.id);
         break;
@@ -235,22 +310,51 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
         success = updatedItem !== null;
         break;
       case 'knowledge':
-        success = await this.db.updateKnowledge(
+        updatedItem = await this.db.updateKnowledge(
           validatedArgs.id,
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.tags,
-          validatedArgs.summary
+          validatedArgs.description
         );
-        if (success) updatedItem = await this.db.getKnowledge(validatedArgs.id);
+        success = updatedItem !== null;
+        break;
+      case 'document':
+        // @ai-logic: Unified document type requires subtype
+        if (!validatedArgs.subtype) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Subtype is required for document type');
+        }
+        success = await this.db.updateDocument(
+          validatedArgs.subtype,
+          validatedArgs.id,
+          validatedArgs.title,
+          validatedArgs.content,
+          validatedArgs.tags,
+          validatedArgs.description
+        );
+        if (success) updatedItem = await this.db.getDocument(validatedArgs.subtype, validatedArgs.id);
         break;
       default:
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        // @ai-logic: Handle custom types as documents
+        const typeExists = await this.isValidCustomType(validatedArgs.type);
+        if (!typeExists) {
+          throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        }
+        success = await this.db.updateDocument(
+          validatedArgs.type as any,
+          validatedArgs.id,
+          validatedArgs.title,
+          validatedArgs.content,
+          validatedArgs.tags,
+          validatedArgs.description
+        );
+        if (success) updatedItem = await this.db.getDocument(validatedArgs.type as any, validatedArgs.id);
+        break;
     }
 
     if (!success) {
@@ -284,8 +388,21 @@ export class ItemHandlers {
       case 'knowledge':
         success = await this.db.deleteKnowledge(validatedArgs.id);
         break;
+      case 'document':
+        // @ai-logic: Unified document type requires subtype
+        if (!validatedArgs.subtype) {
+          throw new McpError(ErrorCode.InvalidRequest, 'Subtype is required for document type');
+        }
+        success = await this.db.deleteDocument(validatedArgs.subtype, validatedArgs.id);
+        break;
       default:
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        // @ai-logic: Handle custom types as documents
+        const typeExists = await this.isValidCustomType(validatedArgs.type);
+        if (!typeExists) {
+          throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
+        }
+        success = await this.db.deleteDocument(validatedArgs.type as any, validatedArgs.id);
+        break;
     }
 
     if (!success) {
@@ -309,6 +426,7 @@ export class ItemHandlers {
       plans?: Plan[];
       docs?: Doc[];
       knowledge?: Knowledge[];
+      documents?: Document[];
     } = {};
 
     // Support searching multiple types
@@ -327,6 +445,10 @@ export class ItemHandlers {
           break;
         case 'knowledge':
           results.knowledge = await this.db.searchKnowledgeByTag(validatedArgs.tag);
+          break;
+        case 'document':
+          // @ai-logic: Search unified documents (both doc and knowledge subtypes)
+          results.documents = await this.db.searchDocumentsByTag(validatedArgs.tag);
           break;
       }
     }

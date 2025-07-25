@@ -55,7 +55,7 @@ export class DocRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
-      summary: metadata.summary || undefined,
+      description: metadata.description || undefined,
       content: docContent,  // @ai-logic: Main value is the documentation content
       tags: Array.isArray(metadata.tags) ? metadata.tags : [],
       created_at: metadata.created_at || new Date().toISOString(),
@@ -67,7 +67,7 @@ export class DocRepository extends BaseRepository {
     const metadata = {
       id: doc.id,
       title: doc.title,
-      summary: doc.summary,
+      description: doc.description,
       tags: doc.tags || [],
       created_at: doc.created_at,
       updated_at: doc.updated_at
@@ -92,7 +92,7 @@ export class DocRepository extends BaseRepository {
       (id, title, summary, content, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
-        doc.id, doc.title, doc.summary || '',
+        doc.id, doc.title, doc.description || '',
         doc.content || '',  // @ai-edge-case: Empty content stored as empty string
         JSON.stringify(doc.tags || []),  // @ai-why: Keep for backward compatibility
         doc.created_at, doc.updated_at
@@ -145,18 +145,18 @@ export class DocRepository extends BaseRepository {
     return docs.map(d => ({ 
       id: d.id, 
       title: d.title,
-      summary: d.summary 
+      description: d.description 
     }));
   }
 
-  async createDoc(title: string, content: string, tags: string[] = [], summary?: string): Promise<Doc> {
+  async createDoc(title: string, content: string, tags: string[] = [], description?: string): Promise<Doc> {
     await this.ensureDirectoryExists();
     
     const now = new Date().toISOString();
     const doc: Doc = {
       id: await this.getDocNextId(),
       title,
-      summary,
+      description,
       content,
       tags,
       created_at: now,
@@ -173,7 +173,7 @@ export class DocRepository extends BaseRepository {
     return doc;
   }
 
-  async updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<Doc | null> {
+  async updateDoc(id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<Doc | null> {
     const filePath = this.getDocFilePath(id);
     
     try {
@@ -188,7 +188,7 @@ export class DocRepository extends BaseRepository {
       if (!doc) return null;
 
       if (title !== undefined) doc.title = title;
-      if (summary !== undefined) doc.summary = summary;
+      if (description !== undefined) doc.description = description;
       if (content !== undefined) doc.content = content;
       if (tags !== undefined) doc.tags = tags;
       doc.updated_at = new Date().toISOString();
@@ -276,7 +276,7 @@ export class DocRepository extends BaseRepository {
         docs.push({
           id: docData.id,
           title: docData.title,
-          summary: docData.summary || undefined,
+          description: docData.description || undefined,
           content: docData.content,
           tags: JSON.parse(docData.tags || '[]'),
           created_at: docData.created_at,

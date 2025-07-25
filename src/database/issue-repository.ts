@@ -17,6 +17,7 @@ export class IssueRepository extends BaseRepository {
   private issuesDir: string;
   private statusRepository: IStatusRepository;
   private tagRepository: TagRepository;
+  private readonly sequenceType = 'issues';
 
   constructor(db: Database, issuesDir: string, statusRepository: IStatusRepository, tagRepository?: TagRepository) {
     super(db, 'IssueRepository');
@@ -35,11 +36,11 @@ export class IssueRepository extends BaseRepository {
   }
 
   private async getNextId(): Promise<number> {
-    return this.getNextSequenceValue('issues');
+    return this.getNextSequenceValue(this.sequenceType);
   }
 
   private getIssueFilePath(id: number): string {
-    return path.join(this.issuesDir, `issue-${id}.md`);
+    return path.join(this.issuesDir, this.getEntityFileName(this.sequenceType, id));
   }
 
   /**
@@ -68,7 +69,7 @@ export class IssueRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
-      summary: metadata.summary || undefined,
+      description: metadata.description || undefined,
       content: contentBody || '',
       priority: metadata.priority || 'medium',
       status_id: status_id,
@@ -105,7 +106,7 @@ export class IssueRepository extends BaseRepository {
     const metadata = {
       id: issue.id,
       title: issue.title,
-      summary: issue.summary,
+      description: issue.description,
       priority: issue.priority,
       status: issue.status,  // @ai-logic: Only store status name, not ID
       tags: issue.tags || [],
@@ -132,7 +133,7 @@ export class IssueRepository extends BaseRepository {
       (id, title, summary, content, priority, status_id, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        issue.id, issue.title, issue.summary || '',
+        issue.id, issue.title, issue.description || '',
         issue.content || '', 
         issue.priority, issue.status_id, 
         JSON.stringify(issue.tags || []),  // @ai-why: Keep for backward compatibility
@@ -162,7 +163,7 @@ export class IssueRepository extends BaseRepository {
   async getAllIssues(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Issue[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.issuesDir);
-    const issueFiles = files.filter(f => f.startsWith('issue-') && f.endsWith('.md'));
+    const issueFiles = files.filter(f => f.startsWith(`${this.sequenceType}-`) && f.endsWith('.md'));
     
     // Get all statuses to filter by is_closed if needed
     let closedStatusIds: number[] = [];
@@ -204,7 +205,7 @@ export class IssueRepository extends BaseRepository {
   async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<IssueSummary[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.issuesDir);
-    const issueFiles = files.filter(f => f.startsWith('issue-') && f.endsWith('.md'));
+    const issueFiles = files.filter(f => f.startsWith(`${this.sequenceType}-`) && f.endsWith('.md'));
     
     // Get all statuses to filter by is_closed if needed
     let closedStatusIds: number[] = [];
@@ -230,6 +231,7 @@ export class IssueRepository extends BaseRepository {
           const summary: IssueSummary = {
             id: issue.id,
             title: issue.title,
+            description: issue.description,
             priority: issue.priority,
             created_at: issue.created_at,
             updated_at: issue.updated_at
@@ -251,7 +253,7 @@ export class IssueRepository extends BaseRepository {
     return summaries.sort((a, b) => a.id - b.id);
   }
 
-  async createIssue(title: string, content?: string, priority: string = 'medium', status?: string, tags?: string[], summary?: string): Promise<Issue> {
+  async createIssue(title: string, content?: string, priority: string = 'medium', status?: string, tags?: string[], description?: string): Promise<Issue> {
     await this.ensureDirectoryExists();
     
     // @ai-logic: Resolve status name to ID
@@ -276,7 +278,7 @@ export class IssueRepository extends BaseRepository {
     const issue: IssueInternal = {
       id: await this.getNextId(),
       title,
-      summary,
+      description,
       content: content || '',
       priority,
       status_id: finalStatusId,
@@ -297,7 +299,7 @@ export class IssueRepository extends BaseRepository {
     return this.toExternalIssue(issue);
   }
 
-  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean> {
+  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string): Promise<boolean> {
     const filePath = this.getIssueFilePath(id);
     
     try {
@@ -312,7 +314,7 @@ export class IssueRepository extends BaseRepository {
       if (!issue) return false;
 
       if (title !== undefined) issue.title = title;
-      if (summary !== undefined) issue.summary = summary;
+      if (description !== undefined) issue.description = description;
       if (content !== undefined) issue.content = content;
       if (priority !== undefined) issue.priority = priority;
       if (status !== undefined) {
