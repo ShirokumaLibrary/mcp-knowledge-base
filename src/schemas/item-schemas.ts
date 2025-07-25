@@ -45,7 +45,7 @@ export const GetItemDetailSchema = z.object({
  * @ai-validation Title required for all types
  * @ai-pattern Type-specific fields are optional
  * @ai-logic content: doc/knowledge, dates: plan, priority/status: issue/plan
- * @ai-defaults priority: 'medium', status_id: 1 (if applicable)
+ * @ai-defaults priority: 'medium', status: 'Open' (if applicable)
  */
 // @ai-intent Date format validation helper
 // @ai-pattern Strict YYYY-MM-DD format validation
@@ -59,7 +59,7 @@ export const CreateItemSchema = z.object({
   title: z.string().min(1, 'Title is required'),  // @ai-validation: Non-empty
   content: z.string().optional(), // @ai-logic: Required for all types (validated in handler)
   priority: z.enum(['high', 'medium', 'low']).optional(),
-  status_id: z.number().int().positive().optional(),
+  status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for plans
   end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for plans
@@ -78,7 +78,7 @@ export const UpdateItemSchema = z.object({
   title: z.string().min(1).optional(),  // @ai-validation: Non-empty if provided
   content: z.string().optional(), // @ai-logic: For all type updates
   priority: z.enum(['high', 'medium', 'low']).optional(),
-  status_id: z.number().int().positive().optional(),
+  status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-logic: For plan timeline changes
   end_date: dateFormatSchema.optional(),   // @ai-logic: For plan timeline changes

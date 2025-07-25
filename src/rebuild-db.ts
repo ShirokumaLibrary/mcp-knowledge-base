@@ -41,7 +41,26 @@ async function scanAndRebuild(databasePath: string, db: any) {
     const content = await fs.readFile(file, 'utf-8');
     const parsed = parseMarkdown(content);
     if (parsed.metadata.tags) {
-      parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      // @ai-logic: Tags might be stored as comma-separated string or array
+      let tags: string[];
+      if (Array.isArray(parsed.metadata.tags)) {
+        tags = parsed.metadata.tags;
+      } else if (typeof parsed.metadata.tags === 'string') {
+        // Check if it's a JSON array string
+        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+          try {
+            tags = JSON.parse(parsed.metadata.tags);
+          } catch {
+            // If JSON parse fails, treat as comma-separated
+            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          }
+        } else {
+          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+        }
+      } else {
+        tags = [];
+      }
+      tags.forEach((tag: string) => counts.tags.add(tag));
     }
     // @ai-critical: Collect status names from files
     // @ai-why: We now store status names, not IDs
@@ -58,7 +77,26 @@ async function scanAndRebuild(databasePath: string, db: any) {
     const content = await fs.readFile(file, 'utf-8');
     const parsed = parseMarkdown(content);
     if (parsed.metadata.tags) {
-      parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      // @ai-logic: Tags might be stored as comma-separated string or array
+      let tags: string[];
+      if (Array.isArray(parsed.metadata.tags)) {
+        tags = parsed.metadata.tags;
+      } else if (typeof parsed.metadata.tags === 'string') {
+        // Check if it's a JSON array string
+        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+          try {
+            tags = JSON.parse(parsed.metadata.tags);
+          } catch {
+            // If JSON parse fails, treat as comma-separated
+            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          }
+        } else {
+          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+        }
+      } else {
+        tags = [];
+      }
+      tags.forEach((tag: string) => counts.tags.add(tag));
     }
     // Collect status names
     if (parsed.metadata.status) {
@@ -74,7 +112,26 @@ async function scanAndRebuild(databasePath: string, db: any) {
     const content = await fs.readFile(file, 'utf-8');
     const parsed = parseMarkdown(content);
     if (parsed.metadata.tags) {
-      parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      // @ai-logic: Tags might be stored as comma-separated string or array
+      let tags: string[];
+      if (Array.isArray(parsed.metadata.tags)) {
+        tags = parsed.metadata.tags;
+      } else if (typeof parsed.metadata.tags === 'string') {
+        // Check if it's a JSON array string
+        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+          try {
+            tags = JSON.parse(parsed.metadata.tags);
+          } catch {
+            // If JSON parse fails, treat as comma-separated
+            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          }
+        } else {
+          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+        }
+      } else {
+        tags = [];
+      }
+      tags.forEach((tag: string) => counts.tags.add(tag));
     }
     counts.docs++;
   }
@@ -86,7 +143,26 @@ async function scanAndRebuild(databasePath: string, db: any) {
     const content = await fs.readFile(file, 'utf-8');
     const parsed = parseMarkdown(content);
     if (parsed.metadata.tags) {
-      parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      // @ai-logic: Tags might be stored as comma-separated string or array
+      let tags: string[];
+      if (Array.isArray(parsed.metadata.tags)) {
+        tags = parsed.metadata.tags;
+      } else if (typeof parsed.metadata.tags === 'string') {
+        // Check if it's a JSON array string
+        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+          try {
+            tags = JSON.parse(parsed.metadata.tags);
+          } catch {
+            // If JSON parse fails, treat as comma-separated
+            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          }
+        } else {
+          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+        }
+      } else {
+        tags = [];
+      }
+      tags.forEach((tag: string) => counts.tags.add(tag));
     }
     counts.knowledge++;
   }
@@ -102,7 +178,24 @@ async function scanAndRebuild(databasePath: string, db: any) {
   });
   for (const dir of sessionDirs) {
     const sessionFiles = globSync(path.join(dir, 'session-*.md'));
-    counts.sessions += sessionFiles.length;
+    for (const file of sessionFiles) {
+      const content = await fs.readFile(file, 'utf-8');
+      const parsed = parseMarkdown(content);
+      if (parsed.metadata.tags) {
+        parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      }
+      counts.sessions++;
+    }
+    
+    // Also scan daily summaries
+    const summaryFiles = globSync(path.join(dir, 'daily-summary-*.md'));
+    for (const file of summaryFiles) {
+      const content = await fs.readFile(file, 'utf-8');
+      const parsed = parseMarkdown(content);
+      if (parsed.metadata.tags) {
+        parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
+      }
+    }
   }
 
   return counts;
@@ -190,6 +283,29 @@ async function rebuildDatabase() {
     console.log(`  📝 Syncing ${summaries.length} daily summaries...`);
     for (const summary of summaries) {
       await fullDb.syncDailySummaryToSQLite(summary);
+    }
+    
+    // Ensure all collected tags are registered
+    console.log('\n🏷️  Registering tags...');
+    console.log('  Collected tags:', Array.from(counts.tags).sort());
+    const tagRepo = (fullDb as any).tagRepo;
+    if (tagRepo && counts.tags.size > 0) {
+      let registeredCount = 0;
+      let existingCount = 0;
+      for (const tag of counts.tags) {
+        try {
+          await tagRepo.createTag(tag);
+          registeredCount++;
+        } catch (error: any) {
+          // Tag might already exist from the sync operations
+          if (error.message?.includes('already exists')) {
+            existingCount++;
+          } else {
+            console.error(`  ❌ Failed to register tag "${tag}":`, error);
+          }
+        }
+      }
+      console.log(`  ✅ Ensured ${counts.tags.size} tags are registered (${registeredCount} new, ${existingCount} already existed)`);
     }
     
     console.log('\n📊 Database rebuild complete:');

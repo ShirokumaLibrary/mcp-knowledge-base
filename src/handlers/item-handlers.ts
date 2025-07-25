@@ -141,7 +141,7 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.priority,
-          validatedArgs.status_id,
+          validatedArgs.status,
           validatedArgs.tags
         );
         break;
@@ -153,7 +153,7 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.priority,
-          validatedArgs.status_id,
+          validatedArgs.status,
           validatedArgs.start_date,
           validatedArgs.end_date,
           validatedArgs.tags
@@ -205,7 +205,7 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.priority,
-          validatedArgs.status_id,
+          validatedArgs.status,
           validatedArgs.tags
         );
         if (success) updatedItem = await this.db.getIssue(validatedArgs.id);
@@ -216,7 +216,7 @@ export class ItemHandlers {
           validatedArgs.title,
           validatedArgs.content,
           validatedArgs.priority,
-          validatedArgs.status_id,
+          validatedArgs.status,
           validatedArgs.start_date,
           validatedArgs.end_date,
           validatedArgs.tags

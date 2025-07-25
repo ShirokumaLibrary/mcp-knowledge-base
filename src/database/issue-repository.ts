@@ -1,7 +1,7 @@
 import * as fsPromises from 'fs/promises';
 import * as path from 'path';
 import { BaseRepository, Database } from './base.js';
-import { Issue } from '../types/domain-types.js';
+import { Issue, IssueInternal, IssueSummary } from '../types/domain-types.js';
 import { IStatusRepository } from '../types/repository-interfaces.js';
 import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
 import { TagRepository } from './tag-repository.js';
@@ -49,7 +49,7 @@ export class IssueRepository extends BaseRepository {
    * @ai-assumption Markdown files use YAML frontmatter format
    * @ai-why Graceful handling of corrupted files prevents system crashes
    */
-  private async parseMarkdownIssue(content: string): Promise<Issue | null> {
+  private async parseMarkdownIssue(content: string): Promise<IssueInternal | null> {
     const { metadata, content: contentBody } = parseMarkdown(content);
     
     // @ai-logic: id and title are minimum required fields
@@ -79,12 +79,22 @@ export class IssueRepository extends BaseRepository {
   }
 
   /**
+   * @ai-intent Convert internal issue representation to external API format
+   * @ai-logic Removes status_id from the response
+   * @ai-critical Ensures internal IDs are not exposed in API responses
+   */
+  private toExternalIssue(internal: IssueInternal): Issue {
+    const { status_id, ...external } = internal;
+    return external;
+  }
+
+  /**
    * @ai-intent Persist issue to markdown file with complete metadata
    * @ai-side-effects Writes to file system, modifies issue.status field
    * @ai-critical File write must be atomic to prevent data corruption
    * @ai-why Status name stored redundantly to support database rebuilds
    */
-  private async writeMarkdownIssue(issue: Issue): Promise<void> {
+  private async writeMarkdownIssue(issue: IssueInternal): Promise<void> {
     // @ai-logic: Ensure status name is always persisted for rebuild resilience
     if (!issue.status && issue.status_id) {
       const status = await this.statusRepository.getStatus(issue.status_id);
@@ -107,12 +117,14 @@ export class IssueRepository extends BaseRepository {
 
   /**
    * @ai-intent Sync issue data to SQLite for fast searching and filtering
-   * @ai-flow 1. Prepare data -> 2. Execute UPSERT -> 3. Handle errors
-   * @ai-side-effects Updates search_issues table, replaces existing data
+   * @ai-flow 1. Prepare data -> 2. Execute UPSERT -> 3. Update tag relationships
+   * @ai-side-effects Updates search_issues table and issue_tags relationship table
    * @ai-performance Uses INSERT OR REPLACE for idempotent operations
    * @ai-assumption SQLite table schema matches Issue type structure
+   * @ai-database-schema Uses issue_tags relationship table for normalized tag storage
    */
-  async syncIssueToSQLite(issue: Issue): Promise<void> {
+  async syncIssueToSQLite(issue: IssueInternal): Promise<void> {
+    // Update main issue data
     await this.db.runAsync(`
       INSERT OR REPLACE INTO search_issues 
       (id, title, content, priority, status_id, tags, created_at, updated_at)
@@ -120,10 +132,18 @@ export class IssueRepository extends BaseRepository {
       [
         issue.id, issue.title, issue.content || '', 
         issue.priority, issue.status_id, 
-        JSON.stringify(issue.tags || []),  // @ai-why: Tags stored as JSON for flexible querying
+        JSON.stringify(issue.tags || []),  // @ai-why: Keep for backward compatibility
         issue.created_at, issue.updated_at
       ]
     );
+    
+    // Update tag relationships
+    if (issue.tags && issue.tags.length > 0) {
+      await this.tagRepository.saveEntityTags('issue', issue.id, issue.tags);
+    } else {
+      // Clear all tag relationships if no tags
+      await this.db.runAsync('DELETE FROM issue_tags WHERE issue_id = ?', [issue.id]);
+    }
   }
 
   /**
@@ -164,7 +184,7 @@ export class IssueRepository extends BaseRepository {
           
           const status = await this.statusRepository.getStatus(issue.status_id);
           issue.status = status?.name;
-          return issue;
+          return this.toExternalIssue(issue);
         }
         return null;
       } catch (error) {
@@ -178,7 +198,7 @@ export class IssueRepository extends BaseRepository {
     return issues.sort((a, b) => a.id - b.id);
   }
 
-  async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Array<{id: number, title: string, priority: string, status_id: number, status?: string, created_at: string, updated_at: string}>> {
+  async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<IssueSummary[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.issuesDir);
     const issueFiles = files.filter(f => f.startsWith('issue-') && f.endsWith('.md'));
@@ -204,15 +224,17 @@ export class IssueRepository extends BaseRepository {
           }
           
           const status = await this.statusRepository.getStatus(issue.status_id);
-          return {
+          const summary: IssueSummary = {
             id: issue.id,
             title: issue.title,
             priority: issue.priority,
-            status_id: issue.status_id,
-            status: status?.name,
             created_at: issue.created_at,
             updated_at: issue.updated_at
           };
+          if (status?.name) {
+            summary.status = status.name;
+          }
+          return summary;
         }
         return null;
       } catch (error) {
@@ -222,28 +244,39 @@ export class IssueRepository extends BaseRepository {
     });
 
     const results = await Promise.all(summaryPromises);
-    const issues = results.filter((issue): issue is NonNullable<typeof issue> => issue !== null);
-    return issues.sort((a, b) => a.id - b.id);
+    const summaries = results.filter((summary): summary is IssueSummary => summary !== null);
+    return summaries.sort((a, b) => a.id - b.id);
   }
 
-  async createIssue(title: string, content?: string, priority: string = 'medium', status_id?: number, tags?: string[]): Promise<Issue> {
+  async createIssue(title: string, content?: string, priority: string = 'medium', status?: string, tags?: string[]): Promise<Issue> {
     await this.ensureDirectoryExists();
     
+    // @ai-logic: Resolve status name to ID
     let finalStatusId: number;
-    if (!status_id) {
+    let statusName: string;
+    if (!status) {
       const statuses = await this.statusRepository.getAllStatuses();
-      finalStatusId = statuses.length > 0 ? statuses[0].id : 1;
+      const defaultStatus = statuses.find(s => s.name === 'Open') || statuses[0];
+      finalStatusId = defaultStatus.id;
+      statusName = defaultStatus.name;
     } else {
-      finalStatusId = status_id;
+      const statuses = await this.statusRepository.getAllStatuses();
+      const matchedStatus = statuses.find(s => s.name === status);
+      if (!matchedStatus) {
+        throw new Error(`Status '${status}' not found`);
+      }
+      finalStatusId = matchedStatus.id;
+      statusName = matchedStatus.name;
     }
 
     const now = new Date().toISOString();
-    const issue: Issue = {
+    const issue: IssueInternal = {
       id: await this.getNextId(),
       title,
       content: content || '',
       priority,
       status_id: finalStatusId,
+      status: statusName,
       tags: tags || [],
       created_at: now,
       updated_at: now
@@ -257,12 +290,10 @@ export class IssueRepository extends BaseRepository {
     await this.writeMarkdownIssue(issue);
     await this.syncIssueToSQLite(issue);
     
-    const status = await this.statusRepository.getStatus(finalStatusId);
-    issue.status = status?.name;
-    return issue;
+    return this.toExternalIssue(issue);
   }
 
-  async updateIssue(id: number, title?: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean> {
+  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean> {
     const filePath = this.getIssueFilePath(id);
     
     try {
@@ -279,7 +310,16 @@ export class IssueRepository extends BaseRepository {
       if (title !== undefined) issue.title = title;
       if (content !== undefined) issue.content = content;
       if (priority !== undefined) issue.priority = priority;
-      if (status_id !== undefined) issue.status_id = status_id;
+      if (status !== undefined) {
+        // @ai-logic: Resolve status name to ID
+        const statuses = await this.statusRepository.getAllStatuses();
+        const matchedStatus = statuses.find(s => s.name === status);
+        if (!matchedStatus) {
+          throw new Error(`Status '${status}' not found`);
+        }
+        issue.status_id = matchedStatus.id;
+        issue.status = matchedStatus.name;
+      }
       if (tags !== undefined) issue.tags = tags;
       issue.updated_at = new Date().toISOString();
 
@@ -308,6 +348,7 @@ export class IssueRepository extends BaseRepository {
 
     try {
       await fsPromises.unlink(filePath);
+      // @ai-logic: CASCADE DELETE in foreign key constraint handles issue_tags cleanup
       await this.db.runAsync('DELETE FROM search_issues WHERE id = ?', [id]);
       return true;
     } catch (error) {
@@ -325,16 +366,51 @@ export class IssueRepository extends BaseRepository {
       if (issue) {
         const status = await this.statusRepository.getStatus(issue.status_id);
         issue.status = status?.name;
+        return this.toExternalIssue(issue);
       }
-      return issue;
+      return null;
     } catch (error) {
       this.logger.error(`Error reading issue ${id}:`, { error });
       return null;
     }
   }
 
+  /**
+   * @ai-intent Search issues by exact tag match using relationship table
+   * @ai-flow 1. Get tag ID -> 2. JOIN with issue_tags -> 3. Load full issues
+   * @ai-performance Uses indexed JOIN instead of LIKE search
+   * @ai-database-schema Leverages issue_tags relationship table
+   */
   async searchIssuesByTag(tag: string): Promise<Issue[]> {
-    const allIssues = await this.getAllIssues();
-    return allIssues.filter(issue => issue.tags && issue.tags.includes(tag));
+    // Get tag ID
+    const tagRow = await this.db.getAsync(
+      'SELECT id FROM tags WHERE name = ?',
+      [tag]
+    );
+    
+    if (!tagRow) {
+      return []; // Tag doesn't exist
+    }
+    
+    // Find all issue IDs with this tag
+    const issueRows = await this.db.allAsync(
+      `SELECT DISTINCT i.id 
+       FROM search_issues i
+       JOIN issue_tags it ON i.id = it.issue_id
+       WHERE it.tag_id = ?
+       ORDER BY i.id`,
+      [tagRow.id]
+    );
+    
+    // Load full issue data
+    const issues: Issue[] = [];
+    for (const row of issueRows) {
+      const issue = await this.getIssue(row.id);
+      if (issue) {
+        issues.push(issue);
+      }
+    }
+    
+    return issues;
   }
 }

@@ -77,25 +77,36 @@ export class DocRepository extends BaseRepository {
 
   /**
    * @ai-intent Sync document to SQLite for full-text search
-   * @ai-flow 1. Prepare data -> 2. UPSERT to search table
-   * @ai-side-effects Updates search_docs table
+   * @ai-flow 1. Prepare data -> 2. UPSERT to search table -> 3. Update tag relationships
+   * @ai-side-effects Updates search_docs table and doc_tags relationship table
    * @ai-performance Content can be large - ensure DB can handle
    * @ai-critical Essential for search functionality
+   * @ai-database-schema Uses doc_tags relationship table for normalized tag storage
    */
   async syncDocToSQLite(doc: Doc): Promise<void> {
+    // Update main doc data
     await this.db.runAsync(`
       INSERT OR REPLACE INTO search_docs 
       (id, title, content, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         doc.id, doc.title, doc.content || '',  // @ai-edge-case: Empty content stored as empty string
-        JSON.stringify(doc.tags || []),
+        JSON.stringify(doc.tags || []),  // @ai-why: Keep for backward compatibility
         doc.created_at, doc.updated_at
       ]
     );
+    
+    // Update tag relationships
+    if (doc.tags && doc.tags.length > 0) {
+      await this.tagRepository.saveEntityTags('doc', doc.id, doc.tags);
+    } else {
+      // Clear all tag relationships if no tags
+      await this.db.runAsync('DELETE FROM doc_tags WHERE doc_id = ?', [doc.id]);
+    }
   }
 
   private async deleteDocFromSQLite(id: number): Promise<void> {
+    // @ai-logic: CASCADE DELETE in foreign key constraint handles doc_tags cleanup
     await this.db.runAsync('DELETE FROM search_docs WHERE id = ?', [id]);
   }
 
@@ -218,19 +229,52 @@ export class DocRepository extends BaseRepository {
     }
   }
 
+  /**
+   * @ai-intent Search documents by exact tag match using relationship table
+   * @ai-flow 1. Get tag ID -> 2. JOIN with doc_tags -> 3. Load full docs
+   * @ai-performance Uses indexed JOIN instead of LIKE search
+   * @ai-database-schema Leverages doc_tags relationship table
+   */
   async searchDocsByTag(tag: string): Promise<Doc[]> {
-    const rows = await this.db.allAsync(
-      `SELECT * FROM search_docs WHERE tags LIKE ?`,
-      [`%${tag}%`]
+    // Get tag ID
+    const tagRow = await this.db.getAsync(
+      'SELECT id FROM tags WHERE name = ?',
+      [tag]
     );
     
-    return rows.map((row: any) => ({
-      id: row.id,
-      title: row.title,
-      content: row.content,
-      tags: JSON.parse(row.tags || '[]'),
-      created_at: row.created_at,
-      updated_at: row.updated_at
-    })).filter((doc: Doc) => doc.tags?.includes(tag));
+    if (!tagRow) {
+      return []; // Tag doesn't exist
+    }
+    
+    // Find all doc IDs with this tag
+    const docRows = await this.db.allAsync(
+      `SELECT DISTINCT d.id 
+       FROM search_docs d
+       JOIN doc_tags dt ON d.id = dt.doc_id
+       WHERE dt.tag_id = ?
+       ORDER BY d.id`,
+      [tagRow.id]
+    );
+    
+    // Load full doc data from search table for better performance
+    const docs: Doc[] = [];
+    for (const row of docRows) {
+      const docData = await this.db.getAsync(
+        'SELECT * FROM search_docs WHERE id = ?',
+        [row.id]
+      );
+      if (docData) {
+        docs.push({
+          id: docData.id,
+          title: docData.title,
+          content: docData.content,
+          tags: JSON.parse(docData.tags || '[]'),
+          created_at: docData.created_at,
+          updated_at: docData.updated_at
+        });
+      }
+    }
+    
+    return docs;
   }
 }

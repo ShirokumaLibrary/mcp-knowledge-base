@@ -76,11 +76,22 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
           metadata[key] = null;  // @ai-edge-case: Empty values become null
         } else if (key === 'tags' || key === 'related_issues') {
           // @ai-why: These fields are always arrays for consistent API
-          const items = value.split(',').map(v => v.trim()).filter(v => v);
-          if (key === 'related_issues' && items.length > 0) {
-            metadata[key] = items.map(item => Number(item));  // @ai-logic: Issue IDs are numbers
+          // @ai-logic: Check if value is JSON array format
+          if (value.trim().startsWith('[') && value.trim().endsWith(']')) {
+            try {
+              metadata[key] = JSON.parse(value);
+            } catch {
+              // If JSON parse fails, fall back to comma-separated
+              const items = value.split(',').map(v => v.trim()).filter(v => v);
+              metadata[key] = items;
+            }
           } else {
-            metadata[key] = items;
+            const items = value.split(',').map(v => v.trim()).filter(v => v);
+            if (key === 'related_issues' && items.length > 0) {
+              metadata[key] = items.map(item => Number(item));  // @ai-logic: Issue IDs are numbers
+            } else {
+              metadata[key] = items;
+            }
           }
         } else if (value.includes(',')) {
           // Simple array parsing for comma-separated values
@@ -125,7 +136,8 @@ export function generateMarkdown(metadata: Record<string, any>, content: string)
     if (value === null || value === undefined) {
       lines.push(`${key}: `);  // @ai-edge-case: Preserve null as empty value
     } else if (Array.isArray(value)) {
-      lines.push(`${key}: ${value.join(', ')}`);  // @ai-logic: Arrays as comma-separated
+      // @ai-logic: Arrays as JSON to preserve items with commas/spaces
+      lines.push(`${key}: ${JSON.stringify(value)}`);
     } else {
       lines.push(`${key}: ${value}`);
     }

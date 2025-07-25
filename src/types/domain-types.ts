@@ -48,19 +48,26 @@ export interface Status {
  * @ai-intent Issue tracking entity
  * @ai-pattern Task with priority and workflow status
  * @ai-critical Core entity for task management
- * @ai-relationship References status by ID
- * @ai-defaults priority: 'medium', status_id: 1
+ * @ai-relationship References status by name
+ * @ai-defaults priority: 'medium', status: 'Open'
  */
 export interface Issue {
   id: number;                      // @ai-logic: Sequential ID from markdown
   title: string;                   // @ai-validation: Required, non-empty
   content: string;                 // @ai-validation: Required content
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
-  status_id: number;               // @ai-relationship: Foreign key to Status
-  status?: string;                 // @ai-logic: Denormalized status name
+  status?: string;                 // @ai-logic: Status name for display
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
+}
+
+/**
+ * @ai-intent Internal representation with status_id
+ * @ai-critical For database operations only, not for API responses
+ */
+export interface IssueInternal extends Issue {
+  status_id: number;               // @ai-relationship: Foreign key to Status
 }
 
 /**
@@ -77,12 +84,19 @@ export interface Plan {
   start_date: string | null;       // @ai-pattern: YYYY-MM-DD or null
   end_date: string | null;         // @ai-pattern: YYYY-MM-DD or null
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
-  status_id: number;               // @ai-relationship: Foreign key to Status
-  status?: string;                 // @ai-logic: Denormalized status name
+  status?: string;                 // @ai-logic: Status name for display
   related_issues?: number[];       // @ai-relationship: Issue IDs
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
+}
+
+/**
+ * @ai-intent Internal representation with status_id
+ * @ai-critical For database operations only, not for API responses
+ */
+export interface PlanInternal extends Plan {
+  status_id: number;               // @ai-relationship: Foreign key to Status
 }
 
 /**
@@ -143,7 +157,6 @@ export interface IssueSummary {
   id: number;
   title: string;
   priority: string;     // @ai-logic: For visual indicators
-  status_id: number;
   status?: string;      // @ai-logic: For display
   created_at: string;
   updated_at: string;
