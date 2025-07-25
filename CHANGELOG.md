@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2025-07-25
+
+### Added
+- `is_closed` flag to status management for distinguishing terminal states
+- "Cancelled" as a default status with `is_closed=true`
+- Status filtering options for issue/plan lists
+  - Default behavior excludes closed statuses
+  - Optional `includeClosedStatuses` parameter
+  - Optional `statusIds` parameter for specific status filtering
+- Commit guidelines documentation for consistent commit practices
+- Development warning in README.md
+
+### Changed
+- **BREAKING**: Status storage now uses names instead of IDs in markdown files
+  - More resilient to database rebuilds
+  - Status IDs no longer stored in markdown frontmatter
+- Improved session manager to use `getSessionDetail` for robust lookups
+- Updated `rebuild-db` to handle status names instead of IDs
+- Renamed "unified" terminology throughout the codebase:
+  - `unified-handlers.ts` → `item-handlers.ts`
+  - `unified-schemas.ts` → `item-schemas.ts`
+  - `unified-tool-definitions.ts` → `tool-definitions.ts`
+- Moved session and summary schemas to `session-schemas.ts`
+
+### Removed
+- Status modification tools (create_status, update_status, delete_status)
+  - Status management is now done through database initialization only
+- Migration system in favor of initialization-only approach
+
+### Fixed
+- Session tests now correctly find sessions regardless of date parsing
+- Test expectations updated for 7 default statuses (was 6)
+- Import paths updated after file renaming
+
 ## [0.0.4] - 2025-07-24
 
 ### Added
