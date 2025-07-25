@@ -49,11 +49,21 @@ export class PlanRepository extends BaseRepository {
    * @ai-assumption Date format is YYYY-MM-DD or null
    * @ai-logic Related issues are stored as numeric IDs for cross-referencing
    */
-  private parseMarkdownPlan(content: string): Plan | null {
+  private async parseMarkdownPlan(content: string): Promise<Plan | null> {
     const { metadata, content: contentBody } = parseMarkdown(content);
     
     // @ai-logic: ID and title are mandatory for valid plans
     if (!metadata.id || !metadata.title) return null;
+
+    // @ai-logic: Resolve status_id from status name
+    let status_id = 1; // Default to first status
+    if (metadata.status) {
+      const statuses = await this.statusRepository.getAllStatuses();
+      const matchedStatus = statuses.find(s => s.name === metadata.status);
+      if (matchedStatus) {
+        status_id = matchedStatus.id;
+      }
+    }
 
     return {
       id: metadata.id,
@@ -62,8 +72,8 @@ export class PlanRepository extends BaseRepository {
       start_date: metadata.start_date || null,  // @ai-edge-case: Plans may not have dates initially
       end_date: metadata.end_date || null,
       priority: metadata.priority || 'medium',
-      status_id: metadata.status_id || 1,
-      status: metadata.status,  // @ai-why: Preserved for database rebuild resilience
+      status_id: status_id,
+      status: metadata.status || 'Open',  // @ai-why: Status name is primary storage
       related_issues: Array.isArray(metadata.related_issues) ? metadata.related_issues : [],
       tags: Array.isArray(metadata.tags) ? metadata.tags : [],
       created_at: metadata.created_at || new Date().toISOString(),
@@ -84,8 +94,7 @@ export class PlanRepository extends BaseRepository {
       start_date: plan.start_date || '',
       end_date: plan.end_date || '',
       priority: plan.priority,
-      status_id: plan.status_id,
-      status: plan.status,
+      status: plan.status,  // @ai-logic: Only store status name, not ID
       related_issues: plan.related_issues || [],
       tags: plan.tags || [],
       created_at: plan.created_at,
@@ -118,16 +127,31 @@ export class PlanRepository extends BaseRepository {
     );
   }
 
-  async getAllPlans(): Promise<Plan[]> {
+  async getAllPlans(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Plan[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.plansDir);
     const planFiles = files.filter(f => f.startsWith('plan-') && f.endsWith('.md'));
     
+    // Get all statuses to filter by is_closed if needed
+    let closedStatusIds: number[] = [];
+    if (!includeClosedStatuses && !statusIds) {
+      const allStatuses = await this.statusRepository.getAllStatuses();
+      closedStatusIds = allStatuses.filter(s => s.is_closed).map(s => s.id);
+    }
+    
     const planPromises = planFiles.map(async (file) => {
       try {
         const content = await fsPromises.readFile(path.join(this.plansDir, file), 'utf8');
-        const plan = this.parseMarkdownPlan(content);
+        const plan = await this.parseMarkdownPlan(content);
         if (plan) {
+          // Apply status filtering
+          if (statusIds && !statusIds.includes(plan.status_id)) {
+            return null;
+          }
+          if (!includeClosedStatuses && !statusIds && closedStatusIds.includes(plan.status_id)) {
+            return null;
+          }
+          
           const status = await this.statusRepository.getStatus(plan.status_id);
           plan.status = status?.name;
           return plan;
@@ -194,7 +218,7 @@ export class PlanRepository extends BaseRepository {
 
     try {
       const fileContent = await fsPromises.readFile(filePath, 'utf8');
-      const plan = this.parseMarkdownPlan(fileContent);
+      const plan = await this.parseMarkdownPlan(fileContent);
       if (!plan) return false;
 
       if (title !== undefined) plan.title = title;
@@ -244,7 +268,7 @@ export class PlanRepository extends BaseRepository {
     
     try {
       const content = await fsPromises.readFile(filePath, 'utf8');
-      const plan = this.parseMarkdownPlan(content);
+      const plan = await this.parseMarkdownPlan(content);
       if (plan) {
         const status = await this.statusRepository.getStatus(plan.status_id);
         plan.status = status?.name;

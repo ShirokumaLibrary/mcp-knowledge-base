@@ -63,9 +63,9 @@ export class StatusHandlers {
     const markdown = [
       '## Available Statuses',
       '',
-      '| ID | Name | Created At |',
-      '|----|------|------------|',
-      ...statuses.map(status => `| ${status.id} | ${status.name} | - |`)  // @ai-debt: Created_at not shown
+      '| ID | Name | Is Closed | Created At |',
+      '|----|------|-----------|------------|',
+      ...statuses.map(status => `| ${status.id} | ${status.name} | ${status.is_closed ? 'Yes' : 'No'} | - |`)  // @ai-debt: Created_at not shown
     ].join('\n');
     
     return {
@@ -88,7 +88,7 @@ export class StatusHandlers {
    */
   async handleCreateStatus(args: any): Promise<ToolResponse> {
     const validatedArgs = CreateStatusSchema.parse(args);  // @ai-validation: Throws on invalid
-    const status = await this.db.createStatus(validatedArgs.name);
+    const status = await this.db.createStatus(validatedArgs.name, validatedArgs.is_closed);
     
     return {
       content: [
@@ -110,7 +110,7 @@ export class StatusHandlers {
    */
   async handleUpdateStatus(args: any): Promise<ToolResponse> {
     const validatedArgs = UpdateStatusSchema.parse(args);
-    const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name);  // @ai-fix: Added missing await
+    const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name, validatedArgs.is_closed);  // @ai-fix: Added missing await
     
     if (!success) {
       throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);

@@ -40,6 +40,7 @@
 export interface Status {
   id: number;           // @ai-logic: Auto-incremented primary key
   name: string;         // @ai-validation: Should be unique
+  is_closed?: boolean;  // @ai-logic: True for terminal states (Closed, Completed)
   created_at?: string;  // @ai-pattern: ISO 8601 timestamp
 }
 

@@ -132,11 +132,11 @@ export class FileIssueDatabase {
    * @ai-validation Name uniqueness checked by repository
    * @ai-return New status object with generated ID
    */
-  async createStatus(name: string) {
+  async createStatus(name: string, is_closed: boolean = false) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.statusRepo.createStatus(name);
+    return this.statusRepo.createStatus(name, is_closed);
   }
 
   /**
@@ -146,11 +146,11 @@ export class FileIssueDatabase {
    * @ai-critical Cannot update if status in use by items
    * @ai-return Updated status object or null if not found
    */
-  async updateStatus(id: number, name: string) {
+  async updateStatus(id: number, name: string, is_closed?: boolean) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.statusRepo.updateStatus(id, name);
+    return this.statusRepo.updateStatus(id, name, is_closed);
   }
 
   /**
@@ -231,11 +231,11 @@ export class FileIssueDatabase {
    * @ai-performance O(n) file reads - consider pagination for scale
    * @ai-return Array of complete issue objects sorted by ID
    */
-  async getAllIssues() {
+  async getAllIssues(includeClosedStatuses: boolean = false, statusIds?: number[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.getAllIssues();
+    return this.issueRepo.getAllIssues(includeClosedStatuses, statusIds);
   }
 
   /**
@@ -244,11 +244,11 @@ export class FileIssueDatabase {
    * @ai-performance Uses indexed SQLite query vs file reads
    * @ai-return Array with id, title, priority, status fields only
    */
-  async getAllIssuesSummary() {
+  async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.getAllIssuesSummary();
+    return this.issueRepo.getAllIssuesSummary(includeClosedStatuses, statusIds);
   }
 
   /**
@@ -313,11 +313,11 @@ export class FileIssueDatabase {
    * @ai-critical Plans include start/end dates for scheduling
    * @ai-return Array of plan objects sorted by ID
    */
-  async getAllPlans() {
+  async getAllPlans(includeClosedStatuses: boolean = false, statusIds?: number[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.getAllPlans();
+    return this.planRepo.getAllPlans(includeClosedStatuses, statusIds);
   }
 
   /**

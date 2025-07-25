@@ -12,12 +12,10 @@ import { ToolResponse } from '../types/mcp-types.js';
 import { 
   CreateWorkSessionSchema, 
   UpdateWorkSessionSchema,
-  SearchSessionsByTagSchema
-} from '../schemas/session-schemas.js';
-import {
+  SearchSessionsByTagSchema,
   GetSessionsSchema,
   GetSessionDetailSchema
-} from '../schemas/unified-schemas.js';
+} from '../schemas/session-schemas.js';
 
 /**
  * @ai-context Handles MCP tool calls for session operations

@@ -11,12 +11,10 @@ import { WorkSessionManager } from '../session-manager.js';
 import { ToolResponse } from '../types/mcp-types.js';
 import { 
   CreateDailySummarySchema, 
-  UpdateDailySummarySchema
-} from '../schemas/session-schemas.js';
-import {
+  UpdateDailySummarySchema,
   GetDailySummariesSchema,
   GetDailySummaryDetailSchema
-} from '../schemas/unified-schemas.js';
+} from '../schemas/session-schemas.js';
 
 /**
  * @ai-context Handles MCP tool calls for daily summaries

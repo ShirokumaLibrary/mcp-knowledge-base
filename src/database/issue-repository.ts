@@ -49,19 +49,29 @@ export class IssueRepository extends BaseRepository {
    * @ai-assumption Markdown files use YAML frontmatter format
    * @ai-why Graceful handling of corrupted files prevents system crashes
    */
-  private parseMarkdownIssue(content: string): Issue | null {
+  private async parseMarkdownIssue(content: string): Promise<Issue | null> {
     const { metadata, content: contentBody } = parseMarkdown(content);
     
     // @ai-logic: id and title are minimum required fields
     if (!metadata.id || !metadata.title) return null;
+
+    // @ai-logic: Resolve status_id from status name
+    let status_id = 1; // Default to first status
+    if (metadata.status) {
+      const statuses = await this.statusRepository.getAllStatuses();
+      const matchedStatus = statuses.find(s => s.name === metadata.status);
+      if (matchedStatus) {
+        status_id = matchedStatus.id;
+      }
+    }
 
     return {
       id: metadata.id,
       title: metadata.title,
       content: contentBody || '',
       priority: metadata.priority || 'medium',
-      status_id: metadata.status_id || 1,
-      status: metadata.status,  // @ai-why: Preserves status name for database rebuilds
+      status_id: status_id,
+      status: metadata.status || 'Open',  // @ai-why: Status name is primary storage
       tags: Array.isArray(metadata.tags) ? metadata.tags : [],
       created_at: metadata.created_at || new Date().toISOString(),
       updated_at: metadata.updated_at || new Date().toISOString()
@@ -85,8 +95,7 @@ export class IssueRepository extends BaseRepository {
       id: issue.id,
       title: issue.title,
       priority: issue.priority,
-      status_id: issue.status_id,
-      status: issue.status,
+      status: issue.status,  // @ai-logic: Only store status name, not ID
       tags: issue.tags || [],
       created_at: issue.created_at,
       updated_at: issue.updated_at
@@ -123,18 +132,36 @@ export class IssueRepository extends BaseRepository {
    * @ai-performance Parallel file reads for better performance
    * @ai-error-handling Silently skips corrupted files to maintain system stability
    * @ai-return Always returns array, empty if no valid issues found
+   * @ai-params 
+   *   - includeClosedStatuses: If false (default), excludes issues with closed statuses
+   *   - statusIds: If provided, only returns issues with these status IDs
    */
-  async getAllIssues(): Promise<Issue[]> {
+  async getAllIssues(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Issue[]> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.issuesDir);
     const issueFiles = files.filter(f => f.startsWith('issue-') && f.endsWith('.md'));
+    
+    // Get all statuses to filter by is_closed if needed
+    let closedStatusIds: number[] = [];
+    if (!includeClosedStatuses && !statusIds) {
+      const allStatuses = await this.statusRepository.getAllStatuses();
+      closedStatusIds = allStatuses.filter(s => s.is_closed).map(s => s.id);
+    }
     
     // @ai-performance: Parallel processing with error isolation
     const issuePromises = issueFiles.map(async (file) => {
       try {
         const content = await fsPromises.readFile(path.join(this.issuesDir, file), 'utf8');
-        const issue = this.parseMarkdownIssue(content);
+        const issue = await this.parseMarkdownIssue(content);
         if (issue) {
+          // Apply status filtering
+          if (statusIds && !statusIds.includes(issue.status_id)) {
+            return null;
+          }
+          if (!includeClosedStatuses && !statusIds && closedStatusIds.includes(issue.status_id)) {
+            return null;
+          }
+          
           const status = await this.statusRepository.getStatus(issue.status_id);
           issue.status = status?.name;
           return issue;
@@ -151,16 +178,31 @@ export class IssueRepository extends BaseRepository {
     return issues.sort((a, b) => a.id - b.id);
   }
 
-  async getAllIssuesSummary(): Promise<Array<{id: number, title: string, priority: string, status_id: number, status?: string, created_at: string, updated_at: string}>> {
+  async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]): Promise<Array<{id: number, title: string, priority: string, status_id: number, status?: string, created_at: string, updated_at: string}>> {
     await this.ensureDirectoryExists();
     const files = await fsPromises.readdir(this.issuesDir);
     const issueFiles = files.filter(f => f.startsWith('issue-') && f.endsWith('.md'));
     
+    // Get all statuses to filter by is_closed if needed
+    let closedStatusIds: number[] = [];
+    if (!includeClosedStatuses && !statusIds) {
+      const allStatuses = await this.statusRepository.getAllStatuses();
+      closedStatusIds = allStatuses.filter(s => s.is_closed).map(s => s.id);
+    }
+    
     const summaryPromises = issueFiles.map(async (file) => {
       try {
         const content = await fsPromises.readFile(path.join(this.issuesDir, file), 'utf8');
-        const issue = this.parseMarkdownIssue(content);
+        const issue = await this.parseMarkdownIssue(content);
         if (issue) {
+          // Apply status filtering
+          if (statusIds && !statusIds.includes(issue.status_id)) {
+            return null;
+          }
+          if (!includeClosedStatuses && !statusIds && closedStatusIds.includes(issue.status_id)) {
+            return null;
+          }
+          
           const status = await this.statusRepository.getStatus(issue.status_id);
           return {
             id: issue.id,
@@ -231,7 +273,7 @@ export class IssueRepository extends BaseRepository {
 
     try {
       const fileContent = await fsPromises.readFile(filePath, 'utf8');
-      const issue = this.parseMarkdownIssue(fileContent);
+      const issue = await this.parseMarkdownIssue(fileContent);
       if (!issue) return false;
 
       if (title !== undefined) issue.title = title;
@@ -279,7 +321,7 @@ export class IssueRepository extends BaseRepository {
     
     try {
       const content = await fsPromises.readFile(filePath, 'utf8');
-      const issue = this.parseMarkdownIssue(content);
+      const issue = await this.parseMarkdownIssue(content);
       if (issue) {
         const status = await this.statusRepository.getStatus(issue.status_id);
         issue.status = status?.name;

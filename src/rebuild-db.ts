@@ -31,7 +31,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
     knowledge: 0,
     sessions: 0,
     tags: new Set<string>(),
-    statuses: new Map<number, string>()  // @ai-logic: Map preserves status ID associations
+    statuses: new Set<string>()  // @ai-logic: Now we only store status names
   };
 
   // @ai-logic: Process each content type with consistent pattern
@@ -43,10 +43,10 @@ async function scanAndRebuild(databasePath: string, db: any) {
     if (parsed.metadata.tags) {
       parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
     }
-    // @ai-critical: Collect custom statuses for restoration
-    // @ai-why: User-defined statuses must survive database rebuilds
-    if (parsed.metadata.status_id && parsed.metadata.status) {
-      counts.statuses.set(parsed.metadata.status_id, parsed.metadata.status);
+    // @ai-critical: Collect status names from files
+    // @ai-why: We now store status names, not IDs
+    if (parsed.metadata.status) {
+      counts.statuses.add(parsed.metadata.status);
     }
     counts.issues++;
   }
@@ -60,9 +60,9 @@ async function scanAndRebuild(databasePath: string, db: any) {
     if (parsed.metadata.tags) {
       parsed.metadata.tags.forEach((tag: string) => counts.tags.add(tag));
     }
-    // Collect custom statuses
-    if (parsed.metadata.status_id && parsed.metadata.status) {
-      counts.statuses.set(parsed.metadata.status_id, parsed.metadata.status);
+    // Collect status names
+    if (parsed.metadata.status) {
+      counts.statuses.add(parsed.metadata.status);
     }
     counts.plans++;
   }
@@ -136,20 +136,13 @@ async function rebuildDatabase() {
     // Scan all markdown files and get counts
     const counts = await scanAndRebuild(databasePath, db);
     
-    // Restore custom statuses from markdown files
-    console.log('\n🔄 Restoring custom statuses...');
-    const defaultStatuses = ['Open', 'In Progress', 'Review', 'Completed', 'Closed', 'On Hold'];
-    for (const [statusId, statusName] of counts.statuses) {
-      if (!defaultStatuses.includes(statusName)) {
-        // This is a custom status, insert it
-        try {
-          await db.runAsync(`INSERT OR IGNORE INTO statuses (id, name) VALUES (?, ?)`, [statusId, statusName]);
-          console.log(`  ✅ Restored custom status: ${statusName} (ID: ${statusId})`);
-        } catch (error) {
-          console.error(`  ❌ Failed to restore status ${statusName}:`, error);
-        }
-      }
-    }
+    // Note: Status restoration is no longer needed
+    // @ai-why: Statuses are now managed through database initialization only
+    // @ai-logic: Custom statuses are not supported - only default statuses exist
+    console.log('\n📝 Status management note:');
+    console.log('  - Statuses are managed through database initialization');
+    console.log('  - Custom statuses found in files: ', Array.from(counts.statuses));
+    console.log('  - Only default statuses will be available after rebuild');
     
     // Now initialize the full database which will trigger the sync
     const { FileIssueDatabase } = await import('./database/index.js');
@@ -206,7 +199,7 @@ async function rebuildDatabase() {
     console.log(`  - Knowledge: ${counts.knowledge}`);
     console.log(`  - Sessions: ${counts.sessions}`);
     console.log(`  - Tags: ${counts.tags.size}`);
-    console.log(`  - Custom Statuses: ${Array.from(counts.statuses.values()).filter(s => !defaultStatuses.includes(s)).length}`);
+    console.log(`  - Unique Status Names: ${counts.statuses.size}`);
     
     // Close connections
     fullDb.close();

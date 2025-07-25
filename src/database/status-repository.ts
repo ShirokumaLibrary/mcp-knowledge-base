@@ -22,13 +22,14 @@ export class StatusRepository extends BaseRepository {
    */
   async getAllStatuses(): Promise<Status[]> {
     const rows = await this.db.allAsync(
-      'SELECT id, name, created_at FROM statuses ORDER BY id'
+      'SELECT id, name, is_closed, created_at FROM statuses ORDER BY id'
     );
     
     // @ai-logic: Type safety through explicit mapping
     return rows.map((row: any) => ({
       id: row.id,
       name: row.name,
+      is_closed: row.is_closed === 1,
       created_at: row.created_at
     }));
   }
@@ -39,7 +40,7 @@ export class StatusRepository extends BaseRepository {
 
   async getStatus(id: number): Promise<Status | null> {
     const row = await this.db.getAsync(
-      'SELECT id, name, created_at FROM statuses WHERE id = ?',
+      'SELECT id, name, is_closed, created_at FROM statuses WHERE id = ?',
       [id]
     );
     
@@ -47,6 +48,7 @@ export class StatusRepository extends BaseRepository {
     return {
       id: row.id,
       name: row.name,
+      is_closed: row.is_closed === 1,
       created_at: row.created_at
     };
   }
@@ -58,24 +60,33 @@ export class StatusRepository extends BaseRepository {
    * @ai-error-handling Throws on duplicate names (UNIQUE constraint)
    * @ai-critical IDs 7+ are custom statuses that need preservation during rebuilds
    */
-  async createStatus(name: string): Promise<Status> {
+  async createStatus(name: string, is_closed: boolean = false): Promise<Status> {
     const result = await this.db.runAsync(
-      'INSERT INTO statuses (name) VALUES (?)',
-      [name]
+      'INSERT INTO statuses (name, is_closed) VALUES (?, ?)',
+      [name, is_closed ? 1 : 0]
     );
     
     return {
       id: (result as any).lastID!,  // @ai-assumption: SQLite always provides lastID
       name,
+      is_closed,
       created_at: new Date().toISOString()
     };
   }
 
-  async updateStatus(id: number, name: string): Promise<boolean> {
-    const result = await this.db.runAsync(
-      'UPDATE statuses SET name = ? WHERE id = ?',
-      [name, id]
-    );
+  async updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean> {
+    let sql = 'UPDATE statuses SET name = ?';
+    const params: any[] = [name];
+    
+    if (is_closed !== undefined) {
+      sql += ', is_closed = ?';
+      params.push(is_closed ? 1 : 0);
+    }
+    
+    sql += ' WHERE id = ?';
+    params.push(id);
+    
+    const result = await this.db.runAsync(sql, params);
     
     return (result as any).changes! > 0;
   }

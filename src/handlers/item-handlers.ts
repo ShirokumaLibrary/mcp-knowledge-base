@@ -14,18 +14,18 @@ import {
   UpdateItemArgs,
   DeleteItemArgs,
   SearchItemsByTagArgs
-} from '../schemas/unified-schemas.js';
+} from '../schemas/item-schemas.js';
 import { Handler } from '../types/handler-types.js';
 import { Issue, Plan, Doc, Knowledge, IssueSummary, DocSummary } from '../types/domain-types.js';
 
 /**
- * @ai-context Unified MCP tool handlers for all content types
+ * @ai-context MCP tool handlers for all content types
  * @ai-pattern Strategy pattern with type-based dispatch
  * @ai-critical Entry point for all MCP tool calls - must handle errors gracefully
  * @ai-dependencies FileIssueDatabase for all data operations
  * @ai-why Single handler class simplifies MCP tool registration and maintenance
  */
-export class UnifiedHandlers {
+export class ItemHandlers {
   constructor(private db: FileIssueDatabase) {}
 
   /**
@@ -34,6 +34,9 @@ export class UnifiedHandlers {
    * @ai-error-handling Throws McpError for invalid types, Zod errors for validation
    * @ai-performance Summary views for issues/docs to reduce payload size
    * @ai-assumption Database methods return empty arrays, not null
+   * @ai-params
+   *   - includeClosedStatuses: Include items with closed statuses (issue/plan only)
+   *   - statusIds: Filter by specific status IDs (issue/plan only)
    */
   async handleGetItems(args: unknown): Promise<ToolResponse> {
     const validatedArgs = GetItemsSchema.parse(args) as GetItemsArgs;
@@ -42,10 +45,16 @@ export class UnifiedHandlers {
     // @ai-logic: Type-based strategy dispatch
     switch (validatedArgs.type) {
       case 'issue':
-        data = await this.db.getAllIssuesSummary();  // @ai-performance: Summary for large datasets
+        data = await this.db.getAllIssuesSummary(
+          validatedArgs.includeClosedStatuses,
+          validatedArgs.statusIds
+        );  // @ai-performance: Summary for large datasets
         break;
       case 'plan':
-        data = await this.db.getAllPlans();
+        data = await this.db.getAllPlans(
+          validatedArgs.includeClosedStatuses,
+          validatedArgs.statusIds
+        );
         break;
       case 'doc':
         data = await this.db.getDocsSummary();  // @ai-performance: Summary excludes content

@@ -2,18 +2,18 @@
  * @ai-context MCP tool schema definitions for external API
  * @ai-pattern Declarative tool specifications following MCP protocol
  * @ai-critical This defines the external API contract - changes break clients
- * @ai-why Unified definitions ensure consistency across all tool types
+ * @ai-why Centralized definitions ensure consistency across all tool types
  * @ai-assumption JSON Schema format as required by MCP specification
  */
 
-// Unified tool definitions for MCP server
-export const unifiedToolDefinitions = [
-  // @ai-pattern Unified CRUD operations for all content types
+// Tool definitions for MCP server
+export const toolDefinitions = [
+  // @ai-pattern CRUD operations for all content types
   // @ai-intent Single API for issues, plans, docs, and knowledge
   // @ai-why Reduces API surface and simplifies client implementation
   {
     name: 'get_items',
-    description: 'Retrieve list of items by type (issue, plan, doc, knowledge).',
+    description: 'Retrieve list of items by type (issue, plan, doc, knowledge). For issue/plan types, defaults to excluding closed statuses.',
     // @ai-flow Returns array of items with summary fields only
     // @ai-performance Optimized for listing - minimal data per item
     inputSchema: {
@@ -23,6 +23,15 @@ export const unifiedToolDefinitions = [
           type: 'string',
           enum: ['issue', 'plan', 'doc', 'knowledge'],
           description: 'Type of items to retrieve',
+        },
+        includeClosedStatuses: {
+          type: 'boolean',
+          description: 'Include items with closed statuses (issue/plan only, default: false)',
+        },
+        statusIds: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by specific status IDs (issue/plan only)',
         },
       },
       required: ['type'],
@@ -208,52 +217,9 @@ export const unifiedToolDefinitions = [
       properties: {},
     },
   },
-  {
-    name: 'create_status',
-    description: 'Create new status.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          description: 'Status name (required)',
-        },
-      },
-      required: ['name'],
-    },
-  },
-  {
-    name: 'update_status',
-    description: 'Update existing status.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'number',
-          description: 'ID of status to update (required)',
-        },
-        name: {
-          type: 'string',
-          description: 'New status name (required)',
-        },
-      },
-      required: ['id', 'name'],
-    },
-  },
-  {
-    name: 'delete_status',
-    description: 'Delete status.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'number',
-          description: 'ID of status to delete (required)',
-        },
-      },
-      required: ['id'],
-    },
-  },
+  // Status modification tools are disabled to prevent accidental changes
+  // Statuses should be stable and only managed through database initialization
+  // create_status, update_status and delete_status are all disabled
   
   // @ai-pattern Tag taxonomy management tools
   // @ai-intent Centralized tag operations for categorization

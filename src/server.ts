@@ -52,12 +52,12 @@ import { FileIssueDatabase } from './database.js';
 import { WorkSessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 
-import { UnifiedHandlers } from './handlers/unified-handlers.js';
+import { ItemHandlers } from './handlers/item-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
-import { unifiedToolDefinitions } from './unified-tool-definitions.js';
+import { toolDefinitions } from './tool-definitions.js';
 
 /**
  * @ai-context Main server class orchestrating all MCP operations
@@ -73,12 +73,12 @@ class IssueTrackerServer {
   
   // @ai-logic: Separate handlers for different tool categories
   // @ai-handler-responsibility
-  // - UnifiedHandlers: CRUD for issues, plans, docs, knowledge (get_items, create_item, etc.)
+  // - ItemHandlers: CRUD for issues, plans, docs, knowledge (get_items, create_item, etc.)
   // - StatusHandlers: Workflow status management (get_statuses, create_status, etc.)
   // - TagHandlers: Tag management and cross-type search (get_tags, search_items_by_tag)
   // - SessionHandlers: Work session tracking (get_sessions, create_session)
   // - SummaryHandlers: Daily summary management (get_summaries, create_summary)
-  private unifiedHandlers: UnifiedHandlers;
+  private itemHandlers: ItemHandlers;
   private statusHandlers: StatusHandlers;
   private tagHandlers: TagHandlers;
   private sessionHandlers: SessionHandlers;
@@ -93,7 +93,7 @@ class IssueTrackerServer {
     );
     
     // @ai-logic: Handler initialization order doesn't matter - no dependencies
-    this.unifiedHandlers = new UnifiedHandlers(this.db);
+    this.itemHandlers = new ItemHandlers(this.db);
     this.statusHandlers = new StatusHandlers(this.db);
     this.tagHandlers = new TagHandlers(this.db);
     this.sessionHandlers = new SessionHandlers(this.sessionManager);
@@ -132,7 +132,7 @@ class IssueTrackerServer {
 
   private setupToolList() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return { tools: unifiedToolDefinitions };
+      return { tools: toolDefinitions };
     });
   }
 
@@ -162,19 +162,19 @@ class IssueTrackerServer {
 
   private async handleToolCall(toolName: string, args: any): Promise<{ content: { type: 'text'; text: string }[] }> {
     switch (toolName) {
-      // Unified API handlers
-      case 'get_items': return this.unifiedHandlers.handleGetItems(args);
-      case 'get_item_detail': return this.unifiedHandlers.handleGetItemDetail(args);
-      case 'create_item': return this.unifiedHandlers.handleCreateItem(args);
-      case 'update_item': return this.unifiedHandlers.handleUpdateItem(args);
-      case 'delete_item': return this.unifiedHandlers.handleDeleteItem(args);
-      case 'search_items_by_tag': return this.unifiedHandlers.handleSearchItemsByTag(args);
+      // Item API handlers
+      case 'get_items': return this.itemHandlers.handleGetItems(args);
+      case 'get_item_detail': return this.itemHandlers.handleGetItemDetail(args);
+      case 'create_item': return this.itemHandlers.handleCreateItem(args);
+      case 'update_item': return this.itemHandlers.handleUpdateItem(args);
+      case 'delete_item': return this.itemHandlers.handleDeleteItem(args);
+      case 'search_items_by_tag': return this.itemHandlers.handleSearchItemsByTag(args);
       
       // Status handlers
       case 'get_statuses': return this.statusHandlers.handleGetStatuses();
-      case 'create_status': return this.statusHandlers.handleCreateStatus(args);
-      case 'update_status': return this.statusHandlers.handleUpdateStatus(args);
-      case 'delete_status': return this.statusHandlers.handleDeleteStatus(args);
+      // case 'create_status': return this.statusHandlers.handleCreateStatus(args);  // Disabled
+      // case 'update_status': return this.statusHandlers.handleUpdateStatus(args);  // Disabled
+      // case 'delete_status': return this.statusHandlers.handleDeleteStatus(args);  // Disabled
       
       // Tag handlers
       case 'get_tags': return this.tagHandlers.handleGetTags();
