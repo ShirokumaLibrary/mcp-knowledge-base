@@ -3,7 +3,8 @@
 ## Content Management
 
 ### Items (Issues, Plans, Documents, Knowledge)
-- `get_items`: Get items by type (issue, plan, doc, knowledge)
+- `get_items`: Get items by type
+  - Type parameter accepts any value returned by `get_types`
   - For issues/plans: Default excludes closed statuses
   - Optional: `includeClosedStatuses` (boolean) - Include items with closed statuses
   - Optional: `statusIds` (array) - Filter by specific status IDs
@@ -39,23 +40,37 @@
 - ~~`update_status`~~: (Disabled) Status updates are not supported
 - ~~`delete_status`~~: (Disabled) Status deletion is not supported
 
+### Types
+- `get_types`: Retrieve all available types
+  - Optional: `include_built_in` (boolean) - Include built-in types (default: true)
+  - Optional: `include_definitions` (boolean) - Include full type definitions (default: false)
+- `create_type`: Create new custom type
+  - Required: `name` (string) - Type name (lowercase letters, numbers, underscores)
+- `delete_type`: Delete custom type (only if no items exist)
+
 ## API Parameters
 
 ### Item Types
-When using item-related commands, specify the type:
+When using item-related commands, specify the type parameter. Available types can be discovered using `get_types`.
+
+Built-in types:
 - `issue` - Bug reports, feature requests, tasks
 - `plan` - Project plans with timelines
 - `doc` - Documentation
 - `knowledge` - Knowledge base entries
 
+Custom types:
+- Any type created via `create_type` (e.g., `recipe`, `tutorial`, `blog_post`)
+- Custom types are stored under `documents/{type}/`
+
 ### Common Parameters
 - `id` - Numeric identifier for items
-- `type` - Item type (see above)
+- `type` - Item type (use `get_types` to see available types)
 - `title` - Title of the item
 - `content` - Main content (required for all item types)
 - `tags` - Array of tag names
 - `priority` - Priority level (high, medium, low) for issues/plans
-- `status_id` - Status identifier for issues/plans (stored as name in markdown files)
+- `status` - Status name for issues/plans (stored as name in markdown files)
 
 ### Date Parameters
 - `date` - Format: YYYY-MM-DD
@@ -65,4 +80,16 @@ When using item-related commands, specify the type:
 ### Search Parameters
 - `tag` - Tag name to search for
 - `pattern` - Search pattern for tags
-- `types` - Array of item types to search (optional)
+- `types` - Array of item types to search (optional, accepts any valid type)
+
+## File Naming Conventions
+
+### Built-in Types (Plural)
+- Issues: `issues/issues-{id}.md`
+- Plans: `plans/plans-{id}.md`
+- Docs: `documents/docs/docs-{id}.md`
+- Knowledge: `documents/knowledge/knowledge-{id}.md`
+
+### Custom Types (Singular)
+- Pattern: `documents/{type}/{type}-{id}.md`
+- Example: `documents/recipe/recipe-1.md`
