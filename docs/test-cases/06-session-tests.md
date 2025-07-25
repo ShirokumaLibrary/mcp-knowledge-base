@@ -1,0 +1,78 @@
+# 6. Session Management Tests
+
+This test suite verifies work session creation, retrieval, and update functionality.
+
+## 6.1 Work Session
+
+### Create session
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Authentication Bug Investigation and Fix",
+  content: "## Work Done\n- Bug root cause investigation\n- Fixed escaping logic\n- Added unit tests\n\n## Next Steps\n- Code review\n- Integration testing",
+  tags: ["bugfix", "authentication"],
+  category: "development"
+)
+```
+Expected: Success with session ID in format YYYYMMDD-HHMMSSsss
+
+- [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
+      Expected: The session just created
+
+### Update session (add content)
+```
+mcp__shirokuma-knowledge-base__update_session(
+  id: "[retrieved session ID]",
+  content: "## Work Done\n- Bug root cause investigation\n- Fixed escaping logic\n- Added unit tests\n- Code review completed\n\n## Completed\n- Merged fix to main branch"
+)
+```
+Expected: Success with content preserved exactly as provided
+
+### Get sessions by date range
+```
+mcp__shirokuma-knowledge-base__get_sessions(
+  start_date: "2025-07-25",
+  end_date: "2025-07-25"
+)
+```
+Expected: Array containing the created session
+
+## 6.2 Multiple Sessions
+
+### Create another session
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Performance Optimization Research",
+  content: "## Research\n- Analyzed slow queries\n- Identified bottlenecks\n- Proposed caching strategy",
+  tags: ["performance", "research"],
+  category: "investigation"
+)
+```
+Expected: Success with unique session ID
+
+- [ ] Get today's sessions: `mcp__shirokuma-knowledge-base__get_sessions()`  
+      Expected: Array containing both sessions created today
+
+- [ ] Search sessions by tag: `mcp__shirokuma-knowledge-base__search_sessions_by_tag(tag: "authentication")`  
+      Expected: Array containing only the first session
+
+## 6.3 Session Categories
+
+### Create session with different category
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Team Meeting Notes",
+  content: "## Discussed\n- Sprint progress\n- Blockers\n- Next sprint planning",
+  tags: ["meeting", "planning"],
+  category: "meeting"
+)
+```
+Expected: Success
+
+### Update session category
+```
+mcp__shirokuma-knowledge-base__update_session(
+  id: "[third session ID]",
+  category: "team-sync"
+)
+```
+Expected: Success with category updated

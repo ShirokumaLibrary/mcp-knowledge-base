@@ -5,22 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] - 2025-07-25
+
+### Added
+- Dynamic type system allowing custom document types
+- Type management tools (create_type, get_types, delete_type)
+- Centralized file naming logic in BaseRepository
+- Migration scripts for plural filenames and unified documents
+
+### Changed
+- **BREAKING**: File naming convention changed to plural forms
+  - `issue-{id}.md` → `issues-{id}.md`
+  - `plan-{id}.md` → `plans-{id}.md`
+  - `doc-{id}.md` → `docs-{id}.md`
+  - Custom types remain singular (e.g., `recipe-{id}.md`)
+- **BREAKING**: Removed enum constraints from type parameters
+  - All type fields now accept dynamic values
+  - Use `get_types` to discover available types
+  - Removed `subtype` parameter - type is now specified directly
+- Simplified createType to only accept name parameter
+- Updated directory structure: `documents/doc/` → `documents/docs/`
+
+### Removed
+- Static type enums from tool definitions
+- Unused description parameter from createType
+- Subtype specification - use type directly (e.g., "recipe" instead of type="document", subtype="recipe")
+
+### Fixed
+- Hardcoded file naming replaced with dynamic sequence table lookups
+- Test failures due to inconsistent file naming
+- MaxListenersExceededWarning by setting Jest maxWorkers to 1
+
 ## [0.0.7] - 2025-07-25
 
 ### Added
 - Summary field support for all item types (issues, plans, docs, knowledge)
 - Migration script for existing summary fields (`migrate-summary-fields.ts`)
 - Comprehensive test case documentation with AI validation procedures
+- **Unified document type**: New 'document' type that encompasses both doc and knowledge
+  - Maintains separate ID sequences for doc and knowledge subtypes
+  - Uses composite primary key (type, id) in SQLite
+  - Preserves existing directory structure under documents/
+- Migration script for unified documents (`migrate-to-unified-documents.ts`)
+- DocumentRepository for managing unified documents
+- Document-specific tests validating the new unified approach
 
 ### Changed
 - Unified content repository approach for doc and knowledge types
 - Removed separate ContentRepository in favor of unified pattern
 - Updated facades to use status names instead of IDs
 - Improved schema definitions to include optional summary field
+- **API Changes**: 
+  - Added 'document' as a new type option in all item operations
+  - Added required 'subtype' field when using type='document'
+  - Doc and knowledge types remain available for backward compatibility
+- Updated tool definitions to support the new document type
+- Enhanced item handlers to process document type with subtype validation
 
 ### Fixed
 - Test expectations for unified content repository structure
 - Facade methods now properly support summary field updates
+- Tag ID handling in DocumentRepository to use Map correctly
 
 ## [0.0.6] - 2025-07-25
 

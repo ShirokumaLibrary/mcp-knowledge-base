@@ -32,6 +32,8 @@ This MCP server provides a unified knowledge base system that manages Issues, Pl
 - **Tag System**: Organize and search content across all types
 - **Status Management**: Customizable workflow statuses
 - **Unified Content Field**: All entity types use consistent `content` field for multi-line text
+- **Dynamic Type System**: Create custom document types to extend the knowledge base
+- **Plural File Naming**: Consistent plural naming convention for all entity files
 
 ## Requirements
 
