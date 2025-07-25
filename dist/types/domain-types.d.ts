@@ -46,19 +46,25 @@ export interface Status {
  * @ai-intent Issue tracking entity
  * @ai-pattern Task with priority and workflow status
  * @ai-critical Core entity for task management
- * @ai-relationship References status by ID
- * @ai-defaults priority: 'medium', status_id: 1
+ * @ai-relationship References status by name
+ * @ai-defaults priority: 'medium', status: 'Open'
  */
 export interface Issue {
     id: number;
     title: string;
     content: string;
     priority: string;
-    status_id: number;
     status?: string;
     tags?: string[];
     created_at: string;
     updated_at: string;
+}
+/**
+ * @ai-intent Internal representation with status_id
+ * @ai-critical For database operations only, not for API responses
+ */
+export interface IssueInternal extends Issue {
+    status_id: number;
 }
 /**
  * @ai-intent Planning entity with timeline
@@ -74,12 +80,18 @@ export interface Plan {
     start_date: string | null;
     end_date: string | null;
     priority: string;
-    status_id: number;
     status?: string;
     related_issues?: number[];
     tags?: string[];
     created_at: string;
     updated_at: string;
+}
+/**
+ * @ai-intent Internal representation with status_id
+ * @ai-critical For database operations only, not for API responses
+ */
+export interface PlanInternal extends Plan {
+    status_id: number;
 }
 /**
  * @ai-intent Knowledge base article
@@ -135,7 +147,6 @@ export interface IssueSummary {
     id: number;
     title: string;
     priority: string;
-    status_id: number;
     status?: string;
     created_at: string;
     updated_at: string;

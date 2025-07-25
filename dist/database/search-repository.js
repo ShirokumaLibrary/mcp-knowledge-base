@@ -106,13 +106,59 @@ export class SearchRepository extends BaseRepository {
             return [];
         }
     }
+    /**
+     * @ai-intent Search daily summaries by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with summary_tags -> 3. Return full summary data
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages summary_tags relationship table
+     */
+    async searchDailySummariesByTag(tag) {
+        try {
+            // Get tag ID
+            const tagRow = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [tag]);
+            if (!tagRow) {
+                return []; // Tag doesn't exist
+            }
+            // Find all summaries with this tag using JOIN
+            const rows = await this.db.allAsync(`SELECT DISTINCT s.* 
+         FROM search_daily_summaries s
+         JOIN summary_tags st ON s.date = st.summary_date
+         WHERE st.tag_id = ?
+         ORDER BY s.date DESC`, [tagRow.id]);
+            return rows.map((row) => ({
+                date: row.date,
+                title: row.title,
+                content: row.content,
+                tags: row.tags ? row.tags.split(',') : [],
+                createdAt: row.created_at,
+                updatedAt: row.updated_at
+            }));
+        }
+        catch (error) {
+            this.logger.error('Daily summary tag search error:', { error });
+            return [];
+        }
+    }
+    /**
+     * @ai-intent Search sessions by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with session_tags -> 3. Return full session data
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages session_tags relationship table
+     */
     async searchSessionsByTag(tag) {
         try {
-            const rows = await this.db.allAsync(`SELECT * FROM search_sessions WHERE tags LIKE ?`, [`%${tag}%`]);
-            return rows.filter((row) => {
-                const tags = row.tags ? row.tags.split(',') : [];
-                return tags.includes(tag);
-            }).map((row) => ({
+            // Get tag ID
+            const tagRow = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [tag]);
+            if (!tagRow) {
+                return []; // Tag doesn't exist
+            }
+            // Find all sessions with this tag using JOIN
+            const rows = await this.db.allAsync(`SELECT DISTINCT s.* 
+         FROM search_sessions s
+         JOIN session_tags st ON s.id = st.session_id
+         WHERE st.tag_id = ?
+         ORDER BY s.date DESC, s.start_time DESC`, [tagRow.id]);
+            return rows.map((row) => ({
                 id: row.id,
                 title: row.title,
                 content: row.content,

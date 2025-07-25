@@ -84,15 +84,7 @@ export declare class FileIssueDatabaseRefactored {
     updateIssue(...args: Parameters<IssueFacade['updateIssue']>): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getAllIssues(): Promise<import("./index.js").Issue[]>;
-    getAllIssuesSummary(): Promise<{
-        id: number;
-        title: string;
-        priority: string;
-        status_id: number;
-        status?: string;
-        created_at: string;
-        updated_at: string;
-    }[]>;
+    getAllIssuesSummary(): Promise<import("./index.js").IssueSummary[]>;
     searchIssuesByTag(tag: string): Promise<import("./index.js").Issue[]>;
     createPlan(...args: Parameters<PlanFacade['createPlan']>): Promise<import("./index.js").Plan>;
     getPlan(id: number): Promise<import("./index.js").Plan | null>;

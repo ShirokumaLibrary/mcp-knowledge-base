@@ -239,11 +239,11 @@ export class FileIssueDatabase {
      * @ai-defaults Priority: 'medium', Status: 1 (default status)
      * @ai-return Complete issue object with generated ID
      */
-    async createIssue(title, description, priority, status_id, tags) {
+    async createIssue(title, description, priority, status, tags) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.createIssue(title, description, priority, status_id, tags);
+        return this.issueRepo.createIssue(title, description, priority, status, tags);
     }
     /**
      * @ai-intent Update existing issue with partial changes
@@ -252,11 +252,11 @@ export class FileIssueDatabase {
      * @ai-validation Issue must exist, status_id must be valid
      * @ai-return Updated issue object or null if not found
      */
-    async updateIssue(id, title, description, priority, status_id, tags) {
+    async updateIssue(id, title, description, priority, status, tags) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.updateIssue(id, title, description, priority, status_id, tags);
+        return this.issueRepo.updateIssue(id, title, description, priority, status, tags);
     }
     /**
      * @ai-intent Delete issue permanently
@@ -303,11 +303,11 @@ export class FileIssueDatabase {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Complete plan object with generated ID
      */
-    async createPlan(title, description, priority, status_id, start_date, end_date, tags) {
+    async createPlan(title, description, priority, status, start_date, end_date, tags) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.planRepo.createPlan(title, description, priority, status_id, start_date, end_date, tags);
+        return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags);
     }
     /**
      * @ai-intent Update plan including timeline adjustments
@@ -316,11 +316,11 @@ export class FileIssueDatabase {
      * @ai-pattern Partial updates preserve unspecified fields
      * @ai-return Updated plan or null if not found
      */
-    async updatePlan(id, title, description, priority, status_id, start_date, end_date, tags) {
+    async updatePlan(id, title, description, priority, status, start_date, end_date, tags) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.planRepo.updatePlan(id, title, description, priority, status_id, start_date, end_date, tags);
+        return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags);
     }
     /**
      * @ai-intent Delete plan permanently
@@ -600,10 +600,11 @@ export class FileIssueDatabase {
     /**
      * @ai-section Session Management
      * @ai-intent Sync work session to SQLite for searching
-     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT to search table
-     * @ai-side-effects Creates tags if needed, updates search_sessions
+     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT to search table -> 4. Update tag relationships
+     * @ai-side-effects Creates tags if needed, updates search_sessions and session_tags
      * @ai-critical Called after markdown write for consistency
      * @ai-assumption Session object has expected properties
+     * @ai-database-schema Uses session_tags relationship table for normalized tag storage
      */
     async syncSessionToSQLite(session) {
         if (this.initializationPromise) {
@@ -614,7 +615,7 @@ export class FileIssueDatabase {
             await this.tagRepo.ensureTagsExist(session.tags);
         }
         const db = this.connection.getDatabase();
-        const tags = session.tags ? session.tags.join(',') : ''; // @ai-pattern: CSV for LIKE queries
+        const tags = session.tags ? session.tags.join(',') : ''; // @ai-pattern: CSV for backward compatibility
         await db.runAsync(`INSERT OR REPLACE INTO search_sessions 
        (id, title, content, category, tags, date, start_time, end_time, summary) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
@@ -628,13 +629,22 @@ export class FileIssueDatabase {
             session.endTime || '',
             session.summary || ''
         ]);
+        // Update tag relationships
+        if (session.tags && session.tags.length > 0) {
+            await this.tagRepo.saveEntityTags('session', session.id, session.tags);
+        }
+        else {
+            // Clear all tag relationships if no tags
+            await db.runAsync('DELETE FROM session_tags WHERE session_id = ?', [session.id]);
+        }
     }
     /**
      * @ai-intent Sync daily summary to SQLite
-     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary
-     * @ai-side-effects Updates search_daily_summaries table
+     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary -> 4. Update tag relationships
+     * @ai-side-effects Updates search_daily_summaries table and summary_tags
      * @ai-critical Date is primary key - one summary per day
      * @ai-assumption Summary has required date and title fields
+     * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
      */
     async syncDailySummaryToSQLite(summary) {
         if (this.initializationPromise) {
@@ -656,6 +666,14 @@ export class FileIssueDatabase {
             summary.createdAt,
             summary.updatedAt || ''
         ]);
+        // Update tag relationships
+        if (summary.tags && summary.tags.length > 0) {
+            await this.tagRepo.saveEntityTags('summary', summary.date, summary.tags);
+        }
+        else {
+            // Clear all tag relationships if no tags
+            await db.runAsync('DELETE FROM summary_tags WHERE summary_date = ?', [summary.date]);
+        }
     }
     /**
      * @ai-intent Clean shutdown of database connections

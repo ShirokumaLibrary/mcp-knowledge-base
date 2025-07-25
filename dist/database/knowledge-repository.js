@@ -67,20 +67,30 @@ export class KnowledgeRepository extends BaseRepository {
     }
     /**
      * @ai-intent Enable full-text search on knowledge content
-     * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update search index
-     * @ai-side-effects Updates search_knowledge table with full content
+     * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update tag relationships
+     * @ai-side-effects Updates search_knowledge table and knowledge_tags relationship table
      * @ai-performance Full content stored for text search capabilities
      * @ai-critical Content field can be large - ensure adequate DB limits
+     * @ai-database-schema Uses knowledge_tags relationship table for normalized tag storage
      */
     async syncKnowledgeToSQLite(knowledge) {
+        // Update main knowledge data
         await this.db.runAsync(`
       INSERT OR REPLACE INTO search_knowledge 
       (id, title, content, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)`, [
             knowledge.id, knowledge.title, knowledge.content,
-            JSON.stringify(knowledge.tags), // @ai-logic: Tags as JSON for flexible queries
+            JSON.stringify(knowledge.tags), // @ai-why: Keep for backward compatibility
             knowledge.created_at, knowledge.updated_at
         ]);
+        // Update tag relationships
+        if (knowledge.tags && knowledge.tags.length > 0) {
+            await this.tagRepository.saveEntityTags('knowledge', knowledge.id, knowledge.tags);
+        }
+        else {
+            // Clear all tag relationships if no tags
+            await this.db.runAsync('DELETE FROM knowledge_tags WHERE knowledge_id = ?', [knowledge.id]);
+        }
     }
     async getAllKnowledge() {
         await this.ensureDirectoryExists();
@@ -169,6 +179,7 @@ export class KnowledgeRepository extends BaseRepository {
         }
         try {
             await fsPromises.unlink(filePath);
+            // @ai-logic: CASCADE DELETE in foreign key constraint handles knowledge_tags cleanup
             await this.db.runAsync('DELETE FROM search_knowledge WHERE id = ?', [id]);
             return true;
         }
@@ -188,9 +199,33 @@ export class KnowledgeRepository extends BaseRepository {
             return null;
         }
     }
+    /**
+     * @ai-intent Search knowledge by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with knowledge_tags -> 3. Load full knowledge
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages knowledge_tags relationship table
+     */
     async searchKnowledgeByTag(tag) {
-        const allKnowledge = await this.getAllKnowledge();
-        return allKnowledge.filter(k => k.tags.includes(tag));
+        // Get tag ID
+        const tagRow = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [tag]);
+        if (!tagRow) {
+            return []; // Tag doesn't exist
+        }
+        // Find all knowledge IDs with this tag
+        const knowledgeRows = await this.db.allAsync(`SELECT DISTINCT k.id 
+       FROM search_knowledge k
+       JOIN knowledge_tags kt ON k.id = kt.knowledge_id
+       WHERE kt.tag_id = ?
+       ORDER BY k.id`, [tagRow.id]);
+        // Load full knowledge data
+        const knowledgeList = [];
+        for (const row of knowledgeRows) {
+            const knowledge = await this.getKnowledge(row.id);
+            if (knowledge) {
+                knowledgeList.push(knowledge);
+            }
+        }
+        return knowledgeList;
     }
 }
 //# sourceMappingURL=knowledge-repository.js.map

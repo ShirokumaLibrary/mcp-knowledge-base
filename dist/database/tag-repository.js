@@ -1,21 +1,72 @@
 import { BaseRepository } from './base.js';
 /**
  * @ai-context Repository for tag management across all content types
- * @ai-pattern Shared tagging system with auto-registration
+ * @ai-pattern Shared tagging system with auto-registration and ID-based relationships
  * @ai-critical Tags are auto-created when content is tagged - no orphan tags
  * @ai-lifecycle Tags created on-demand, never cascade deleted
  * @ai-assumption Tag names are case-sensitive and trimmed
+ * @ai-database-schema tags table uses auto-increment ID with unique name constraint
  */
 export class TagRepository extends BaseRepository {
     constructor(db) {
         super(db, 'TagRepository');
     }
     async getTags() {
-        const rows = await this.db.allAsync('SELECT name, created_at FROM tags ORDER BY name');
+        const rows = await this.db.allAsync('SELECT id, name, created_at FROM tags ORDER BY name');
         return rows.map((row) => ({
             name: row.name,
             createdAt: row.created_at
         }));
+    }
+    /**
+     * @ai-intent Get tag by numeric ID
+     * @ai-flow Query tags table by ID
+     * @ai-return Tag object or null if not found
+     */
+    async getTagById(id) {
+        const row = await this.db.getAsync('SELECT id, name, created_at FROM tags WHERE id = ?', [id]);
+        if (!row)
+            return null;
+        return {
+            name: row.name,
+            createdAt: row.created_at
+        };
+    }
+    /**
+     * @ai-intent Get or create tag, returning its ID
+     * @ai-flow 1. Try to get existing tag -> 2. Create if not exists -> 3. Return ID
+     * @ai-critical Used by repositories to get tag IDs for relationship tables
+     * @ai-side-effects May create new tag in database
+     */
+    async getOrCreateTagId(name) {
+        // First try to get existing tag
+        const existing = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [name]);
+        if (existing) {
+            return existing.id;
+        }
+        // Create new tag
+        const result = await this.db.runAsync('INSERT INTO tags (name) VALUES (?)', [name]);
+        return result.lastID;
+    }
+    /**
+     * @ai-intent Get tag IDs for multiple tag names
+     * @ai-flow 1. Ensure all tags exist -> 2. Query for IDs -> 3. Return mapping
+     * @ai-performance Batch operation to minimize queries
+     * @ai-return Map of tag name to ID
+     */
+    async getTagIds(names) {
+        if (!names || names.length === 0)
+            return new Map();
+        // Ensure all tags exist first
+        await this.ensureTagsExist(names);
+        // Get all IDs in one query
+        const placeholders = names.map(() => '?').join(',');
+        const rows = await this.db.allAsync(`SELECT id, name FROM tags WHERE name IN (${placeholders})`, names);
+        const idMap = new Map();
+        rows.forEach((row) => {
+            idMap.set(row.name, row.id);
+        });
+        return idMap;
     }
     /**
      * @ai-intent Create single tag with duplicate checking
@@ -50,11 +101,56 @@ export class TagRepository extends BaseRepository {
         return result.changes > 0;
     }
     async getTagsByPattern(pattern) {
-        const rows = await this.db.allAsync('SELECT name, created_at FROM tags WHERE name LIKE ? ORDER BY name', [`%${pattern}%`]);
+        const rows = await this.db.allAsync('SELECT id, name, created_at FROM tags WHERE name LIKE ? ORDER BY name', [`%${pattern}%`]);
         return rows.map((row) => ({
             name: row.name,
             createdAt: row.created_at
         }));
+    }
+    /**
+     * @ai-intent Get tags for a specific entity using relationship table
+     * @ai-flow JOIN tags with relationship table by entity ID
+     * @ai-performance Single query with indexed JOIN
+     * @ai-database-schema Uses entity-specific relationship tables (issue_tags, plan_tags, etc.)
+     */
+    async getEntityTags(entityType, entityId) {
+        const tableName = `${entityType}_tags`;
+        const idColumn = entityType === 'session' || entityType === 'summary' ?
+            `${entityType}_${entityType === 'session' ? 'id' : 'date'}` :
+            `${entityType}_id`;
+        const rows = await this.db.allAsync(`SELECT t.name 
+       FROM tags t 
+       JOIN ${tableName} et ON t.id = et.tag_id 
+       WHERE et.${idColumn} = ?
+       ORDER BY t.name`, [entityId]);
+        return rows.map((row) => row.name);
+    }
+    /**
+     * @ai-intent Save tags for an entity using relationship table
+     * @ai-flow 1. Get tag IDs -> 2. Delete old relationships -> 3. Insert new ones
+     * @ai-side-effects Updates relationship table, may create new tags
+     * @ai-transaction Should be called within a transaction for consistency
+     */
+    async saveEntityTags(entityType, entityId, tagNames) {
+        if (!tagNames || tagNames.length === 0)
+            return;
+        const tableName = `${entityType}_tags`;
+        const idColumn = entityType === 'session' || entityType === 'summary' ?
+            `${entityType}_${entityType === 'session' ? 'id' : 'date'}` :
+            `${entityType}_id`;
+        // Get or create tag IDs
+        const tagIdMap = await this.getTagIds(tagNames);
+        // Delete existing relationships
+        await this.db.runAsync(`DELETE FROM ${tableName} WHERE ${idColumn} = ?`, [entityId]);
+        // Insert new relationships
+        const values = Array.from(tagIdMap.values()).map(() => `(?, ?)`).join(',');
+        const params = [];
+        tagIdMap.forEach(tagId => {
+            params.push(entityId, tagId);
+        });
+        if (params.length > 0) {
+            await this.db.runAsync(`INSERT INTO ${tableName} (${idColumn}, tag_id) VALUES ${values}`, params);
+        }
     }
     /**
      * @ai-intent Bulk create tags for content, ignoring existing ones

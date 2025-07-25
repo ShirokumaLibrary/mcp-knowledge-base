@@ -1,5 +1,5 @@
 import { BaseRepository, Database } from './base.js';
-import { Plan } from '../types/domain-types.js';
+import { Plan, PlanInternal } from '../types/domain-types.js';
 import { IStatusRepository } from '../types/repository-interfaces.js';
 import { TagRepository } from './tag-repository.js';
 /**
@@ -25,19 +25,32 @@ export declare class PlanRepository extends BaseRepository {
      * @ai-logic Related issues are stored as numeric IDs for cross-referencing
      */
     private parseMarkdownPlan;
+    /**
+     * @ai-intent Convert internal plan representation to external API format
+     * @ai-logic Removes status_id from the response
+     * @ai-critical Ensures internal IDs are not exposed in API responses
+     */
+    private toExternalPlan;
     private writeMarkdownPlan;
     /**
      * @ai-intent Sync plan data to SQLite including timeline information
-     * @ai-flow 1. Prepare values -> 2. Execute UPSERT -> 3. Handle errors
-     * @ai-side-effects Updates search_plans table, enables date-range queries
+     * @ai-flow 1. Prepare values -> 2. Execute UPSERT -> 3. Update tag relationships
+     * @ai-side-effects Updates search_plans table and plan_tags relationship table
      * @ai-assumption Empty dates stored as empty strings for SQL compatibility
      * @ai-why Related issues not in search table - retrieved via separate queries
+     * @ai-database-schema Uses plan_tags relationship table for normalized tag storage
      */
-    syncPlanToSQLite(plan: Plan): Promise<void>;
+    syncPlanToSQLite(plan: PlanInternal): Promise<void>;
     getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Plan[]>;
-    createPlan(title: string, content?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan>;
-    updatePlan(id: number, title?: string, content?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
+    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getPlan(id: number): Promise<Plan | null>;
+    /**
+     * @ai-intent Search plans by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with plan_tags -> 3. Load full plans
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages plan_tags relationship table
+     */
     searchPlansByTag(tag: string): Promise<Plan[]>;
 }

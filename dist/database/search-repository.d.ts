@@ -43,6 +43,19 @@ export declare class SearchRepository extends BaseRepository {
     }>;
     searchSessions(query: string): Promise<any[]>;
     searchDailySummaries(query: string): Promise<any[]>;
+    /**
+     * @ai-intent Search daily summaries by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with summary_tags -> 3. Return full summary data
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages summary_tags relationship table
+     */
+    searchDailySummariesByTag(tag: string): Promise<any[]>;
+    /**
+     * @ai-intent Search sessions by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with session_tags -> 3. Return full session data
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages session_tags relationship table
+     */
     searchSessionsByTag(tag: string): Promise<any[]>;
     /**
      * @ai-intent Rebuild search index from markdown files

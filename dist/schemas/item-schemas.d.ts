@@ -54,7 +54,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     title: z.ZodString;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
-    status_id: z.ZodOptional<z.ZodNumber>;
+    status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
@@ -63,7 +63,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     type: "knowledge" | "issue" | "plan" | "doc";
     tags?: string[] | undefined;
     content?: string | undefined;
-    status_id?: number | undefined;
+    status?: string | undefined;
     priority?: "medium" | "high" | "low" | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
@@ -72,7 +72,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     type: "knowledge" | "issue" | "plan" | "doc";
     tags?: string[] | undefined;
     content?: string | undefined;
-    status_id?: number | undefined;
+    status?: string | undefined;
     priority?: "medium" | "high" | "low" | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
@@ -90,7 +90,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
-    status_id: z.ZodOptional<z.ZodNumber>;
+    status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
@@ -100,7 +100,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
-    status_id?: number | undefined;
+    status?: string | undefined;
     priority?: "medium" | "high" | "low" | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
@@ -110,7 +110,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
-    status_id?: number | undefined;
+    status?: string | undefined;
     priority?: "medium" | "high" | "low" | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;

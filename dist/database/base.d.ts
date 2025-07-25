@@ -46,6 +46,8 @@ export declare class DatabaseConnection {
     private initializeDatabase;
     private createTables;
     private createSearchTables;
+    private createTagRelationshipTables;
+    private createIndexes;
     getDatabase(): Database;
     isInitialized(): boolean;
     close(): void;

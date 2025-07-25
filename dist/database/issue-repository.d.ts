@@ -1,5 +1,5 @@
 import { BaseRepository, Database } from './base.js';
-import { Issue } from '../types/domain-types.js';
+import { Issue, IssueInternal, IssueSummary } from '../types/domain-types.js';
 import { IStatusRepository } from '../types/repository-interfaces.js';
 import { TagRepository } from './tag-repository.js';
 /**
@@ -26,6 +26,12 @@ export declare class IssueRepository extends BaseRepository {
      */
     private parseMarkdownIssue;
     /**
+     * @ai-intent Convert internal issue representation to external API format
+     * @ai-logic Removes status_id from the response
+     * @ai-critical Ensures internal IDs are not exposed in API responses
+     */
+    private toExternalIssue;
+    /**
      * @ai-intent Persist issue to markdown file with complete metadata
      * @ai-side-effects Writes to file system, modifies issue.status field
      * @ai-critical File write must be atomic to prevent data corruption
@@ -34,12 +40,13 @@ export declare class IssueRepository extends BaseRepository {
     private writeMarkdownIssue;
     /**
      * @ai-intent Sync issue data to SQLite for fast searching and filtering
-     * @ai-flow 1. Prepare data -> 2. Execute UPSERT -> 3. Handle errors
-     * @ai-side-effects Updates search_issues table, replaces existing data
+     * @ai-flow 1. Prepare data -> 2. Execute UPSERT -> 3. Update tag relationships
+     * @ai-side-effects Updates search_issues table and issue_tags relationship table
      * @ai-performance Uses INSERT OR REPLACE for idempotent operations
      * @ai-assumption SQLite table schema matches Issue type structure
+     * @ai-database-schema Uses issue_tags relationship table for normalized tag storage
      */
-    syncIssueToSQLite(issue: Issue): Promise<void>;
+    syncIssueToSQLite(issue: IssueInternal): Promise<void>;
     /**
      * @ai-intent Load all issues from markdown files
      * @ai-flow 1. List files -> 2. Read in parallel -> 3. Parse & validate -> 4. Sort by ID
@@ -51,18 +58,16 @@ export declare class IssueRepository extends BaseRepository {
      *   - statusIds: If provided, only returns issues with these status IDs
      */
     getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Issue[]>;
-    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Array<{
-        id: number;
-        title: string;
-        priority: string;
-        status_id: number;
-        status?: string;
-        created_at: string;
-        updated_at: string;
-    }>>;
-    createIssue(title: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<Issue>;
-    updateIssue(id: number, title?: string, content?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<IssueSummary[]>;
+    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<Issue>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getIssue(id: number): Promise<Issue | null>;
+    /**
+     * @ai-intent Search issues by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with issue_tags -> 3. Load full issues
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages issue_tags relationship table
+     */
     searchIssuesByTag(tag: string): Promise<Issue[]>;
 }

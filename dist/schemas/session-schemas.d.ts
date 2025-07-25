@@ -71,14 +71,14 @@ export declare const CreateDailySummarySchema: z.ZodObject<{
     content: z.ZodString;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    date: string;
     tags: string[];
     content: string;
     title: string;
-    date: string;
 }, {
+    date: string;
     content: string;
     title: string;
-    date: string;
     tags?: string[] | undefined;
 }>;
 /**

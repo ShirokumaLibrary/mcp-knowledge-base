@@ -147,15 +147,7 @@ export declare class FileIssueDatabase {
      * @ai-performance Uses indexed SQLite query vs file reads
      * @ai-return Array with id, title, priority, status fields only
      */
-    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<{
-        id: number;
-        title: string;
-        priority: string;
-        status_id: number;
-        status?: string;
-        created_at: string;
-        updated_at: string;
-    }[]>;
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<import("./index.js").IssueSummary[]>;
     /**
      * @ai-intent Create new issue with optional metadata
      * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Write markdown -> 4. Sync SQLite
@@ -163,7 +155,7 @@ export declare class FileIssueDatabase {
      * @ai-defaults Priority: 'medium', Status: 1 (default status)
      * @ai-return Complete issue object with generated ID
      */
-    createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<import("./index.js").Issue>;
+    createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[]): Promise<import("./index.js").Issue>;
     /**
      * @ai-intent Update existing issue with partial changes
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Merge changes -> 4. Write both stores
@@ -171,7 +163,7 @@ export declare class FileIssueDatabase {
      * @ai-validation Issue must exist, status_id must be valid
      * @ai-return Updated issue object or null if not found
      */
-    updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
+    updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean>;
     /**
      * @ai-intent Delete issue permanently
      * @ai-flow 1. Wait for init -> 2. Delete markdown -> 3. Delete from SQLite
@@ -202,7 +194,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Complete plan object with generated ID
      */
-    createPlan(title: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<import("./index.js").Plan>;
+    createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<import("./index.js").Plan>;
     /**
      * @ai-intent Update plan including timeline adjustments
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Validate changes -> 4. Update
@@ -210,7 +202,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Partial updates preserve unspecified fields
      * @ai-return Updated plan or null if not found
      */
-    updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
+    updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
     /**
      * @ai-intent Delete plan permanently
      * @ai-flow 1. Wait for init -> 2. Remove markdown -> 3. Clean SQLite
@@ -387,18 +379,20 @@ export declare class FileIssueDatabase {
     /**
      * @ai-section Session Management
      * @ai-intent Sync work session to SQLite for searching
-     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT to search table
-     * @ai-side-effects Creates tags if needed, updates search_sessions
+     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT to search table -> 4. Update tag relationships
+     * @ai-side-effects Creates tags if needed, updates search_sessions and session_tags
      * @ai-critical Called after markdown write for consistency
      * @ai-assumption Session object has expected properties
+     * @ai-database-schema Uses session_tags relationship table for normalized tag storage
      */
     syncSessionToSQLite(session: any): Promise<void>;
     /**
      * @ai-intent Sync daily summary to SQLite
-     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary
-     * @ai-side-effects Updates search_daily_summaries table
+     * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary -> 4. Update tag relationships
+     * @ai-side-effects Updates search_daily_summaries table and summary_tags
      * @ai-critical Date is primary key - one summary per day
      * @ai-assumption Summary has required date and title fields
+     * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
      */
     syncDailySummaryToSQLite(summary: any): Promise<void>;
     /**

@@ -168,8 +168,9 @@ describe('DocRepository Async Tests', () => {
          */
         test('should handle getDocsSummary with async operations', async () => {
             // @ai-setup: Create docs with different content lengths
-            const shortDoc = await db.createDoc('Short Doc', 'Short content');
-            const longDoc = await db.createDoc('Long Doc', 'This is a much longer document content that should be included in the summary. '.repeat(10));
+            const timestamp = Date.now();
+            const shortDoc = await db.createDoc(`Short Doc ${timestamp}`, 'Short content');
+            const longDoc = await db.createDoc(`Long Doc ${timestamp}`, 'This is a much longer document content that should be included in the summary. '.repeat(10));
             const summary = await db.getDocsSummary();
             // @ai-validation: Should include at least the docs we created
             expect(summary.length).toBeGreaterThanOrEqual(2);
@@ -178,8 +179,8 @@ describe('DocRepository Async Tests', () => {
             const longDocSummary = summary.find(s => s.id === longDoc.id);
             expect(shortDocSummary).toBeDefined();
             expect(longDocSummary).toBeDefined();
-            expect(shortDocSummary.title).toBe('Short Doc');
-            expect(longDocSummary.title).toBe('Long Doc');
+            expect(shortDocSummary.title).toBe(`Short Doc ${timestamp}`);
+            expect(longDocSummary.title).toBe(`Long Doc ${timestamp}`);
             // @ai-validation: Summary should only include id and title
             expect(Object.keys(shortDocSummary)).toEqual(['id', 'title']);
             expect(Object.keys(longDocSummary)).toEqual(['id', 'title']);

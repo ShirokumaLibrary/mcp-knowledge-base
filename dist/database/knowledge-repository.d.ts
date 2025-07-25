@@ -26,10 +26,11 @@ export declare class KnowledgeRepository extends BaseRepository {
     private writeMarkdownKnowledge;
     /**
      * @ai-intent Enable full-text search on knowledge content
-     * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update search index
-     * @ai-side-effects Updates search_knowledge table with full content
+     * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update tag relationships
+     * @ai-side-effects Updates search_knowledge table and knowledge_tags relationship table
      * @ai-performance Full content stored for text search capabilities
      * @ai-critical Content field can be large - ensure adequate DB limits
+     * @ai-database-schema Uses knowledge_tags relationship table for normalized tag storage
      */
     syncKnowledgeToSQLite(knowledge: Knowledge): Promise<void>;
     getAllKnowledge(): Promise<Knowledge[]>;
@@ -44,5 +45,11 @@ export declare class KnowledgeRepository extends BaseRepository {
     updateKnowledge(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean>;
     deleteKnowledge(id: number): Promise<boolean>;
     getKnowledge(id: number): Promise<Knowledge | null>;
+    /**
+     * @ai-intent Search knowledge by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with knowledge_tags -> 3. Load full knowledge
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages knowledge_tags relationship table
+     */
     searchKnowledgeByTag(tag: string): Promise<Knowledge[]>;
 }

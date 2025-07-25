@@ -7,7 +7,7 @@
  */
 import { BaseFacade } from './base-facade.js';
 import { IssueRepository } from '../issue-repository.js';
-import { Issue } from '../../types/domain-types.js';
+import { Issue, IssueSummary } from '../../types/domain-types.js';
 import { DatabaseConnection } from '../base.js';
 import { StatusRepository } from '../status-repository.js';
 import { TagRepository } from '../tag-repository.js';
@@ -23,9 +23,9 @@ export declare class IssueFacade extends BaseFacade {
      * @ai-defaults priority: 'medium', status: 'Open', tags: []
      * @ai-side-effects Creates markdown file and SQLite record
      */
-    createIssue(title: string, content?: string, priority?: string, statusId?: number, tags?: string[]): Promise<Issue>;
+    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<Issue>;
     getIssue(id: number): Promise<Issue | null>;
-    updateIssue(id: number, title?: string, content?: string, priority?: string, statusId?: number, tags?: string[]): Promise<boolean>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getAllIssues(): Promise<Issue[]>;
     /**
@@ -34,14 +34,6 @@ export declare class IssueFacade extends BaseFacade {
      * @ai-return Array of summary objects with minimal fields
      * @ai-why Optimized for UI list rendering performance
      */
-    getAllIssuesSummary(): Promise<Array<{
-        id: number;
-        title: string;
-        priority: string;
-        status_id: number;
-        status?: string;
-        created_at: string;
-        updated_at: string;
-    }>>;
+    getAllIssuesSummary(): Promise<IssueSummary[]>;
     searchIssuesByTag(tag: string): Promise<Issue[]>;
 }

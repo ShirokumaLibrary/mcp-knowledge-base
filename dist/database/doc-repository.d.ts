@@ -26,10 +26,11 @@ export declare class DocRepository extends BaseRepository {
     private writeMarkdownDoc;
     /**
      * @ai-intent Sync document to SQLite for full-text search
-     * @ai-flow 1. Prepare data -> 2. UPSERT to search table
-     * @ai-side-effects Updates search_docs table
+     * @ai-flow 1. Prepare data -> 2. UPSERT to search table -> 3. Update tag relationships
+     * @ai-side-effects Updates search_docs table and doc_tags relationship table
      * @ai-performance Content can be large - ensure DB can handle
      * @ai-critical Essential for search functionality
+     * @ai-database-schema Uses doc_tags relationship table for normalized tag storage
      */
     syncDocToSQLite(doc: Doc): Promise<void>;
     private deleteDocFromSQLite;
@@ -49,5 +50,11 @@ export declare class DocRepository extends BaseRepository {
     updateDoc(id: number, title?: string, content?: string, tags?: string[]): Promise<Doc | null>;
     deleteDoc(id: number): Promise<boolean>;
     getDoc(id: number): Promise<Doc | null>;
+    /**
+     * @ai-intent Search documents by exact tag match using relationship table
+     * @ai-flow 1. Get tag ID -> 2. JOIN with doc_tags -> 3. Load full docs
+     * @ai-performance Uses indexed JOIN instead of LIKE search
+     * @ai-database-schema Leverages doc_tags relationship table
+     */
     searchDocsByTag(tag: string): Promise<Doc[]>;
 }

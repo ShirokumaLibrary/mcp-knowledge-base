@@ -106,11 +106,12 @@ export class DatabaseConnection {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
-        // Tag management table
+        // Tag management table with auto-increment ID
         this.logger.debug('Creating tags table...');
         await this.db.runAsync(`
       CREATE TABLE IF NOT EXISTS tags (
-        name TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -143,9 +144,12 @@ export class DatabaseConnection {
         // Search tables
         this.logger.debug('Creating search tables...');
         await this.createSearchTables();
+        // Create relationship tables for tags
+        this.logger.debug('Creating tag relationship tables...');
+        await this.createTagRelationshipTables();
         // Create indexes
-        this.logger.debug('Creating final index...');
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_tags ON search_knowledge(tags)`);
+        this.logger.debug('Creating indexes...');
+        await this.createIndexes();
         this.logger.debug('All tables created successfully');
     }
     async createSearchTables() {
@@ -236,6 +240,92 @@ export class DatabaseConnection {
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_tags ON search_sessions(tags)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_tags ON search_daily_summaries(tags)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_tags ON search_docs(tags)`);
+    }
+    async createTagRelationshipTables() {
+        // Issue tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS issue_tags (
+        issue_id INTEGER,
+        tag_id INTEGER,
+        PRIMARY KEY (issue_id, tag_id),
+        FOREIGN KEY (issue_id) REFERENCES search_issues(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+        // Plan tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS plan_tags (
+        plan_id INTEGER,
+        tag_id INTEGER,
+        PRIMARY KEY (plan_id, tag_id),
+        FOREIGN KEY (plan_id) REFERENCES search_plans(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+        // Document tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS doc_tags (
+        doc_id INTEGER,
+        tag_id INTEGER,
+        PRIMARY KEY (doc_id, tag_id),
+        FOREIGN KEY (doc_id) REFERENCES search_docs(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+        // Knowledge tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS knowledge_tags (
+        knowledge_id INTEGER,
+        tag_id INTEGER,
+        PRIMARY KEY (knowledge_id, tag_id),
+        FOREIGN KEY (knowledge_id) REFERENCES search_knowledge(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+        // Session tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS session_tags (
+        session_id TEXT,
+        tag_id INTEGER,
+        PRIMARY KEY (session_id, tag_id),
+        FOREIGN KEY (session_id) REFERENCES work_sessions(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+        // Daily summary tags relationship
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS summary_tags (
+        summary_date TEXT,
+        tag_id INTEGER,
+        PRIMARY KEY (summary_date, tag_id),
+        FOREIGN KEY (summary_date) REFERENCES daily_summaries(date) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+    }
+    async createIndexes() {
+        // Text search indexes
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_text ON search_knowledge(title, content)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_text ON search_docs(title, content)`);
+        // Tag relationship indexes
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_issue ON issue_tags(issue_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_tag ON issue_tags(tag_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_plan ON plan_tags(plan_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_tag ON plan_tags(tag_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_doc_tags_doc ON doc_tags(doc_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_doc_tags_tag ON doc_tags(tag_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_tags_knowledge ON knowledge_tags(knowledge_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_tags_tag ON knowledge_tags(tag_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)`);
+        // Tag name index for quick lookups
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)`);
     }
     getDatabase() {
         if (!this.db) {

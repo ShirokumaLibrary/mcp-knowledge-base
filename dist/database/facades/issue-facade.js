@@ -23,22 +23,20 @@ export class IssueFacade extends BaseFacade {
      * @ai-defaults priority: 'medium', status: 'Open', tags: []
      * @ai-side-effects Creates markdown file and SQLite record
      */
-    async createIssue(title, content, priority = 'medium', statusId, tags = []) {
+    async createIssue(title, content, priority = 'medium', status, tags = []) {
         await this.ensureInitialized(this.initPromise);
-        if (!statusId) {
-            const statuses = await this.statusRepo.getAllStatuses();
-            const openStatus = statuses.find(s => s.name === 'Open'); // @ai-logic: Prefer 'Open' status
-            statusId = openStatus ? openStatus.id : 1; // @ai-fallback: Default to ID 1
+        if (!status) {
+            status = 'Open'; // @ai-logic: Default to 'Open' status
         }
-        return this.issueRepo.createIssue(title, content || '', priority, statusId, tags);
+        return this.issueRepo.createIssue(title, content || '', priority, status, tags);
     }
     async getIssue(id) {
         await this.ensureInitialized(this.initPromise);
         return this.issueRepo.getIssue(id);
     }
-    async updateIssue(id, title, content, priority, statusId, tags) {
+    async updateIssue(id, title, content, priority, status, tags) {
         await this.ensureInitialized(this.initPromise);
-        return this.issueRepo.updateIssue(id, title, content, priority, statusId, tags);
+        return this.issueRepo.updateIssue(id, title, content, priority, status, tags);
     }
     async deleteIssue(id) {
         await this.ensureInitialized(this.initPromise);
