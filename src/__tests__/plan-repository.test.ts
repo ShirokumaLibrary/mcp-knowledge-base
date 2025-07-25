@@ -18,7 +18,7 @@ import * as path from 'path';
 describe('PlanRepository Async Tests', () => {
   let db: FileIssueDatabase;
   // @ai-pattern: Unique test directory using process ID
-  const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-plan-' + process.pid);
+  const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-plans-' + process.pid);
   const testDbPath = path.join(testDataDir, 'test.db');
 
   /**

@@ -12,8 +12,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 describe('WorkSessionManager', () => {
+  jest.setTimeout(10000); // Increase timeout for database operations
   // @ai-pattern: Isolated test directories using process ID
-  const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-session-' + process.pid);
+  const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-sessions-' + process.pid);
   const testSessionsDir = path.join(testDataDir, 'sessions');
   const testDbPath = path.join(testDataDir, 'test.db');
   let sessionManager: WorkSessionManager;

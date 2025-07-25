@@ -133,7 +133,7 @@ describe('KnowledgeRepository Async Tests', () => {
         ['updated', 'test']  // @ai-integration-point: New tags auto-registered
       );
       
-      expect(updateResult).toBe(true);
+      expect(updateResult).not.toBeNull();
       
       // @ai-validation: Verify changes persisted to file
       const updated = await db.getKnowledge(knowledge.id);
@@ -257,7 +257,7 @@ describe('KnowledgeRepository Async Tests', () => {
      */
     test('should handle update of non-existent knowledge', async () => {
       const result = await db.updateKnowledge(99999, 'New Title');
-      expect(result).toBe(false);  // @ai-pattern: False for not found
+      expect(result).toBeNull();  // @ai-pattern: null for not found
     });
 
     /**

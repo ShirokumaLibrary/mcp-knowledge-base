@@ -18,7 +18,7 @@ import { FileIssueDatabase } from '../database/index.js';
 
 describe('Tag Auto Registration', () => {
   let db: FileIssueDatabase;
-  const testDir = '/home/webapp/mcp/tmp/mcp-test-tag-auto-' + process.pid;
+  const testDir = '/home/webapp/mcp/tmp/mcp-test-tags-auto-' + process.pid;
   const dbPath = path.join(testDir, 'test.db');
 
   /**
