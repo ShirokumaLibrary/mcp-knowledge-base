@@ -5,6 +5,7 @@ import { IssueRepository } from './issue-repository.js';
 import { PlanRepository } from './plan-repository.js';
 import { KnowledgeRepository } from './knowledge-repository.js';
 import { DocRepository } from './doc-repository.js';
+import { ContentRepository } from './content-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { getConfig } from '../config.js';
 

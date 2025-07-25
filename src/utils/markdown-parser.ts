@@ -34,6 +34,8 @@
  * - Preserves content even if metadata parsing fails
  */
 
+import { Content } from '../types/domain-types.js';
+
 export interface ParsedMarkdown {
   metadata: Record<string, any>;
   content: string;
@@ -146,4 +148,45 @@ export function generateMarkdown(metadata: Record<string, any>, content: string)
   lines.push('---', '', content);  // @ai-logic: Empty line separates frontmatter from content
   
   return lines.join('\n');
+}
+
+/**
+ * @ai-intent Parse content markdown file
+ * @ai-pattern Specific parser for Content type with type field
+ * @ai-validation Ensures type field exists
+ */
+export function parseContentMarkdown(fileContent: string, id: number): Content {
+  const { metadata, content } = parseMarkdown(fileContent);
+  
+  return {
+    id,
+    type: metadata.type || 'doc', // Default to 'doc' if not specified
+    title: metadata.title || '',
+    summary: metadata.summary || undefined,
+    content,
+    tags: metadata.tags || [],
+    created_at: metadata.created_at || new Date().toISOString(),
+    updated_at: metadata.updated_at || new Date().toISOString()
+  };
+}
+
+/**
+ * @ai-intent Generate markdown for content
+ * @ai-pattern Includes type field in metadata
+ */
+export function generateContentMarkdown(content: Content): string {
+  const metadata: Record<string, any> = {
+    id: content.id,
+    type: content.type,
+    title: content.title,
+    tags: content.tags,
+    created_at: content.created_at,
+    updated_at: content.updated_at
+  };
+
+  if (content.summary) {
+    metadata.summary = content.summary;
+  }
+
+  return generateMarkdown(metadata, content.content);
 }

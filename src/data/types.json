@@ -1,0 +1,30 @@
+{
+  "contentTypes": [
+    {
+      "name": "doc",
+      "description": "ドキュメント（APIリファレンス、ユーザーガイド等）",
+      "isBuiltin": true,
+      "isDefault": true
+    },
+    {
+      "name": "knowledge",
+      "description": "ナレッジ（ベストプラクティス、Tips、ノウハウ）",
+      "isBuiltin": true
+    },
+    {
+      "name": "architecture",
+      "description": "アーキテクチャ（システム設計、技術構成、ADR）",
+      "isBuiltin": true
+    },
+    {
+      "name": "guideline",
+      "description": "ガイドライン（コーディング規約、開発フロー）",
+      "isBuiltin": true
+    },
+    {
+      "name": "test",
+      "description": "テスト（テストケース、シナリオ、結果）",
+      "isBuiltin": true
+    }
+  ]
+}
