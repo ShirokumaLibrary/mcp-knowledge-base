@@ -8,7 +8,7 @@
 
 import { BaseFacade } from './base-facade.js';
 import { IssueRepository } from '../issue-repository.js';
-import { Issue } from '../../types/domain-types.js';
+import { Issue, IssueSummary } from '../../types/domain-types.js';
 import { DatabaseConnection } from '../base.js';
 import { StatusRepository } from '../status-repository.js';
 import { TagRepository } from '../tag-repository.js';
@@ -35,16 +35,15 @@ export class IssueFacade extends BaseFacade {
     title: string,
     content?: string,
     priority: string = 'medium',
-    statusId?: number,
-    tags: string[] = []
+    status?: string,
+    tags: string[] = [],
+    summary?: string
   ): Promise<Issue> {
     await this.ensureInitialized(this.initPromise);
-    if (!statusId) {
-      const statuses = await this.statusRepo.getAllStatuses();
-      const openStatus = statuses.find(s => s.name === 'Open');  // @ai-logic: Prefer 'Open' status
-      statusId = openStatus ? openStatus.id : 1;  // @ai-fallback: Default to ID 1
+    if (!status) {
+      status = 'Open';  // @ai-logic: Default to 'Open' status
     }
-    return this.issueRepo.createIssue(title, content || '', priority, statusId, tags);
+    return this.issueRepo.createIssue(title, content || '', priority, status, tags, summary);
   }
 
   async getIssue(id: number): Promise<Issue | null> {
@@ -57,11 +56,12 @@ export class IssueFacade extends BaseFacade {
     title?: string,
     content?: string,
     priority?: string,
-    statusId?: number,
-    tags?: string[]
+    status?: string,
+    tags?: string[],
+    summary?: string
   ): Promise<boolean> {
     await this.ensureInitialized(this.initPromise);
-    return this.issueRepo.updateIssue(id, title, content, priority, statusId, tags);
+    return this.issueRepo.updateIssue(id, title, content, priority, status, tags, summary);
   }
 
   async deleteIssue(id: number): Promise<boolean> {
@@ -80,15 +80,7 @@ export class IssueFacade extends BaseFacade {
    * @ai-return Array of summary objects with minimal fields
    * @ai-why Optimized for UI list rendering performance
    */
-  async getAllIssuesSummary(): Promise<Array<{
-    id: number;
-    title: string;
-    priority: string;
-    status_id: number;
-    status?: string;
-    created_at: string;
-    updated_at: string;
-  }>> {
+  async getAllIssuesSummary(): Promise<IssueSummary[]> {
     await this.ensureInitialized(this.initPromise);
     return this.issueRepo.getAllIssuesSummary();
   }

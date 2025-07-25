@@ -8,7 +8,7 @@
 
 import { BaseFacade } from './base-facade.js';
 import { PlanRepository } from '../plan-repository.js';
-import { Plan } from '../../types/domain-types.js';
+import { Plan, PlanSummary } from '../../types/domain-types.js';
 import { DatabaseConnection } from '../base.js';
 import { StatusRepository } from '../status-repository.js';
 import { TagRepository } from '../tag-repository.js';
@@ -36,18 +36,17 @@ export class PlanFacade extends BaseFacade {
     title: string,
     content?: string,
     priority: string = 'medium',
-    statusId?: number,
+    status?: string,
     startDate?: string,   // @ai-pattern: YYYY-MM-DD or undefined
     endDate?: string,     // @ai-pattern: YYYY-MM-DD or undefined
-    tags: string[] = []
+    tags: string[] = [],
+    summary?: string
   ): Promise<Plan> {
     await this.ensureInitialized(this.initPromise);
-    if (!statusId) {
-      const statuses = await this.statusRepo.getAllStatuses();
-      const plannedStatus = statuses.find(s => s.name === 'Planned');  // @ai-logic: Plans start as 'Planned'
-      statusId = plannedStatus ? plannedStatus.id : 1;  // @ai-fallback: Default to ID 1
+    if (!status) {
+      status = 'Open';  // @ai-logic: Default to 'Open' status
     }
-    return this.planRepo.createPlan(title, content || '', priority, statusId, startDate, endDate, tags);
+    return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, summary);
   }
 
   async getPlan(id: number): Promise<Plan | null> {
@@ -60,13 +59,14 @@ export class PlanFacade extends BaseFacade {
     title?: string,
     content?: string,
     priority?: string,
-    statusId?: number,
+    status?: string,
     startDate?: string,
     endDate?: string,
-    tags?: string[]
+    tags?: string[],
+    summary?: string
   ): Promise<boolean> {
     await this.ensureInitialized(this.initPromise);
-    return this.planRepo.updatePlan(id, title, content, priority, statusId, startDate, endDate, tags);
+    return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary);
   }
 
   async deletePlan(id: number): Promise<boolean> {
@@ -82,5 +82,16 @@ export class PlanFacade extends BaseFacade {
   async searchPlansByTag(tag: string): Promise<Plan[]> {
     await this.ensureInitialized(this.initPromise);
     return this.planRepo.searchPlansByTag(tag);
+  }
+
+  /**
+   * @ai-intent Get lightweight plan summaries for lists
+   * @ai-performance Excludes content for speed
+   * @ai-return Array of summary objects with minimal fields
+   * @ai-why Optimized for UI list rendering performance
+   */
+  async getAllPlansSummary(): Promise<PlanSummary[]> {
+    await this.ensureInitialized(this.initPromise);
+    return this.planRepo.getAllPlansSummary();
   }
 }
