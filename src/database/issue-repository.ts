@@ -68,6 +68,7 @@ export class IssueRepository extends BaseRepository {
     return {
       id: metadata.id,
       title: metadata.title,
+      summary: metadata.summary || undefined,
       content: contentBody || '',
       priority: metadata.priority || 'medium',
       status_id: status_id,
@@ -104,6 +105,7 @@ export class IssueRepository extends BaseRepository {
     const metadata = {
       id: issue.id,
       title: issue.title,
+      summary: issue.summary,
       priority: issue.priority,
       status: issue.status,  // @ai-logic: Only store status name, not ID
       tags: issue.tags || [],
@@ -127,10 +129,11 @@ export class IssueRepository extends BaseRepository {
     // Update main issue data
     await this.db.runAsync(`
       INSERT OR REPLACE INTO search_issues 
-      (id, title, content, priority, status_id, tags, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, title, summary, content, priority, status_id, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        issue.id, issue.title, issue.content || '', 
+        issue.id, issue.title, issue.summary || '',
+        issue.content || '', 
         issue.priority, issue.status_id, 
         JSON.stringify(issue.tags || []),  // @ai-why: Keep for backward compatibility
         issue.created_at, issue.updated_at
@@ -248,7 +251,7 @@ export class IssueRepository extends BaseRepository {
     return summaries.sort((a, b) => a.id - b.id);
   }
 
-  async createIssue(title: string, content?: string, priority: string = 'medium', status?: string, tags?: string[]): Promise<Issue> {
+  async createIssue(title: string, content?: string, priority: string = 'medium', status?: string, tags?: string[], summary?: string): Promise<Issue> {
     await this.ensureDirectoryExists();
     
     // @ai-logic: Resolve status name to ID
@@ -273,6 +276,7 @@ export class IssueRepository extends BaseRepository {
     const issue: IssueInternal = {
       id: await this.getNextId(),
       title,
+      summary,
       content: content || '',
       priority,
       status_id: finalStatusId,
@@ -293,7 +297,7 @@ export class IssueRepository extends BaseRepository {
     return this.toExternalIssue(issue);
   }
 
-  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean> {
+  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean> {
     const filePath = this.getIssueFilePath(id);
     
     try {
@@ -308,6 +312,7 @@ export class IssueRepository extends BaseRepository {
       if (!issue) return false;
 
       if (title !== undefined) issue.title = title;
+      if (summary !== undefined) issue.summary = summary;
       if (content !== undefined) issue.content = content;
       if (priority !== undefined) issue.priority = priority;
       if (status !== undefined) {

@@ -1,157 +1,266 @@
-import { Knowledge, Content } from '../types/domain-types.js';
-import { ContentRepository } from './content-repository.js';
-import { logger } from '../utils/logger.js';
+import * as fsPromises from 'fs/promises';
+import * as path from 'path';
+import { BaseRepository, Database } from './base.js';
+import { Knowledge } from '../types/domain-types.js';
+import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
+import { TagRepository } from './tag-repository.js';
 
 /**
- * @ai-context Legacy wrapper for KnowledgeRepository using ContentRepository
- * @ai-pattern Adapter pattern - maintains API compatibility
- * @ai-critical Translates between Knowledge interface and Content storage
- * @ai-dependencies ContentRepository for actual storage
- * @ai-deprecated Use ContentRepository directly for new code
+ * @ai-context Repository for organizational knowledge and documentation
+ * @ai-pattern Simple content repository without status workflow
+ * @ai-critical Knowledge entries are immutable references - updates create new versions
+ * @ai-dependencies TagRepository for categorization only
+ * @ai-why Simpler than issues/plans - no status tracking or relationships
  */
-export class KnowledgeRepository {
-  private contentRepository: ContentRepository;
+export class KnowledgeRepository extends BaseRepository {
+  private knowledgeDir: string;
+  private tagRepository: TagRepository;
 
-  constructor(dbPath: string, dataDir: string, tagRepository: any) {
-    this.contentRepository = new ContentRepository(dbPath, dataDir, tagRepository);
+  constructor(db: Database, knowledgeDir: string, tagRepository?: TagRepository) {
+    super(db, 'KnowledgeRepository');
+    this.knowledgeDir = knowledgeDir;
+    this.tagRepository = tagRepository || new TagRepository(db);
+    // @ai-async: Directory creation deferred to first operation
+  }
+
+  private async ensureDirectoryExists(): Promise<void> {
+    try {
+      await fsPromises.access(this.knowledgeDir);
+    } catch {
+      await fsPromises.mkdir(this.knowledgeDir, { recursive: true });
+    }
+  }
+
+  private async getKnowledgeNextId(): Promise<number> {
+    return this.getNextSequenceValue('knowledge');
+  }
+
+  private getKnowledgeFilePath(id: number): string {
+    return path.join(this.knowledgeDir, `knowledge-${id}.md`);
   }
 
   /**
-   * @ai-intent Initialize repository
-   * @ai-delegation Delegates to ContentRepository
+   * @ai-intent Parse knowledge entry from markdown file
+   * @ai-flow 1. Extract metadata -> 2. Validate essentials -> 3. Return structured data
+   * @ai-edge-case Content is required for knowledge (unlike issues/plans)
+   * @ai-assumption Knowledge always has content body, not just metadata
+   * @ai-return Null for invalid entries to maintain system stability
    */
-  async initialize(): Promise<void> {
-    await this.contentRepository.initialize();
-  }
+  private parseMarkdownKnowledge(content: string): Knowledge | null {
+    const { metadata, content: knowledgeContent } = parseMarkdown(content);
+    
+    // @ai-logic: Knowledge requires both ID/title AND content
+    if (!metadata.id || !metadata.title) return null;
 
-  /**
-   * @ai-intent Convert Content to Knowledge format
-   * @ai-pattern Adapter method for type conversion
-   */
-  private contentToKnowledge(content: Content): Knowledge {
     return {
-      id: content.id,
-      title: content.title,
-      summary: content.summary,
-      content: content.content,
-      tags: content.tags,
-      created_at: content.created_at,
-      updated_at: content.updated_at
+      id: metadata.id,
+      title: metadata.title,
+      summary: metadata.summary || undefined,
+      content: knowledgeContent,  // @ai-critical: Main value is in the content
+      tags: Array.isArray(metadata.tags) ? metadata.tags : [],
+      created_at: metadata.created_at || new Date().toISOString(),
+      updated_at: metadata.updated_at || new Date().toISOString()
     };
   }
 
-  /**
-   * @ai-intent Create new knowledge
-   * @ai-delegation Converts to Content and delegates to ContentRepository
-   */
-  async createKnowledge(knowledgeData: { title: string; content: string; tags?: string[] }): Promise<Knowledge | null> {
-    const content = await this.contentRepository.create({
-      type: 'knowledge',
-      title: knowledgeData.title,
-      content: knowledgeData.content,
-      tags: knowledgeData.tags || []
-    });
+  private async writeMarkdownKnowledge(knowledge: Knowledge): Promise<void> {
+    const metadata = {
+      id: knowledge.id,
+      title: knowledge.title,
+      summary: knowledge.summary,
+      tags: knowledge.tags,
+      created_at: knowledge.created_at,
+      updated_at: knowledge.updated_at
+    };
     
-    return content ? this.contentToKnowledge(content) : null;
+    const content = generateMarkdown(metadata, knowledge.content);
+    await fsPromises.writeFile(this.getKnowledgeFilePath(knowledge.id), content, 'utf8');
   }
 
   /**
-   * @ai-intent Get knowledge by ID
-   * @ai-delegation Retrieves from ContentRepository and converts
-   */
-  async getKnowledgeById(id: number): Promise<Knowledge | null> {
-    const content = await this.contentRepository.getById(id);
-    if (!content || content.type !== 'knowledge') {
-      return null;
-    }
-    return this.contentToKnowledge(content);
-  }
-
-  /**
-   * @ai-intent Get all knowledge items
-   * @ai-delegation Filters Content by type='knowledge'
-   */
-  async getAllKnowledge(): Promise<Knowledge[]> {
-    const contents = await this.contentRepository.getByType('knowledge');
-    return contents.map(c => this.contentToKnowledge(c));
-  }
-
-  /**
-   * @ai-intent Update knowledge
-   * @ai-delegation Updates via ContentRepository
-   */
-  async updateKnowledge(id: number, updates: { title?: string; content?: string; tags?: string[] }): Promise<Knowledge | null> {
-    const content = await this.contentRepository.update(id, {
-      ...updates,
-      type: 'knowledge'
-    });
-    
-    return content ? this.contentToKnowledge(content) : null;
-  }
-
-  /**
-   * @ai-intent Delete knowledge
-   * @ai-delegation Deletes via ContentRepository
-   */
-  async deleteKnowledge(id: number): Promise<boolean> {
-    return await this.contentRepository.delete(id);
-  }
-
-  /**
-   * @ai-intent Search knowledge
-   * @ai-delegation Searches via ContentRepository with type filter
-   */
-  async searchKnowledge(query: string): Promise<Knowledge[]> {
-    const results = await this.contentRepository.getByType('knowledge');
-    const filtered = results.filter(k => 
-      k.title.toLowerCase().includes(query.toLowerCase()) ||
-      k.content.toLowerCase().includes(query.toLowerCase()) ||
-      k.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-    );
-    return filtered.map(c => this.contentToKnowledge(c));
-  }
-
-  /**
-   * @ai-intent Sync knowledge to SQLite
-   * @ai-delegation For compatibility - handled by ContentRepository
+   * @ai-intent Enable full-text search on knowledge content
+   * @ai-flow 1. Serialize data -> 2. Execute UPSERT -> 3. Update tag relationships
+   * @ai-side-effects Updates search_knowledge table and knowledge_tags relationship table
+   * @ai-performance Full content stored for text search capabilities
+   * @ai-critical Content field can be large - ensure adequate DB limits
+   * @ai-database-schema Uses knowledge_tags relationship table for normalized tag storage
    */
   async syncKnowledgeToSQLite(knowledge: Knowledge): Promise<void> {
-    // ContentRepository handles this internally
-    logger.info('[KnowledgeRepository] syncKnowledgeToSQLite called - handled by ContentRepository');
+    // Update main knowledge data
+    await this.db.runAsync(`
+      INSERT OR REPLACE INTO search_knowledge 
+      (id, title, summary, content, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        knowledge.id, knowledge.title, knowledge.summary || '',
+        knowledge.content,
+        JSON.stringify(knowledge.tags),  // @ai-why: Keep for backward compatibility
+        knowledge.created_at, knowledge.updated_at
+      ]
+    );
+    
+    // Update tag relationships
+    if (knowledge.tags && knowledge.tags.length > 0) {
+      await this.tagRepository.saveEntityTags('knowledge', knowledge.id, knowledge.tags);
+    } else {
+      // Clear all tag relationships if no tags
+      await this.db.runAsync('DELETE FROM knowledge_tags WHERE knowledge_id = ?', [knowledge.id]);
+    }
+  }
+
+  async getAllKnowledge(): Promise<Knowledge[]> {
+    await this.ensureDirectoryExists();
+    const files = await fsPromises.readdir(this.knowledgeDir);
+    const knowledgeFiles = files.filter(f => f.startsWith('knowledge-') && f.endsWith('.md'));
+    
+    const knowledgePromises = knowledgeFiles.map(async (file) => {
+      try {
+        const content = await fsPromises.readFile(path.join(this.knowledgeDir, file), 'utf8');
+        return this.parseMarkdownKnowledge(content);
+      } catch (error) {
+        this.logger.error(`Error reading knowledge file ${file}:`, { error });
+        return null;
+      }
+    });
+
+    const results = await Promise.all(knowledgePromises);
+    const knowledgeList = results.filter((knowledge): knowledge is Knowledge => knowledge !== null);
+    return knowledgeList.sort((a, b) => a.id - b.id);
   }
 
   /**
-   * @ai-intent Search knowledge by tag
-   * @ai-delegation Use ContentRepository to filter by tag
+   * @ai-intent Create new knowledge entry with auto-generated ID
+   * @ai-flow 1. Generate ID -> 2. Create object -> 3. Save to file -> 4. Sync to DB
+   * @ai-side-effects Creates markdown file, updates SQLite, registers tags
+   * @ai-assumption Content is already validated and safe to store
+   * @ai-critical Knowledge is append-only - no in-place updates
+   */
+  async createKnowledge(title: string, content: string, tags: string[] = [], summary?: string): Promise<Knowledge> {
+    await this.ensureDirectoryExists();
+    
+    const now = new Date().toISOString();
+    const knowledge: Knowledge = {
+      id: await this.getKnowledgeNextId(),
+      title,
+      summary,
+      content,
+      tags,
+      created_at: now,
+      updated_at: now
+    };
+
+    // Ensure tags exist before writing knowledge
+    if (knowledge.tags && knowledge.tags.length > 0) {
+      await this.tagRepository.ensureTagsExist(knowledge.tags);
+    }
+
+    await this.writeMarkdownKnowledge(knowledge);
+    await this.syncKnowledgeToSQLite(knowledge);
+    return knowledge;
+  }
+
+  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<boolean> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      await fsPromises.access(filePath);
+    } catch {
+      return false;
+    }
+
+    try {
+      const fileContent = await fsPromises.readFile(filePath, 'utf8');
+      const knowledge = this.parseMarkdownKnowledge(fileContent);
+      if (!knowledge) return false;
+
+      if (title !== undefined) knowledge.title = title;
+      if (summary !== undefined) knowledge.summary = summary;
+      if (content !== undefined) knowledge.content = content;
+      if (tags !== undefined) knowledge.tags = tags;
+      knowledge.updated_at = new Date().toISOString();
+
+      // Ensure tags exist before writing knowledge
+      if (knowledge.tags && knowledge.tags.length > 0) {
+        await this.tagRepository.ensureTagsExist(knowledge.tags);
+      }
+
+      await this.writeMarkdownKnowledge(knowledge);
+      await this.syncKnowledgeToSQLite(knowledge);
+      return true;
+    } catch (error) {
+      this.logger.error(`Error updating knowledge ${id}:`, { error });
+      return false;
+    }
+  }
+
+  async deleteKnowledge(id: number): Promise<boolean> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      await fsPromises.access(filePath);
+    } catch {
+      return false;
+    }
+
+    try {
+      await fsPromises.unlink(filePath);
+      // @ai-logic: CASCADE DELETE in foreign key constraint handles knowledge_tags cleanup
+      await this.db.runAsync('DELETE FROM search_knowledge WHERE id = ?', [id]);
+      return true;
+    } catch (error) {
+      this.logger.error(`Error deleting knowledge ${id}:`, { error });
+      return false;
+    }
+  }
+
+  async getKnowledge(id: number): Promise<Knowledge | null> {
+    const filePath = this.getKnowledgeFilePath(id);
+    
+    try {
+      const content = await fsPromises.readFile(filePath, 'utf8');
+      return this.parseMarkdownKnowledge(content);
+    } catch (error) {
+      this.logger.error(`Error reading knowledge ${id}:`, { error });
+      return null;
+    }
+  }
+
+  /**
+   * @ai-intent Search knowledge by exact tag match using relationship table
+   * @ai-flow 1. Get tag ID -> 2. JOIN with knowledge_tags -> 3. Load full knowledge
+   * @ai-performance Uses indexed JOIN instead of LIKE search
+   * @ai-database-schema Leverages knowledge_tags relationship table
    */
   async searchKnowledgeByTag(tag: string): Promise<Knowledge[]> {
-    const contents = await this.contentRepository.getByType('knowledge');
-    const filtered = contents.filter(c => c.tags.includes(tag));
-    return filtered.map(c => this.contentToKnowledge(c));
-  }
-
-  /**
-   * @ai-intent Delete knowledge by tag
-   * @ai-delegation Find and delete matching knowledge
-   */
-  async deleteKnowledgeByTag(tag: string): Promise<number> {
-    const knowledge = await this.searchKnowledgeByTag(tag);
-    let deleted = 0;
+    // Get tag ID
+    const tagRow = await this.db.getAsync(
+      'SELECT id FROM tags WHERE name = ?',
+      [tag]
+    );
     
-    for (const k of knowledge) {
-      if (await this.deleteKnowledge(k.id)) {
-        deleted++;
+    if (!tagRow) {
+      return []; // Tag doesn't exist
+    }
+    
+    // Find all knowledge IDs with this tag
+    const knowledgeRows = await this.db.allAsync(
+      `SELECT DISTINCT k.id 
+       FROM search_knowledge k
+       JOIN knowledge_tags kt ON k.id = kt.knowledge_id
+       WHERE kt.tag_id = ?
+       ORDER BY k.id`,
+      [tagRow.id]
+    );
+    
+    // Load full knowledge data
+    const knowledgeList: Knowledge[] = [];
+    for (const row of knowledgeRows) {
+      const knowledge = await this.getKnowledge(row.id);
+      if (knowledge) {
+        knowledgeList.push(knowledge);
       }
     }
     
-    return deleted;
-  }
-
-  /**
-   * @ai-intent Rebuild search index
-   * @ai-delegation Delegates to ContentRepository
-   */
-  async rebuildKnowledgeSearchIndex(): Promise<void> {
-    await this.contentRepository.rebuildSearchIndex();
+    return knowledgeList;
   }
 }

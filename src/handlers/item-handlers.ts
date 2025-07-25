@@ -16,7 +16,7 @@ import {
   SearchItemsByTagArgs
 } from '../schemas/item-schemas.js';
 import { Handler } from '../types/handler-types.js';
-import { Issue, Plan, Doc, Knowledge, IssueSummary, DocSummary } from '../types/domain-types.js';
+import { Issue, Plan, Doc, Knowledge, IssueSummary, DocSummary, PlanSummary } from '../types/domain-types.js';
 
 /**
  * @ai-context MCP tool handlers for all content types
@@ -40,7 +40,7 @@ export class ItemHandlers {
    */
   async handleGetItems(args: unknown): Promise<ToolResponse> {
     const validatedArgs = GetItemsSchema.parse(args) as GetItemsArgs;
-    let data: IssueSummary[] | Plan[] | DocSummary[] | Knowledge[];
+    let data: IssueSummary[] | PlanSummary[] | DocSummary[] | Knowledge[];
 
     // @ai-logic: Type-based strategy dispatch
     switch (validatedArgs.type) {
@@ -51,10 +51,10 @@ export class ItemHandlers {
         );  // @ai-performance: Summary for large datasets
         break;
       case 'plan':
-        data = await this.db.getAllPlans(
+        data = await this.db.getAllPlansSummary(
           validatedArgs.includeClosedStatuses,
           validatedArgs.statusIds
-        );
+        );  // @ai-performance: Summary for large datasets
         break;
       case 'doc':
         data = await this.db.getDocsSummary();  // @ai-performance: Summary excludes content
@@ -142,7 +142,8 @@ export class ItemHandlers {
           validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         break;
       case 'plan':
@@ -156,7 +157,8 @@ export class ItemHandlers {
           validatedArgs.status,
           validatedArgs.start_date,
           validatedArgs.end_date,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         break;
       case 'doc':
@@ -166,7 +168,8 @@ export class ItemHandlers {
         item = await this.db.createDoc(
           validatedArgs.title,
           validatedArgs.content,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         break;
       case 'knowledge':
@@ -176,7 +179,8 @@ export class ItemHandlers {
         item = await this.db.createKnowledge(
           validatedArgs.title,
           validatedArgs.content,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         break;
       default:
@@ -206,7 +210,8 @@ export class ItemHandlers {
           validatedArgs.content,
           validatedArgs.priority,
           validatedArgs.status,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         if (success) updatedItem = await this.db.getIssue(validatedArgs.id);
         break;
@@ -219,7 +224,8 @@ export class ItemHandlers {
           validatedArgs.status,
           validatedArgs.start_date,
           validatedArgs.end_date,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         if (success) updatedItem = await this.db.getPlan(validatedArgs.id);
         break;
@@ -228,7 +234,8 @@ export class ItemHandlers {
           validatedArgs.id,
           validatedArgs.title,
           validatedArgs.content,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         success = updatedItem !== null;
         break;
@@ -237,7 +244,8 @@ export class ItemHandlers {
           validatedArgs.id,
           validatedArgs.title,
           validatedArgs.content,
-          validatedArgs.tags
+          validatedArgs.tags,
+          validatedArgs.summary
         );
         if (success) updatedItem = await this.db.getKnowledge(validatedArgs.id);
         break;

@@ -212,3 +212,20 @@ export interface ContentSummary {
   created_at: string;
   updated_at: string;
 }
+
+/**
+ * @ai-intent Plan summary for list display
+ * @ai-pattern Includes timeline data
+ * @ai-performance Avoids loading full content
+ */
+export interface PlanSummary {
+  id: number;
+  title: string;
+  summary?: string;     // @ai-intent: One-line description
+  priority: string;
+  status?: string;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
+}

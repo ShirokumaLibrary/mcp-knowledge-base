@@ -17,7 +17,7 @@ import { z } from 'zod';
 export const CreateStatusSchema = z.object({
   name: z.string().min(1, 'Status name is required'),  // @ai-validation: Non-empty
   is_closed: z.boolean().optional().default(false),  // @ai-default: false for new statuses
-});
+}).strict();
 
 /**
  * @ai-intent Schema for update_status tool
@@ -29,7 +29,7 @@ export const UpdateStatusSchema = z.object({
   id: z.number().int().positive(),  // @ai-validation: Must be > 0
   name: z.string().min(1, 'Status name is required'),
   is_closed: z.boolean().optional(),  // @ai-logic: Optional to allow partial updates
-});
+}).strict();
 
 /**
  * @ai-intent Schema for delete_status tool
@@ -39,4 +39,4 @@ export const UpdateStatusSchema = z.object({
  */
 export const DeleteStatusSchema = z.object({
   id: z.number().int().positive(),  // @ai-validation: Must exist
-});
+}).strict();

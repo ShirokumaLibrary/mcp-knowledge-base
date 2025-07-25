@@ -27,7 +27,7 @@ export const GetItemsSchema = z.object({
   type: ItemTypeSchema,
   includeClosedStatuses: z.boolean().optional().default(false),
   statusIds: z.array(z.number().int().positive()).optional(),
-});
+}).strict();
 
 /**
  * @ai-intent Schema for get_item_detail tool
@@ -38,7 +38,7 @@ export const GetItemsSchema = z.object({
 export const GetItemDetailSchema = z.object({
   type: ItemTypeSchema,
   id: z.number().int().positive(),  // @ai-validation: Must be > 0
-});
+}).strict();
 
 /**
  * @ai-intent Schema for create_item tool
@@ -57,13 +57,14 @@ const dateFormatSchema = z.string().regex(
 export const CreateItemSchema = z.object({
   type: ItemTypeSchema,
   title: z.string().min(1, 'Title is required'),  // @ai-validation: Non-empty
+  summary: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().optional(), // @ai-logic: Required for all types (validated in handler)
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for plans
   end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for plans
-});
+}).strict();
 
 /**
  * @ai-intent Schema for update_item tool
@@ -76,13 +77,14 @@ export const UpdateItemSchema = z.object({
   type: ItemTypeSchema,
   id: z.number().int().positive(),  // @ai-critical: Must identify existing item
   title: z.string().min(1).optional(),  // @ai-validation: Non-empty if provided
+  summary: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().optional(), // @ai-logic: For all type updates
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-logic: For plan timeline changes
   end_date: dateFormatSchema.optional(),   // @ai-logic: For plan timeline changes
-});
+}).strict();
 
 /**
  * @ai-intent Schema for delete_item tool
@@ -93,7 +95,7 @@ export const UpdateItemSchema = z.object({
 export const DeleteItemSchema = z.object({
   type: ItemTypeSchema,
   id: z.number().int().positive(),
-});
+}).strict();
 
 /**
  * @ai-intent Schema for search_items_by_tag tool
@@ -105,7 +107,7 @@ export const DeleteItemSchema = z.object({
 export const SearchItemsByTagSchema = z.object({
   tag: z.string().min(1, 'Tag is required'),  // @ai-validation: Non-empty
   types: z.array(ItemTypeSchema).optional(), // @ai-logic: Filter results by type
-});
+}).strict();
 
 /**
  * @ai-section TypeScript Type Exports

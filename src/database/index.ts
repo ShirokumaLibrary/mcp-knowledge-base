@@ -5,9 +5,9 @@ import { IssueRepository } from './issue-repository.js';
 import { PlanRepository } from './plan-repository.js';
 import { KnowledgeRepository } from './knowledge-repository.js';
 import { DocRepository } from './doc-repository.js';
-import { ContentRepository } from './content-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { getConfig } from '../config.js';
+import * as path from 'path';
 
 // Re-export types
 export * from '../types/domain-types.js';
@@ -92,13 +92,13 @@ export class FileIssueDatabase {
     const db = this.connection.getDatabase();
 
     // @ai-logic: Initialize in dependency order
-    const config = getConfig();
+    // @ai-critical: Use provided dataDir instead of config paths for test isolation
     this.statusRepo = new StatusRepository(db);  // @ai-logic: No dependencies
     this.tagRepo = new TagRepository(db);        // @ai-logic: No dependencies
-    this.issueRepo = new IssueRepository(db, config.database.issuesPath, this.statusRepo, this.tagRepo);
-    this.planRepo = new PlanRepository(db, config.database.plansPath, this.statusRepo, this.tagRepo);
-    this.knowledgeRepo = new KnowledgeRepository(db, config.database.knowledgePath, this.tagRepo);
-    this.docRepo = new DocRepository(db, config.database.docsPath, this.tagRepo);
+    this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
+    this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
+    this.knowledgeRepo = new KnowledgeRepository(db, path.join(this.dataDir, 'knowledge'), this.tagRepo);
+    this.docRepo = new DocRepository(db, path.join(this.dataDir, 'docs'), this.tagRepo);
     this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.knowledgeRepo, this.docRepo);
   }
 
@@ -259,11 +259,11 @@ export class FileIssueDatabase {
    * @ai-defaults Priority: 'medium', Status: 1 (default status)
    * @ai-return Complete issue object with generated ID
    */
-  async createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[]) {
+  async createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.createIssue(title, description, priority, status, tags);
+    return this.issueRepo.createIssue(title, description, priority, status, tags, summary);
   }
 
   /**
@@ -273,11 +273,11 @@ export class FileIssueDatabase {
    * @ai-validation Issue must exist, status_id must be valid
    * @ai-return Updated issue object or null if not found
    */
-  async updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[]) {
+  async updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.updateIssue(id, title, description, priority, status, tags);
+    return this.issueRepo.updateIssue(id, title, description, priority, status, tags, summary);
   }
 
   /**
@@ -328,11 +328,11 @@ export class FileIssueDatabase {
    * @ai-pattern Dates in YYYY-MM-DD format
    * @ai-return Complete plan object with generated ID
    */
-  async createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]) {
+  async createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags);
+    return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags, summary);
   }
 
   /**
@@ -342,11 +342,11 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates preserve unspecified fields
    * @ai-return Updated plan or null if not found
    */
-  async updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]) {
+  async updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags);
+    return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags, summary);
   }
 
   /**
@@ -422,11 +422,11 @@ export class FileIssueDatabase {
    * @ai-side-effects Creates file and search index entry
    * @ai-return Complete knowledge object
    */
-  async createKnowledge(title: string, content: string, tags?: string[]) {
+  async createKnowledge(title: string, content: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.createKnowledge(title, content, tags);
+    return this.knowledgeRepo.createKnowledge(title, content, tags, summary);
   }
 
   /**
@@ -435,11 +435,11 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates allowed
    * @ai-return Updated knowledge or null
    */
-  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[]) {
+  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.knowledgeRepo.updateKnowledge(id, title, content, tags);
+    return this.knowledgeRepo.updateKnowledge(id, title, content, tags, summary);
   }
 
   /**
@@ -513,11 +513,11 @@ export class FileIssueDatabase {
    * @ai-validation Content required for docs
    * @ai-return Complete doc object
    */
-  async createDoc(title: string, content: string, tags?: string[]) {
+  async createDoc(title: string, content: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.createDoc(title, content, tags);
+    return this.docRepo.createDoc(title, content, tags, summary);
   }
 
   /**
@@ -526,11 +526,11 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates supported
    * @ai-return Updated doc or null
    */
-  async updateDoc(id: number, title?: string, content?: string, tags?: string[]) {
+  async updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.docRepo.updateDoc(id, title, content, tags);
+    return this.docRepo.updateDoc(id, title, content, tags, summary);
   }
 
   /**
@@ -567,6 +567,19 @@ export class FileIssueDatabase {
       await this.initializationPromise;
     }
     return this.docRepo.searchDocsByTag(tag);
+  }
+
+  /**
+   * @ai-intent Get lightweight plan list for UI display
+   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
+   * @ai-performance Uses indexed SQLite query vs file reads
+   * @ai-return Array with key fields including timeline data
+   */
+  async getAllPlansSummary(includeClosedStatuses: boolean = false, statusIds?: number[]) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    return this.planRepo.getAllPlansSummary(includeClosedStatuses, statusIds);
   }
 
   /**

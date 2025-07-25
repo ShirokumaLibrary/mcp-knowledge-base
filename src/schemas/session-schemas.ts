@@ -21,7 +21,7 @@ export const CreateWorkSessionSchema = z.object({
   content: z.string().optional(),  // @ai-logic: Work details and notes
   tags: z.array(z.string()).default([]),  // @ai-default: Empty array
   category: z.string().optional(),  // @ai-logic: Work categorization
-});
+}).strict();
 
 /**
  * @ai-intent Schema for update_session tool
@@ -36,7 +36,7 @@ export const UpdateWorkSessionSchema = z.object({
   content: z.string().optional(),  // @ai-logic: Work details and notes
   tags: z.array(z.string()).optional(),
   category: z.string().optional(),
-});
+}).strict();
 
 /**
  * @ai-intent Schema for create_summary tool
@@ -50,7 +50,7 @@ export const CreateDailySummarySchema = z.object({
   title: z.string().min(1, 'Title is required'),
   content: z.string().min(1, 'Content is required'),  // @ai-validation: Non-empty summary
   tags: z.array(z.string()).default([]),
-});
+}).strict();
 
 /**
  * @ai-intent Schema for update_summary tool
@@ -64,7 +64,7 @@ export const UpdateDailySummarySchema = z.object({
   title: z.string().min(1).optional(),    // @ai-bug: Can't clear with empty string
   content: z.string().min(1).optional(),  // @ai-bug: Can't clear with empty string
   tags: z.array(z.string()).optional(),
-});
+}).strict();
 
 /**
  * @ai-intent Schema for search_sessions_by_tag tool
@@ -74,7 +74,7 @@ export const UpdateDailySummarySchema = z.object({
  */
 export const SearchSessionsByTagSchema = z.object({
   tag: z.string().min(1, 'Tag is required'),  // @ai-validation: Non-empty tag
-});
+}).strict();
 
 /**
  * @ai-intent Schema for get_sessions tool
@@ -86,7 +86,7 @@ export const SearchSessionsByTagSchema = z.object({
 export const GetSessionsSchema = z.object({
   start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
   end_date: z.string().optional(),   // @ai-pattern: YYYY-MM-DD format
-});
+}).strict();
 
 /**
  * @ai-intent Schema for get_session_detail tool
@@ -96,7 +96,7 @@ export const GetSessionsSchema = z.object({
  */
 export const GetSessionDetailSchema = z.object({
   id: z.string().min(1, 'Session ID is required'),  // @ai-validation: Non-empty
-});
+}).strict();
 
 /**
  * @ai-intent Schema for get_summaries tool
@@ -108,7 +108,7 @@ export const GetSessionDetailSchema = z.object({
 export const GetDailySummariesSchema = z.object({
   start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
   end_date: z.string().optional(),   // @ai-pattern: YYYY-MM-DD
-});
+}).strict();
 
 /**
  * @ai-intent Schema for get_summary_detail tool
@@ -119,4 +119,4 @@ export const GetDailySummariesSchema = z.object({
  */
 export const GetDailySummaryDetailSchema = z.object({
   date: z.string().min(1, 'Date is required'), // @ai-pattern: YYYY-MM-DD
-});
+}).strict();

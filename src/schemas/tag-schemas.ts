@@ -16,7 +16,7 @@ import { z } from 'zod';
  */
 export const CreateTagSchema = z.object({
   name: z.string().min(1, 'Tag name is required'),  // @ai-validation: Non-empty
-});
+}).strict();
 
 /**
  * @ai-intent Schema for delete_tag tool
@@ -26,7 +26,7 @@ export const CreateTagSchema = z.object({
  */
 export const DeleteTagSchema = z.object({
   name: z.string().min(1, 'Tag name is required'),  // @ai-bug: Should be 'id' for consistency
-});
+}).strict();
 
 /**
  * @ai-intent Schema for search_tags tool
@@ -36,7 +36,7 @@ export const DeleteTagSchema = z.object({
  */
 export const SearchTagSchema = z.object({
   pattern: z.string().min(1, 'Search pattern is required'),  // @ai-pattern: SQL LIKE %pattern%
-});
+}).strict();
 
 /**
  * @ai-intent Schema for cross-type tag search
@@ -46,4 +46,4 @@ export const SearchTagSchema = z.object({
  */
 export const SearchAllByTagSchema = z.object({
   tag: z.string().min(1, 'Tag is required'),  // @ai-pattern: Exact match
-});
+}).strict();

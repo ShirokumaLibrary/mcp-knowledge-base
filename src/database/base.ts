@@ -196,6 +196,7 @@ export class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS search_issues (
         id INTEGER PRIMARY KEY,
         title TEXT,
+        summary TEXT,
         content TEXT,
         priority TEXT,
         status_id INTEGER,
@@ -210,6 +211,7 @@ export class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS search_plans (
         id INTEGER PRIMARY KEY,
         title TEXT,
+        summary TEXT,
         content TEXT,
         priority TEXT,
         status_id INTEGER,
@@ -226,6 +228,7 @@ export class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS search_knowledge (
         id INTEGER PRIMARY KEY,
         title TEXT,
+        summary TEXT,
         content TEXT,
         tags TEXT,
         created_at TEXT,
@@ -265,6 +268,7 @@ export class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS search_docs (
         id INTEGER PRIMARY KEY,
         title TEXT,
+        summary TEXT,
         content TEXT,
         tags TEXT,
         created_at TEXT,
@@ -273,12 +277,12 @@ export class DatabaseConnection {
     `);
 
     // Create indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_text ON search_knowledge(title, content)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content, summary)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content, summary)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_text ON search_knowledge(title, content, summary)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content, summary)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_text ON search_docs(title, content)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_text ON search_docs(title, content, summary)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_tags ON search_issues(tags)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_tags ON search_plans(tags)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_tags ON search_sessions(tags)`);
