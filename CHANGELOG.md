@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.6] - 2025-07-25
+
+### Changed
+- **BREAKING**: Migrated from YAML frontmatter to JSON metadata format
+  - Significantly improved performance (JSON parsing is ~10x faster than YAML)
+  - Reduced dependencies by removing js-yaml
+  - All markdown files now use JSON format between `---json` markers
+  - Added migration script `migrate-tags-to-json.ts` for existing data
+
+### Added
+- JSON metadata format support in markdown parser
+- Migration script to convert existing YAML frontmatter to JSON
+- Backward compatibility during transition period
+
+### Fixed
+- Performance issues with large datasets due to YAML parsing overhead
+- Memory usage reduced by using native JSON parsing
+
+### Technical Details
+- Replaced gray-matter YAML parsing with custom JSON parser
+- Updated all repositories to generate JSON metadata
+- Test cases updated to work with new format
+
 ## [0.0.5] - 2025-07-25
 
 ### Added
