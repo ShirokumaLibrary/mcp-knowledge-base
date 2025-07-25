@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] - 2025-07-25
+
+### Added
+- Summary field support for all item types (issues, plans, docs, knowledge)
+- Migration script for existing summary fields (`migrate-summary-fields.ts`)
+- Comprehensive test case documentation with AI validation procedures
+
+### Changed
+- Unified content repository approach for doc and knowledge types
+- Removed separate ContentRepository in favor of unified pattern
+- Updated facades to use status names instead of IDs
+- Improved schema definitions to include optional summary field
+
+### Fixed
+- Test expectations for unified content repository structure
+- Facade methods now properly support summary field updates
+
 ## [0.0.6] - 2025-07-25
 
 ### Changed
