@@ -6,6 +6,7 @@ The tests should be executed sequentially, starting from an empty database state
 ## Prerequisites
 - MCP server (`shirokuma-knowledge-base`) is available in your session
 - Data directory (`.shirokuma/data/`) should be empty for a clean test
+  - **Note**: If the database is already initialized/empty, no additional cleanup is needed
 - You have access to all MCP tools prefixed with `mcp__shirokuma-knowledge-base__`
 
 ## Test Execution Instructions
@@ -71,25 +72,46 @@ Expected: Empty arrays are returned
 
 #### 2.1 Issue Creation
 ```
-Create an Issue with multi-line content and verify that content field is required
+Create multiple Issues with various configurations
 ```
 
-- [ ] Basic Issue creation:
+- [ ] Issue 1 - Basic Issue with tags:
   ```
   mcp__shirokuma-knowledge-base__create_item(
     type: "issue",
     title: "Authentication System Bug Fix",
     content: "## Issue Details\nUsers cannot login with passwords containing special characters.\n\n### Reproduction Steps\n1. Enter username on login screen\n2. Include special characters in password\n3. Click login button\n4. Error is displayed\n\n### Expected Behavior\nUsers should be able to login with special character passwords\n\n### Impact\n- All users\n- All authentication-dependent features",
     priority: "high",
-    status_id: 1,
+    status: "Open",
     tags: ["bug", "authentication", "urgent"]
   )
   ```
-  Expected: Success with returned object containing:
-  - id: 1 (auto-generated)
-  - All provided fields
-  - created_at timestamp
-  - status: "Open"
+  Expected: Success with id: 1
+
+- [ ] Issue 2 - Issue without tags:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "issue",
+    title: "Performance Optimization Needed",
+    content: "## Problem\nThe dashboard page takes too long to load (>5 seconds).\n\n### Analysis\n- Database queries are not optimized\n- No caching implemented\n- Large data sets being loaded unnecessarily",
+    priority: "medium",
+    status: "Open"
+  )
+  ```
+  Expected: Success with id: 2, no tags
+
+- [ ] Issue 3 - Issue with different status:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "issue",
+    title: "Add Dark Mode Support",
+    content: "## Feature Request\nUsers have requested dark mode support for better visibility in low-light conditions.\n\n### Requirements\n- Toggle switch in settings\n- Persistent preference storage\n- Smooth transition animations",
+    priority: "low",
+    status: "In Progress",
+    tags: ["feature", "ui", "enhancement"]
+  )
+  ```
+  Expected: Success with id: 3
 
 - [ ] Issue creation without content - Verify error occurs:
   ```
@@ -99,34 +121,61 @@ Create an Issue with multi-line content and verify that content field is require
     priority: "medium"
   )
   ```
-  Expected: Error with message indicating content is required for issues
+  Expected: Error "Content is required for issues"
 
 #### 2.2 Plan Creation
 ```
-Create a Plan with start_date and end_date
+Create multiple Plans with various configurations
 ```
 
-- [ ] Plan creation:
+- [ ] Plan 1 - Plan with dates and tags:
   ```
   mcp__shirokuma-knowledge-base__create_item(
     type: "plan",
     title: "Q1 2025 Development Roadmap",
     content: "## Goals\n- New feature implementation\n- Performance improvements\n- Security enhancements\n\n## Milestones\n1. Authentication system renewal (January)\n2. API optimization (February)\n3. UI renewal (March)",
     priority: "high",
-    status_id: 1,
+    status: "Open",
     start_date: "2025-01-01",
     end_date: "2025-03-31",
     tags: ["roadmap", "q1-2025", "planning"]
   )
   ```
-  Expected: Success with all fields including dates
+  Expected: Success with id: 1
+
+- [ ] Plan 2 - Plan without tags:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "plan",
+    title: "Database Migration Project",
+    content: "## Objective\nMigrate from PostgreSQL 12 to PostgreSQL 16\n\n## Tasks\n- Backup current database\n- Test migration in staging\n- Schedule maintenance window\n- Execute production migration",
+    priority: "high",
+    status: "Open",
+    start_date: "2025-02-01",
+    end_date: "2025-02-28"
+  )
+  ```
+  Expected: Success with id: 2, no tags
+
+- [ ] Plan 3 - Plan without dates:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "plan",
+    title: "Technical Debt Reduction",
+    content: "## Areas to Address\n- Refactor legacy authentication code\n- Update deprecated dependencies\n- Improve test coverage to 80%\n- Document internal APIs",
+    priority: "medium",
+    status: "Open",
+    tags: ["technical-debt", "refactoring"]
+  )
+  ```
+  Expected: Success with id: 3, null dates
 
 #### 2.3 Document Creation
 ```
-Create a technical document
+Create multiple Documents with various configurations
 ```
 
-- [ ] Document creation:
+- [ ] Doc 1 - Document with tags:
   ```
   mcp__shirokuma-knowledge-base__create_item(
     type: "doc",
@@ -135,14 +184,35 @@ Create a technical document
     tags: ["documentation", "api", "authentication"]
   )
   ```
-  Expected: Success with document created
+  Expected: Success with id: 1
+
+- [ ] Doc 2 - Document without tags:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "doc",
+    title: "System Architecture Overview",
+    content: "# System Architecture\n\n## Components\n- Frontend: React + TypeScript\n- Backend: Node.js + Express\n- Database: PostgreSQL\n- Cache: Redis\n\n## Communication\n- REST API for client-server\n- WebSocket for real-time updates\n- Message Queue for background jobs"
+  )
+  ```
+  Expected: Success with id: 2, no tags
+
+- [ ] Doc 3 - Development guidelines:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "doc",
+    title: "Development Guidelines",
+    content: "# Development Guidelines\n\n## Code Style\n- Use ESLint configuration\n- Follow TypeScript strict mode\n- Write tests for all features\n\n## Git Workflow\n- Feature branches from main\n- PR reviews required\n- Squash merge policy",
+    tags: ["guidelines", "development", "standards"]
+  )
+  ```
+  Expected: Success with id: 3
 
 #### 2.4 Knowledge Creation
 ```
-Create a knowledge base entry
+Create multiple Knowledge entries with various configurations
 ```
 
-- [ ] Knowledge creation:
+- [ ] Knowledge 1 - Knowledge with tags:
   ```
   mcp__shirokuma-knowledge-base__create_item(
     type: "knowledge",
@@ -151,19 +221,40 @@ Create a knowledge base entry
     tags: ["best-practices", "error-handling", "development"]
   )
   ```
-  Expected: Success with knowledge entry created
+  Expected: Success with id: 1
+
+- [ ] Knowledge 2 - Knowledge without tags:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "knowledge",
+    title: "Database Query Optimization",
+    content: "## Query Optimization Techniques\n\n### Indexing Strategy\n- Create indexes on frequently queried columns\n- Use composite indexes for multi-column queries\n- Monitor index usage and remove unused ones\n\n### Query Patterns\n- Avoid SELECT *\n- Use EXPLAIN ANALYZE\n- Batch operations when possible"
+  )
+  ```
+  Expected: Success with id: 2, no tags
+
+- [ ] Knowledge 3 - Security practices:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "knowledge",
+    title: "Security Checklist",
+    content: "## Application Security\n\n### Authentication\n- Use bcrypt for password hashing\n- Implement rate limiting\n- Enable 2FA for sensitive accounts\n\n### Data Protection\n- Encrypt sensitive data at rest\n- Use HTTPS everywhere\n- Validate all inputs\n- Sanitize outputs",
+    tags: ["security", "checklist", "best-practices"]
+  )
+  ```
+  Expected: Success with id: 3
 
 ### 3. Data Retrieval & Update Tests
 
 #### 3.1 List Retrieval Verification
 - [ ] Get Issues list: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
-      Expected: Array containing the created issue with all fields
+      Expected: Array containing 3 issues (only non-closed ones)
 - [ ] Get Plans list: `mcp__shirokuma-knowledge-base__get_items(type: "plan")`
-      Expected: Array containing the created plan
+      Expected: Array containing 3 plans
 - [ ] Get Documents list: `mcp__shirokuma-knowledge-base__get_items(type: "doc")`
-      Expected: Array containing the created document
+      Expected: Array containing 3 documents
 - [ ] Get Knowledge list: `mcp__shirokuma-knowledge-base__get_items(type: "knowledge")`
-      Expected: Array containing the created knowledge entry
+      Expected: Array containing 3 knowledge entries
 
 #### 3.1.1 Status Filtering Tests (Issues and Plans)
 - [ ] Get Issues excluding closed statuses (default): `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
@@ -195,11 +286,10 @@ Create a knowledge base entry
   mcp__shirokuma-knowledge-base__update_item(
     type: "issue",
     id: 1,
-    content: "## Issue Details (Updated)\nProblem is being resolved.\n\n### Root Cause\nPassword escaping issue identified\n\n### Solution\nImplemented proper escaping for special characters",
-    status_id: 2
+    content: "## Issue Details (Updated)\nProblem is being resolved.\n\n### Root Cause\nPassword escaping issue identified\n\n### Solution\nImplemented proper escaping for special characters"
   )
   ```
-  Expected: Success with updated content and status
+  Expected: Success with updated content
 
 - [ ] Plan update (add tags):
   ```
@@ -221,12 +311,22 @@ Create a knowledge base entry
   ```
   Expected: Success with only title changed, other fields preserved
 
+- [ ] Status update test:
+  ```
+  mcp__shirokuma-knowledge-base__update_item(
+    type: "issue",
+    id: 1,
+    status: "In Progress"
+  )
+  ```
+  Expected: Success with status changed to "In Progress"
+
 ### 4. Tag Functionality Tests
 
 #### 4.1 Tag Management
 - [ ] Get tag list: `mcp__shirokuma-knowledge-base__get_tags()`
       Expected: Array containing all auto-registered tags from created items:
-      ["bug", "authentication", "urgent", "roadmap", "q1-2025", "planning", "documentation", "api", "best-practices", "error-handling", "development", "priority"]
+      ["bug", "authentication", "urgent", "feature", "ui", "enhancement", "roadmap", "q1-2025", "planning", "technical-debt", "refactoring", "documentation", "api", "guidelines", "development", "standards", "best-practices", "error-handling", "security", "checklist"]
 - [ ] Tag search: `mcp__shirokuma-knowledge-base__search_tags(pattern: "auth")`
       Expected: Array containing "authentication"
 - [ ] Create new tag: `mcp__shirokuma-knowledge-base__create_tag(name: "feature")`
@@ -236,9 +336,11 @@ Create a knowledge base entry
 
 #### 4.2 Search by Tag
 - [ ] Single tag search: `mcp__shirokuma-knowledge-base__search_items_by_tag(tag: "authentication")`
-      Expected: Results containing both the issue and document with "authentication" tag
+      Expected: Results containing Issue 1 and Doc 1 (both have "authentication" tag)
 - [ ] Tag search with specific types: `mcp__shirokuma-knowledge-base__search_items_by_tag(tag: "authentication", types: ["issue", "doc"])`
-      Expected: Same results (issue and doc only, no plans or knowledge)
+      Expected: Same results (Issue 1 and Doc 1)
+- [ ] Search for "development" tag: `mcp__shirokuma-knowledge-base__search_items_by_tag(tag: "development")`
+      Expected: Results containing Doc 3 and Knowledge 1 (both have "development" tag)
 - [ ] Search with non-existent tag: `mcp__shirokuma-knowledge-base__search_items_by_tag(tag: "nonexistent")`
       Expected: Empty result
 
@@ -257,19 +359,20 @@ Note: Status creation, update, and deletion are disabled. Statuses can only be m
       Expected: Error - tool not available
 
 #### 5.2 Status Usage Tests
-- [ ] Update issue to closed status:
+- [ ] Update issue status using status name:
   ```
   mcp__shirokuma-knowledge-base__update_item(
     type: "issue",
     id: 1,
-    status_id: 5
+    status: "Closed"
   )
   ```
-  Expected: Success, item now has "Closed" status
+  Expected: Success with status updated to "Closed"
+  Note: Status updates now work correctly using status names
 - [ ] Verify closed issue is excluded by default: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
-      Expected: Empty array (closed issue not shown)
+      Expected: Array with 2 issues (closed issue not shown)
 - [ ] Verify closed issue appears with flag: `mcp__shirokuma-knowledge-base__get_items(type: "issue", includeClosedStatuses: true)`
-      Expected: Array contains the closed issue
+      Expected: Array with 3 issues (including the closed one)
 
 ### 6. Session Management Tests
 
@@ -367,7 +470,7 @@ Note: Status creation, update, and deletion are disabled. Statuses can only be m
 - [ ] Delete Issue: `mcp__shirokuma-knowledge-base__delete_item(type: "issue", id: 1)`
       Expected: Success
 - [ ] Verify list after deletion: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
-      Expected: Empty array
+      Expected: Array with 2 remaining issues (id: 2, 3)
 - [ ] Get detail of deleted item: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issue", id: 1)`
       Expected: null
 - [ ] Delete already deleted item: `mcp__shirokuma-knowledge-base__delete_item(type: "issue", id: 1)`
@@ -451,7 +554,7 @@ Note: This requires command line access, not MCP
     type: "issue",
     title: "Cancelled Feature",
     content: "This feature was cancelled",
-    status_id: 7
+    status: "Cancelled"
   )
   ```
   Then: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
@@ -481,6 +584,7 @@ Note: This requires command line access, not MCP
 - Status filtering for issues/plans works as expected (default excludes closed)
 - Status modification tools are properly disabled
 - Status names (not IDs) are stored in markdown files
+- Status updates via update_item work correctly using status names
 - Unicode and special characters are handled properly
 
 ### AI Testing Guidelines
