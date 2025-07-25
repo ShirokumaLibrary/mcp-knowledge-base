@@ -44,15 +44,16 @@ describe('FileIssueDatabase Async Tests', () => {
     describe('Status operations', () => {
         /**
          * @ai-intent Test default status initialization
-         * @ai-validation Ensures 6 default statuses exist
-         * @ai-assumption Default statuses are: Open, In Progress, Review, Completed, Closed, On Hold
+         * @ai-validation Ensures 7 default statuses exist
+         * @ai-assumption Default statuses are: Open, In Progress, Review, Completed, Closed, On Hold, Cancelled
          */
         test('should initialize with default statuses', async () => {
             const statuses = await db.getAllStatuses();
-            expect(statuses).toHaveLength(6); // @ai-logic: 6 default statuses
+            expect(statuses).toHaveLength(7); // @ai-logic: 7 default statuses including Cancelled
             expect(statuses.map(s => s.name)).toContain('Open');
             expect(statuses.map(s => s.name)).toContain('In Progress');
             expect(statuses.map(s => s.name)).toContain('Completed');
+            expect(statuses.map(s => s.name)).toContain('Cancelled');
         });
         /**
          * @ai-intent Test custom status creation

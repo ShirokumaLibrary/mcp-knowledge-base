@@ -1,13 +1,13 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { GetItemsSchema, GetItemDetailSchema, CreateItemSchema, UpdateItemSchema, DeleteItemSchema, SearchItemsByTagSchema } from '../schemas/unified-schemas.js';
+import { GetItemsSchema, GetItemDetailSchema, CreateItemSchema, UpdateItemSchema, DeleteItemSchema, SearchItemsByTagSchema } from '../schemas/item-schemas.js';
 /**
- * @ai-context Unified MCP tool handlers for all content types
+ * @ai-context MCP tool handlers for all content types
  * @ai-pattern Strategy pattern with type-based dispatch
  * @ai-critical Entry point for all MCP tool calls - must handle errors gracefully
  * @ai-dependencies FileIssueDatabase for all data operations
  * @ai-why Single handler class simplifies MCP tool registration and maintenance
  */
-export class UnifiedHandlers {
+export class ItemHandlers {
     db;
     constructor(db) {
         this.db = db;
@@ -240,4 +240,4 @@ export class UnifiedHandlers {
         };
     }
 }
-//# sourceMappingURL=unified-handlers.js.map
+//# sourceMappingURL=item-handlers.js.map

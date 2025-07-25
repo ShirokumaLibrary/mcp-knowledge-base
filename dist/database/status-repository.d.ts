@@ -26,8 +26,8 @@ export declare class StatusRepository extends BaseRepository {
      * @ai-error-handling Throws on duplicate names (UNIQUE constraint)
      * @ai-critical IDs 7+ are custom statuses that need preservation during rebuilds
      */
-    createStatus(name: string): Promise<Status>;
-    updateStatus(id: number, name: string): Promise<boolean>;
+    createStatus(name: string, is_closed?: boolean): Promise<Status>;
+    updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean>;
     /**
      * @ai-intent Remove status definition
      * @ai-flow 1. Execute DELETE -> 2. Check affected rows -> 3. Return success

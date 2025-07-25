@@ -117,3 +117,64 @@ export declare const SearchSessionsByTagSchema: z.ZodObject<{
 }, {
     tag: string;
 }>;
+/**
+ * @ai-intent Schema for get_sessions tool
+ * @ai-validation Optional date range parameters
+ * @ai-pattern Date format: YYYY-MM-DD
+ * @ai-defaults No params = today's sessions only
+ * @ai-return Array of sessions in date range
+ */
+export declare const GetSessionsSchema: z.ZodObject<{
+    start_date: z.ZodOptional<z.ZodString>;
+    end_date: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+}, {
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+}>;
+/**
+ * @ai-intent Schema for get_session_detail tool
+ * @ai-validation Session ID is required
+ * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
+ * @ai-return Complete session object or error
+ */
+export declare const GetSessionDetailSchema: z.ZodObject<{
+    id: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+}, {
+    id: string;
+}>;
+/**
+ * @ai-intent Schema for get_summaries tool
+ * @ai-validation Optional date range
+ * @ai-defaults No params = last 7 days
+ * @ai-pattern Dates in YYYY-MM-DD format
+ * @ai-return Array of daily summaries
+ */
+export declare const GetDailySummariesSchema: z.ZodObject<{
+    start_date: z.ZodOptional<z.ZodString>;
+    end_date: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+}, {
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+}>;
+/**
+ * @ai-intent Schema for get_summary_detail tool
+ * @ai-validation Date parameter required
+ * @ai-pattern Date format: YYYY-MM-DD
+ * @ai-critical One summary per date maximum
+ * @ai-return Daily summary or null
+ */
+export declare const GetDailySummaryDetailSchema: z.ZodObject<{
+    date: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    date: string;
+}, {
+    date: string;
+}>;

@@ -87,8 +87,8 @@ export class WorkSessionManager {
      * @ai-error-handling Throws descriptive error if session not found
      */
     updateSession(id, title, content, tags, category) {
-        // @ai-logic: Parse YYYYMMDD from ID to get YYYY-MM-DD date
-        const session = this.repository.loadSession(id, id.substring(0, 4) + '-' + id.substring(4, 6) + '-' + id.substring(6, 8));
+        // @ai-logic: Use getSessionDetail to find session in any date directory
+        const session = this.repository.getSessionDetail(id);
         if (!session) {
             throw new Error(`Session ${id} not found`);
         }
@@ -112,9 +112,8 @@ export class WorkSessionManager {
      * @ai-why Date needed to locate correct directory
      */
     getSession(sessionId) {
-        // @ai-logic: Convert YYYYMMDD to YYYY-MM-DD for directory path
-        const date = sessionId.substring(0, 4) + '-' + sessionId.substring(4, 6) + '-' + sessionId.substring(6, 8);
-        return this.repository.loadSession(sessionId, date);
+        // @ai-logic: Use getSessionDetail to find session in any date directory
+        return this.repository.getSessionDetail(sessionId);
     }
     /**
      * @ai-intent Get most recent session from today

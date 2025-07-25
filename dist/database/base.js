@@ -102,6 +102,7 @@ export class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS statuses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
+        is_closed BOOLEAN DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -123,8 +124,8 @@ export class DatabaseConnection {
     `);
         // Insert default statuses
         this.logger.debug('Inserting default statuses...');
-        await this.db.runAsync(`INSERT OR IGNORE INTO statuses (name) VALUES 
-      ('Open'), ('In Progress'), ('Review'), ('Completed'), ('Closed'), ('On Hold')`);
+        await this.db.runAsync(`INSERT OR IGNORE INTO statuses (name, is_closed) VALUES 
+      ('Open', 0), ('In Progress', 0), ('Review', 0), ('Completed', 1), ('Closed', 1), ('On Hold', 0), ('Cancelled', 1)`);
         // Initialize sequences - reset to 0 if database is empty
         this.logger.debug('Initializing sequences...');
         // Check if sequences already exist

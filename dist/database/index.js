@@ -123,11 +123,11 @@ export class FileIssueDatabase {
      * @ai-validation Name uniqueness checked by repository
      * @ai-return New status object with generated ID
      */
-    async createStatus(name) {
+    async createStatus(name, is_closed = false) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.statusRepo.createStatus(name);
+        return this.statusRepo.createStatus(name, is_closed);
     }
     /**
      * @ai-intent Update existing status name
@@ -136,11 +136,11 @@ export class FileIssueDatabase {
      * @ai-critical Cannot update if status in use by items
      * @ai-return Updated status object or null if not found
      */
-    async updateStatus(id, name) {
+    async updateStatus(id, name, is_closed) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.statusRepo.updateStatus(id, name);
+        return this.statusRepo.updateStatus(id, name, is_closed);
     }
     /**
      * @ai-intent Delete workflow status
@@ -214,11 +214,11 @@ export class FileIssueDatabase {
      * @ai-performance O(n) file reads - consider pagination for scale
      * @ai-return Array of complete issue objects sorted by ID
      */
-    async getAllIssues() {
+    async getAllIssues(includeClosedStatuses = false, statusIds) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.getAllIssues();
+        return this.issueRepo.getAllIssues(includeClosedStatuses, statusIds);
     }
     /**
      * @ai-intent Get lightweight issue list for UI display
@@ -226,11 +226,11 @@ export class FileIssueDatabase {
      * @ai-performance Uses indexed SQLite query vs file reads
      * @ai-return Array with id, title, priority, status fields only
      */
-    async getAllIssuesSummary() {
+    async getAllIssuesSummary(includeClosedStatuses = false, statusIds) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.getAllIssuesSummary();
+        return this.issueRepo.getAllIssuesSummary(includeClosedStatuses, statusIds);
     }
     /**
      * @ai-intent Create new issue with optional metadata
@@ -290,11 +290,11 @@ export class FileIssueDatabase {
      * @ai-critical Plans include start/end dates for scheduling
      * @ai-return Array of plan objects sorted by ID
      */
-    async getAllPlans() {
+    async getAllPlans(includeClosedStatuses = false, statusIds) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.planRepo.getAllPlans();
+        return this.planRepo.getAllPlans(includeClosedStatuses, statusIds);
     }
     /**
      * @ai-intent Create new plan with timeline

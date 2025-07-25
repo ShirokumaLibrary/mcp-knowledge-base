@@ -1,13 +1,13 @@
 /**
- * @ai-context Zod schemas for unified MCP tool validation
- * @ai-pattern Unified API treating all content types generically
+ * @ai-context Zod schemas for MCP tool validation
+ * @ai-pattern Single API treating all content types generically
  * @ai-critical Validates all MCP tool arguments for type safety
  * @ai-dependencies Zod for runtime validation and type inference
  * @ai-why Single API reduces complexity for MCP clients
  */
 import { z } from 'zod';
 /**
- * @ai-intent Valid content types for unified operations
+ * @ai-intent Valid content types for item operations
  * @ai-pattern Enum ensures only valid types accepted
  * @ai-critical Must match handler implementations
  */
@@ -94,45 +94,4 @@ export const SearchItemsByTagSchema = z.object({
     tag: z.string().min(1, 'Tag is required'), // @ai-validation: Non-empty
     types: z.array(ItemTypeSchema).optional(), // @ai-logic: Filter results by type
 });
-/**
- * @ai-intent Schema for get_sessions tool
- * @ai-validation Optional date range parameters
- * @ai-pattern Date format: YYYY-MM-DD
- * @ai-defaults No params = today's sessions only
- * @ai-return Array of sessions in date range
- */
-export const GetSessionsSchema = z.object({
-    start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
-    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
-});
-/**
- * @ai-intent Schema for get_session_detail tool
- * @ai-validation Session ID is required
- * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
- * @ai-return Complete session object or error
- */
-export const GetSessionDetailSchema = z.object({
-    id: z.string().min(1, 'Session ID is required'), // @ai-validation: Non-empty
-});
-/**
- * @ai-intent Schema for get_summaries tool
- * @ai-validation Optional date range
- * @ai-defaults No params = last 7 days
- * @ai-pattern Dates in YYYY-MM-DD format
- * @ai-return Array of daily summaries
- */
-export const GetDailySummariesSchema = z.object({
-    start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
-    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
-});
-/**
- * @ai-intent Schema for get_summary_detail tool
- * @ai-validation Date parameter required
- * @ai-pattern Date format: YYYY-MM-DD
- * @ai-critical One summary per date maximum
- * @ai-return Daily summary or null
- */
-export const GetDailySummaryDetailSchema = z.object({
-    date: z.string().min(1, 'Date is required'), // @ai-pattern: YYYY-MM-DD
-});
-//# sourceMappingURL=unified-schemas.js.map
+//# sourceMappingURL=item-schemas.js.map

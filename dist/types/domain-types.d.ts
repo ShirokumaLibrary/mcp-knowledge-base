@@ -39,6 +39,7 @@
 export interface Status {
     id: number;
     name: string;
+    is_closed?: boolean;
     created_at?: string;
 }
 /**

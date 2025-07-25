@@ -84,7 +84,7 @@ export declare class FileIssueDatabase {
      * @ai-validation Name uniqueness checked by repository
      * @ai-return New status object with generated ID
      */
-    createStatus(name: string): Promise<import("./index.js").Status>;
+    createStatus(name: string, is_closed?: boolean): Promise<import("./index.js").Status>;
     /**
      * @ai-intent Update existing status name
      * @ai-flow 1. Wait for init -> 2. Update in SQLite -> 3. Return updated
@@ -92,7 +92,7 @@ export declare class FileIssueDatabase {
      * @ai-critical Cannot update if status in use by items
      * @ai-return Updated status object or null if not found
      */
-    updateStatus(id: number, name: string): Promise<boolean>;
+    updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean>;
     /**
      * @ai-intent Delete workflow status
      * @ai-flow 1. Wait for init -> 2. Check usage -> 3. Delete if unused
@@ -140,14 +140,14 @@ export declare class FileIssueDatabase {
      * @ai-performance O(n) file reads - consider pagination for scale
      * @ai-return Array of complete issue objects sorted by ID
      */
-    getAllIssues(): Promise<import("./index.js").Issue[]>;
+    getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<import("./index.js").Issue[]>;
     /**
      * @ai-intent Get lightweight issue list for UI display
      * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
      * @ai-performance Uses indexed SQLite query vs file reads
      * @ai-return Array with id, title, priority, status fields only
      */
-    getAllIssuesSummary(): Promise<{
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<{
         id: number;
         title: string;
         priority: string;
@@ -194,7 +194,7 @@ export declare class FileIssueDatabase {
      * @ai-critical Plans include start/end dates for scheduling
      * @ai-return Array of plan objects sorted by ID
      */
-    getAllPlans(): Promise<import("./index.js").Plan[]>;
+    getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<import("./index.js").Plan[]>;
     /**
      * @ai-intent Create new plan with timeline
      * @ai-flow 1. Wait for init -> 2. Validate dates -> 3. Create files -> 4. Sync

@@ -14,10 +14,13 @@ import { z } from 'zod';
  */
 export declare const CreateStatusSchema: z.ZodObject<{
     name: z.ZodString;
+    is_closed: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
 }, "strip", z.ZodTypeAny, {
     name: string;
+    is_closed: boolean;
 }, {
     name: string;
+    is_closed?: boolean | undefined;
 }>;
 /**
  * @ai-intent Schema for update_status tool
@@ -28,12 +31,15 @@ export declare const CreateStatusSchema: z.ZodObject<{
 export declare const UpdateStatusSchema: z.ZodObject<{
     id: z.ZodNumber;
     name: z.ZodString;
+    is_closed: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     id: number;
     name: string;
+    is_closed?: boolean | undefined;
 }, {
     id: number;
     name: string;
+    is_closed?: boolean | undefined;
 }>;
 /**
  * @ai-intent Schema for delete_status tool

@@ -46,9 +46,12 @@ export declare class IssueRepository extends BaseRepository {
      * @ai-performance Parallel file reads for better performance
      * @ai-error-handling Silently skips corrupted files to maintain system stability
      * @ai-return Always returns array, empty if no valid issues found
+     * @ai-params
+     *   - includeClosedStatuses: If false (default), excludes issues with closed statuses
+     *   - statusIds: If provided, only returns issues with these status IDs
      */
-    getAllIssues(): Promise<Issue[]>;
-    getAllIssuesSummary(): Promise<Array<{
+    getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Issue[]>;
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Array<{
         id: number;
         title: string;
         priority: string;

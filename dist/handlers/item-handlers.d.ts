@@ -1,13 +1,13 @@
 import { FileIssueDatabase } from '../database.js';
 import { ToolResponse } from '../types/mcp-types.js';
 /**
- * @ai-context Unified MCP tool handlers for all content types
+ * @ai-context MCP tool handlers for all content types
  * @ai-pattern Strategy pattern with type-based dispatch
  * @ai-critical Entry point for all MCP tool calls - must handle errors gracefully
  * @ai-dependencies FileIssueDatabase for all data operations
  * @ai-why Single handler class simplifies MCP tool registration and maintenance
  */
-export declare class UnifiedHandlers {
+export declare class ItemHandlers {
     private db;
     constructor(db: FileIssueDatabase);
     /**

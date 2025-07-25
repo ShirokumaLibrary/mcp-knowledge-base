@@ -163,6 +163,17 @@ describe('WorkSessionManager', () => {
          */
         it('should load saved session', () => {
             const session = sessionManager.createSession('Test Session', 'Content');
+            // Debug: Check if session was created properly
+            expect(session).toBeDefined();
+            expect(session.id).toBeDefined();
+            expect(session.id).toMatch(/^\d{8}-\d{9}$/); // YYYYMMDD-HHMMSSsss format
+            // Verify the session file was created
+            // Use the date from the session object, not parsed from ID
+            const sessionPath = path.join(testSessionsDir, session.date, `session-${session.id}.md`);
+            // Debug: Check if directory exists
+            const dateDir = path.join(testSessionsDir, session.date);
+            expect(fs.existsSync(dateDir)).toBe(true);
+            expect(fs.existsSync(sessionPath)).toBe(true);
             const loaded = sessionManager.getSession(session.id);
             expect(loaded).not.toBeNull();
             expect(loaded?.title).toBe('Test Session');

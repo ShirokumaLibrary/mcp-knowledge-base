@@ -2,12 +2,12 @@
  * @ai-context MCP tool schema definitions for external API
  * @ai-pattern Declarative tool specifications following MCP protocol
  * @ai-critical This defines the external API contract - changes break clients
- * @ai-why Unified definitions ensure consistency across all tool types
+ * @ai-why Centralized definitions ensure consistency across all tool types
  * @ai-assumption JSON Schema format as required by MCP specification
  */
-// Unified tool definitions for MCP server
-export const unifiedToolDefinitions = [
-    // @ai-pattern Unified CRUD operations for all content types
+// Tool definitions for MCP server
+export const toolDefinitions = [
+    // @ai-pattern CRUD operations for all content types
     // @ai-intent Single API for issues, plans, docs, and knowledge
     // @ai-why Reduces API surface and simplifies client implementation
     {
@@ -486,4 +486,4 @@ export const unifiedToolDefinitions = [
         },
     },
 ];
-//# sourceMappingURL=unified-tool-definitions.js.map
+//# sourceMappingURL=tool-definitions.js.map

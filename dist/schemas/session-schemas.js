@@ -69,4 +69,45 @@ export const UpdateDailySummarySchema = z.object({
 export const SearchSessionsByTagSchema = z.object({
     tag: z.string().min(1, 'Tag is required'), // @ai-validation: Non-empty tag
 });
+/**
+ * @ai-intent Schema for get_sessions tool
+ * @ai-validation Optional date range parameters
+ * @ai-pattern Date format: YYYY-MM-DD
+ * @ai-defaults No params = today's sessions only
+ * @ai-return Array of sessions in date range
+ */
+export const GetSessionsSchema = z.object({
+    start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
+    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
+});
+/**
+ * @ai-intent Schema for get_session_detail tool
+ * @ai-validation Session ID is required
+ * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
+ * @ai-return Complete session object or error
+ */
+export const GetSessionDetailSchema = z.object({
+    id: z.string().min(1, 'Session ID is required'), // @ai-validation: Non-empty
+});
+/**
+ * @ai-intent Schema for get_summaries tool
+ * @ai-validation Optional date range
+ * @ai-defaults No params = last 7 days
+ * @ai-pattern Dates in YYYY-MM-DD format
+ * @ai-return Array of daily summaries
+ */
+export const GetDailySummariesSchema = z.object({
+    start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
+    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
+});
+/**
+ * @ai-intent Schema for get_summary_detail tool
+ * @ai-validation Date parameter required
+ * @ai-pattern Date format: YYYY-MM-DD
+ * @ai-critical One summary per date maximum
+ * @ai-return Daily summary or null
+ */
+export const GetDailySummaryDetailSchema = z.object({
+    date: z.string().min(1, 'Date is required'), // @ai-pattern: YYYY-MM-DD
+});
 //# sourceMappingURL=session-schemas.js.map

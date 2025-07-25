@@ -6,8 +6,7 @@
  * @ai-assumption All responses follow MCP JSON format
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { CreateWorkSessionSchema, UpdateWorkSessionSchema, SearchSessionsByTagSchema } from '../schemas/session-schemas.js';
-import { GetSessionsSchema, GetSessionDetailSchema } from '../schemas/unified-schemas.js';
+import { CreateWorkSessionSchema, UpdateWorkSessionSchema, SearchSessionsByTagSchema, GetSessionsSchema, GetSessionDetailSchema } from '../schemas/session-schemas.js';
 /**
  * @ai-context Handles MCP tool calls for session operations
  * @ai-pattern Each method validates args and returns JSON response

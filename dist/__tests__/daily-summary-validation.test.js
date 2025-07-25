@@ -5,7 +5,7 @@
  */
 import { WorkSessionManager } from '../session-manager';
 import { FileIssueDatabase } from '../database';
-import { CreateItemSchema } from '../schemas/unified-schemas';
+import { CreateItemSchema } from '../schemas/item-schemas';
 import * as fs from 'fs';
 import * as path from 'path';
 describe('Daily Summary Validation', () => {

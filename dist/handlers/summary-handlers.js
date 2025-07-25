@@ -6,8 +6,7 @@
  * @ai-assumption One summary per date maximum
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { CreateDailySummarySchema, UpdateDailySummarySchema } from '../schemas/session-schemas.js';
-import { GetDailySummariesSchema, GetDailySummaryDetailSchema } from '../schemas/unified-schemas.js';
+import { CreateDailySummarySchema, UpdateDailySummarySchema, GetDailySummariesSchema, GetDailySummaryDetailSchema } from '../schemas/session-schemas.js';
 /**
  * @ai-context Handles MCP tool calls for daily summaries
  * @ai-pattern Each method validates and delegates

@@ -16,12 +16,14 @@ export interface IStatusRepository {
     getAllStatuses(): Promise<Array<{
         id: number;
         name: string;
+        is_closed?: boolean;
     }>>;
-    createStatus(name: string): Promise<{
+    createStatus(name: string, is_closed?: boolean): Promise<{
         id: number;
         name: string;
+        is_closed?: boolean;
     }>;
-    updateStatus(id: number, name: string): Promise<boolean>;
+    updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean>;
     deleteStatus(id: number): Promise<boolean>;
 }
 /**
@@ -38,8 +40,8 @@ export interface ITagRepository {
     searchTags(pattern: string): Promise<any[]>;
 }
 export interface IIssueRepository {
-    getAllIssues(): Promise<any[]>;
-    getAllIssuesSummary(): Promise<any[]>;
+    getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
     createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<any>;
     updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
@@ -47,7 +49,7 @@ export interface IIssueRepository {
     searchIssuesByTag(tag: string): Promise<any[]>;
 }
 export interface IPlanRepository {
-    getAllPlans(): Promise<any[]>;
+    getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
     getAllPlansSummary(): Promise<any[]>;
     createPlan(title: string, description?: string, priority?: string, status_id?: number, tags?: string[], start_date?: string, end_date?: string): Promise<any>;
     updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[], start_date?: string, end_date?: string): Promise<boolean>;
