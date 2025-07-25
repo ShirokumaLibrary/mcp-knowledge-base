@@ -45,17 +45,19 @@ Expected: Empty arrays are returned
 
 #### 1.3 Master Data Verification
 - [ ] Status list: `mcp__shirokuma-knowledge-base__get_statuses()`
-      Expected: Array containing default statuses with is_closed flags:
-      ```json
-      [
-        {"id": 1, "name": "Open", "is_closed": false},
-        {"id": 2, "name": "In Progress", "is_closed": false},
-        {"id": 3, "name": "Review", "is_closed": false},
-        {"id": 4, "name": "Completed", "is_closed": true},
-        {"id": 5, "name": "Closed", "is_closed": true},
-        {"id": 6, "name": "On Hold", "is_closed": false},
-        {"id": 7, "name": "Cancelled", "is_closed": true}
-      ]
+      Expected: Markdown table containing default statuses with is_closed flags:
+      ```
+      ## Available Statuses
+
+      | Name | Is Closed |
+      |------|-----------|
+      | Open | No |
+      | In Progress | No |
+      | Review | No |
+      | Completed | Yes |
+      | Closed | Yes |
+      | On Hold | No |
+      | Cancelled | Yes |
       ```
 - [ ] Tag list: `mcp__shirokuma-knowledge-base__get_tags()`
       Expected: Empty array `[]`
@@ -112,6 +114,20 @@ Create multiple Issues with various configurations
   )
   ```
   Expected: Success with id: 3
+
+- [ ] Issue 4 - Issue with summary field:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "issue",
+    title: "Memory Leak in Background Worker",
+    summary: "Background worker process consumes increasing memory over time",
+    content: "## Problem Description\nThe background worker process shows steadily increasing memory usage.\n\n### Observations\n- Memory grows by ~50MB per hour\n- No corresponding increase in workload\n- Process eventually crashes after 48 hours\n\n### Initial Investigation\n- Profiler shows object accumulation\n- Suspect event listener leak",
+    priority: "high",
+    status: "Open",
+    tags: ["bug", "memory", "performance"]
+  )
+  ```
+  Expected: Success with id: 4, summary field stored
 
 - [ ] Issue creation without content - Verify error occurs:
   ```
@@ -170,6 +186,22 @@ Create multiple Plans with various configurations
   ```
   Expected: Success with id: 3, null dates
 
+- [ ] Plan 4 - Plan with summary field:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "plan",
+    title: "API Rate Limiting Implementation",
+    summary: "Implement rate limiting to prevent API abuse and ensure fair usage",
+    content: "## Overview\nImplement comprehensive rate limiting across all API endpoints\n\n## Requirements\n- Per-user rate limits\n- Per-IP rate limits\n- Configurable limits per endpoint\n- Graceful degradation\n\n## Implementation Plan\n1. Research rate limiting algorithms\n2. Choose appropriate library/framework\n3. Implement middleware\n4. Add monitoring and alerts\n5. Document usage limits",
+    priority: "medium",
+    status: "Open",
+    start_date: "2025-03-01",
+    end_date: "2025-03-15",
+    tags: ["api", "security", "infrastructure"]
+  )
+  ```
+  Expected: Success with id: 4, summary field stored
+
 #### 2.3 Document Creation
 ```
 Create multiple Documents with various configurations
@@ -206,6 +238,18 @@ Create multiple Documents with various configurations
   )
   ```
   Expected: Success with id: 3
+
+- [ ] Doc 4 - Document with summary field:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "doc",
+    title: "CI/CD Pipeline Documentation",
+    summary: "Complete guide for our continuous integration and deployment pipeline setup",
+    content: "# CI/CD Pipeline Documentation\n\n## Overview\nOur CI/CD pipeline automates testing, building, and deployment processes.\n\n## Pipeline Stages\n1. **Build Stage**\n   - Compile TypeScript\n   - Bundle assets\n   - Generate artifacts\n\n2. **Test Stage**\n   - Unit tests\n   - Integration tests\n   - E2E tests\n\n3. **Deploy Stage**\n   - Deploy to staging\n   - Run smoke tests\n   - Deploy to production\n\n## Configuration\nSee `.github/workflows/` for GitHub Actions configuration.",
+    tags: ["ci-cd", "devops", "automation"]
+  )
+  ```
+  Expected: Success with id: 4, summary field stored
 
 #### 2.4 Knowledge Creation
 ```
@@ -244,17 +288,29 @@ Create multiple Knowledge entries with various configurations
   ```
   Expected: Success with id: 3
 
+- [ ] Knowledge 4 - Knowledge with summary field:
+  ```
+  mcp__shirokuma-knowledge-base__create_item(
+    type: "knowledge",
+    title: "Microservices Design Patterns",
+    summary: "Common patterns and anti-patterns when building microservices architectures",
+    content: "## Microservices Design Patterns\n\n### Communication Patterns\n1. **API Gateway Pattern**\n   - Single entry point for clients\n   - Handles routing, authentication, rate limiting\n\n2. **Service Mesh**\n   - Sidecar proxy for service-to-service communication\n   - Provides observability, security, traffic management\n\n3. **Event-Driven Architecture**\n   - Asynchronous communication via message queues\n   - Loose coupling between services\n\n### Data Management\n- Database per Service\n- Saga Pattern for distributed transactions\n- CQRS for read/write separation\n\n### Anti-Patterns to Avoid\n- Shared database\n- Chatty interfaces\n- Distributed monolith",
+    tags: ["architecture", "microservices", "patterns"]
+  )
+  ```
+  Expected: Success with id: 4, summary field stored
+
 ### 3. Data Retrieval & Update Tests
 
 #### 3.1 List Retrieval Verification
 - [ ] Get Issues list: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
-      Expected: Array containing 3 issues (only non-closed ones)
+      Expected: Array containing 4 issues (only non-closed ones)
 - [ ] Get Plans list: `mcp__shirokuma-knowledge-base__get_items(type: "plan")`
-      Expected: Array containing 3 plans
+      Expected: Array containing 4 plans
 - [ ] Get Documents list: `mcp__shirokuma-knowledge-base__get_items(type: "doc")`
-      Expected: Array containing 3 documents
+      Expected: Array containing 4 documents
 - [ ] Get Knowledge list: `mcp__shirokuma-knowledge-base__get_items(type: "knowledge")`
-      Expected: Array containing 3 knowledge entries
+      Expected: Array containing 4 knowledge entries
 
 #### 3.1.1 Status Filtering Tests (Issues and Plans)
 - [ ] Get Issues excluding closed statuses (default): `mcp__shirokuma-knowledge-base__get_items(type: "issue")`
@@ -321,6 +377,27 @@ Create multiple Knowledge entries with various configurations
   ```
   Expected: Success with status changed to "In Progress"
 
+- [ ] Summary update test:
+  ```
+  mcp__shirokuma-knowledge-base__update_item(
+    type: "plan",
+    id: 4,
+    summary: "Updated: Implement comprehensive rate limiting with monitoring capabilities"
+  )
+  ```
+  Expected: Success with only summary changed, other fields preserved
+
+- [ ] Update both summary and content:
+  ```
+  mcp__shirokuma-knowledge-base__update_item(
+    type: "knowledge",
+    id: 4,
+    summary: "Essential microservices patterns for scalable distributed systems",
+    content: "## Microservices Design Patterns (Updated)\n\n### Core Patterns\n1. **API Gateway**\n2. **Service Discovery**\n3. **Circuit Breaker**\n4. **Bulkhead**\n\n### Data Patterns\n- Saga Pattern\n- Event Sourcing\n- CQRS\n\n### Deployment Patterns\n- Blue-Green Deployment\n- Canary Release\n- Feature Toggles"
+  )
+  ```
+  Expected: Success with both summary and content updated
+
 ### 4. Tag Functionality Tests
 
 #### 4.1 Tag Management
@@ -350,7 +427,7 @@ Create multiple Knowledge entries with various configurations
 Note: Status creation, update, and deletion are disabled. Statuses can only be managed through database initialization.
 
 - [ ] Verify status list: `mcp__shirokuma-knowledge-base__get_statuses()`
-      Expected: Array contains default statuses with is_closed flags
+      Expected: Markdown table contains default statuses with is_closed flags
 - [ ] Attempt to create custom status (should fail): `mcp__shirokuma-knowledge-base__create_status(name: "Under Review")`
       Expected: Error - tool not available
 - [ ] Attempt to update status (should fail): `mcp__shirokuma-knowledge-base__update_status(id: 1, name: "New Name")`
@@ -449,7 +526,7 @@ Note: Status creation, update, and deletion are disabled. Statuses can only be m
 
 #### 8.1 Data Integrity
 - [ ] Verify tags are correctly registered for all created items
-- [ ] Verify status IDs are correctly saved and displayed
+- [ ] Verify status names are correctly saved and displayed
 - [ ] Verify date fields are saved in correct format
 - [ ] Verify session IDs follow YYYYMMDD-HHMMSSsss format
 - [ ] Verify content fields maintain exact formatting (no unwanted changes)
