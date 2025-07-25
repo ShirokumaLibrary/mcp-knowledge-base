@@ -19,7 +19,7 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     tags: string[];
     title: string;
     id?: string | undefined;
@@ -45,7 +45,7 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: string;
     tags?: string[] | undefined;
     content?: string | undefined;
@@ -70,7 +70,7 @@ export declare const CreateDailySummarySchema: z.ZodObject<{
     title: z.ZodString;
     content: z.ZodString;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     date: string;
     tags: string[];
     content: string;
@@ -93,7 +93,7 @@ export declare const UpdateDailySummarySchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     date: string;
     tags?: string[] | undefined;
     content?: string | undefined;
@@ -112,7 +112,7 @@ export declare const UpdateDailySummarySchema: z.ZodObject<{
  */
 export declare const SearchSessionsByTagSchema: z.ZodObject<{
     tag: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     tag: string;
 }, {
     tag: string;
@@ -127,7 +127,7 @@ export declare const SearchSessionsByTagSchema: z.ZodObject<{
 export declare const GetSessionsSchema: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     start_date?: string | undefined;
     end_date?: string | undefined;
 }, {
@@ -142,7 +142,7 @@ export declare const GetSessionsSchema: z.ZodObject<{
  */
 export declare const GetSessionDetailSchema: z.ZodObject<{
     id: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: string;
 }, {
     id: string;
@@ -157,7 +157,7 @@ export declare const GetSessionDetailSchema: z.ZodObject<{
 export declare const GetDailySummariesSchema: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     start_date?: string | undefined;
     end_date?: string | undefined;
 }, {
@@ -173,7 +173,7 @@ export declare const GetDailySummariesSchema: z.ZodObject<{
  */
 export declare const GetDailySummaryDetailSchema: z.ZodObject<{
     date: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     date: string;
 }, {
     date: string;

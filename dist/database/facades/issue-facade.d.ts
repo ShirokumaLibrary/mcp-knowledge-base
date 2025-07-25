@@ -23,9 +23,9 @@ export declare class IssueFacade extends BaseFacade {
      * @ai-defaults priority: 'medium', status: 'Open', tags: []
      * @ai-side-effects Creates markdown file and SQLite record
      */
-    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<Issue>;
+    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<Issue>;
     getIssue(id: number): Promise<Issue | null>;
-    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getAllIssues(): Promise<Issue[]>;
     /**

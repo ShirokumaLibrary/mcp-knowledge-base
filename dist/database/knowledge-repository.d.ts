@@ -41,8 +41,8 @@ export declare class KnowledgeRepository extends BaseRepository {
      * @ai-assumption Content is already validated and safe to store
      * @ai-critical Knowledge is append-only - no in-place updates
      */
-    createKnowledge(title: string, content: string, tags?: string[]): Promise<Knowledge>;
-    updateKnowledge(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean>;
+    createKnowledge(title: string, content: string, tags?: string[], summary?: string): Promise<Knowledge>;
+    updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<boolean>;
     deleteKnowledge(id: number): Promise<boolean>;
     getKnowledge(id: number): Promise<Knowledge | null>;
     /**

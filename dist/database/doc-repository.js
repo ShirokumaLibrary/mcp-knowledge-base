@@ -48,6 +48,7 @@ export class DocRepository extends BaseRepository {
         return {
             id: metadata.id,
             title: metadata.title,
+            summary: metadata.summary || undefined,
             content: docContent, // @ai-logic: Main value is the documentation content
             tags: Array.isArray(metadata.tags) ? metadata.tags : [],
             created_at: metadata.created_at || new Date().toISOString(),
@@ -58,6 +59,7 @@ export class DocRepository extends BaseRepository {
         const metadata = {
             id: doc.id,
             title: doc.title,
+            summary: doc.summary,
             tags: doc.tags || [],
             created_at: doc.created_at,
             updated_at: doc.updated_at
@@ -77,9 +79,10 @@ export class DocRepository extends BaseRepository {
         // Update main doc data
         await this.db.runAsync(`
       INSERT OR REPLACE INTO search_docs 
-      (id, title, content, tags, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)`, [
-            doc.id, doc.title, doc.content || '', // @ai-edge-case: Empty content stored as empty string
+      (id, title, summary, content, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+            doc.id, doc.title, doc.summary || '',
+            doc.content || '', // @ai-edge-case: Empty content stored as empty string
             JSON.stringify(doc.tags || []), // @ai-why: Keep for backward compatibility
             doc.created_at, doc.updated_at
         ]);
@@ -123,14 +126,19 @@ export class DocRepository extends BaseRepository {
      */
     async getDocsSummary() {
         const docs = await this.getAllDocs();
-        return docs.map(d => ({ id: d.id, title: d.title }));
+        return docs.map(d => ({
+            id: d.id,
+            title: d.title,
+            summary: d.summary
+        }));
     }
-    async createDoc(title, content, tags = []) {
+    async createDoc(title, content, tags = [], summary) {
         await this.ensureDirectoryExists();
         const now = new Date().toISOString();
         const doc = {
             id: await this.getDocNextId(),
             title,
+            summary,
             content,
             tags,
             created_at: now,
@@ -144,7 +152,7 @@ export class DocRepository extends BaseRepository {
         await this.syncDocToSQLite(doc);
         return doc;
     }
-    async updateDoc(id, title, content, tags) {
+    async updateDoc(id, title, content, tags, summary) {
         const filePath = this.getDocFilePath(id);
         try {
             await fsPromises.access(filePath);
@@ -159,6 +167,8 @@ export class DocRepository extends BaseRepository {
                 return null;
             if (title !== undefined)
                 doc.title = title;
+            if (summary !== undefined)
+                doc.summary = summary;
             if (content !== undefined)
                 doc.content = content;
             if (tags !== undefined)
@@ -232,6 +242,7 @@ export class DocRepository extends BaseRepository {
                 docs.push({
                     id: docData.id,
                     title: docData.title,
+                    summary: docData.summary || undefined,
                     content: docData.content,
                     tags: JSON.parse(docData.tags || '[]'),
                     created_at: docData.created_at,

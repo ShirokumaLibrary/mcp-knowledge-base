@@ -86,9 +86,9 @@ export const toolDefinitions = [
                     enum: ['high', 'medium', 'low'],
                     description: 'Priority (for issue/plan)',
                 },
-                status_id: {
-                    type: 'number',
-                    description: 'Status ID (for issue/plan)',
+                status: {
+                    type: 'string',
+                    description: 'Status name (for issue/plan)',
                 },
                 tags: {
                     type: 'array',
@@ -139,9 +139,9 @@ export const toolDefinitions = [
                     enum: ['high', 'medium', 'low'],
                     description: 'New priority (for issue/plan)',
                 },
-                status_id: {
-                    type: 'number',
-                    description: 'New status ID (for issue/plan)',
+                status: {
+                    type: 'string',
+                    description: 'New status name (for issue/plan)',
                 },
                 tags: {
                     type: 'array',

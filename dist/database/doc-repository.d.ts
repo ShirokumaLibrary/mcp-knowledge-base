@@ -1,5 +1,5 @@
 import { BaseRepository, Database } from './base.js';
-import { Doc } from '../types/domain-types.js';
+import { Doc, DocSummary } from '../types/domain-types.js';
 import { TagRepository } from './tag-repository.js';
 /**
  * @ai-context Repository for technical documentation management
@@ -42,12 +42,9 @@ export declare class DocRepository extends BaseRepository {
      * @ai-return Lightweight objects with just ID and title
      * @ai-why Documents can be large - summary view prevents memory issues
      */
-    getDocsSummary(): Promise<Array<{
-        id: number;
-        title: string;
-    }>>;
-    createDoc(title: string, content: string, tags?: string[]): Promise<Doc>;
-    updateDoc(id: number, title?: string, content?: string, tags?: string[]): Promise<Doc | null>;
+    getDocsSummary(): Promise<DocSummary[]>;
+    createDoc(title: string, content: string, tags?: string[], summary?: string): Promise<Doc>;
+    updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<Doc | null>;
     deleteDoc(id: number): Promise<boolean>;
     getDoc(id: number): Promise<Doc | null>;
     /**

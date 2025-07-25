@@ -1,5 +1,5 @@
 import { BaseRepository, Database } from './base.js';
-import { Plan, PlanInternal } from '../types/domain-types.js';
+import { Plan, PlanInternal, PlanSummary } from '../types/domain-types.js';
 import { IStatusRepository } from '../types/repository-interfaces.js';
 import { TagRepository } from './tag-repository.js';
 /**
@@ -42,8 +42,9 @@ export declare class PlanRepository extends BaseRepository {
      */
     syncPlanToSQLite(plan: PlanInternal): Promise<void>;
     getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Plan[]>;
-    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<Plan>;
-    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
+    getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<PlanSummary[]>;
+    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<Plan>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getPlan(id: number): Promise<Plan | null>;
     /**

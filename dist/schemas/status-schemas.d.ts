@@ -15,7 +15,7 @@ import { z } from 'zod';
 export declare const CreateStatusSchema: z.ZodObject<{
     name: z.ZodString;
     is_closed: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     name: string;
     is_closed: boolean;
 }, {
@@ -32,7 +32,7 @@ export declare const UpdateStatusSchema: z.ZodObject<{
     id: z.ZodNumber;
     name: z.ZodString;
     is_closed: z.ZodOptional<z.ZodBoolean>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: number;
     name: string;
     is_closed?: boolean | undefined;
@@ -49,7 +49,7 @@ export declare const UpdateStatusSchema: z.ZodObject<{
  */
 export declare const DeleteStatusSchema: z.ZodObject<{
     id: z.ZodNumber;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: number;
 }, {
     id: number;

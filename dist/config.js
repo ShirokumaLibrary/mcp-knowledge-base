@@ -27,7 +27,8 @@ export function getConfig() {
             plansPath: path.join(baseDir, 'plans'),
             docsPath: path.join(baseDir, 'docs'),
             knowledgePath: path.join(baseDir, 'knowledge'),
-            sessionsPath: path.join(baseDir, 'sessions')
+            sessionsPath: path.join(baseDir, 'sessions'),
+            contentsPath: path.join(baseDir, 'contents') // @ai-logic: Unified content directory
         },
         server: {
             // @ai-default: Shirokuma knowledge base server
@@ -43,5 +44,12 @@ export function getConfig() {
             logDir: process.env.MCP_LOG_DIR || path.join(process.cwd(), 'logs')
         }
     };
+}
+/**
+ * @ai-intent Helper function to get content path
+ * @ai-pattern Convenience wrapper for common path access
+ */
+export function contentPath(dataDir) {
+    return path.join(dataDir, 'contents');
 }
 //# sourceMappingURL=config.js.map

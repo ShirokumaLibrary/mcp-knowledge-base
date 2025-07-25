@@ -20,6 +20,7 @@ export interface Config {
         docsPath: string;
         knowledgePath: string;
         sessionsPath: string;
+        contentsPath: string;
     };
     server: {
         name: string;
@@ -40,3 +41,8 @@ export interface Config {
  * @ai-return Immutable configuration object
  */
 export declare function getConfig(): Config;
+/**
+ * @ai-intent Helper function to get content path
+ * @ai-pattern Convenience wrapper for common path access
+ */
+export declare function contentPath(dataDir: string): string;

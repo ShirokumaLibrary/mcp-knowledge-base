@@ -7,7 +7,7 @@
  */
 import { BaseFacade } from './base-facade.js';
 import { PlanRepository } from '../plan-repository.js';
-import { Plan } from '../../types/domain-types.js';
+import { Plan, PlanSummary } from '../../types/domain-types.js';
 import { DatabaseConnection } from '../base.js';
 import { StatusRepository } from '../status-repository.js';
 import { TagRepository } from '../tag-repository.js';
@@ -26,10 +26,17 @@ export declare class PlanFacade extends BaseFacade {
      */
     createPlan(title: string, content?: string, priority?: string, status?: string, startDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
     endDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
-    tags?: string[]): Promise<Plan>;
+    tags?: string[], summary?: string): Promise<Plan>;
     getPlan(id: number): Promise<Plan | null>;
-    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, startDate?: string, endDate?: string, tags?: string[]): Promise<boolean>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, startDate?: string, endDate?: string, tags?: string[], summary?: string): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getAllPlans(): Promise<Plan[]>;
     searchPlansByTag(tag: string): Promise<Plan[]>;
+    /**
+     * @ai-intent Get lightweight plan summaries for lists
+     * @ai-performance Excludes content for speed
+     * @ai-return Array of summary objects with minimal fields
+     * @ai-why Optimized for UI list rendering performance
+     */
+    getAllPlansSummary(): Promise<PlanSummary[]>;
 }

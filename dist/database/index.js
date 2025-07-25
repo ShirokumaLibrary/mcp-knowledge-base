@@ -7,6 +7,7 @@ import { KnowledgeRepository } from './knowledge-repository.js';
 import { DocRepository } from './doc-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { getConfig } from '../config.js';
+import * as path from 'path';
 // Re-export types
 export * from '../types/domain-types.js';
 /**
@@ -85,13 +86,13 @@ export class FileIssueDatabase {
         await this.connection.initialize();
         const db = this.connection.getDatabase();
         // @ai-logic: Initialize in dependency order
-        const config = getConfig();
+        // @ai-critical: Use provided dataDir instead of config paths for test isolation
         this.statusRepo = new StatusRepository(db); // @ai-logic: No dependencies
         this.tagRepo = new TagRepository(db); // @ai-logic: No dependencies
-        this.issueRepo = new IssueRepository(db, config.database.issuesPath, this.statusRepo, this.tagRepo);
-        this.planRepo = new PlanRepository(db, config.database.plansPath, this.statusRepo, this.tagRepo);
-        this.knowledgeRepo = new KnowledgeRepository(db, config.database.knowledgePath, this.tagRepo);
-        this.docRepo = new DocRepository(db, config.database.docsPath, this.tagRepo);
+        this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
+        this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
+        this.knowledgeRepo = new KnowledgeRepository(db, path.join(this.dataDir, 'knowledge'), this.tagRepo);
+        this.docRepo = new DocRepository(db, path.join(this.dataDir, 'docs'), this.tagRepo);
         this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.knowledgeRepo, this.docRepo);
     }
     /**
@@ -239,11 +240,11 @@ export class FileIssueDatabase {
      * @ai-defaults Priority: 'medium', Status: 1 (default status)
      * @ai-return Complete issue object with generated ID
      */
-    async createIssue(title, description, priority, status, tags) {
+    async createIssue(title, description, priority, status, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.createIssue(title, description, priority, status, tags);
+        return this.issueRepo.createIssue(title, description, priority, status, tags, summary);
     }
     /**
      * @ai-intent Update existing issue with partial changes
@@ -252,11 +253,11 @@ export class FileIssueDatabase {
      * @ai-validation Issue must exist, status_id must be valid
      * @ai-return Updated issue object or null if not found
      */
-    async updateIssue(id, title, description, priority, status, tags) {
+    async updateIssue(id, title, description, priority, status, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.issueRepo.updateIssue(id, title, description, priority, status, tags);
+        return this.issueRepo.updateIssue(id, title, description, priority, status, tags, summary);
     }
     /**
      * @ai-intent Delete issue permanently
@@ -303,11 +304,11 @@ export class FileIssueDatabase {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Complete plan object with generated ID
      */
-    async createPlan(title, description, priority, status, start_date, end_date, tags) {
+    async createPlan(title, description, priority, status, start_date, end_date, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags);
+        return this.planRepo.createPlan(title, description, priority, status, start_date, end_date, tags, summary);
     }
     /**
      * @ai-intent Update plan including timeline adjustments
@@ -316,11 +317,11 @@ export class FileIssueDatabase {
      * @ai-pattern Partial updates preserve unspecified fields
      * @ai-return Updated plan or null if not found
      */
-    async updatePlan(id, title, description, priority, status, start_date, end_date, tags) {
+    async updatePlan(id, title, description, priority, status, start_date, end_date, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags);
+        return this.planRepo.updatePlan(id, title, description, priority, status, start_date, end_date, tags, summary);
     }
     /**
      * @ai-intent Delete plan permanently
@@ -390,11 +391,11 @@ export class FileIssueDatabase {
      * @ai-side-effects Creates file and search index entry
      * @ai-return Complete knowledge object
      */
-    async createKnowledge(title, content, tags) {
+    async createKnowledge(title, content, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.knowledgeRepo.createKnowledge(title, content, tags);
+        return this.knowledgeRepo.createKnowledge(title, content, tags, summary);
     }
     /**
      * @ai-intent Update knowledge article content
@@ -402,11 +403,11 @@ export class FileIssueDatabase {
      * @ai-pattern Partial updates allowed
      * @ai-return Updated knowledge or null
      */
-    async updateKnowledge(id, title, content, tags) {
+    async updateKnowledge(id, title, content, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.knowledgeRepo.updateKnowledge(id, title, content, tags);
+        return this.knowledgeRepo.updateKnowledge(id, title, content, tags, summary);
     }
     /**
      * @ai-intent Delete knowledge article
@@ -474,11 +475,11 @@ export class FileIssueDatabase {
      * @ai-validation Content required for docs
      * @ai-return Complete doc object
      */
-    async createDoc(title, content, tags) {
+    async createDoc(title, content, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.docRepo.createDoc(title, content, tags);
+        return this.docRepo.createDoc(title, content, tags, summary);
     }
     /**
      * @ai-intent Update documentation content
@@ -486,11 +487,11 @@ export class FileIssueDatabase {
      * @ai-pattern Partial updates supported
      * @ai-return Updated doc or null
      */
-    async updateDoc(id, title, content, tags) {
+    async updateDoc(id, title, content, tags, summary) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.docRepo.updateDoc(id, title, content, tags);
+        return this.docRepo.updateDoc(id, title, content, tags, summary);
     }
     /**
      * @ai-intent Delete documentation
@@ -524,6 +525,18 @@ export class FileIssueDatabase {
             await this.initializationPromise;
         }
         return this.docRepo.searchDocsByTag(tag);
+    }
+    /**
+     * @ai-intent Get lightweight plan list for UI display
+     * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
+     * @ai-performance Uses indexed SQLite query vs file reads
+     * @ai-return Array with key fields including timeline data
+     */
+    async getAllPlansSummary(includeClosedStatuses = false, statusIds) {
+        if (this.initializationPromise) {
+            await this.initializationPromise;
+        }
+        return this.planRepo.getAllPlansSummary(includeClosedStatuses, statusIds);
     }
     /**
      * @ai-section Global Search Operations

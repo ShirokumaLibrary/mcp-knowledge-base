@@ -32,7 +32,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -66,7 +66,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -107,7 +107,7 @@ export declare const toolDefinitions: ({
                 enum: string[];
                 description: string;
             };
-            status_id: {
+            status: {
                 type: string;
                 description: string;
             };
@@ -170,7 +170,7 @@ export declare const toolDefinitions: ({
                 enum: string[];
                 description: string;
             };
-            status_id: {
+            status: {
                 type: string;
                 description: string;
             };
@@ -226,7 +226,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -251,7 +251,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -282,7 +282,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -312,7 +312,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -346,7 +346,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             tag?: undefined;
             types?: undefined;
@@ -374,7 +374,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -424,7 +424,7 @@ export declare const toolDefinitions: ({
             includeClosedStatuses?: undefined;
             statusIds?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             start_date?: undefined;
             end_date?: undefined;
             tag?: undefined;
@@ -453,7 +453,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -483,7 +483,7 @@ export declare const toolDefinitions: ({
             description?: undefined;
             content?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             tags?: undefined;
             start_date?: undefined;
             end_date?: undefined;
@@ -526,7 +526,7 @@ export declare const toolDefinitions: ({
             id?: undefined;
             description?: undefined;
             priority?: undefined;
-            status_id?: undefined;
+            status?: undefined;
             start_date?: undefined;
             end_date?: undefined;
             tag?: undefined;

@@ -24,12 +24,12 @@ export declare const GetItemsSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     includeClosedStatuses: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     statusIds: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
-}, "strip", z.ZodTypeAny, {
-    type: "knowledge" | "issue" | "plan" | "doc";
+}, "strict", z.ZodTypeAny, {
+    type: "knowledge" | "doc" | "issue" | "plan";
     includeClosedStatuses: boolean;
     statusIds?: number[] | undefined;
 }, {
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
     includeClosedStatuses?: boolean | undefined;
     statusIds?: number[] | undefined;
 }>;
@@ -42,25 +42,27 @@ export declare const GetItemsSchema: z.ZodObject<{
 export declare const GetItemDetailSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     id: z.ZodNumber;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
 }, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
 }>;
 export declare const CreateItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     title: z.ZodString;
+    summary: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
     status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
+    type: "knowledge" | "doc" | "issue" | "plan";
     title: string;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    summary?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
     status?: string | undefined;
@@ -68,8 +70,9 @@ export declare const CreateItemSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
 }, {
+    type: "knowledge" | "doc" | "issue" | "plan";
     title: string;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    summary?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
     status?: string | undefined;
@@ -88,15 +91,17 @@ export declare const UpdateItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     id: z.ZodNumber;
     title: z.ZodOptional<z.ZodString>;
+    summary: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
     status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
+    summary?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
@@ -106,7 +111,8 @@ export declare const UpdateItemSchema: z.ZodObject<{
     end_date?: string | undefined;
 }, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
+    summary?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
     title?: string | undefined;
@@ -124,12 +130,12 @@ export declare const UpdateItemSchema: z.ZodObject<{
 export declare const DeleteItemSchema: z.ZodObject<{
     type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
     id: z.ZodNumber;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
 }, {
     id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: "knowledge" | "doc" | "issue" | "plan";
 }>;
 /**
  * @ai-intent Schema for search_items_by_tag tool
@@ -141,12 +147,12 @@ export declare const DeleteItemSchema: z.ZodObject<{
 export declare const SearchItemsByTagSchema: z.ZodObject<{
     tag: z.ZodString;
     types: z.ZodOptional<z.ZodArray<z.ZodEnum<["issue", "plan", "doc", "knowledge"]>, "many">>;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     tag: string;
-    types?: ("knowledge" | "issue" | "plan" | "doc")[] | undefined;
+    types?: ("knowledge" | "doc" | "issue" | "plan")[] | undefined;
 }, {
     tag: string;
-    types?: ("knowledge" | "issue" | "plan" | "doc")[] | undefined;
+    types?: ("knowledge" | "doc" | "issue" | "plan")[] | undefined;
 }>;
 /**
  * @ai-section TypeScript Type Exports

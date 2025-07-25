@@ -55,9 +55,9 @@ export class StatusHandlers {
         const markdown = [
             '## Available Statuses',
             '',
-            '| ID | Name | Is Closed | Created At |',
-            '|----|------|-----------|------------|',
-            ...statuses.map(status => `| ${status.id} | ${status.name} | ${status.is_closed ? 'Yes' : 'No'} | - |`) // @ai-debt: Created_at not shown
+            '| Name | Is Closed |',
+            '|------|-----------|',
+            ...statuses.map(status => `| ${status.name} | ${status.is_closed ? 'Yes' : 'No'} |`)
         ].join('\n');
         return {
             content: [

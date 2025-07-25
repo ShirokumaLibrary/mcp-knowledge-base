@@ -155,7 +155,7 @@ export declare class FileIssueDatabase {
      * @ai-defaults Priority: 'medium', Status: 1 (default status)
      * @ai-return Complete issue object with generated ID
      */
-    createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[]): Promise<import("./index.js").Issue>;
+    createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<import("./index.js").Issue>;
     /**
      * @ai-intent Update existing issue with partial changes
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Merge changes -> 4. Write both stores
@@ -163,7 +163,7 @@ export declare class FileIssueDatabase {
      * @ai-validation Issue must exist, status_id must be valid
      * @ai-return Updated issue object or null if not found
      */
-    updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[]): Promise<boolean>;
+    updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean>;
     /**
      * @ai-intent Delete issue permanently
      * @ai-flow 1. Wait for init -> 2. Delete markdown -> 3. Delete from SQLite
@@ -194,7 +194,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Complete plan object with generated ID
      */
-    createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<import("./index.js").Plan>;
+    createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<import("./index.js").Plan>;
     /**
      * @ai-intent Update plan including timeline adjustments
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Validate changes -> 4. Update
@@ -202,7 +202,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Partial updates preserve unspecified fields
      * @ai-return Updated plan or null if not found
      */
-    updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[]): Promise<boolean>;
+    updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<boolean>;
     /**
      * @ai-intent Delete plan permanently
      * @ai-flow 1. Wait for init -> 2. Remove markdown -> 3. Clean SQLite
@@ -246,14 +246,14 @@ export declare class FileIssueDatabase {
      * @ai-side-effects Creates file and search index entry
      * @ai-return Complete knowledge object
      */
-    createKnowledge(title: string, content: string, tags?: string[]): Promise<import("./index.js").Knowledge>;
+    createKnowledge(title: string, content: string, tags?: string[], summary?: string): Promise<import("./index.js").Knowledge>;
     /**
      * @ai-intent Update knowledge article content
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Apply changes -> 4. Reindex
      * @ai-pattern Partial updates allowed
      * @ai-return Updated knowledge or null
      */
-    updateKnowledge(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean>;
+    updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<boolean>;
     /**
      * @ai-intent Delete knowledge article
      * @ai-flow 1. Wait for init -> 2. Delete files and index
@@ -288,24 +288,21 @@ export declare class FileIssueDatabase {
      * @ai-performance Avoids loading full content
      * @ai-return Array of {id, title} objects only
      */
-    getDocsSummary(): Promise<{
-        id: number;
-        title: string;
-    }[]>;
+    getDocsSummary(): Promise<import("./index.js").DocSummary[]>;
     /**
      * @ai-intent Create new documentation
      * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save -> 4. Index
      * @ai-validation Content required for docs
      * @ai-return Complete doc object
      */
-    createDoc(title: string, content: string, tags?: string[]): Promise<import("./index.js").Doc>;
+    createDoc(title: string, content: string, tags?: string[], summary?: string): Promise<import("./index.js").Doc>;
     /**
      * @ai-intent Update documentation content
      * @ai-flow 1. Wait for init -> 2. Update markdown and index
      * @ai-pattern Partial updates supported
      * @ai-return Updated doc or null
      */
-    updateDoc(id: number, title?: string, content?: string, tags?: string[]): Promise<import("./index.js").Doc | null>;
+    updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<import("./index.js").Doc | null>;
     /**
      * @ai-intent Delete documentation
      * @ai-flow 1. Wait for init -> 2. Remove files and index
@@ -324,6 +321,13 @@ export declare class FileIssueDatabase {
      * @ai-return Array of matching docs
      */
     searchDocsByTag(tag: string): Promise<import("./index.js").Doc[]>;
+    /**
+     * @ai-intent Get lightweight plan list for UI display
+     * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
+     * @ai-performance Uses indexed SQLite query vs file reads
+     * @ai-return Array with key fields including timeline data
+     */
+    getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<import("./index.js").PlanSummary[]>;
     /**
      * @ai-section Global Search Operations
      * @ai-intent Full-text search across all content types

@@ -59,6 +59,7 @@ export class PlanRepository extends BaseRepository {
         return {
             id: metadata.id,
             title: metadata.title,
+            summary: metadata.summary || undefined,
             content: contentBody || '',
             start_date: metadata.start_date || null, // @ai-edge-case: Plans may not have dates initially
             end_date: metadata.end_date || null,
@@ -89,6 +90,7 @@ export class PlanRepository extends BaseRepository {
         const metadata = {
             id: plan.id,
             title: plan.title,
+            summary: plan.summary,
             start_date: plan.start_date || '',
             end_date: plan.end_date || '',
             priority: plan.priority,
@@ -113,9 +115,10 @@ export class PlanRepository extends BaseRepository {
         // Update main plan data
         await this.db.runAsync(`
       INSERT OR REPLACE INTO search_plans 
-      (id, title, content, priority, status_id, start_date, end_date, tags, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-            plan.id, plan.title, plan.content || '',
+      (id, title, summary, content, priority, status_id, start_date, end_date, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+            plan.id, plan.title, plan.summary || '',
+            plan.content || '',
             plan.priority, plan.status_id,
             plan.start_date || '', plan.end_date || '', // @ai-logic: Empty strings for NULL dates
             JSON.stringify(plan.tags || []), // @ai-why: Keep for backward compatibility
@@ -167,7 +170,54 @@ export class PlanRepository extends BaseRepository {
         const plans = results.filter((plan) => plan !== null);
         return plans.sort((a, b) => a.id - b.id);
     }
-    async createPlan(title, content, priority = 'medium', status, start_date, end_date, tags) {
+    async getAllPlansSummary(includeClosedStatuses = false, statusIds) {
+        await this.ensureDirectoryExists();
+        const files = await fsPromises.readdir(this.plansDir);
+        const planFiles = files.filter(f => f.startsWith('plan-') && f.endsWith('.md'));
+        // Get all statuses to filter by is_closed if needed
+        let closedStatusIds = [];
+        if (!includeClosedStatuses && !statusIds) {
+            const allStatuses = await this.statusRepository.getAllStatuses();
+            closedStatusIds = allStatuses.filter(s => s.is_closed).map(s => s.id);
+        }
+        const summaryPromises = planFiles.map(async (file) => {
+            try {
+                const content = await fsPromises.readFile(path.join(this.plansDir, file), 'utf8');
+                const plan = await this.parseMarkdownPlan(content);
+                if (plan) {
+                    // Apply status filtering
+                    if (statusIds && !statusIds.includes(plan.status_id)) {
+                        return null;
+                    }
+                    if (!includeClosedStatuses && !statusIds && closedStatusIds.includes(plan.status_id)) {
+                        return null;
+                    }
+                    const status = await this.statusRepository.getStatus(plan.status_id);
+                    const summary = {
+                        id: plan.id,
+                        title: plan.title,
+                        summary: plan.summary,
+                        priority: plan.priority,
+                        status: status?.name,
+                        start_date: plan.start_date,
+                        end_date: plan.end_date,
+                        created_at: plan.created_at,
+                        updated_at: plan.updated_at
+                    };
+                    return summary;
+                }
+                return null;
+            }
+            catch (error) {
+                this.logger.error(`Error reading plan file ${file}:`, { error });
+                return null;
+            }
+        });
+        const results = await Promise.all(summaryPromises);
+        const summaries = results.filter((summary) => summary !== null);
+        return summaries.sort((a, b) => a.id - b.id);
+    }
+    async createPlan(title, content, priority = 'medium', status, start_date, end_date, tags, summary) {
         await this.ensureDirectoryExists();
         // @ai-logic: Resolve status name to ID
         let finalStatusId;
@@ -191,6 +241,7 @@ export class PlanRepository extends BaseRepository {
         const plan = {
             id: await this.getPlanNextId(),
             title,
+            summary,
             content: content || '',
             start_date: start_date || null,
             end_date: end_date || null,
@@ -210,7 +261,7 @@ export class PlanRepository extends BaseRepository {
         await this.syncPlanToSQLite(plan);
         return this.toExternalPlan(plan);
     }
-    async updatePlan(id, title, content, priority, status, start_date, end_date, tags) {
+    async updatePlan(id, title, content, priority, status, start_date, end_date, tags, summary) {
         const filePath = this.getPlanFilePath(id);
         try {
             await fsPromises.access(filePath);
@@ -225,6 +276,8 @@ export class PlanRepository extends BaseRepository {
                 return false;
             if (title !== undefined)
                 plan.title = title;
+            if (summary !== undefined)
+                plan.summary = summary;
             if (content !== undefined)
                 plan.content = content;
             if (priority !== undefined)

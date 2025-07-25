@@ -14,7 +14,7 @@ import { z } from 'zod';
  */
 export declare const CreateTagSchema: z.ZodObject<{
     name: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     name: string;
 }, {
     name: string;
@@ -27,7 +27,7 @@ export declare const CreateTagSchema: z.ZodObject<{
  */
 export declare const DeleteTagSchema: z.ZodObject<{
     name: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     name: string;
 }, {
     name: string;
@@ -40,7 +40,7 @@ export declare const DeleteTagSchema: z.ZodObject<{
  */
 export declare const SearchTagSchema: z.ZodObject<{
     pattern: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     pattern: string;
 }, {
     pattern: string;
@@ -53,7 +53,7 @@ export declare const SearchTagSchema: z.ZodObject<{
  */
 export declare const SearchAllByTagSchema: z.ZodObject<{
     tag: z.ZodString;
-}, "strip", z.ZodTypeAny, {
+}, "strict", z.ZodTypeAny, {
     tag: string;
 }, {
     tag: string;

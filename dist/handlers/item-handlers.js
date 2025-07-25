@@ -31,7 +31,7 @@ export class ItemHandlers {
                 data = await this.db.getAllIssuesSummary(validatedArgs.includeClosedStatuses, validatedArgs.statusIds); // @ai-performance: Summary for large datasets
                 break;
             case 'plan':
-                data = await this.db.getAllPlans(validatedArgs.includeClosedStatuses, validatedArgs.statusIds);
+                data = await this.db.getAllPlansSummary(validatedArgs.includeClosedStatuses, validatedArgs.statusIds); // @ai-performance: Summary for large datasets
                 break;
             case 'doc':
                 data = await this.db.getDocsSummary(); // @ai-performance: Summary excludes content
@@ -107,25 +107,25 @@ export class ItemHandlers {
                 if (!validatedArgs.content) {
                     throw new McpError(ErrorCode.InvalidRequest, 'Content is required for issues');
                 }
-                item = await this.db.createIssue(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags);
+                item = await this.db.createIssue(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.summary);
                 break;
             case 'plan':
                 if (!validatedArgs.content) {
                     throw new McpError(ErrorCode.InvalidRequest, 'Content is required for plans');
                 }
-                item = await this.db.createPlan(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
+                item = await this.db.createPlan(validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags, validatedArgs.summary);
                 break;
             case 'doc':
                 if (!validatedArgs.content) {
                     throw new McpError(ErrorCode.InvalidRequest, 'Content is required for documents');
                 }
-                item = await this.db.createDoc(validatedArgs.title, validatedArgs.content, validatedArgs.tags);
+                item = await this.db.createDoc(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.summary);
                 break;
             case 'knowledge':
                 if (!validatedArgs.content) {
                     throw new McpError(ErrorCode.InvalidRequest, 'Content is required for knowledge');
                 }
-                item = await this.db.createKnowledge(validatedArgs.title, validatedArgs.content, validatedArgs.tags);
+                item = await this.db.createKnowledge(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.summary);
                 break;
             default:
                 throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
@@ -145,21 +145,21 @@ export class ItemHandlers {
         let updatedItem;
         switch (validatedArgs.type) {
             case 'issue':
-                success = await this.db.updateIssue(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags);
+                success = await this.db.updateIssue(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.summary);
                 if (success)
                     updatedItem = await this.db.getIssue(validatedArgs.id);
                 break;
             case 'plan':
-                success = await this.db.updatePlan(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags);
+                success = await this.db.updatePlan(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.tags, validatedArgs.summary);
                 if (success)
                     updatedItem = await this.db.getPlan(validatedArgs.id);
                 break;
             case 'doc':
-                updatedItem = await this.db.updateDoc(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags);
+                updatedItem = await this.db.updateDoc(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.summary);
                 success = updatedItem !== null;
                 break;
             case 'knowledge':
-                success = await this.db.updateKnowledge(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags);
+                success = await this.db.updateKnowledge(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.summary);
                 if (success)
                     updatedItem = await this.db.getKnowledge(validatedArgs.id);
                 break;

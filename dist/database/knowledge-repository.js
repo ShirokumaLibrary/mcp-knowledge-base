@@ -48,6 +48,7 @@ export class KnowledgeRepository extends BaseRepository {
         return {
             id: metadata.id,
             title: metadata.title,
+            summary: metadata.summary || undefined,
             content: knowledgeContent, // @ai-critical: Main value is in the content
             tags: Array.isArray(metadata.tags) ? metadata.tags : [],
             created_at: metadata.created_at || new Date().toISOString(),
@@ -58,6 +59,7 @@ export class KnowledgeRepository extends BaseRepository {
         const metadata = {
             id: knowledge.id,
             title: knowledge.title,
+            summary: knowledge.summary,
             tags: knowledge.tags,
             created_at: knowledge.created_at,
             updated_at: knowledge.updated_at
@@ -77,9 +79,10 @@ export class KnowledgeRepository extends BaseRepository {
         // Update main knowledge data
         await this.db.runAsync(`
       INSERT OR REPLACE INTO search_knowledge 
-      (id, title, content, tags, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)`, [
-            knowledge.id, knowledge.title, knowledge.content,
+      (id, title, summary, content, tags, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+            knowledge.id, knowledge.title, knowledge.summary || '',
+            knowledge.content,
             JSON.stringify(knowledge.tags), // @ai-why: Keep for backward compatibility
             knowledge.created_at, knowledge.updated_at
         ]);
@@ -117,12 +120,13 @@ export class KnowledgeRepository extends BaseRepository {
      * @ai-assumption Content is already validated and safe to store
      * @ai-critical Knowledge is append-only - no in-place updates
      */
-    async createKnowledge(title, content, tags = []) {
+    async createKnowledge(title, content, tags = [], summary) {
         await this.ensureDirectoryExists();
         const now = new Date().toISOString();
         const knowledge = {
             id: await this.getKnowledgeNextId(),
             title,
+            summary,
             content,
             tags,
             created_at: now,
@@ -136,7 +140,7 @@ export class KnowledgeRepository extends BaseRepository {
         await this.syncKnowledgeToSQLite(knowledge);
         return knowledge;
     }
-    async updateKnowledge(id, title, content, tags) {
+    async updateKnowledge(id, title, content, tags, summary) {
         const filePath = this.getKnowledgeFilePath(id);
         try {
             await fsPromises.access(filePath);
@@ -151,6 +155,8 @@ export class KnowledgeRepository extends BaseRepository {
                 return false;
             if (title !== undefined)
                 knowledge.title = title;
+            if (summary !== undefined)
+                knowledge.summary = summary;
             if (content !== undefined)
                 knowledge.content = content;
             if (tags !== undefined)

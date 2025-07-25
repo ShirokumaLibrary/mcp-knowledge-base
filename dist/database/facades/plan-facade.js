@@ -26,20 +26,20 @@ export class PlanFacade extends BaseFacade {
      */
     async createPlan(title, content, priority = 'medium', status, startDate, // @ai-pattern: YYYY-MM-DD or undefined
     endDate, // @ai-pattern: YYYY-MM-DD or undefined
-    tags = []) {
+    tags = [], summary) {
         await this.ensureInitialized(this.initPromise);
         if (!status) {
             status = 'Open'; // @ai-logic: Default to 'Open' status
         }
-        return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags);
+        return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, summary);
     }
     async getPlan(id) {
         await this.ensureInitialized(this.initPromise);
         return this.planRepo.getPlan(id);
     }
-    async updatePlan(id, title, content, priority, status, startDate, endDate, tags) {
+    async updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary) {
         await this.ensureInitialized(this.initPromise);
-        return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags);
+        return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary);
     }
     async deletePlan(id) {
         await this.ensureInitialized(this.initPromise);
@@ -52,6 +52,16 @@ export class PlanFacade extends BaseFacade {
     async searchPlansByTag(tag) {
         await this.ensureInitialized(this.initPromise);
         return this.planRepo.searchPlansByTag(tag);
+    }
+    /**
+     * @ai-intent Get lightweight plan summaries for lists
+     * @ai-performance Excludes content for speed
+     * @ai-return Array of summary objects with minimal fields
+     * @ai-why Optimized for UI list rendering performance
+     */
+    async getAllPlansSummary() {
+        await this.ensureInitialized(this.initPromise);
+        return this.planRepo.getAllPlansSummary();
     }
 }
 //# sourceMappingURL=plan-facade.js.map
