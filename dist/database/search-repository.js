@@ -9,15 +9,13 @@ import { BaseRepository } from './base.js';
 export class SearchRepository extends BaseRepository {
     issueRepository; // @ai-why: Circular dependency prevents proper typing
     planRepository;
-    knowledgeRepository;
-    docRepository;
+    documentRepository; // @ai-logic: Unified document repository
     sessionRepository;
-    constructor(db, issueRepository, planRepository, knowledgeRepository, docRepository, sessionRepository) {
+    constructor(db, issueRepository, planRepository, documentRepository, sessionRepository) {
         super(db, 'SearchRepository');
         this.issueRepository = issueRepository;
         this.planRepository = planRepository;
-        this.knowledgeRepository = knowledgeRepository;
-        this.docRepository = docRepository;
+        this.documentRepository = documentRepository;
         this.sessionRepository = sessionRepository;
     }
     /**
@@ -37,8 +35,8 @@ export class SearchRepository extends BaseRepository {
         const planPromises = planRows.map((row) => this.planRepository.getPlan(row.id));
         const plans = (await Promise.all(planPromises)).filter(Boolean);
         // @ai-logic: Knowledge searches content field too (more comprehensive)
-        const knowledgeRows = await this.db.allAsync(`SELECT id FROM search_knowledge WHERE title LIKE ? OR content LIKE ?`, [`%${query}%`, `%${query}%`]);
-        const knowledgePromises = knowledgeRows.map((row) => this.knowledgeRepository.getKnowledge(row.id));
+        const knowledgeRows = await this.db.allAsync(`SELECT type, id FROM search_documents WHERE type = 'knowledge' AND (title LIKE ? OR content LIKE ?)`, [`%${query}%`, `%${query}%`]);
+        const knowledgePromises = knowledgeRows.map((row) => this.documentRepository.getDocument('knowledge', row.id));
         const knowledge = (await Promise.all(knowledgePromises)).filter(Boolean);
         return { issues, plans, knowledge };
     }
@@ -54,8 +52,8 @@ export class SearchRepository extends BaseRepository {
         const results = await Promise.all([
             this.issueRepository.getAllIssues(),
             this.planRepository.getAllPlans(),
-            this.knowledgeRepository.searchKnowledgeByTag(tag),
-            this.docRepository ? this.docRepository.searchDocsByTag(tag) : Promise.resolve([]),
+            this.documentRepository.searchDocumentsByTag(tag, 'knowledge'),
+            this.documentRepository.searchDocumentsByTag(tag, 'doc'),
             this.sessionRepository ? this.sessionRepository.searchSessionsByTag(tag) : Promise.resolve([])
         ]);
         const [issues, plans, knowledge, docs, sessions] = results;
@@ -188,19 +186,34 @@ export class SearchRepository extends BaseRepository {
         await Promise.all([
             this.db.runAsync('DELETE FROM search_issues'),
             this.db.runAsync('DELETE FROM search_plans'),
-            this.db.runAsync('DELETE FROM search_knowledge')
+            this.db.runAsync('DELETE FROM search_documents')
         ]);
         // @ai-logic: Load all content from markdown files
-        const [issues, plans, knowledge] = await Promise.all([
+        const [issues, plans, documents] = await Promise.all([
             this.issueRepository.getAllIssues(),
             this.planRepository.getAllPlans(),
-            this.knowledgeRepository.getAllKnowledge()
+            this.documentRepository.getAllDocuments()
         ]);
+        // @ai-critical: Pre-register all tags to avoid race conditions
+        const allTags = new Set();
+        issues.forEach((issue) => {
+            if (issue.tags)
+                issue.tags.forEach(tag => allTags.add(tag));
+        });
+        plans.forEach((plan) => {
+            if (plan.tags)
+                plan.tags.forEach(tag => allTags.add(tag));
+        });
+        documents.forEach((doc) => {
+            if (doc.tags)
+                doc.tags.forEach(tag => allTags.add(tag));
+        });
+        // @ai-logic: Tags are auto-registered during document sync operations
         // @ai-performance: Batch sync for better performance
         await Promise.all([
             ...issues.map((issue) => this.issueRepository.syncIssueToSQLite(issue)),
             ...plans.map((plan) => this.planRepository.syncPlanToSQLite(plan)),
-            ...knowledge.map((k) => this.knowledgeRepository.syncKnowledgeToSQLite(k))
+            ...documents.map((doc) => this.documentRepository.syncDocumentToSQLite(doc))
         ]);
     }
 }

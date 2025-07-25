@@ -17,6 +17,24 @@ export class BaseRepository {
         this.logger = createLogger(loggerName || this.constructor.name);
     }
     /**
+     * @ai-intent Generate consistent file names for entity storage
+     * @ai-pattern Uses sequence type as file prefix directly
+     * @ai-why Sequence types are already properly pluralized in the database
+     */
+    getEntityFileName(sequenceType, id) {
+        // Use sequence type directly as it's already properly formatted
+        return `${sequenceType}-${id}.md`;
+    }
+    /**
+     * @ai-intent Get sequence type information from database
+     * @ai-flow Query sequences table for type metadata
+     * @ai-return Returns sequence type or null if not found
+     */
+    async getSequenceType(sequenceName) {
+        const row = await this.db.getAsync('SELECT type FROM sequences WHERE type = ?', [sequenceName]);
+        return row?.type || null;
+    }
+    /**
      * @ai-intent Generate unique sequential IDs for entities
      * @ai-flow 1. Atomically increment sequence -> 2. Retrieve new value -> 3. Return ID
      * @ai-critical Must be atomic to prevent duplicate IDs in concurrent operations
@@ -26,8 +44,8 @@ export class BaseRepository {
     async getNextSequenceValue(sequenceName) {
         try {
             // @ai-logic: Atomic increment prevents race conditions
-            await this.db.runAsync(`UPDATE sequences SET current_value = current_value + 1 WHERE name = ?`, [sequenceName]);
-            const row = await this.db.getAsync(`SELECT current_value FROM sequences WHERE name = ?`, [sequenceName]);
+            await this.db.runAsync(`UPDATE sequences SET current_value = current_value + 1 WHERE type = ?`, [sequenceName]);
+            const row = await this.db.getAsync(`SELECT current_value FROM sequences WHERE type = ?`, [sequenceName]);
             if (!row || !row.current_value) {
                 throw new Error(`Failed to get sequence value for ${sequenceName}`);
             }
@@ -119,8 +137,10 @@ export class DatabaseConnection {
         this.logger.debug('Creating sequences table...');
         await this.db.runAsync(`
       CREATE TABLE IF NOT EXISTS sequences (
-        name TEXT PRIMARY KEY,
-        current_value INTEGER DEFAULT 1
+        type TEXT PRIMARY KEY,
+        current_value INTEGER DEFAULT 0,
+        base_type TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
         // Insert default statuses
@@ -130,16 +150,16 @@ export class DatabaseConnection {
         // Initialize sequences - reset to 0 if database is empty
         this.logger.debug('Initializing sequences...');
         // Check if sequences already exist
-        const existingSequences = await this.db.allAsync(`SELECT name FROM sequences`);
+        const existingSequences = await this.db.allAsync(`SELECT type FROM sequences`);
         if (existingSequences.length === 0) {
             // Fresh database - insert new sequences starting at 0
-            await this.db.runAsync(`INSERT INTO sequences (name, current_value) VALUES 
-        ('issues', 0), ('plans', 0), ('knowledge', 0), ('docs', 0)`);
+            await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES 
+        ('issues', 0, 'issues'), ('plans', 0, 'plans'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
         }
         else {
             // Existing database - ensure all sequences exist
-            await this.db.runAsync(`INSERT OR IGNORE INTO sequences (name, current_value) VALUES 
-        ('issues', 0), ('plans', 0), ('knowledge', 0), ('docs', 0)`);
+            await this.db.runAsync(`INSERT OR IGNORE INTO sequences (type, current_value, base_type) VALUES 
+        ('issues', 0, 'issues'), ('plans', 0, 'plans'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
         }
         // Search tables
         this.logger.debug('Creating search tables...');
@@ -183,18 +203,6 @@ export class DatabaseConnection {
         updated_at TEXT
       )
     `);
-        // Knowledge search table
-        await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_knowledge (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        summary TEXT,
-        content TEXT,
-        tags TEXT,
-        created_at TEXT,
-        updated_at TEXT
-      )
-    `);
         // Sessions search table
         await this.db.runAsync(`
       CREATE TABLE IF NOT EXISTS search_sessions (
@@ -220,30 +228,15 @@ export class DatabaseConnection {
         updated_at TEXT
       )
     `);
-        // Docs search table
-        await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_docs (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        summary TEXT,
-        content TEXT,
-        tags TEXT,
-        created_at TEXT,
-        updated_at TEXT
-      )
-    `);
         // Create indexes
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content, summary)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content, summary)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_text ON search_knowledge(title, content, summary)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content, summary)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_text ON search_docs(title, content, summary)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_tags ON search_issues(tags)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_tags ON search_plans(tags)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_tags ON search_sessions(tags)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_tags ON search_daily_summaries(tags)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_tags ON search_docs(tags)`);
     }
     async createTagRelationshipTables() {
         // Issue tags relationship
@@ -266,26 +259,8 @@ export class DatabaseConnection {
         FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
       )
     `);
-        // Document tags relationship
-        await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS doc_tags (
-        doc_id INTEGER,
-        tag_id INTEGER,
-        PRIMARY KEY (doc_id, tag_id),
-        FOREIGN KEY (doc_id) REFERENCES search_docs(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
-        // Knowledge tags relationship
-        await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS knowledge_tags (
-        knowledge_id INTEGER,
-        tag_id INTEGER,
-        PRIMARY KEY (knowledge_id, tag_id),
-        FOREIGN KEY (knowledge_id) REFERENCES search_knowledge(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
+        // Note: doc_tags and knowledge_tags are replaced by document_tags table
+        // created in DocumentRepository
         // Session tags relationship
         await this.db.runAsync(`
       CREATE TABLE IF NOT EXISTS session_tags (
@@ -311,19 +286,14 @@ export class DatabaseConnection {
         // Text search indexes
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_text ON search_knowledge(title, content)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_docs_text ON search_docs(title, content)`);
         // Tag relationship indexes
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_issue ON issue_tags(issue_id)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_tag ON issue_tags(tag_id)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_plan ON plan_tags(plan_id)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_tag ON plan_tags(tag_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_doc_tags_doc ON doc_tags(doc_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_doc_tags_tag ON doc_tags(tag_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_tags_knowledge ON knowledge_tags(knowledge_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_knowledge_tags_tag ON knowledge_tags(tag_id)`);
+        // Note: doc_tags and knowledge_tags indexes are replaced by document_tags indexes
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)`);
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)`);

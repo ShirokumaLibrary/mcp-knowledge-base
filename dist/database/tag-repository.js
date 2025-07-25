@@ -44,9 +44,19 @@ export class TagRepository extends BaseRepository {
         if (existing) {
             return existing.id;
         }
-        // Create new tag
-        const result = await this.db.runAsync('INSERT INTO tags (name) VALUES (?)', [name]);
-        return result.lastID;
+        // Create new tag using regular INSERT since we already checked
+        try {
+            const result = await this.db.runAsync('INSERT INTO tags (name) VALUES (?)', [name]);
+            return result.lastID;
+        }
+        catch (err) {
+            // Handle race condition where another process created the tag
+            if (err.message && err.message.includes('UNIQUE constraint failed')) {
+                const existing = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [name]);
+                return existing.id;
+            }
+            throw err;
+        }
     }
     /**
      * @ai-intent Get tag IDs for multiple tag names
@@ -76,17 +86,14 @@ export class TagRepository extends BaseRepository {
      * @ai-why Explicit error messages help UI provide better feedback
      */
     async createTag(name) {
-        try {
-            await this.db.runAsync('INSERT INTO tags (name) VALUES (?)', [name]);
-            return name;
+        // Use INSERT OR IGNORE to avoid AUTOINCREMENT increase
+        const result = await this.db.runAsync('INSERT OR IGNORE INTO tags (name) VALUES (?)', [name]);
+        // Check if the tag was actually inserted
+        if (result.changes === 0) {
+            // Tag already existed
+            throw new Error(`Tag "${name}" already exists`);
         }
-        catch (err) {
-            // @ai-logic: UNIQUE constraint = tag already exists (not an error)
-            if (err.message && err.message.includes('UNIQUE constraint failed')) {
-                throw new Error(`Tag "${name}" already exists`);
-            }
-            throw new Error(`Failed to create tag "${name}": ${err.message}`);
-        }
+        return name;
     }
     /**
      * @ai-intent Remove tag from system
@@ -163,12 +170,21 @@ export class TagRepository extends BaseRepository {
     async ensureTagsExist(tags) {
         if (!tags || tags.length === 0)
             return; // @ai-edge-case: Empty arrays handled gracefully
-        // @ai-logic: Dynamic SQL but safe - tags array is from controlled input
-        const placeholders = tags.map(() => '(?)').join(',');
+        // First, check which tags already exist to minimize INSERT attempts
+        const placeholdersForSelect = tags.map(() => '?').join(',');
+        const existingRows = await this.db.allAsync(`SELECT name FROM tags WHERE name IN (${placeholdersForSelect})`, tags);
+        const existingNames = new Set(existingRows.map((row) => row.name));
+        const newTags = tags.filter(tag => !existingNames.has(tag));
+        if (newTags.length === 0) {
+            this.logger.debug(`All tags already exist: ${tags.join(', ')}`);
+            return;
+        }
+        // Only insert tags that don't exist
+        const placeholders = newTags.map(() => '(?)').join(',');
         const query = `INSERT OR IGNORE INTO tags (name) VALUES ${placeholders}`;
         try {
-            await this.db.runAsync(query, tags);
-            this.logger.debug(`Ensured tags exist: ${tags.join(', ')}`);
+            await this.db.runAsync(query, newTags);
+            this.logger.debug(`Ensured tags exist: ${tags.join(', ')} (${newTags.length} new)`);
         }
         catch (error) {
             this.logger.error('Error ensuring tags exist:', { error, tags });

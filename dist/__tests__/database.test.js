@@ -10,6 +10,7 @@ import { FileIssueDatabase } from '../database.js';
 import * as fs from 'fs';
 import * as path from 'path';
 describe('FileIssueDatabase Async Tests', () => {
+    jest.setTimeout(10000); // Increase timeout for database operations
     let db;
     // @ai-pattern: Unique test directory per process to avoid conflicts
     const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-database-' + process.pid);

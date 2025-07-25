@@ -105,7 +105,7 @@ describe('KnowledgeRepository Async Tests', () => {
             const knowledge = await db.createKnowledge('Original Title', 'Original content');
             const updateResult = await db.updateKnowledge(knowledge.id, 'Updated Title', 'Updated content with more details', ['updated', 'test'] // @ai-integration-point: New tags auto-registered
             );
-            expect(updateResult).toBe(true);
+            expect(updateResult).not.toBeNull();
             // @ai-validation: Verify changes persisted to file
             const updated = await db.getKnowledge(knowledge.id);
             expect(updated.title).toBe('Updated Title');
@@ -214,7 +214,7 @@ describe('KnowledgeRepository Async Tests', () => {
          */
         test('should handle update of non-existent knowledge', async () => {
             const result = await db.updateKnowledge(99999, 'New Title');
-            expect(result).toBe(false); // @ai-pattern: False for not found
+            expect(result).toBeNull(); // @ai-pattern: null for not found
         });
         /**
          * @ai-intent Test delete error handling

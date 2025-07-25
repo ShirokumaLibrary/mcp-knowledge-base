@@ -26,20 +26,20 @@ export class PlanFacade extends BaseFacade {
      */
     async createPlan(title, content, priority = 'medium', status, startDate, // @ai-pattern: YYYY-MM-DD or undefined
     endDate, // @ai-pattern: YYYY-MM-DD or undefined
-    tags = [], summary) {
+    tags = [], description) {
         await this.ensureInitialized(this.initPromise);
         if (!status) {
             status = 'Open'; // @ai-logic: Default to 'Open' status
         }
-        return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, summary);
+        return this.planRepo.createPlan(title, content || '', priority, status, startDate, endDate, tags, description);
     }
     async getPlan(id) {
         await this.ensureInitialized(this.initPromise);
         return this.planRepo.getPlan(id);
     }
-    async updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary) {
+    async updatePlan(id, title, content, priority, status, startDate, endDate, tags, description) {
         await this.ensureInitialized(this.initPromise);
-        return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, summary);
+        return this.planRepo.updatePlan(id, title, content, priority, status, startDate, endDate, tags, description);
     }
     async deletePlan(id) {
         await this.ensureInitialized(this.initPromise);

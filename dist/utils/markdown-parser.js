@@ -152,7 +152,7 @@ export function parseContentMarkdown(fileContent, id) {
         id,
         type: metadata.type || 'doc', // Default to 'doc' if not specified
         title: metadata.title || '',
-        summary: metadata.summary || undefined,
+        description: metadata.description || undefined,
         content,
         tags: metadata.tags || [],
         created_at: metadata.created_at || new Date().toISOString(),
@@ -172,8 +172,8 @@ export function generateContentMarkdown(content) {
         created_at: content.created_at,
         updated_at: content.updated_at
     };
-    if (content.summary) {
-        metadata.summary = content.summary;
+    if (content.description) {
+        metadata.description = content.description;
     }
     return generateMarkdown(metadata, content.content);
 }

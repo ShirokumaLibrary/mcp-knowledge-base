@@ -28,7 +28,8 @@ export function getConfig() {
             docsPath: path.join(baseDir, 'docs'),
             knowledgePath: path.join(baseDir, 'knowledge'),
             sessionsPath: path.join(baseDir, 'sessions'),
-            contentsPath: path.join(baseDir, 'contents') // @ai-logic: Unified content directory
+            contentsPath: path.join(baseDir, 'contents'), // @ai-logic: Unified content directory
+            documentsPath: path.join(baseDir, 'documents') // @ai-logic: New unified documents directory
         },
         server: {
             // @ai-default: Shirokuma knowledge base server
@@ -52,4 +53,15 @@ export function getConfig() {
 export function contentPath(dataDir) {
     return path.join(dataDir, 'contents');
 }
+/**
+ * @ai-intent Singleton configuration instance
+ * @ai-pattern Module-level constant for global access
+ * @ai-critical Used throughout the application
+ */
+export const config = getConfig();
+/**
+ * @ai-intent Convenience export for data directory
+ * @ai-pattern Common access pattern for file operations
+ */
+export const dataDir = config.database.path;
 //# sourceMappingURL=config.js.map

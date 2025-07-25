@@ -16,7 +16,7 @@ import * as path from 'path';
 import { FileIssueDatabase } from '../database/index.js';
 describe('Tag Auto Registration', () => {
     let db;
-    const testDir = '/home/webapp/mcp/tmp/mcp-test-tag-auto-' + process.pid;
+    const testDir = '/home/webapp/mcp/tmp/mcp-test-tags-auto-' + process.pid;
     const dbPath = path.join(testDir, 'test.db');
     /**
      * @ai-intent Set up clean test environment

@@ -9,7 +9,7 @@ import { CreateItemSchema } from '../schemas/item-schemas';
 import * as fs from 'fs';
 import * as path from 'path';
 describe('Daily Summary Validation', () => {
-    const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-summary-' + process.pid);
+    const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-summaries-' + process.pid);
     const testSessionsDir = path.join(testDataDir, 'sessions');
     const testDbPath = path.join(testDataDir, 'test.db');
     let sessionManager;

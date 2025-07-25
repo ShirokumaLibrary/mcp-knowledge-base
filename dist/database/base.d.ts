@@ -21,6 +21,18 @@ export declare abstract class BaseRepository {
     protected logger: winston.Logger;
     constructor(db: Database, loggerName?: string);
     /**
+     * @ai-intent Generate consistent file names for entity storage
+     * @ai-pattern Uses sequence type as file prefix directly
+     * @ai-why Sequence types are already properly pluralized in the database
+     */
+    protected getEntityFileName(sequenceType: string, id: number | string): string;
+    /**
+     * @ai-intent Get sequence type information from database
+     * @ai-flow Query sequences table for type metadata
+     * @ai-return Returns sequence type or null if not found
+     */
+    protected getSequenceType(sequenceName: string): Promise<string | null>;
+    /**
      * @ai-intent Generate unique sequential IDs for entities
      * @ai-flow 1. Atomically increment sequence -> 2. Retrieve new value -> 3. Return ID
      * @ai-critical Must be atomic to prevent duplicate IDs in concurrent operations

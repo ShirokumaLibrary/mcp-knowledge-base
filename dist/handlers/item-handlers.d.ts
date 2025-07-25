@@ -9,7 +9,13 @@ import { ToolResponse } from '../types/mcp-types.js';
  */
 export declare class ItemHandlers {
     private db;
+    private builtInTypes;
     constructor(db: FileIssueDatabase);
+    /**
+     * @ai-intent Check if a type exists in sequences table
+     * @ai-logic Skip check for built-in types, query DB for custom types
+     */
+    private isValidCustomType;
     /**
      * @ai-intent List all items of specified type (issue/plan/doc/knowledge)
      * @ai-flow 1. Validate args -> 2. Dispatch by type -> 3. Format response

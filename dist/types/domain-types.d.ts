@@ -52,7 +52,7 @@ export interface Status {
 export interface Issue {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     content: string;
     priority: string;
     status?: string;
@@ -77,7 +77,7 @@ export interface IssueInternal extends Issue {
 export interface Plan {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     content: string;
     start_date: string | null;
     end_date: string | null;
@@ -96,16 +96,47 @@ export interface PlanInternal extends Plan {
     status_id: number;
 }
 /**
+ * @ai-intent Unified document entity replacing separate doc/knowledge types
+ * @ai-pattern Combines doc and knowledge into single type with subtype
+ * @ai-critical Uses composite key (type, id) for unique identification
+ * @ai-types 'doc' | 'knowledge' preserved for backward compatibility
+ */
+export interface Document {
+    type: string;
+    id: number;
+    title: string;
+    description?: string;
+    content: string;
+    tags: string[];
+    created_at: string;
+    updated_at: string;
+}
+/**
+ * @ai-intent Document summary for list display
+ * @ai-pattern Minimal fields for performance
+ * @ai-usage getAllDocumentsSummary() returns these
+ */
+export interface DocumentSummary {
+    type: string;
+    id: number;
+    title: string;
+    description?: string;
+    tags?: string[];
+    created_at: string;
+    updated_at: string;
+}
+/**
  * @ai-intent Unified content entity for doc/knowledge/etc
  * @ai-pattern Base type for all content items
  * @ai-critical Supports multiple content types via type field
  * @ai-types doc, knowledge, architecture, guideline, test
+ * @deprecated Being replaced by Document interface
  */
 export interface Content {
     id: number;
     type: string;
     title: string;
-    summary?: string;
+    description?: string;
     content: string;
     tags: string[];
     created_at: string;
@@ -121,7 +152,7 @@ export interface Content {
 export interface Knowledge {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     content: string;
     tags: string[];
     created_at: string;
@@ -137,7 +168,7 @@ export interface Knowledge {
 export interface Doc {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     content: string;
     tags?: string[];
     created_at: string;
@@ -168,7 +199,7 @@ export interface Tag {
 export interface IssueSummary {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     priority: string;
     status?: string;
     created_at: string;
@@ -183,7 +214,7 @@ export interface IssueSummary {
 export interface DocSummary {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
 }
 /**
  * @ai-intent Content summary for list display
@@ -194,7 +225,7 @@ export interface ContentSummary {
     id: number;
     type: string;
     title: string;
-    summary?: string;
+    description?: string;
     tags?: string[];
     created_at: string;
     updated_at: string;
@@ -207,7 +238,7 @@ export interface ContentSummary {
 export interface PlanSummary {
     id: number;
     title: string;
-    summary?: string;
+    description?: string;
     priority: string;
     status?: string;
     start_date: string | null;

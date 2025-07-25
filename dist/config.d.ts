@@ -21,6 +21,7 @@ export interface Config {
         knowledgePath: string;
         sessionsPath: string;
         contentsPath: string;
+        documentsPath: string;
     };
     server: {
         name: string;
@@ -46,3 +47,14 @@ export declare function getConfig(): Config;
  * @ai-pattern Convenience wrapper for common path access
  */
 export declare function contentPath(dataDir: string): string;
+/**
+ * @ai-intent Singleton configuration instance
+ * @ai-pattern Module-level constant for global access
+ * @ai-critical Used throughout the application
+ */
+export declare const config: Config;
+/**
+ * @ai-intent Convenience export for data directory
+ * @ai-pattern Common access pattern for file operations
+ */
+export declare const dataDir: string;

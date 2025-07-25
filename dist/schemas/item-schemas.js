@@ -10,8 +10,16 @@ import { z } from 'zod';
  * @ai-intent Valid content types for item operations
  * @ai-pattern Enum ensures only valid types accepted
  * @ai-critical Must match handler implementations
+ * @ai-change Added 'document' for unified doc/knowledge type
+ * @ai-extension Custom types are validated separately in handlers
  */
-const ItemTypeSchema = z.enum(['issue', 'plan', 'doc', 'knowledge']);
+const ItemTypeSchema = z.enum(['issue', 'plan', 'doc', 'knowledge', 'document']).or(z.string());
+/**
+ * @ai-intent Valid subtypes for document type
+ * @ai-pattern Preserves separate ID sequences
+ * @ai-critical Required when type is 'document'
+ */
+const DocumentSubtypeSchema = z.enum(['doc', 'knowledge']);
 /**
  * @ai-intent Schema for get_items tool - list by type
  * @ai-validation Type parameter is required
@@ -19,9 +27,11 @@ const ItemTypeSchema = z.enum(['issue', 'plan', 'doc', 'knowledge']);
  * @ai-params
  *   - includeClosedStatuses: If true, includes items with closed statuses (default: false)
  *   - statusIds: Optional array of specific status IDs to filter by
+ *   - subtype: Required when type is 'document' to specify doc or knowledge
  */
 export const GetItemsSchema = z.object({
     type: ItemTypeSchema,
+    subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     includeClosedStatuses: z.boolean().optional().default(false),
     statusIds: z.array(z.number().int().positive()).optional(),
 }).strict();
@@ -33,6 +43,7 @@ export const GetItemsSchema = z.object({
  */
 export const GetItemDetailSchema = z.object({
     type: ItemTypeSchema,
+    subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     id: z.number().int().positive(), // @ai-validation: Must be > 0
 }).strict();
 /**
@@ -47,8 +58,9 @@ export const GetItemDetailSchema = z.object({
 const dateFormatSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format');
 export const CreateItemSchema = z.object({
     type: ItemTypeSchema,
+    subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     title: z.string().min(1, 'Title is required'), // @ai-validation: Non-empty
-    summary: z.string().optional(), // @ai-intent: One-line description for list views
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().optional(), // @ai-logic: Required for all types (validated in handler)
     priority: z.enum(['high', 'medium', 'low']).optional(),
     status: z.string().optional(), // @ai-logic: Status name instead of ID
@@ -65,9 +77,10 @@ export const CreateItemSchema = z.object({
  */
 export const UpdateItemSchema = z.object({
     type: ItemTypeSchema,
+    subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     id: z.number().int().positive(), // @ai-critical: Must identify existing item
     title: z.string().min(1).optional(), // @ai-validation: Non-empty if provided
-    summary: z.string().optional(), // @ai-intent: One-line description for list views
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().optional(), // @ai-logic: For all type updates
     priority: z.enum(['high', 'medium', 'low']).optional(),
     status: z.string().optional(), // @ai-logic: Status name instead of ID
@@ -83,6 +96,7 @@ export const UpdateItemSchema = z.object({
  */
 export const DeleteItemSchema = z.object({
     type: ItemTypeSchema,
+    subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     id: z.number().int().positive(),
 }).strict();
 /**

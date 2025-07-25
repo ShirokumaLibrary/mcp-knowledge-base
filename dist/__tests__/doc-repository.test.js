@@ -182,8 +182,8 @@ describe('DocRepository Async Tests', () => {
             expect(shortDocSummary.title).toBe(`Short Doc ${timestamp}`);
             expect(longDocSummary.title).toBe(`Long Doc ${timestamp}`);
             // @ai-validation: Summary should include id, title, and summary
-            expect(Object.keys(shortDocSummary).sort()).toEqual(['id', 'summary', 'title']);
-            expect(Object.keys(longDocSummary).sort()).toEqual(['id', 'summary', 'title']);
+            expect(Object.keys(shortDocSummary).sort()).toEqual(['description', 'id', 'title']);
+            expect(Object.keys(longDocSummary).sort()).toEqual(['description', 'id', 'title']);
         });
         /**
          * @ai-intent Test tag-based document search

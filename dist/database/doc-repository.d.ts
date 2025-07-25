@@ -43,8 +43,8 @@ export declare class DocRepository extends BaseRepository {
      * @ai-why Documents can be large - summary view prevents memory issues
      */
     getDocsSummary(): Promise<DocSummary[]>;
-    createDoc(title: string, content: string, tags?: string[], summary?: string): Promise<Doc>;
-    updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<Doc | null>;
+    createDoc(title: string, content: string, tags?: string[], description?: string): Promise<Doc>;
+    updateDoc(id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<Doc | null>;
     deleteDoc(id: number): Promise<boolean>;
     getDoc(id: number): Promise<Doc | null>;
     /**

@@ -28,7 +28,15 @@ async function scanAndRebuild(databasePath, db) {
         knowledge: 0,
         sessions: 0,
         tags: new Set(),
-        statuses: new Set() // @ai-logic: Now we only store status names
+        statuses: new Set(), // @ai-logic: Now we only store status names
+        maxIds: {
+            issues: 0,
+            plans: 0,
+            docs: 0,
+            knowledge: 0,
+            customTypes: {} // @ai-logic: Track max IDs for custom types
+        },
+        customTypes: new Set() // @ai-logic: Track discovered custom types
     };
     // @ai-logic: Process each content type with consistent pattern
     console.log('\n📂 Scanning issues...');
@@ -36,6 +44,15 @@ async function scanAndRebuild(databasePath, db) {
     for (const file of issueFiles) {
         const content = await fs.readFile(file, 'utf-8');
         const parsed = parseMarkdown(content);
+        // Extract ID from filename and update max ID
+        const filename = path.basename(file);
+        const idMatch = filename.match(/issue-(\d+)\.md/);
+        if (idMatch) {
+            const id = parseInt(idMatch[1]);
+            if (id > counts.maxIds.issues) {
+                counts.maxIds.issues = id;
+            }
+        }
         if (parsed.metadata.tags) {
             // @ai-logic: Tags might be stored as comma-separated string or array
             let tags;
@@ -75,6 +92,15 @@ async function scanAndRebuild(databasePath, db) {
     for (const file of planFiles) {
         const content = await fs.readFile(file, 'utf-8');
         const parsed = parseMarkdown(content);
+        // Extract ID from filename and update max ID
+        const filename = path.basename(file);
+        const idMatch = filename.match(/plan-(\d+)\.md/);
+        if (idMatch) {
+            const id = parseInt(idMatch[1]);
+            if (id > counts.maxIds.plans) {
+                counts.maxIds.plans = id;
+            }
+        }
         if (parsed.metadata.tags) {
             // @ai-logic: Tags might be stored as comma-separated string or array
             let tags;
@@ -109,10 +135,19 @@ async function scanAndRebuild(databasePath, db) {
     }
     // Scan documents
     console.log('📂 Scanning documents...');
-    const docFiles = globSync(path.join(databasePath, 'docs', 'doc-*.md'));
+    const docFiles = globSync(path.join(databasePath, 'documents', 'doc', 'doc-*.md'));
     for (const file of docFiles) {
         const content = await fs.readFile(file, 'utf-8');
         const parsed = parseMarkdown(content);
+        // Extract ID from filename and update max ID
+        const filename = path.basename(file);
+        const idMatch = filename.match(/doc-(\d+)\.md/);
+        if (idMatch) {
+            const id = parseInt(idMatch[1]);
+            if (id > counts.maxIds.docs) {
+                counts.maxIds.docs = id;
+            }
+        }
         if (parsed.metadata.tags) {
             // @ai-logic: Tags might be stored as comma-separated string or array
             let tags;
@@ -143,10 +178,19 @@ async function scanAndRebuild(databasePath, db) {
     }
     // Scan knowledge
     console.log('📂 Scanning knowledge...');
-    const knowledgeFiles = globSync(path.join(databasePath, 'knowledge', 'knowledge-*.md'));
+    const knowledgeFiles = globSync(path.join(databasePath, 'documents', 'knowledge', 'knowledge-*.md'));
     for (const file of knowledgeFiles) {
         const content = await fs.readFile(file, 'utf-8');
         const parsed = parseMarkdown(content);
+        // Extract ID from filename and update max ID
+        const filename = path.basename(file);
+        const idMatch = filename.match(/knowledge-(\d+)\.md/);
+        if (idMatch) {
+            const id = parseInt(idMatch[1]);
+            if (id > counts.maxIds.knowledge) {
+                counts.maxIds.knowledge = id;
+            }
+        }
         if (parsed.metadata.tags) {
             // @ai-logic: Tags might be stored as comma-separated string or array
             let tags;
@@ -174,6 +218,69 @@ async function scanAndRebuild(databasePath, db) {
             tags.forEach((tag) => counts.tags.add(tag));
         }
         counts.knowledge++;
+    }
+    // @ai-logic: Scan custom document types
+    console.log('📂 Scanning custom document types...');
+    const documentsDir = path.join(databasePath, 'documents');
+    try {
+        const subdirs = await fs.readdir(documentsDir);
+        for (const subdir of subdirs) {
+            // Skip built-in types
+            if (subdir === 'doc' || subdir === 'knowledge')
+                continue;
+            const subdirPath = path.join(documentsDir, subdir);
+            const stat = await fs.stat(subdirPath);
+            if (stat.isDirectory()) {
+                counts.customTypes.add(subdir);
+                counts.maxIds.customTypes[subdir] = 0;
+                // Scan files with plural prefix pattern
+                const filePrefix = subdir.endsWith('s') ? subdir : `${subdir}s`;
+                const customFiles = globSync(path.join(subdirPath, `${filePrefix}-*.md`));
+                for (const file of customFiles) {
+                    const content = await fs.readFile(file, 'utf-8');
+                    const parsed = parseMarkdown(content);
+                    // Extract ID from filename and update max ID
+                    const filename = path.basename(file);
+                    const idMatch = filename.match(new RegExp(`${filePrefix}-(\\d+)\\.md`));
+                    if (idMatch) {
+                        const id = parseInt(idMatch[1]);
+                        if (id > counts.maxIds.customTypes[subdir]) {
+                            counts.maxIds.customTypes[subdir] = id;
+                        }
+                    }
+                    if (parsed.metadata.tags) {
+                        // @ai-logic: Tags might be stored as comma-separated string or array
+                        let tags;
+                        if (Array.isArray(parsed.metadata.tags)) {
+                            tags = parsed.metadata.tags;
+                        }
+                        else if (typeof parsed.metadata.tags === 'string') {
+                            // Check if it's a JSON array string
+                            if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+                                try {
+                                    tags = JSON.parse(parsed.metadata.tags);
+                                }
+                                catch {
+                                    // If JSON parse fails, treat as comma-separated
+                                    tags = parsed.metadata.tags.split(',').map((t) => t.trim());
+                                }
+                            }
+                            else {
+                                tags = parsed.metadata.tags.split(',').map((t) => t.trim());
+                            }
+                        }
+                        else {
+                            tags = [];
+                        }
+                        tags.forEach((tag) => counts.tags.add(tag));
+                    }
+                }
+                console.log(`  📁 Found custom type: ${subdir} (${customFiles.length} files)`);
+            }
+        }
+    }
+    catch (error) {
+        console.log('  ⚠️  Could not scan custom types:', error);
     }
     // Scan sessions
     console.log('📂 Scanning sessions...');
@@ -213,12 +320,11 @@ async function rebuildDatabase() {
     const databasePath = config.database.path;
     const sqlitePath = config.database.sqlitePath;
     try {
-        // Check if search.db exists and back it up
+        // Remove existing database if it exists
         try {
             await fs.access(sqlitePath);
-            const backupPath = `${sqlitePath}.backup-${Date.now()}`;
-            await fs.rename(sqlitePath, backupPath);
-            console.log(`📦 Backed up existing database to: ${backupPath}`);
+            await fs.unlink(sqlitePath);
+            console.log('🗑️  Removed existing database');
         }
         catch {
             console.log('📝 No existing database found, creating new one...');
@@ -252,15 +358,8 @@ async function rebuildDatabase() {
         else {
             console.log('  ⚠️  Search repository not available, manual sync required');
         }
-        // Also need to handle docs separately as they're not in rebuildSearchIndex
-        const docs = await fullDb.getAllDocs();
-        console.log(`  📄 Syncing ${docs.length} documents...`);
-        const docRepo = fullDb.docRepo;
-        if (docRepo && docRepo.syncDocToSQLite) {
-            for (const doc of docs) {
-                await docRepo.syncDocToSQLite(doc);
-            }
-        }
+        // Docs are now handled in rebuildSearchIndex through DocumentRepository
+        console.log('  ✅ Documents synced as part of search index rebuild');
         // Sync sessions and daily summaries
         console.log('\n🔄 Syncing sessions and daily summaries...');
         // Import SessionRepository
@@ -269,44 +368,70 @@ async function rebuildDatabase() {
         // Get all sessions
         const sessions = sessionRepo.getSessions();
         console.log(`  📅 Syncing ${sessions.length} sessions...`);
-        for (const session of sessions) {
-            await fullDb.syncSessionToSQLite(session);
-        }
         // Get all daily summaries
         const summaries = sessionRepo.getDailySummaries();
         console.log(`  📝 Syncing ${summaries.length} daily summaries...`);
+        // Pre-register all session and summary tags to avoid race conditions
+        const sessionTags = new Set();
+        sessions.forEach((session) => {
+            if (session.tags)
+                session.tags.forEach((tag) => sessionTags.add(tag));
+        });
+        summaries.forEach((summary) => {
+            if (summary.tags)
+                summary.tags.forEach((tag) => sessionTags.add(tag));
+        });
+        if (sessionTags.size > 0) {
+            const tagRepo = fullDb.tagRepo;
+            if (tagRepo) {
+                await tagRepo.ensureTagsExist(Array.from(sessionTags));
+            }
+        }
+        // Now sync sessions and summaries
+        for (const session of sessions) {
+            await fullDb.syncSessionToSQLite(session);
+        }
         for (const summary of summaries) {
             await fullDb.syncDailySummaryToSQLite(summary);
         }
-        // Ensure all collected tags are registered
-        console.log('\n🏷️  Registering tags...');
-        console.log('  Collected tags:', Array.from(counts.tags).sort());
-        const tagRepo = fullDb.tagRepo;
-        if (tagRepo && counts.tags.size > 0) {
-            let registeredCount = 0;
-            let existingCount = 0;
-            for (const tag of counts.tags) {
-                try {
-                    await tagRepo.createTag(tag);
-                    registeredCount++;
+        // Update sequences with max IDs to prevent overwrites
+        console.log('\n🔢 Updating sequences with max IDs...');
+        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.issues, 'issues']);
+        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.plans, 'plans']);
+        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.docs, 'docs']);
+        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.knowledge, 'knowledge']);
+        console.log(`  ✅ Updated sequences - Issues: ${counts.maxIds.issues}, Plans: ${counts.maxIds.plans}, Docs: ${counts.maxIds.docs}, Knowledge: ${counts.maxIds.knowledge}`);
+        // @ai-logic: Update or create sequences for custom types
+        if (counts.customTypes.size > 0) {
+            console.log('\n🔧 Processing custom types...');
+            for (const customType of counts.customTypes) {
+                // Check if sequence exists
+                const existing = await db.getAsync('SELECT type FROM sequences WHERE type = ?', [customType]);
+                if (existing) {
+                    // Update existing sequence
+                    await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [
+                        counts.maxIds.customTypes[customType] || 0,
+                        customType
+                    ]);
+                    console.log(`  ✅ Updated sequence for custom type '${customType}' to ${counts.maxIds.customTypes[customType] || 0}`);
                 }
-                catch (error) {
-                    // Tag might already exist from the sync operations
-                    if (error.message?.includes('already exists')) {
-                        existingCount++;
-                    }
-                    else {
-                        console.error(`  ❌ Failed to register tag "${tag}":`, error);
-                    }
+                else {
+                    // Create new sequence for custom type found in directory
+                    await db.runAsync('INSERT INTO sequences (type, current_value, base_type) VALUES (?, ?, ?)', [customType, counts.maxIds.customTypes[customType] || 0, 'documents']);
+                    console.log(`  ✅ Created sequence for custom type '${customType}' with base_type 'documents'`);
                 }
             }
-            console.log(`  ✅ Ensured ${counts.tags.size} tags are registered (${registeredCount} new, ${existingCount} already existed)`);
         }
+        // Tags are automatically registered during sync operations via saveEntityTags
+        console.log('\n🏷️  Tags registration:');
+        console.log('  Collected tags:', Array.from(counts.tags).sort());
+        console.log('  ✅ Tags were automatically registered during data sync');
         console.log('\n📊 Database rebuild complete:');
         console.log(`  - Issues: ${counts.issues}`);
         console.log(`  - Plans: ${counts.plans}`);
         console.log(`  - Documents: ${counts.docs}`);
         console.log(`  - Knowledge: ${counts.knowledge}`);
+        console.log(`  - Custom Types: ${counts.customTypes.size}`);
         console.log(`  - Sessions: ${counts.sessions}`);
         console.log(`  - Tags: ${counts.tags.size}`);
         console.log(`  - Unique Status Names: ${counts.statuses.size}`);

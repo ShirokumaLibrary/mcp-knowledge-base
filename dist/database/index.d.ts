@@ -41,11 +41,21 @@ export declare class FileIssueDatabase {
     private tagRepo;
     private issueRepo;
     private planRepo;
-    private knowledgeRepo;
-    private docRepo;
+    private documentRepo;
     private searchRepo;
+    private typeRepo;
     private initializationPromise;
     constructor(dataDir: string, dbPath?: string);
+    /**
+     * @ai-intent Get data directory for external access
+     * @ai-why TypeHandlers need this to create TypeRepository
+     */
+    get dataDirectory(): string;
+    /**
+     * @ai-intent Expose database connection
+     * @ai-why TypeRepository needs direct database access
+     */
+    getDatabase(): import("./base.js").Database;
     /**
      * @ai-intent Initialize database and all repositories
      * @ai-flow 1. Check if initializing -> 2. Start init -> 3. Cache promise
@@ -155,7 +165,7 @@ export declare class FileIssueDatabase {
      * @ai-defaults Priority: 'medium', Status: 1 (default status)
      * @ai-return Complete issue object with generated ID
      */
-    createIssue(title: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<import("./index.js").Issue>;
+    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string): Promise<import("./index.js").Issue>;
     /**
      * @ai-intent Update existing issue with partial changes
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Merge changes -> 4. Write both stores
@@ -163,7 +173,7 @@ export declare class FileIssueDatabase {
      * @ai-validation Issue must exist, status_id must be valid
      * @ai-return Updated issue object or null if not found
      */
-    updateIssue(id: number, title?: string, description?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string): Promise<boolean>;
     /**
      * @ai-intent Delete issue permanently
      * @ai-flow 1. Wait for init -> 2. Delete markdown -> 3. Delete from SQLite
@@ -194,7 +204,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Complete plan object with generated ID
      */
-    createPlan(title: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<import("./index.js").Plan>;
+    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<import("./index.js").Plan>;
     /**
      * @ai-intent Update plan including timeline adjustments
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Validate changes -> 4. Update
@@ -202,7 +212,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Partial updates preserve unspecified fields
      * @ai-return Updated plan or null if not found
      */
-    updatePlan(id: number, title?: string, description?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<boolean>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<boolean>;
     /**
      * @ai-intent Delete plan permanently
      * @ai-flow 1. Wait for init -> 2. Remove markdown -> 3. Clean SQLite
@@ -238,7 +248,7 @@ export declare class FileIssueDatabase {
      * @ai-pattern Knowledge items are reference documentation
      * @ai-return Array of knowledge objects with content
      */
-    getAllKnowledge(): Promise<import("./index.js").Knowledge[]>;
+    getAllKnowledge(): Promise<import("./index.js").Document[]>;
     /**
      * @ai-intent Create new knowledge article
      * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save markdown -> 4. Index
@@ -246,14 +256,14 @@ export declare class FileIssueDatabase {
      * @ai-side-effects Creates file and search index entry
      * @ai-return Complete knowledge object
      */
-    createKnowledge(title: string, content: string, tags?: string[], summary?: string): Promise<import("./index.js").Knowledge>;
+    createKnowledge(title: string, content: string, tags?: string[], description?: string): Promise<import("./index.js").Document>;
     /**
      * @ai-intent Update knowledge article content
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Apply changes -> 4. Reindex
      * @ai-pattern Partial updates allowed
      * @ai-return Updated knowledge or null
      */
-    updateKnowledge(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<boolean>;
+    updateKnowledge(id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<import("./index.js").Document | null>;
     /**
      * @ai-intent Delete knowledge article
      * @ai-flow 1. Wait for init -> 2. Delete files and index
@@ -266,14 +276,14 @@ export declare class FileIssueDatabase {
      * @ai-flow 1. Wait for init -> 2. Read from markdown
      * @ai-return Complete knowledge object or null
      */
-    getKnowledge(id: number): Promise<import("./index.js").Knowledge | null>;
+    getKnowledge(id: number): Promise<import("./index.js").Document | null>;
     /**
      * @ai-intent Find knowledge articles by tag
      * @ai-flow 1. Wait for init -> 2. Query search index -> 3. Filter exact
      * @ai-pattern Tag exact match in JSON array
      * @ai-return Array of matching knowledge items
      */
-    searchKnowledgeByTag(tag: string): Promise<import("./index.js").Knowledge[]>;
+    searchKnowledgeByTag(tag: string): Promise<import("./index.js").Document[]>;
     /**
      * @ai-section Documentation Operations
      * @ai-intent Retrieve all technical documentation
@@ -281,28 +291,32 @@ export declare class FileIssueDatabase {
      * @ai-critical Docs can be large - memory consideration
      * @ai-return Array of complete doc objects
      */
-    getAllDocs(): Promise<import("./index.js").Doc[]>;
+    getAllDocs(): Promise<import("./index.js").Document[]>;
     /**
      * @ai-intent Get doc list without content
      * @ai-flow 1. Wait for init -> 2. Get all docs -> 3. Extract summaries
      * @ai-performance Avoids loading full content
      * @ai-return Array of {id, title} objects only
      */
-    getDocsSummary(): Promise<import("./index.js").DocSummary[]>;
+    getDocsSummary(): Promise<{
+        id: number;
+        title: string;
+        description: string | undefined;
+    }[]>;
     /**
      * @ai-intent Create new documentation
      * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save -> 4. Index
      * @ai-validation Content required for docs
      * @ai-return Complete doc object
      */
-    createDoc(title: string, content: string, tags?: string[], summary?: string): Promise<import("./index.js").Doc>;
+    createDoc(title: string, content: string, tags?: string[], description?: string): Promise<import("./index.js").Document>;
     /**
      * @ai-intent Update documentation content
      * @ai-flow 1. Wait for init -> 2. Update markdown and index
      * @ai-pattern Partial updates supported
      * @ai-return Updated doc or null
      */
-    updateDoc(id: number, title?: string, content?: string, tags?: string[], summary?: string): Promise<import("./index.js").Doc | null>;
+    updateDoc(id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<import("./index.js").Document | null>;
     /**
      * @ai-intent Delete documentation
      * @ai-flow 1. Wait for init -> 2. Remove files and index
@@ -314,13 +328,13 @@ export declare class FileIssueDatabase {
      * @ai-flow 1. Wait for init -> 2. Read from markdown
      * @ai-return Complete doc object or null
      */
-    getDoc(id: number): Promise<import("./index.js").Doc | null>;
+    getDoc(id: number): Promise<import("./index.js").Document | null>;
     /**
      * @ai-intent Find docs by tag
      * @ai-flow 1. Wait for init -> 2. Query search_docs table
      * @ai-return Array of matching docs
      */
-    searchDocsByTag(tag: string): Promise<import("./index.js").Doc[]>;
+    searchDocsByTag(tag: string): Promise<import("./index.js").Document[]>;
     /**
      * @ai-intent Get lightweight plan list for UI display
      * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
@@ -399,6 +413,57 @@ export declare class FileIssueDatabase {
      * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
      */
     syncDailySummaryToSQLite(summary: any): Promise<void>;
+    /**
+     * @ai-section Unified Document Operations
+     * @ai-intent Operations for unified doc/knowledge documents
+     * @ai-pattern Replaces separate doc and knowledge operations
+     * @ai-critical Uses composite key (type, id) for identification
+     */
+    /**
+     * @ai-intent Get all documents of specific subtype
+     * @ai-flow 1. Wait for init -> 2. Query by type -> 3. Return sorted
+     * @ai-param type Optional filter by 'doc' or 'knowledge'
+     * @ai-return Array of Document objects
+     */
+    getAllDocuments(type?: string): Promise<import("./index.js").Document[]>;
+    /**
+     * @ai-intent Get document summaries for lists
+     * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return lightweight
+     * @ai-performance Excludes content field
+     * @ai-return Array of DocumentSummary objects
+     */
+    getAllDocumentsSummary(type?: string): Promise<import("./index.js").DocumentSummary[]>;
+    /**
+     * @ai-intent Create new document with subtype
+     * @ai-flow 1. Wait for init -> 2. Get type-specific ID -> 3. Save
+     * @ai-critical Type determines ID sequence
+     * @ai-return Complete Document object
+     */
+    createDocument(type: string, title: string, content: string, tags?: string[], description?: string): Promise<import("./index.js").Document>;
+    /**
+     * @ai-intent Get single document by type and ID
+     * @ai-flow 1. Wait for init -> 2. Load from file
+     * @ai-return Document object or null
+     */
+    getDocument(type: string, id: number): Promise<import("./index.js").Document | null>;
+    /**
+     * @ai-intent Update document with partial changes
+     * @ai-flow 1. Wait for init -> 2. Apply updates -> 3. Save
+     * @ai-return true if updated, false if not found
+     */
+    updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<boolean>;
+    /**
+     * @ai-intent Delete document by type and ID
+     * @ai-flow 1. Wait for init -> 2. Remove file and index
+     * @ai-return true if deleted, false if not found
+     */
+    deleteDocument(type: string, id: number): Promise<boolean>;
+    /**
+     * @ai-intent Search documents by tag
+     * @ai-flow 1. Wait for init -> 2. Query by tag -> 3. Filter by type
+     * @ai-return Array of matching documents
+     */
+    searchDocumentsByTag(tag: string, type?: string): Promise<import("./index.js").Document[]>;
     /**
      * @ai-intent Clean shutdown of database connections
      * @ai-flow 1. Close SQLite connection -> 2. Flush pending writes

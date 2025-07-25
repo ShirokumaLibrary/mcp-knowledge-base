@@ -26,9 +26,9 @@ export declare class PlanFacade extends BaseFacade {
      */
     createPlan(title: string, content?: string, priority?: string, status?: string, startDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
     endDate?: string, // @ai-pattern: YYYY-MM-DD or undefined
-    tags?: string[], summary?: string): Promise<Plan>;
+    tags?: string[], description?: string): Promise<Plan>;
     getPlan(id: number): Promise<Plan | null>;
-    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, startDate?: string, endDate?: string, tags?: string[], summary?: string): Promise<boolean>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, startDate?: string, endDate?: string, tags?: string[], description?: string): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getAllPlans(): Promise<Plan[]>;
     searchPlansByTag(tag: string): Promise<Plan[]>;

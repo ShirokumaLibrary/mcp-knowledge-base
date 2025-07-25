@@ -13,7 +13,6 @@ export declare const toolDefinitions: ({
         properties: {
             type: {
                 type: string;
-                enum: string[];
                 description: string;
             };
             includeClosedStatuses: {
@@ -42,6 +41,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -53,7 +54,6 @@ export declare const toolDefinitions: ({
         properties: {
             type: {
                 type: string;
-                enum: string[];
                 description: string;
             };
             id: {
@@ -76,6 +76,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -87,7 +89,6 @@ export declare const toolDefinitions: ({
         properties: {
             type: {
                 type: string;
-                enum: string[];
                 description: string;
             };
             title: {
@@ -135,6 +136,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -146,7 +149,6 @@ export declare const toolDefinitions: ({
         properties: {
             type: {
                 type: string;
-                enum: string[];
                 description: string;
             };
             id: {
@@ -197,6 +199,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -214,7 +218,6 @@ export declare const toolDefinitions: ({
                 type: string;
                 items: {
                     type: string;
-                    enum: string[];
                 };
                 description: string;
             };
@@ -234,6 +237,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -261,6 +266,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required?: undefined;
     };
@@ -291,6 +298,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -321,6 +330,8 @@ export declare const toolDefinitions: ({
             name?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -354,6 +365,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required?: undefined;
     };
@@ -384,6 +397,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -432,6 +447,8 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -462,6 +479,8 @@ export declare const toolDefinitions: ({
             pattern?: undefined;
             category?: undefined;
             date?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -492,6 +511,8 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
     };
@@ -534,7 +555,44 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            include_built_in?: undefined;
+            include_definitions?: undefined;
         };
         required: string[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            include_built_in: {
+                type: string;
+                description: string;
+            };
+            include_definitions: {
+                type: string;
+                description: string;
+            };
+            type?: undefined;
+            includeClosedStatuses?: undefined;
+            statusIds?: undefined;
+            id?: undefined;
+            title?: undefined;
+            description?: undefined;
+            content?: undefined;
+            priority?: undefined;
+            status?: undefined;
+            tags?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            tag?: undefined;
+            types?: undefined;
+            name?: undefined;
+            pattern?: undefined;
+            category?: undefined;
+            date?: undefined;
+        };
+        required?: undefined;
     };
 })[];

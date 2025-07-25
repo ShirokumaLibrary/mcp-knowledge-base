@@ -13,6 +13,7 @@ export declare class PlanRepository extends BaseRepository {
     private plansDir;
     private statusRepository;
     private tagRepository;
+    private readonly sequenceType;
     constructor(db: Database, plansDir: string, statusRepository: IStatusRepository, tagRepository?: TagRepository);
     private ensureDirectoryExists;
     private getPlanNextId;
@@ -43,8 +44,8 @@ export declare class PlanRepository extends BaseRepository {
     syncPlanToSQLite(plan: PlanInternal): Promise<void>;
     getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Plan[]>;
     getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<PlanSummary[]>;
-    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<Plan>;
-    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], summary?: string): Promise<boolean>;
+    createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<Plan>;
+    updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
     getPlan(id: number): Promise<Plan | null>;
     /**

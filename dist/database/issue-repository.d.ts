@@ -13,6 +13,7 @@ export declare class IssueRepository extends BaseRepository {
     private issuesDir;
     private statusRepository;
     private tagRepository;
+    private readonly sequenceType;
     constructor(db: Database, issuesDir: string, statusRepository: IStatusRepository, tagRepository?: TagRepository);
     private ensureDirectoryExists;
     private getNextId;
@@ -59,8 +60,8 @@ export declare class IssueRepository extends BaseRepository {
      */
     getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Issue[]>;
     getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<IssueSummary[]>;
-    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<Issue>;
-    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], summary?: string): Promise<boolean>;
+    createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string): Promise<Issue>;
+    updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
     getIssue(id: number): Promise<Issue | null>;
     /**

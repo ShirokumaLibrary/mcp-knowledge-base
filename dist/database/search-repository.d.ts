@@ -11,10 +11,9 @@ import { WorkSession } from '../types/session-types.js';
 export declare class SearchRepository extends BaseRepository {
     private issueRepository;
     private planRepository;
-    private knowledgeRepository;
-    private docRepository;
+    private documentRepository;
     private sessionRepository;
-    constructor(db: Database, issueRepository: any, planRepository: any, knowledgeRepository: any, docRepository?: any, sessionRepository?: any);
+    constructor(db: Database, issueRepository: any, planRepository: any, documentRepository: any, sessionRepository?: any);
     /**
      * @ai-intent Full-text search across issues, plans, and knowledge
      * @ai-flow 1. Query search tables -> 2. Get IDs -> 3. Fetch full objects -> 4. Filter nulls
