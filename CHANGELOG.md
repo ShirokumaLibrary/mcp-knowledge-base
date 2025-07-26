@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.11] - 2025-07-26
+
+### Added
+- Custom datetime parameter for create_session
+  - New `datetime` parameter allows creating sessions with past timestamps
+  - Enables historical data migration and import
+  - ISO 8601 datetime format support
+
+### Changed
+- Session ID format changed to `YYYY-MM-DD-HH.MM.SS.sss`
+  - More readable format with dots as separators
+  - Example: `2025-01-26-14.30.52.123`
+
 ## [0.0.10] - 2025-07-26
 
 ### Added

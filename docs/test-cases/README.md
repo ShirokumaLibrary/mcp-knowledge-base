@@ -73,7 +73,7 @@ Tests should be executed in numerical order as later tests may depend on data cr
 ## Common Issues to Watch For
 - Content field being modified or formatted unexpectedly
 - Tags not being auto-registered
-- Session IDs not following the expected format (YYYYMMDD-HHMMSSsss)
+- Session IDs not following the expected format (YYYY-MM-DD-HH.MM.SS.sss)
 - Date fields not accepting the YYYY-MM-DD format
 - Search results missing expected items
 - Error messages not being descriptive enough

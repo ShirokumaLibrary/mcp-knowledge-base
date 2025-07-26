@@ -18,7 +18,7 @@ This test suite performs comprehensive checks on data integrity and error handli
 
 ### Verify session IDs follow correct format
 - [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
-      Expected: Session ID matches YYYYMMDD-HHMMSSsss format
+      Expected: Session ID matches YYYY-MM-DD-HH.MM.SS.sss format
 
 ### Verify content fields maintain exact formatting
 - [ ] Get knowledge detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "knowledge", id: 4)`  

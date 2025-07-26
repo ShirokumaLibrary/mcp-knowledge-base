@@ -13,7 +13,7 @@ mcp__shirokuma-knowledge-base__create_session(
   category: "development"
 )
 ```
-Expected: Success with session ID in format YYYYMMDD-HHMMSSsss
+Expected: Success with session ID in format YYYY-MM-DD-HH.MM.SS.sss
 
 - [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
       Expected: The session just created
@@ -76,3 +76,21 @@ mcp__shirokuma-knowledge-base__update_session(
 )
 ```
 Expected: Success with category updated
+
+## 6.4 Past Data Migration
+
+### Create session with custom datetime
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Historical Session Import",
+  content: "## Work Done\n- Legacy project migration\n- Database schema update\n- Data validation",
+  tags: ["migration", "historical"],
+  category: "maintenance",
+  datetime: "2024-12-15T10:30:00.000Z"
+)
+```
+Expected: Success with session created in past date directory (2024-12-15)
+
+- [ ] Verify session date: Get session detail and check `date` field is "2024-12-15"
+- [ ] Verify session in correct directory: Get sessions for date "2024-12-15"  
+      Expected: Array containing the historical session

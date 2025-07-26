@@ -92,7 +92,7 @@ src/
 │   └── knowledge-*.md    # Individual knowledge files
 ├── sessions/        # Work session recording
 │   └── YYYY-MM-DD/  # Date-based directories
-│       ├── session-YYYYMMDD-HHMMSSmmm.md  # Session records (with Front Matter)
+│       ├── session-YYYY-MM-DD-HH.MM.SS.sss.md  # Session records (with Front Matter)
 │       └── daily-summary-YYYY-MM-DD.md   # Daily summaries
 └── search.db        # SQLite high-speed search database (includes tag management)
 ```
@@ -131,10 +131,11 @@ Note:
 - `content`: Required multi-line content
 
 **Work Sessions**:
-- `id`: YYYYMMDD-HHMMSSsss format
+- `id`: YYYY-MM-DD-HH.MM.SS.sss format
 - `content`: Optional session details
 - `category`: Optional categorization
 - `date`: YYYY-MM-DD format
+- `datetime`: Optional ISO 8601 datetime for past data migration
 
 **Daily Summaries**:
 - `date`: Primary key (YYYY-MM-DD format)
