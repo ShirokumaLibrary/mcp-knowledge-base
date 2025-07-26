@@ -31,13 +31,15 @@ This document collection is designed for AI assistants (like Claude) to systemat
 ### Advanced Tests
 8. **[Comprehensive Verification](./08-verification.md)** - Data integrity and error handling
 9. **[Data Deletion Tests](./09-deletion-tests.md)** - Delete operations and cascading
-10. **[Database Rebuild Tests](./10-rebuild-tests.md)** - Database reconstruction from markdown
-11. **[Edge Cases and Additional Tests](./11-edge-cases.md)** - Unicode, boundaries, and special cases
-12. **[Type Management Tests](./12-type-management.md)** - Dynamic type system and custom types
+10. **[Edge Cases and Additional Tests](./10-edge-cases.md)** - Unicode, boundaries, and special cases
+11. **[Type Management Tests](./11-type-management.md)** - Dynamic type system and custom types
+12. **[Database Rebuild Tests](./12-rebuild-tests.md)** - Database reconstruction from markdown (MUST be run last)
 
 ## Test Execution Order
 
 Tests should be executed in numerical order as later tests may depend on data created in earlier tests.
+
+**IMPORTANT**: Database Rebuild Tests (test 12) MUST be executed last as it will reset the database and may affect subsequent tests.
 
 ## Success Criteria
 - All CRUD operations work correctly without errors
@@ -57,7 +59,7 @@ Tests should be executed in numerical order as later tests may depend on data cr
 - Custom types can be created with field definitions and validation
 - Type inheritance (base, document, task) works correctly
 - Types with existing items cannot be deleted
-- Built-in types are protected from modification
+- Default types can be deleted like any other type
 
 ## AI Testing Guidelines
 1. **Execute tests sequentially** - Later tests may depend on earlier data

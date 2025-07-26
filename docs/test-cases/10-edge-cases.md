@@ -18,7 +18,7 @@ Expected: Success with proper Unicode handling
 ### Create item with emoji
 ```
 mcp__shirokuma-knowledge-base__create_item(
-  type: "doc",
+  type: "docs",
   title: "Emoji Test 🚀",
   content: "## Testing Emojis 😀\n\n- ✅ Task completed\n- 🐛 Bug fixed\n- 📚 Documentation",
   tags: ["emoji", "test"]
@@ -62,19 +62,19 @@ Expected: Success with code blocks preserved
 ### Create issue with "Cancelled" status
 ```
 mcp__shirokuma-knowledge-base__create_item(
-  type: "issue",
+  type: "issues",
   title: "Cancelled Feature",
   content: "This feature was cancelled",
   status: "Cancelled"
 )
 ```
-Then: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`  
+Then: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
 Expected: Issue not shown (cancelled is closed)
 
-- [ ] Test filtering with empty statusIds array: `mcp__shirokuma-knowledge-base__get_items(type: "issue", statusIds: [])`  
+- [ ] Test filtering with empty statusIds array: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statusIds: [])`  
       Expected: Empty result (no status IDs match)
 
-- [ ] Test filtering with invalid status ID: `mcp__shirokuma-knowledge-base__get_items(type: "issue", statusIds: [999])`  
+- [ ] Test filtering with invalid status ID: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statusIds: [999])`  
       Expected: Empty result
 
 ## 11.6 Search Edge Cases
@@ -115,7 +115,7 @@ Expected: Error or empty result (should use "doc" or "knowledge")
 ```
 mcp__shirokuma-knowledge-base__get_item_detail(
   type: "document",
-  subtype: "doc",
+  subtype: "docs",
   id: 1
 )
 ```

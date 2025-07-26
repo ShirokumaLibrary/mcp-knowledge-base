@@ -7,11 +7,11 @@ This test verifies that the system starts in a clean state with no data and hand
 **Purpose**: Verify no errors occur in empty state  
 **Expected**: Empty arrays are returned
 
-- [ ] Issues list: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`  
+- [ ] Issues list: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
       Expected: Empty array `[]`
-- [ ] Plans list: `mcp__shirokuma-knowledge-base__get_items(type: "plan")`  
+- [ ] Plans list: `mcp__shirokuma-knowledge-base__get_items(type: "plans")`  
       Expected: Empty array `[]`
-- [ ] Documents list: `mcp__shirokuma-knowledge-base__get_items(type: "doc")`  
+- [ ] Documents list: `mcp__shirokuma-knowledge-base__get_items(type: "docs")`  
       Expected: Empty array `[]`
 - [ ] Knowledge list: `mcp__shirokuma-knowledge-base__get_items(type: "knowledge")`  
       Expected: Empty array `[]`

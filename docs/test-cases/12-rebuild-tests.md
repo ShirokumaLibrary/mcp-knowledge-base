@@ -18,13 +18,13 @@ This test suite verifies database rebuild functionality from markdown files.
 ### Post-rebuild verification via MCP
 
 #### Verify all data is restored
-- [ ] Get issues: `mcp__shirokuma-knowledge-base__get_items(type: "issue", includeClosedStatuses: true)`  
+- [ ] Get issues: `mcp__shirokuma-knowledge-base__get_items(type: "issues", includeClosedStatuses: true)`  
       Expected: All issues are restored with correct data
 
-- [ ] Get plans: `mcp__shirokuma-knowledge-base__get_items(type: "plan")`  
+- [ ] Get plans: `mcp__shirokuma-knowledge-base__get_items(type: "plans")`  
       Expected: All plans are restored
 
-- [ ] Get documents: `mcp__shirokuma-knowledge-base__get_items(type: "doc")`  
+- [ ] Get documents: `mcp__shirokuma-knowledge-base__get_items(type: "docs")`  
       Expected: All documents are restored
 
 - [ ] Get knowledge: `mcp__shirokuma-knowledge-base__get_items(type: "knowledge")`  
@@ -48,7 +48,7 @@ This test suite verifies database rebuild functionality from markdown files.
       Expected: All tags from markdown files are registered (except deleted ones)
 
 #### Verify data integrity
-- [ ] Check a specific issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issue", id: 4)`  
+- [ ] Check a specific issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 4)`  
       Expected: All fields match pre-rebuild state
 
 - [ ] Check status names: Verify issues show status names (not IDs)  
@@ -58,7 +58,7 @@ This test suite verifies database rebuild functionality from markdown files.
 - [ ] Create new item after rebuild:
 ```
 mcp__shirokuma-knowledge-base__create_item(
-  type: "issue",
+  type: "issues",
   title: "Post-rebuild Test Issue",
   content: "Testing ID sequence after rebuild",
   priority: "low",

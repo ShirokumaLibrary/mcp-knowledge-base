@@ -23,7 +23,7 @@ This test suite verifies status functionality and filtering capabilities.
 ### Update issue status using status name
 ```
 mcp__shirokuma-knowledge-base__update_item(
-  type: "issue",
+  type: "issues",
   id: 1,
   status: "Closed"
 )
@@ -31,10 +31,10 @@ mcp__shirokuma-knowledge-base__update_item(
 Expected: Success with status updated to "Closed"  
 Note: Status updates now work correctly using status names
 
-- [ ] Verify closed issue is excluded by default: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`  
+- [ ] Verify closed issue is excluded by default: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
       Expected: Array with 3 issues (closed issue not shown)
 
-- [ ] Verify closed issue appears with flag: `mcp__shirokuma-knowledge-base__get_items(type: "issue", includeClosedStatuses: true)`  
+- [ ] Verify closed issue appears with flag: `mcp__shirokuma-knowledge-base__get_items(type: "issues", includeClosedStatuses: true)`  
       Expected: Array with 4 issues (including the closed one)
 
 ### Test different closed statuses
@@ -42,25 +42,25 @@ Note: Status updates now work correctly using status names
 - [ ] Update another issue to "Completed" status:
 ```
 mcp__shirokuma-knowledge-base__update_item(
-  type: "issue",
+  type: "issues",
   id: 2,
   status: "Completed"
 )
 ```
 Expected: Success
 
-- [ ] Verify both closed issues are excluded: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`  
+- [ ] Verify both closed issues are excluded: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
       Expected: Array with 2 issues (only Open and In Progress shown)
 
 - [ ] Test "Cancelled" status:
 ```
 mcp__shirokuma-knowledge-base__update_item(
-  type: "issue",
+  type: "issues",
   id: 3,
   status: "Cancelled"
 )
 ```
 Expected: Success
 
-- [ ] Verify only one open issue remains: `mcp__shirokuma-knowledge-base__get_items(type: "issue")`  
+- [ ] Verify only one open issue remains: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
       Expected: Array with 1 issue (only issue 4 with "Open" status)

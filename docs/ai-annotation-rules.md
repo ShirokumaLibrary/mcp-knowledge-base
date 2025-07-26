@@ -102,6 +102,12 @@ try {
 - `@ai-fix`: Bug fixes with explanation
 - `@ai-debt`: Technical debt markers
 
+### Testing Tags
+- `@ai-skip`: Test is intentionally skipped
+- `@ai-reason`: Reason why test is skipped or special handling
+- `@ai-todo`: Future improvements or missing functionality
+- `@ai-note`: Additional context or warnings
+
 ### Cross-Reference Tags (New)
 - `@ai-related-files`: Lists related files that should be considered together
 - `@ai-filesystem`: Describes file system structure and paths
@@ -184,6 +190,28 @@ Example scenarios:
  * @ai-bug Missing await on async operations
  * @ai-fix Added await keywords to prevent race conditions
  */
+```
+
+### Test Annotations
+```typescript
+/**
+ * @ai-skip Environment-dependent test
+ * @ai-reason File permission changes behave differently across OS/environments
+ * @ai-todo Consider integration test suite for platform-specific behaviors
+ */
+it.skip('should handle read permission errors gracefully', async () => {
+  // test implementation
+});
+
+/**
+ * @ai-skip Complex error scenario
+ * @ai-reason Tests error recovery from malformed YAML/Markdown
+ * @ai-todo Implement robust parser error handling first
+ * @ai-note Current implementation may crash on invalid YAML
+ */
+it.skip('should handle corrupted markdown files', async () => {
+  // test implementation
+});
 ```
 
 ### Cross-Reference Example

@@ -30,27 +30,14 @@ This test suite validates the dynamic type system that allows creating custom do
 - Type registered in sequences table
 - Directory created at `documents/tutorial/`
 
-### TC12.3: List Custom Types
+### TC12.3: List All Types
 **Command**: `mcp__shirokuma-knowledge-base__get_types`
 ```json
-{
-  "include_built_in": false
-}
+{}
 ```
 **Expected Result**:
-- Returns array with recipe and tutorial types
-- Each type shows name, base_type ('documents'), and is_custom: true
-
-### TC12.4: List All Types
-**Command**: `mcp__shirokuma-knowledge-base__get_types`
-```json
-{
-  "include_built_in": true
-}
-```
-**Expected Result**:
-- Returns array including built-in types (issues, plans, docs, knowledge) and custom types
-- Built-in types have is_custom: false
+- Returns array including all types (issues, plans, docs, knowledge, recipe, tutorial)
+- Each type shows name and base_type
 
 ## Item Creation with Custom Types
 
@@ -164,7 +151,7 @@ This test suite validates the dynamic type system that allows creating custom do
 **Expected Result**:
 - Error: Cannot delete type "recipe" because documents of this type exist
 
-### TC12.14: Error - Delete Built-in Type
+### TC12.14: Delete Default Type
 **Command**: `mcp__shirokuma-knowledge-base__delete_type`
 ```json
 {
@@ -172,7 +159,7 @@ This test suite validates the dynamic type system that allows creating custom do
 }
 ```
 **Expected Result**:
-- Error: Cannot delete built-in type "issues"
+- Success: Type "issues" deleted (default types can be deleted like any other type)
 
 ### TC12.15: Error - Delete Non-existent Type
 **Command**: `mcp__shirokuma-knowledge-base__delete_type`
@@ -212,21 +199,90 @@ This test suite validates the dynamic type system that allows creating custom do
 - Returns items tagged with "baking" from specified custom types
 - Shows that type arrays also accept dynamic values
 
+## Task Type Creation
+
+### TC12.18: Create Custom Task Type
+**Command**: `mcp__shirokuma-knowledge-base__create_type`
+```json
+{
+  "name": "bugs",
+  "base_type": "tasks"
+}
+```
+**Expected Result**:
+- Success message indicating type created with base_type "tasks"
+- Type registered in sequences table with base_type 'tasks'
+- Directory created at `tasks/bugs/`
+
+### TC12.19: Create Items with Custom Task Type
+**Command**: `mcp__shirokuma-knowledge-base__create_item`
+```json
+{
+  "type": "bugs",
+  "title": "Login Button Not Working",
+  "content": "The login button is unresponsive on mobile devices",
+  "priority": "high",
+  "status": "Open",
+  "tags": ["mobile", "ui", "critical"]
+}
+```
+**Expected Result**:
+- Success: Item created with type "bugs"
+- File created at: `tasks/bugs/bugs-1.md`
+- Item has status and priority fields
+
+### TC12.20: Test Status Filtering with Custom Task Type
+**Command**: `mcp__shirokuma-knowledge-base__update_item`
+```json
+{
+  "type": "bugs",
+  "id": 1,
+  "status": "Closed"
+}
+```
+**Expected Result**:
+- Success: Status updated to "Closed"
+
+**Command**: `mcp__shirokuma-knowledge-base__get_items`
+```json
+{
+  "type": "bugs"
+}
+```
+**Expected Result**:
+- Empty array (closed items excluded by default)
+
+**Command**: `mcp__shirokuma-knowledge-base__get_items`
+```json
+{
+  "type": "bugs",
+  "includeClosedStatuses": true
+}
+```
+**Expected Result**:
+- Array with the closed bug item
+
 ## Summary
 These tests validate:
-1. ✓ Custom type creation with name only
-2. ✓ Type listing and filtering (built-in vs custom)
-3. ✓ Creating and retrieving items with custom types
-4. ✓ Type deletion with safety checks
-5. ✓ Error handling for invalid operations
-6. ✓ Protection of built-in types
-7. ✓ File naming convention for custom types (singular directory name, singular file prefix with ID)
-8. ✓ Separate ID sequences for each type
+1. ✓ Custom type creation with name only (defaults to documents)
+2. ✓ Custom type creation with explicit base_type (tasks or documents)
+3. ✓ Type listing shows all types
+4. ✓ Creating and retrieving items with custom types
+5. ✓ Type deletion with safety checks
+6. ✓ Error handling for invalid operations
+7. ✓ All types can be deleted (no special protection)
+8. ✓ File naming convention for custom types
+9. ✓ Separate ID sequences for each type
+10. ✓ Task types support status filtering
+11. ✓ Task types have priority and status fields
 
 ## Notes
-- Custom types are stored in the sequences table with base_type 'documents'
-- Each type gets its own directory under `documents/`
-- File naming follows the pattern: `{type}-{id}.md` (singular form for custom types)
-- Built-in types use plural forms: `issues-{id}.md`, `plans-{id}.md`, `docs-{id}.md`
+- Custom types are stored in the sequences table with specified base_type ('tasks' or 'documents')
+- Task types get their own directory under `tasks/`
+- Document types get their own directory under `documents/`
+- File naming follows the pattern: `{type}-{id}.md`
+- Default types: `issues-{id}.md`, `plans-{id}.md`, `docs-{id}.md`, `knowledge-{id}.md`
 - All type parameters in tools accept dynamic values - use `get_types` to discover available types
 - The type system is fully extensible without code changes
+- Task types support status, priority, and date fields
+- Document types require content field

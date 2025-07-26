@@ -270,11 +270,184 @@ Usage: `./commit-separator.sh "feat: new feature"`
 4. **Selective Reversion**: Can revert just tests or just docs if needed
 5. **CI/CD Friendly**: Can trigger different pipelines based on commit content
 
+## CHANGELOG.md and Version Management
+
+### When to Update CHANGELOG.md
+
+Update CHANGELOG.md for:
+- **Features**: New functionality (`feat:` commits)
+- **Bug Fixes**: User-facing bug fixes (`fix:` commits)
+- **Breaking Changes**: Any backward-incompatible changes
+- **Deprecations**: Features marked for future removal
+- **Documentation**: Significant documentation improvements
+
+Do NOT update CHANGELOG.md for:
+- Internal refactoring
+- Test improvements
+- Build process changes
+- Minor documentation fixes
+
+### CHANGELOG.md Format
+
+Follow [Keep a Changelog](https://keepachangelog.com) format:
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- New features
+
+### Changed
+- Changes in existing functionality
+
+### Deprecated
+- Soon-to-be removed features
+
+### Removed
+- Now removed features
+
+### Fixed
+- Bug fixes
+
+### Security
+- Vulnerabilities fixes
+
+## [0.0.8] - 2024-01-15
+
+### Added
+- Dynamic type system for custom content types
+- Status filtering in task lists
+...
+```
+
+### Version Numbering (Semantic Versioning)
+
+Format: `MAJOR.MINOR.PATCH`
+
+- **MAJOR** (1.0.0): Breaking changes
+  - Removing features
+  - Changing API contracts
+  - Incompatible database schema changes
+  
+- **MINOR** (0.1.0): New features (backward compatible)
+  - Adding new endpoints
+  - New functionality
+  - New optional parameters
+  
+- **PATCH** (0.0.1): Bug fixes and minor improvements
+  - Fixing bugs
+  - Performance improvements
+  - Documentation updates
+
+### Version Update Process
+
+1. **Update package.json**:
+   ```bash
+   # For patch release
+   npm version patch -m "chore: release v%s"
+   
+   # For minor release
+   npm version minor -m "chore: release v%s"
+   
+   # For major release
+   npm version major -m "chore: release v%s"
+   ```
+
+2. **Update CHANGELOG.md**:
+   - Move items from `[Unreleased]` to new version section
+   - Add release date
+   - Add comparison link at bottom
+
+3. **Commit Order for Releases**:
+   ```bash
+   # 1. Update CHANGELOG.md manually
+   git add CHANGELOG.md
+   git commit -m "docs: update CHANGELOG for v0.0.9"
+   
+   # 2. Update version (this creates a commit and tag)
+   npm version patch -m "chore: release v%s"
+   
+   # 3. Push commits and tags
+   git push && git push --tags
+   ```
+
+### CHANGELOG.md Best Practices
+
+1. **Write for Users**: Focus on user impact, not implementation details
+   ```markdown
+   ❌ Bad: Refactored IssueRepository to use status names
+   ✅ Good: Fixed issue where status IDs could become inconsistent
+   ```
+
+2. **Group Related Changes**:
+   ```markdown
+   ### Added
+   - Dynamic type system for custom content types
+     - Create custom task types (bugs, features, stories)
+     - Create custom document types (guides, tutorials)
+     - Automatic type discovery on rebuild
+   ```
+
+3. **Include Migration Notes**:
+   ```markdown
+   ### Changed
+   - Status system now uses names instead of IDs
+     - **Migration**: Run `npm run rebuild-db` after updating
+   ```
+
+4. **Credit Contributors** (if applicable):
+   ```markdown
+   ### Fixed
+   - Fixed memory leak in session handler (@username)
+   ```
+
+### Example Release Workflow
+
+```bash
+# 1. Ensure all changes are committed
+git status
+
+# 2. Run tests
+npm test
+
+# 3. Update CHANGELOG.md
+# Move unreleased items to new version section
+vim CHANGELOG.md
+
+# 4. Commit CHANGELOG
+git add CHANGELOG.md
+git commit -m "docs: update CHANGELOG for v0.0.9"
+
+# 5. Update version (creates commit and tag)
+npm version patch -m "chore: release v%s"
+
+# 6. Build distribution
+npm run build
+
+# 7. Commit distribution if needed
+git add dist/
+git commit -m "build: distribution for v0.0.9"
+
+# 8. Push everything
+git push && git push --tags
+
+# 9. Create GitHub release (optional)
+gh release create v0.0.9 --notes-from-tag
+```
+
 ## Exceptions
 
 Some changes may not fit this pattern:
 - **Hotfixes**: May combine source and tests for speed
 - **Initial Setup**: May include everything in one commit
 - **Dependencies**: package.json changes affecting multiple areas
+- **Releases**: Version updates include package.json and CHANGELOG.md
 
 Document exceptions in your commit message when deviating from this pattern.

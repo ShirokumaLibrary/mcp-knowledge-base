@@ -42,10 +42,10 @@
 
 ### Types
 - `get_types`: Retrieve all available types
-  - Optional: `include_built_in` (boolean) - Include built-in types (default: true)
   - Optional: `include_definitions` (boolean) - Include full type definitions (default: false)
 - `create_type`: Create new custom type
   - Required: `name` (string) - Type name (lowercase letters, numbers, underscores)
+  - Optional: `base_type` (string) - Base type: 'tasks' or 'documents' (default: 'documents')
 - `delete_type`: Delete custom type (only if no items exist)
 
 ## API Parameters
@@ -53,10 +53,10 @@
 ### Item Types
 When using item-related commands, specify the type parameter. Available types can be discovered using `get_types`.
 
-Built-in types:
-- `issue` - Bug reports, feature requests, tasks
-- `plan` - Project plans with timelines
-- `doc` - Documentation
+Default types (provided at initialization):
+- `issues` - Bug reports, feature requests, tasks
+- `plans` - Project plans with timelines
+- `docs` - Documentation
 - `knowledge` - Knowledge base entries
 
 Custom types:
@@ -84,7 +84,7 @@ Custom types:
 
 ## File Naming Conventions
 
-### Built-in Types (Plural)
+### Default Types (Plural)
 - Issues: `issues/issues-{id}.md`
 - Plans: `plans/plans-{id}.md`
 - Docs: `documents/docs/docs-{id}.md`
