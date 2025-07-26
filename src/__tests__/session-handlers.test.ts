@@ -145,7 +145,9 @@ describe('SessionHandlers', () => {
         [],  // Default empty array for tags
         undefined,
         undefined,
-        undefined  // datetime parameter
+        undefined,  // datetime parameter
+        undefined,
+        undefined
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -171,7 +173,9 @@ describe('SessionHandlers', () => {
         [],  // Default empty array for tags
         undefined,
         '2025-01-26-17.00.00.000',
-        undefined  // datetime parameter
+        undefined,  // datetime parameter
+        undefined,
+        undefined
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -196,7 +200,9 @@ describe('SessionHandlers', () => {
         ['work', 'important'],
         undefined,
         undefined,
-        undefined  // datetime parameter
+        undefined,  // datetime parameter
+        undefined,
+        undefined
       );
     });
 
@@ -222,7 +228,9 @@ describe('SessionHandlers', () => {
         [],  // Default empty array for tags
         undefined,
         undefined,
-        customDatetime
+        customDatetime,
+        undefined,
+        undefined
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -251,6 +259,8 @@ describe('SessionHandlers', () => {
         'Updated Title',
         'Updated content',
         ['updated'],
+        undefined,
+        undefined,
         undefined
       );
       const responseData = JSON.parse(result.content[0].text);
@@ -274,6 +284,8 @@ describe('SessionHandlers', () => {
         '2025-01-26-17.00.00.000',
         undefined,
         'Updated content only',
+        undefined,
+        undefined,
         undefined,
         undefined
       );

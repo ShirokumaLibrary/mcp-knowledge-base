@@ -15,7 +15,7 @@ describe('TaskRepository', () => {
   
   beforeEach(async () => {
     // Create a temporary directory for test data
-    testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-test-tasks-'));
+    testDir = await fs.mkdtemp(path.join(process.cwd(), 'tmp', 'mcp-test-tasks-'));
     
     // Initialize database
     const connection = new DatabaseConnection(':memory:');
@@ -29,8 +29,12 @@ describe('TaskRepository', () => {
   });
   
   afterEach(async () => {
-    // Clean up test directory
-    await fs.rm(testDir, { recursive: true, force: true });
+    // Clean up test directory unless KEEP_TEST_DATA is set
+    if (process.env.KEEP_TEST_DATA !== 'true') {
+      await fs.rm(testDir, { recursive: true, force: true });
+    } else {
+      console.log(`Test data kept in: ${testDir}`);
+    }
   });
   
   describe('Task operations', () => {

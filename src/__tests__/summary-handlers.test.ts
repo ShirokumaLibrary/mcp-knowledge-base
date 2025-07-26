@@ -137,7 +137,9 @@ describe('SummaryHandlers', () => {
         '2025-01-26',
         'New Summary',
         'Summary content',
-        ['work', 'done']
+        ['work', 'done'],
+        undefined,
+        undefined
       );
       const response = JSON.parse(result.content[0].text);
       expect(response.message).toBe('Daily summary created successfully');
@@ -162,7 +164,9 @@ describe('SummaryHandlers', () => {
         '2025-01-26',
         'Simple Summary',
         'Content',
-        []
+        [],
+        undefined,
+        undefined
       );
     });
 
@@ -209,7 +213,9 @@ describe('SummaryHandlers', () => {
         '2025-01-26',
         'Updated Summary',
         'Updated content',
-        ['updated']
+        ['updated'],
+        undefined,
+        undefined
       );
       const response = JSON.parse(result.content[0].text);
       expect(response.message).toBe('Daily summary updated successfully');
@@ -233,6 +239,8 @@ describe('SummaryHandlers', () => {
         '2025-01-26',
         undefined,
         'Updated content',
+        undefined,
+        undefined,
         undefined
       );
     });

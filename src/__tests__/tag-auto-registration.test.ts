@@ -14,11 +14,12 @@
 import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { FileIssueDatabase } from '../database/index.js';
 
 describe('Tag Auto Registration', () => {
   let db: FileIssueDatabase;
-  const testDir = '/home/webapp/mcp/tmp/mcp-test-tags-auto-' + process.pid;
+  const testDir = path.join(process.cwd(), 'tmp', 'mcp-test-tags-auto-' + process.pid);
   const dbPath = path.join(testDir, 'test.db');
 
   /**
@@ -41,8 +42,10 @@ describe('Tag Auto Registration', () => {
 
   afterEach(() => {
     db.close();
-    if (fs.existsSync(testDir)) {
+    if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true });
+    } else if (process.env.KEEP_TEST_DATA === 'true') {
+      console.log(`Test data kept in: ${testDir}`);
     }
   });
 

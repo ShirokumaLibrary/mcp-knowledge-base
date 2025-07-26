@@ -213,7 +213,8 @@ describe('ItemHandlers', () => {
         undefined, // description
         undefined, // start_date
         undefined, // end_date
-        ['issues-1', 'plans-1'] // related_tasks
+        ['issues-1', 'plans-1'], // related_tasks
+        undefined // related_documents
       );
       
       const text = result.content[0].text;
@@ -306,7 +307,8 @@ describe('ItemHandlers', () => {
         undefined,
         undefined,
         undefined,
-        ['issues-1', 'plans-2']
+        ['issues-1', 'plans-2'],
+        undefined
       );
       expect(result.content[0].text).toContain('issues created:');
       const jsonPart = result.content[0].text.replace('issues created: ', '');
@@ -344,7 +346,8 @@ describe('ItemHandlers', () => {
         undefined,
         undefined,
         undefined,
-        []
+        [],
+        undefined
       );
       const jsonPart = result.content[0].text.replace('plans created: ', '');
       const responseData = JSON.parse(jsonPart);
@@ -414,6 +417,7 @@ describe('ItemHandlers', () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         undefined
       );
     });
@@ -448,7 +452,8 @@ describe('ItemHandlers', () => {
         undefined,
         undefined,
         undefined,
-        ['issues-2', 'plans-3', 'issues-4']
+        ['issues-2', 'plans-3', 'issues-4'],
+        undefined
       );
       const jsonPart = result.content[0].text.replace('issues updated: ', '');
       const responseData = JSON.parse(jsonPart);
@@ -485,7 +490,8 @@ describe('ItemHandlers', () => {
         undefined,
         undefined,
         undefined,
-        []
+        [],
+        undefined
       );
       const jsonPart = result.content[0].text.replace('plans updated: ', '');
       const responseData = JSON.parse(jsonPart);

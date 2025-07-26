@@ -14,7 +14,7 @@ describe('Type Management', () => {
 
   beforeEach(async () => {
     // Create temporary test directory
-    testDataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'type-test-'));
+    testDataDir = await fs.mkdtemp(path.join(process.cwd(), 'tmp', 'type-test-'));
     sqlitePath = path.join(testDataDir, 'test.db');
     db = new FileIssueDatabase(testDataDir, sqlitePath);
     await db.initialize();

@@ -42,9 +42,11 @@ describe('FileIssueDatabase Async Tests', () => {
    */
   afterEach(() => {
     db.close();  // @ai-logic: Release SQLite locks
-    // @ai-cleanup: Remove all test files
-    if (fs.existsSync(testDataDir)) {
+    // @ai-cleanup: Remove all test files unless KEEP_TEST_DATA is set
+    if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDataDir)) {
       fs.rmSync(testDataDir, { recursive: true, force: true });
+    } else if (process.env.KEEP_TEST_DATA === 'true') {
+      console.log(`Test data kept in: ${testDataDir}`);
     }
   });
 

@@ -1,0 +1,480 @@
+import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { spawn, ChildProcess } from 'child_process';
+import path from 'path';
+import fs from 'fs/promises';
+import { SimpleMCPClient } from './mcp-test-client.js';
+
+describe('MCP Server Integration Tests', () => {
+  let client: SimpleMCPClient;
+  let serverProcess: ChildProcess;
+  const testData = {
+    createdItems: [] as Array<{ type: string; id: number }>,
+    createdTypes: [] as string[],
+    createdTags: [] as string[]
+  };
+
+  beforeAll(async () => {
+    // MCPサーバーを起動
+    serverProcess = spawn('node', [path.join(process.cwd(), 'dist/server.js')], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, NODE_ENV: 'test' }
+    });
+
+    // サーバーの起動を待つ
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // MCPクライアントを初期化
+    client = new SimpleMCPClient({
+      name: 'test-client',
+      version: '1.0.0'
+    });
+    
+    // 既存のサーバープロセスに接続
+    await client.connect({
+      process: serverProcess
+    } as any);
+  });
+
+  afterAll(async () => {
+    // クリーンアップ: 作成したアイテムを削除
+    for (const item of testData.createdItems.reverse()) {
+      try {
+        await client.call('delete_item', { 
+          type: item.type, 
+          id: item.id 
+        });
+      } catch (error) {
+        // 削除済みの場合は無視
+      }
+    }
+
+    // カスタムタイプを削除
+    for (const typeName of testData.createdTypes) {
+      try {
+        await client.call('delete_type', { name: typeName });
+      } catch (error) {
+        // 削除済みの場合は無視
+      }
+    }
+    
+    await client.close();
+    
+    // サーバープロセスを終了
+    if (serverProcess) {
+      serverProcess.kill();
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  });
+
+  describe('Test Suite 01: Initial State Verification', () => {
+    test('should return empty arrays for all item types', async () => {
+      const types = ['issues', 'plans', 'docs', 'knowledge'];
+      
+      for (const type of types) {
+        const result = await client.call('get_items', { type });
+        expect(result.data).toEqual([]);
+      }
+    });
+
+    test('should return default statuses', async () => {
+      const result = await client.call('get_statuses', {});
+      expect(result).toContain('Open');
+      expect(result).toContain('Closed');
+      expect(result).toContain('In Progress');
+    });
+  });
+
+  describe('Test Suite 02: Data Creation', () => {
+    test('should create an issue with all fields', async () => {
+      const issue = {
+        type: 'issues',
+        title: 'Test Issue',
+        content: 'Test content',
+        priority: 'high',
+        status: 'Open',
+        tags: ['test', 'integration']
+      };
+
+      const result = await client.call('create_item', issue);
+      
+      expect(result).toMatchObject({
+        id: expect.any(Number),
+        title: issue.title,
+        content: issue.content,
+        priority: issue.priority,
+        status: issue.status,
+        tags: issue.tags
+      });
+
+      testData.createdItems.push({ 
+        type: 'issues', 
+        id: result.id 
+      });
+    });
+
+    test('should handle unicode and special characters', async () => {
+      const knowledge = {
+        type: 'knowledge',
+        title: '日本語テスト 🚀',
+        content: '## 特殊文字\n!@#$%^&*()_+{}[]|\\:;<>?,./\n\n絵文字: 😀🎉',
+        tags: ['日本語', 'unicode']
+      };
+
+      const result = await client.call('create_item', knowledge);
+      
+      expect(result.title).toBe(knowledge.title);
+      expect(result.content).toBe(knowledge.content);
+      
+      testData.createdItems.push({ 
+        type: 'knowledge', 
+        id: result.id 
+      });
+    });
+  });
+
+  describe('Test Suite 03: Error Handling', () => {
+    test('should error on missing required fields', async () => {
+      await expect(
+        client.call('create_item', {
+          type: 'issues',
+          title: 'No content'
+          // contentが欠落
+        })
+      ).rejects.toThrow('Content is required');
+    });
+
+    test('should error on invalid type', async () => {
+      await expect(
+        client.call('create_item', {
+          type: 'invalid_type',
+          title: 'Test',
+          content: 'Test'
+        })
+      ).rejects.toThrow('Unknown type');
+    });
+  });
+
+  describe('Test Suite 04: Complex Operations', () => {
+    test('should handle related fields correctly', async () => {
+      // 最初にアイテムを作成
+      const issue = await client.call('create_item', {
+        type: 'issues',
+        title: 'Related Issue',
+        content: 'Issue with relations',
+        related_tasks: ['issues-1', 'plans-1'],
+        related_documents: ['docs-1', 'knowledge-1']
+      });
+
+      testData.createdItems.push({ 
+        type: 'issues', 
+        id: issue.id 
+      });
+
+      // 詳細を取得して確認
+      const detail = await client.call('get_item_detail', {
+        type: 'issues',
+        id: issue.id
+      });
+
+      expect(detail.data.related_tasks).toEqual(['issues-1', 'plans-1']);
+      expect(detail.data.related_documents).toContain('docs-1');
+    });
+  });
+
+  describe('Test Suite 05: Type Management', () => {
+    test('should create custom type', async () => {
+      const result = await client.call('create_type', {
+        name: 'test_type'
+      });
+      
+      expect(result).toContain('created successfully');
+      testData.createdTypes.push('test_type');
+    });
+
+    test('should use custom type for items', async () => {
+      const item = await client.call('create_item', {
+        type: 'test_type',
+        title: 'Custom Type Item',
+        content: 'Testing custom types'
+      });
+
+      expect(item.type).toBe('test_type');
+      expect(item.id).toBe(1); // 新しいタイプの最初のID
+      
+      testData.createdItems.push({ 
+        type: 'test_type', 
+        id: item.id 
+      });
+    });
+
+    test('should prevent duplicate type creation', async () => {
+      await expect(
+        client.call('create_type', { name: 'test_type' })
+      ).rejects.toThrow('already exists');
+    });
+  });
+
+  describe('Test Suite 06: Session and Summary Tests', () => {
+    test('should create and retrieve work session', async () => {
+      const session = await client.call('create_session', {
+        title: 'Test Session',
+        content: 'Testing session functionality',
+        category: 'testing',
+        tags: ['test', 'session']
+      });
+
+      expect(session.id).toMatch(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/);
+      expect(session.title).toBe('Test Session');
+      expect(session.category).toBe('testing');
+    });
+
+    test('should get latest session', async () => {
+      const latest = await client.call('get_latest_session', {});
+      
+      expect(latest).toBeDefined();
+      expect(latest.title).toBe('Test Session');
+    });
+
+    test('should create daily summary', async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const summary = await client.call('create_summary', {
+        date: today,
+        title: 'Test Summary',
+        content: 'Daily summary for testing',
+        tags: ['test', 'summary']
+      });
+
+      expect(summary.date).toBe(today);
+      expect(summary.title).toBe('Test Summary');
+    });
+  });
+
+  describe('Test Suite 07: Tag Operations', () => {
+    test('should auto-register tags when creating items', async () => {
+      const uniqueTag = `unique-tag-${Date.now()}`;
+      
+      const item = await client.call('create_item', {
+        type: 'knowledge',
+        title: 'Tagged Item',
+        content: 'Item with unique tag',
+        tags: [uniqueTag, 'common-tag']
+      });
+
+      testData.createdItems.push({ type: 'knowledge', id: item.id });
+      testData.createdTags.push(uniqueTag);
+
+      const tags = await client.call('get_tags', {});
+      expect(tags).toContain(uniqueTag);
+    });
+
+    test('should search items by tag', async () => {
+      const results = await client.call('search_items_by_tag', {
+        tag: 'common-tag'
+      });
+
+      expect(results.data).toBeDefined();
+      expect(results.data.length).toBeGreaterThan(0);
+    });
+
+    test('should handle tag deletion', async () => {
+      const tempTag = `temp-tag-${Date.now()}`;
+      
+      await client.call('create_tag', { name: tempTag });
+      testData.createdTags.push(tempTag);
+      
+      const result = await client.call('delete_tag', { name: tempTag });
+      expect(result).toBe(true);
+
+      const tags = await client.call('get_tags', {});
+      expect(tags).not.toContain(tempTag);
+    });
+  });
+
+  describe('Test Suite 08: Status Filtering', () => {
+    test('should filter closed status items', async () => {
+      // 閉じたissueを作成
+      const closedIssue = await client.call('create_item', {
+        type: 'issues',
+        title: 'Closed Issue',
+        content: 'This issue is closed',
+        status: 'Closed'
+      });
+
+      testData.createdItems.push({ type: 'issues', id: closedIssue.id });
+
+      // デフォルトでは閉じたアイテムは含まれない
+      const defaultResults = await client.call('get_items', { type: 'issues' });
+      const closedInDefault = defaultResults.data.find((item: any) => item.id === closedIssue.id);
+      expect(closedInDefault).toBeUndefined();
+
+      // includeClosedStatusesを指定すると含まれる
+      const allResults = await client.call('get_items', { 
+        type: 'issues', 
+        includeClosedStatuses: true 
+      });
+      const closedInAll = allResults.data.find((item: any) => item.id === closedIssue.id);
+      expect(closedInAll).toBeDefined();
+    });
+  });
+
+  describe('Test Suite 09: Related Items', () => {
+    test('should handle related tasks and documents', async () => {
+      const plan = await client.call('create_item', {
+        type: 'plans',
+        title: 'Plan with Relations',
+        content: 'Testing related items',
+        priority: 'medium',
+        status: 'In Progress',
+        related_tasks: ['issues-1', 'issues-2'],
+        related_documents: ['docs-1', 'knowledge-1']
+      });
+
+      testData.createdItems.push({ type: 'plans', id: plan.id });
+
+      const detail = await client.call('get_item_detail', {
+        type: 'plans',
+        id: plan.id
+      });
+
+      expect(detail.data.related_tasks).toEqual(['issues-1', 'issues-2']);
+      expect(detail.data.related_documents).toEqual(['docs-1', 'knowledge-1']);
+    });
+  });
+
+  describe('Test Suite 10: Edge Cases', () => {
+    test('should handle very long content', async () => {
+      const longContent = 'A'.repeat(10000);
+      
+      const doc = await client.call('create_item', {
+        type: 'docs',
+        title: 'Long Document',
+        content: longContent
+      });
+
+      testData.createdItems.push({ type: 'docs', id: doc.id });
+
+      const detail = await client.call('get_item_detail', {
+        type: 'docs',
+        id: doc.id
+      });
+
+      expect(detail.data.content.length).toBe(10000);
+    });
+
+    test('should handle empty arrays', async () => {
+      const item = await client.call('create_item', {
+        type: 'issues',
+        title: 'Empty Arrays',
+        content: 'Testing empty arrays',
+        tags: [],
+        related_tasks: [],
+        related_documents: []
+      });
+
+      testData.createdItems.push({ type: 'issues', id: item.id });
+
+      expect(item.tags).toEqual([]);
+      expect(item.related_tasks).toEqual([]);
+      expect(item.related_documents).toEqual([]);
+    });
+
+    test('should handle special characters in titles', async () => {
+      const specialTitle = 'Title with "quotes" and \\backslashes\\ and /slashes/';
+      
+      const item = await client.call('create_item', {
+        type: 'knowledge',
+        title: specialTitle,
+        content: 'Testing special characters'
+      });
+
+      testData.createdItems.push({ type: 'knowledge', id: item.id });
+
+      expect(item.title).toBe(specialTitle);
+    });
+  });
+
+  describe('Test Suite 11: Concurrent Operations', () => {
+    test('should handle concurrent item creation', async () => {
+      const promises = [];
+      
+      for (let i = 0; i < 5; i++) {
+        promises.push(
+          client.call('create_item', {
+            type: 'issues',
+            title: `Concurrent Issue ${i}`,
+            content: `Testing concurrent creation ${i}`,
+            priority: 'low',
+            status: 'Open'
+          })
+        );
+      }
+
+      const results = await Promise.all(promises);
+      
+      // すべて成功し、異なるIDを持つことを確認
+      const ids = results.map((r: any) => r.id);
+      const uniqueIds = new Set(ids);
+      
+      expect(uniqueIds.size).toBe(5);
+      
+      // クリーンアップ用に記録
+      results.forEach((item: any) => {
+        testData.createdItems.push({ type: 'issues', id: item.id });
+      });
+    });
+  });
+
+  describe('Test Suite 12: Validation Tests', () => {
+    test('should validate required fields', async () => {
+      // titleなし
+      await expect(
+        client.call('create_item', {
+          type: 'docs',
+          content: 'No title'
+        })
+      ).rejects.toThrow('title');
+
+      // contentなし（documents系）
+      await expect(
+        client.call('create_item', {
+          type: 'knowledge',
+          title: 'No content'
+        })
+      ).rejects.toThrow('content');
+    });
+
+    test('should validate enum values', async () => {
+      // 無効なpriority
+      await expect(
+        client.call('create_item', {
+          type: 'issues',
+          title: 'Invalid Priority',
+          content: 'Testing invalid priority',
+          priority: 'invalid'
+        })
+      ).rejects.toThrow();
+
+      // 無効なstatus
+      await expect(
+        client.call('create_item', {
+          type: 'plans',
+          title: 'Invalid Status',
+          content: 'Testing invalid status',
+          status: 'InvalidStatus'
+        })
+      ).rejects.toThrow('Invalid status');
+    });
+
+    test('should validate date formats', async () => {
+      // 無効な日付形式
+      await expect(
+        client.call('create_item', {
+          type: 'plans',
+          title: 'Invalid Date',
+          content: 'Testing invalid date',
+          start_date: 'not-a-date'
+        })
+      ).rejects.toThrow();
+    });
+  });
+});
