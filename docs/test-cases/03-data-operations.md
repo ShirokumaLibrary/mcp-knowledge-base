@@ -102,9 +102,9 @@ mcp__shirokuma-knowledge-base__update_item(
 ```
 Expected: Success with both description and content updated
 
-## Related Tasks Testing
+## Related Tasks and Documents Testing
 
-**Note**: The `related_tasks` feature is fully implemented and tested. Unit tests have been added to verify functionality at both the repository and MCP handler levels.
+**Note**: The `related_tasks` and `related_documents` features are fully implemented and tested. Unit tests have been added to verify functionality at both the repository and MCP handler levels.
 
 ### Create task with related tasks
 ```
@@ -160,7 +160,7 @@ mcp__shirokuma-knowledge-base__create_item(
   type: "issues",
   title: "Test invalid reference",
   content: "Testing invalid task reference",
-  related_tasks: ["invalid-format", "docs-1"]  // docs don't support related_tasks
+  related_tasks: ["invalid-format", "nonexistent-999"]
 )
 ```
 Expected: Success (invalid references are stored as-is, validation is lenient)
@@ -173,3 +173,51 @@ mcp__shirokuma-knowledge-base__get_item_detail(
 )
 ```
 Expected: Response includes related_tasks array exactly as stored
+
+### Create document with related tasks and documents
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "docs",
+  title: "Integration Guide",
+  content: "Guide for integrating authentication with API",
+  tags: ["integration", "guide"],
+  related_tasks: ["issues-5", "plans-5"],
+  related_documents: ["docs-1", "knowledge-5"]
+)
+```
+Expected: Success with both related_tasks and related_documents arrays
+
+### Update document with related documents
+```
+mcp__shirokuma-knowledge-base__update_item(
+  type: "docs",
+  id: 6,  // Assuming this is the ID from previous create
+  related_documents: ["knowledge-1", "knowledge-3", "docs-2"]
+)
+```
+Expected: Success with updated related_documents array
+
+### Create session with related fields
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Working on authentication feature",
+  content: "Implemented JWT validation and rate limiting",
+  tags: ["development", "authentication"],
+  related_tasks: ["issues-5", "plans-4"],
+  related_documents: ["docs-5", "knowledge-5"]
+)
+```
+Expected: Success with both related_tasks and related_documents arrays
+
+### Create daily summary with related fields
+```
+mcp__shirokuma-knowledge-base__create_summary(
+  date: "2025-01-26",
+  title: "Security Implementation Progress",
+  content: "Completed JWT implementation and started on rate limiting",
+  tags: ["daily", "progress"],
+  related_tasks: ["issues-5", "plans-4", "plans-5"],
+  related_documents: ["docs-5", "knowledge-5"]
+)
+```
+Expected: Success with both related_tasks and related_documents arrays

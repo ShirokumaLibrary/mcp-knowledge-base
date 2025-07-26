@@ -15,6 +15,19 @@ mcp__shirokuma-knowledge-base__create_session(
 ```
 Expected: Success with session ID in format YYYY-MM-DD-HH.MM.SS.sss
 
+### Create session with related fields
+```
+mcp__shirokuma-knowledge-base__create_session(
+  title: "Security Implementation Work",
+  content: "## Work Done\n- Implemented JWT validation\n- Added rate limiting middleware\n- Updated documentation\n\n## Related Work\n- See related issues and documents for context",
+  tags: ["security", "implementation"],
+  category: "development",
+  related_tasks: ["issues-5", "plans-4"],
+  related_documents: ["docs-5", "knowledge-5"]
+)
+```
+Expected: Success with both related_tasks and related_documents arrays
+
 - [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
       Expected: The session just created
 
@@ -26,6 +39,16 @@ mcp__shirokuma-knowledge-base__update_session(
 )
 ```
 Expected: Success with content preserved exactly as provided
+
+### Update session with related fields
+```
+mcp__shirokuma-knowledge-base__update_session(
+  id: "[second session ID]",
+  related_tasks: ["issues-5", "plans-4", "plans-5"],
+  related_documents: ["docs-1", "docs-5", "knowledge-3", "knowledge-5"]
+)
+```
+Expected: Success with updated related_tasks and related_documents arrays
 
 ### Get sessions by date range
 ```

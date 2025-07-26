@@ -15,6 +15,19 @@ mcp__shirokuma-knowledge-base__create_summary(
 ```
 Expected: Success
 
+### Create summary with related fields
+```
+mcp__shirokuma-knowledge-base__create_summary(
+  date: "2025-07-26",
+  title: "Security Implementation Progress",
+  content: "## Today's Achievements\n- Completed JWT validation implementation\n- Added rate limiting to all API endpoints\n- Updated security documentation\n\n## Related Work\n- Multiple issues and plans completed today",
+  tags: ["security", "progress"],
+  related_tasks: ["issues-5", "plans-4", "plans-5"],
+  related_documents: ["docs-5", "knowledge-5"]
+)
+```
+Expected: Success with both related_tasks and related_documents arrays
+
 - [ ] Get summary detail: `mcp__shirokuma-knowledge-base__get_summary_detail(date: "2025-07-25")`  
       Expected: Complete summary object
 
@@ -26,6 +39,16 @@ mcp__shirokuma-knowledge-base__update_summary(
 )
 ```
 Expected: Success with updated content
+
+### Update summary with related fields
+```
+mcp__shirokuma-knowledge-base__update_summary(
+  date: "2025-07-26",
+  related_tasks: ["issues-1", "issues-4", "issues-5", "plans-4", "plans-5"],
+  related_documents: ["docs-1", "docs-5", "knowledge-3", "knowledge-5"]
+)
+```
+Expected: Success with updated related_tasks and related_documents arrays
 
 ### Create duplicate summary for same date
 ```

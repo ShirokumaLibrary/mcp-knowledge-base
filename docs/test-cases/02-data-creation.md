@@ -58,6 +58,21 @@ mcp__shirokuma-knowledge-base__create_item(
 ```
 Expected: Success with id: 4, description field stored
 
+### Issue 5 - Issue with related tasks and documents
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "issues",
+  title: "API Documentation Needs Update",
+  content: "## Issue\nThe API documentation is outdated and missing new endpoints.\n\n### Related Work\n- Update endpoints documentation\n- Add example requests/responses\n- Document error codes",
+  priority: "medium",
+  status: "Open",
+  tags: ["documentation", "api"],
+  related_tasks: ["issues-1", "plans-4"],
+  related_documents: ["docs-1", "knowledge-1"]
+)
+```
+Expected: Success with id: 5, with related_tasks and related_documents arrays
+
 ### Issue creation without content - Verify error occurs
 ```
 mcp__shirokuma-knowledge-base__create_item(
@@ -130,6 +145,23 @@ mcp__shirokuma-knowledge-base__create_item(
 ```
 Expected: Success with id: 4, description field stored
 
+### Plan 5 - Plan with related tasks
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "plans",
+  title: "Security Audit Project",
+  content: "## Security Audit Plan\n\n### Phase 1: Assessment\n- Review current security practices\n- Identify vulnerabilities\n- Prioritize risks\n\n### Phase 2: Implementation\n- Fix critical vulnerabilities\n- Update security policies\n- Train team members",
+  priority: "high",
+  status: "Open",
+  start_date: "2025-04-01",
+  end_date: "2025-06-30",
+  tags: ["security", "audit"],
+  related_tasks: ["issues-4", "issues-5"],
+  related_documents: ["knowledge-3"]
+)
+```
+Expected: Success with id: 5, with related_tasks and related_documents arrays
+
 ## 2.3 Document Creation
 
 Create multiple Documents with various configurations.
@@ -178,6 +210,19 @@ mcp__shirokuma-knowledge-base__create_item(
 ```
 Expected: Success with id: 4, description field stored
 
+### Doc 5 - Document with related tasks and documents
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "docs",
+  title: "Security Implementation Guide",
+  content: "# Security Implementation Guide\n\n## Overview\nThis guide covers security implementation for the API rate limiting project.\n\n## Related Work\nSee related issues and plans for context.\n\n## Implementation Details\n- JWT token validation\n- Rate limiting middleware\n- IP whitelisting\n- Security headers",
+  tags: ["security", "implementation"],
+  related_tasks: ["plans-4", "plans-5"],
+  related_documents: ["knowledge-3", "docs-1"]
+)
+```
+Expected: Success with id: 5, with related_tasks and related_documents arrays
+
 ## 2.4 Knowledge Creation
 
 Create multiple Knowledge entries with various configurations.
@@ -225,3 +270,16 @@ mcp__shirokuma-knowledge-base__create_item(
 )
 ```
 Expected: Success with id: 4, description field stored
+
+### Knowledge 5 - Knowledge with related documents
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "knowledge",
+  title: "API Security Best Practices",
+  content: "## API Security Best Practices\n\n### Authentication & Authorization\n- Use OAuth 2.0 or JWT tokens\n- Implement proper token expiration\n- Use refresh tokens securely\n\n### Rate Limiting\n- Implement per-user limits\n- Use sliding window algorithms\n- Return proper 429 status codes\n\n### Input Validation\n- Validate all inputs\n- Use parameterized queries\n- Sanitize outputs",
+  tags: ["api", "security", "best-practices"],
+  related_tasks: ["issues-5", "plans-4"],
+  related_documents: ["docs-1", "docs-5", "knowledge-3"]
+)
+```
+Expected: Success with id: 5, with related_tasks and related_documents arrays

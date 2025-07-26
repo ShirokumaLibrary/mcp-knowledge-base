@@ -72,6 +72,8 @@ Custom types:
 - `tags` - Array of tag names
 - `priority` - Priority level (high, medium, low) for issues/plans
 - `status` - Status name for issues/plans (stored as name in markdown files)
+- `related_tasks` - Array of task references (e.g., ["issues-1", "plans-2"]) for cross-referencing
+- `related_documents` - Array of document references (e.g., ["docs-1", "knowledge-2"]) for cross-referencing
 
 ### Date Parameters
 - `date` - Format: YYYY-MM-DD

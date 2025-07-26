@@ -31,6 +31,19 @@ This test suite performs comprehensive checks on data integrity and error handli
 - [ ] Get plan detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: 4)`  
       Expected: Description field contains the updated description
 
+### Verify related fields are preserved
+- [ ] Get issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 5)`  
+      Expected: related_tasks and related_documents arrays match what was created
+
+- [ ] Get doc detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "docs", id: 5)`  
+      Expected: related_tasks and related_documents arrays match what was created
+
+- [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
+      Expected: If session has related fields, they are preserved
+
+- [ ] Get summary detail: `mcp__shirokuma-knowledge-base__get_summary_detail(date: "2025-07-26")`  
+      Expected: related_tasks and related_documents arrays match what was created
+
 ## 8.2 Error Handling
 
 ### Detail retrieval with non-existent ID

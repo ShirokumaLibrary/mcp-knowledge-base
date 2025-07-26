@@ -12,11 +12,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New `datetime` parameter allows creating sessions with past timestamps
   - Enables historical data migration and import
   - ISO 8601 datetime format support
+- Cross-reference fields for all item types
+  - `related_tasks` field added to documents, sessions, and summaries
+  - `related_documents` field added to all item types (issues, plans, docs, knowledge, sessions, summaries)
+  - Normalized database tables for relationship storage
+  - MCP tool definitions updated with new fields
 
 ### Changed
 - Session ID format changed to `YYYY-MM-DD-HH.MM.SS.sss`
   - More readable format with dots as separators
   - Example: `2025-01-26-14.30.52.123`
+- Enhanced item relationships
+  - All item types can now reference related tasks (e.g., ["issues-1", "plans-2"])
+  - All item types can now reference related documents (e.g., ["docs-1", "knowledge-2"])
+  - Database schema extended with related_documents table
+- **Database connection pattern changed to per-request connections**
+  - Each API call now creates a fresh database connection
+  - Automatically handles database rebuild scenarios without restart
+  - Eliminates connection state issues
+  - Small performance trade-off (~10-15ms) for improved reliability
+
+### Technical Details
+- Database schema changes:
+  - New `related_documents` table for document relationships
+  - Indexes added for efficient relationship queries
+  - Support for both integer and string IDs in relationships
+- Updated all handlers to pass through relationship fields
+- Extended Zod schemas for validation of new fields
+- Removed persistent database connection in favor of per-request pattern
+  - No more initialization on server startup
+  - Database connections are created and closed for each tool call
 
 ## [0.0.10] - 2025-07-26
 
