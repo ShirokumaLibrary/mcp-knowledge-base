@@ -323,7 +323,7 @@ export const toolDefinitions = [
   },
   {
     name: 'create_session',
-    description: 'Create or update work session.',
+    description: 'Create new work session. Sessions are identified by YYYY-MM-DD-HH.MM.SS.sss format.',
     inputSchema: {
       type: 'object',
       properties: {

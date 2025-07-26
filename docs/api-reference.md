@@ -19,6 +19,7 @@
 - `get_session_detail`: Get detailed information for specified session
 - `get_latest_session`: Get the latest work session for today
 - `create_session`: Create new work session
+  - Optional: `datetime` (ISO 8601) - Create session with specific timestamp (for historical data migration)
 - `update_session`: Update existing work session
 - `search_sessions_by_tag`: Search work sessions by tag
 
@@ -64,7 +65,7 @@ Custom types:
 - Custom types are stored under `documents/{type}/`
 
 ### Common Parameters
-- `id` - Numeric identifier for items
+- `id` - Numeric identifier for items (Session IDs use format: YYYY-MM-DD-HH.MM.SS.sss)
 - `type` - Item type (use `get_types` to see available types)
 - `title` - Title of the item
 - `content` - Main content (required for all item types)
