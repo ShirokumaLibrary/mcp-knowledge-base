@@ -1,6 +1,7 @@
 import { BaseRepository, Database } from './base.js';
-import { Issue, Plan, Knowledge, Doc, Document } from '../types/domain-types.js';
+import { Issue, Plan, Document } from '../types/domain-types.js';
 import { WorkSession } from '../types/session-types.js';
+import { typeRegistry, TaskType } from '../types/type-registry.js';
 
 /**
  * @ai-context Centralized search functionality across all content types
@@ -10,21 +11,18 @@ import { WorkSession } from '../types/session-types.js';
  * @ai-assumption SQLite search tables are kept in sync with markdown files
  */
 export class SearchRepository extends BaseRepository {
-  private issueRepository: any;  // @ai-why: Circular dependency prevents proper typing
-  private planRepository: any;
+  private taskRepository: any;  // @ai-why: Circular dependency prevents proper typing
   private documentRepository: any;  // @ai-logic: Unified document repository
   private sessionRepository: any;
 
   constructor(
     db: Database, 
-    issueRepository: any,
-    planRepository: any,
+    taskRepository: any,
     documentRepository: any,
     sessionRepository?: any
   ) {
     super(db, 'SearchRepository');
-    this.issueRepository = issueRepository;
-    this.planRepository = planRepository;
+    this.taskRepository = taskRepository;
     this.documentRepository = documentRepository;
     this.sessionRepository = sessionRepository;
   }
@@ -36,30 +34,64 @@ export class SearchRepository extends BaseRepository {
    * @ai-why Two-phase approach: search returns IDs, then fetch full data from files
    * @ai-edge-case Handles deleted files gracefully with filter(Boolean)
    */
-  async searchAll(query: string): Promise<{ issues: Issue[], plans: Plan[], knowledge: Knowledge[] }> {
-    // @ai-logic: Search issues by title and description
-    const issueRows = await this.db.allAsync(
-      `SELECT id FROM search_issues WHERE title LIKE ? OR content LIKE ?`,
+  async searchAll(query: string): Promise<{ issues: Issue[], plans: Plan[], knowledge: Document[] }> {
+    // @ai-logic: Search tasks (issues and plans) from unified table
+    const taskRows = await this.db.allAsync(
+      `SELECT type, id FROM search_tasks WHERE title LIKE ? OR content LIKE ?`,
       [`%${query}%`, `%${query}%`]
     );
-    const issuePromises = issueRows.map((row: any) => this.issueRepository.getIssue(row.id));
+    
+    // Get task types from sequences table
+    const sequences = await this.db.allAsync(
+      `SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`
+    );
+    
+    // Group task rows by type
+    const tasksByType: Record<string, any[]> = {};
+    for (const row of taskRows) {
+      if (!tasksByType[row.type]) {
+        tasksByType[row.type] = [];
+      }
+      tasksByType[row.type].push(row);
+    }
+    
+    // For backward compatibility, map first two task types to issues/plans
+    const issueType = sequences[0]?.type;
+    const planType = sequences[1]?.type;
+    const issueRows = issueType ? (tasksByType[issueType] || []) : [];
+    const planRows = planType ? (tasksByType[planType] || []) : [];
+    
+    const issuePromises = issueRows.map((row: any) => this.taskRepository.getTask(issueType, row.id));
     const issues = (await Promise.all(issuePromises)).filter(Boolean) as Issue[];
-
-    // @ai-logic: Search plans similarly
-    const planRows = await this.db.allAsync(
-      `SELECT id FROM search_plans WHERE title LIKE ? OR content LIKE ?`,
-      [`%${query}%`, `%${query}%`]
-    );
-    const planPromises = planRows.map((row: any) => this.planRepository.getPlan(row.id));
+    
+    const planPromises = planRows.map((row: any) => this.taskRepository.getTask(planType, row.id));
     const plans = (await Promise.all(planPromises)).filter(Boolean) as Plan[];
 
-    // @ai-logic: Knowledge searches content field too (more comprehensive)
-    const knowledgeRows = await this.db.allAsync(
-      `SELECT type, id FROM search_documents WHERE type = 'knowledge' AND (title LIKE ? OR content LIKE ?)`,
+    // @ai-logic: Search all document types
+    const documentRows = await this.db.allAsync(
+      `SELECT type, id FROM search_documents WHERE title LIKE ? OR content LIKE ?`,
       [`%${query}%`, `%${query}%`]
     );
-    const knowledgePromises = knowledgeRows.map((row: any) => this.documentRepository.getDocument('knowledge', row.id));
-    const knowledge = (await Promise.all(knowledgePromises)).filter(Boolean) as Knowledge[];
+    
+    // Group document rows by type
+    const documentsByType: Record<string, any[]> = {};
+    for (const row of documentRows) {
+      if (!documentsByType[row.type]) {
+        documentsByType[row.type] = [];
+      }
+      documentsByType[row.type].push(row);
+    }
+    
+    // Get all documents
+    const allDocuments: Document[] = [];
+    for (const [docType, rows] of Object.entries(documentsByType)) {
+      const docPromises = rows.map((row: any) => this.documentRepository.getDocument(docType, row.id));
+      const docs = (await Promise.all(docPromises)).filter(Boolean) as Document[];
+      allDocuments.push(...docs);
+    }
+    
+    // For backward compatibility, return empty array as knowledge
+    const knowledge = allDocuments;
 
     return { issues, plans, knowledge };
   }
@@ -71,23 +103,42 @@ export class SearchRepository extends BaseRepository {
    * @ai-why Mixed approach: some repos have tag search, others need filtering
    * @ai-assumption Tags are exact matches, case-sensitive
    */
-  async searchAllByTag(tag: string): Promise<{ issues: Issue[], plans: Plan[], docs: Doc[], knowledge: Knowledge[], sessions: WorkSession[] }> {
+  async searchAllByTag(tag: string): Promise<{ issues: Issue[], plans: Plan[], docs: Document[], knowledge: Document[], sessions: WorkSession[] }> {
     // @ai-performance: Parallel fetching for better response time
+    // Get task types from sequences
+    const taskSequences = await this.db.allAsync(
+      `SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`
+    );
+    
+    // Fetch all tasks by type
+    const taskPromises = taskSequences.map((seq: any) => 
+      this.taskRepository.getAllTasks(seq.type)
+    );
+    
     const results = await Promise.all([
-      this.issueRepository.getAllIssues(),
-      this.planRepository.getAllPlans(),
-      this.documentRepository.searchDocumentsByTag(tag, 'knowledge'),
-      this.documentRepository.searchDocumentsByTag(tag, 'doc'),
+      ...taskPromises,
+      this.documentRepository.searchDocumentsByTag(tag), // All document types
       this.sessionRepository ? this.sessionRepository.searchSessionsByTag(tag) : Promise.resolve([])
     ]);
     
-    const [issues, plans, knowledge, docs, sessions] = results;
+    // Extract results
+    const allTasks = results.slice(0, taskSequences.length);
+    const allDocuments = results[taskSequences.length] as Document[];
+    const sessions = results[taskSequences.length + 1] as WorkSession[];
+    
+    // For backward compatibility, assume first two task types are issues and plans
+    const issues = (allTasks[0] || []).filter((t: any) => t.tags && t.tags.includes(tag)) as Issue[];
+    const plans = (allTasks[1] || []).filter((t: any) => t.tags && t.tags.includes(tag)) as Plan[];
+    
+    // Filter documents by type
+    const docs = allDocuments.filter(d => d.type === 'docs');
+    const knowledge = allDocuments.filter(d => d.type === 'knowledge');
     
     return {
-      issues: issues.filter((i: Issue) => i.tags && i.tags.includes(tag)),  // @ai-logic: In-memory filter
-      plans: plans.filter((p: Plan) => p.tags && p.tags.includes(tag)),
-      docs,      // @ai-logic: Already filtered by repository
-      knowledge, // @ai-logic: Already filtered by repository
+      issues,    // @ai-logic: Already filtered above
+      plans,     // @ai-logic: Already filtered above
+      docs,      // @ai-logic: Filtered from all documents
+      knowledge, // @ai-logic: Filtered from all documents
       sessions   // @ai-logic: Already filtered by repository
     };
   }
@@ -237,17 +288,33 @@ export class SearchRepository extends BaseRepository {
   async rebuildSearchIndex(): Promise<void> {
     // @ai-logic: Clear existing data to prevent duplicates
     await Promise.all([
-      this.db.runAsync('DELETE FROM search_issues'),
-      this.db.runAsync('DELETE FROM search_plans'),
+      this.db.runAsync('DELETE FROM search_tasks'),
       this.db.runAsync('DELETE FROM search_documents')
     ]);
 
     // @ai-logic: Load all content from markdown files
-    const [issues, plans, documents] = await Promise.all([
-      this.issueRepository.getAllIssues(),
-      this.planRepository.getAllPlans(),
+    // Get task types from sequences
+    const taskSequences = await this.db.allAsync(
+      `SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`
+    );
+    
+    // Fetch all tasks by type
+    const taskPromises = taskSequences.map((seq: any) => 
+      this.taskRepository.getAllTasks(seq.type)
+    );
+    
+    const results = await Promise.all([
+      ...taskPromises,
       this.documentRepository.getAllDocuments()
     ]);
+    
+    // Extract results
+    const allTasks = results.slice(0, taskSequences.length);
+    const documents = results[taskSequences.length] as Document[];
+    
+    // For backward compatibility, assume first two task types are issues and plans
+    const issues = allTasks[0] || [];
+    const plans = allTasks[1] || [];
 
     // @ai-critical: Pre-register all tags to avoid race conditions
     const allTags = new Set<string>();
@@ -264,9 +331,20 @@ export class SearchRepository extends BaseRepository {
     // @ai-logic: Tags are auto-registered during document sync operations
 
     // @ai-performance: Batch sync for better performance
+    // Get task types from sequences
+    const sequences = await this.db.allAsync(
+      `SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`
+    );
+    const issueType = sequences[0]?.type;
+    const planType = sequences[1]?.type;
+    
+    if (!issueType || !planType) {
+      throw new Error('Task types not properly initialized in sequences table');
+    }
+    
     await Promise.all([
-      ...issues.map((issue: Issue) => this.issueRepository.syncIssueToSQLite(issue)),
-      ...plans.map((plan: Plan) => this.planRepository.syncPlanToSQLite(plan)),
+      ...issues.map((issue: Issue) => this.taskRepository.syncTaskToSQLite(issue, issueType as TaskType)),
+      ...plans.map((plan: Plan) => this.taskRepository.syncTaskToSQLite(plan, planType as TaskType)),
       ...documents.map((doc: Document) => this.documentRepository.syncDocumentToSQLite(doc))
     ]);
   }

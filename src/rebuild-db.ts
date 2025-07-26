@@ -24,40 +24,114 @@ import { parseMarkdown } from './utils/markdown-parser.js';
  * @ai-why Separate scanning from syncing allows progress reporting and validation
  */
 async function scanAndRebuild(databasePath: string, db: any) {
+  // First, get all types from sequences table
+  const sequences = await db.allAsync('SELECT type, base_type FROM sequences');
+  
   const counts = {
-    issues: 0,
-    plans: 0,
-    docs: 0,
-    knowledge: 0,
+    typeCountsMap: {} as Record<string, number>,  // Dynamic type counts
     sessions: 0,
     tags: new Set<string>(),
     statuses: new Set<string>(),  // @ai-logic: Now we only store status names
-    maxIds: {  // @ai-critical: Track maximum IDs to update sequences correctly
-      issues: 0,
-      plans: 0,
-      docs: 0,
-      knowledge: 0,
-      customTypes: {} as Record<string, number>  // @ai-logic: Track max IDs for custom types
-    },
-    customTypes: new Set<string>()  // @ai-logic: Track discovered custom types
+    maxIds: {} as Record<string, number>,  // @ai-critical: Track maximum IDs to update sequences correctly
   };
-
-  // @ai-logic: Process each content type with consistent pattern
-  console.log('\n📂 Scanning issues...');
-  const issueFiles = globSync(path.join(databasePath, 'issues', 'issue-*.md'));
-  for (const file of issueFiles) {
-    const content = await fs.readFile(file, 'utf-8');
-    const parsed = parseMarkdown(content);
-    
-    // Extract ID from filename and update max ID
-    const filename = path.basename(file);
-    const idMatch = filename.match(/issue-(\d+)\.md/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1]);
-      if (id > counts.maxIds.issues) {
-        counts.maxIds.issues = id;
+  
+  // Initialize counts for all known types
+  for (const seq of sequences) {
+    counts.typeCountsMap[seq.type] = 0;
+    counts.maxIds[seq.type] = 0;
+  }
+  
+  // @ai-logic: Also scan filesystem for types that may not be in database yet
+  console.log('\n🔍 Scanning filesystem for additional types...');
+  
+  // Scan task directories
+  try {
+    const taskDirs = await fs.readdir(path.join(databasePath, 'tasks'));
+    for (const dir of taskDirs) {
+      const dirPath = path.join(databasePath, 'tasks', dir);
+      const stat = await fs.stat(dirPath);
+      if (stat.isDirectory() && !sequences.find((s: any) => s.type === dir)) {
+        console.log(`  📁 Found unregistered task type: ${dir}`);
+        // Add to sequences for processing
+        sequences.push({ type: dir, base_type: 'tasks' });
+        counts.typeCountsMap[dir] = 0;
+        counts.maxIds[dir] = 0;
+        
+        // Register in database
+        await db.runAsync(
+          'INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)',
+          [dir, 'tasks']
+        );
+        console.log(`  ✅ Registered task type: ${dir}`);
       }
     }
+  } catch (e) {
+    console.log('  ℹ️  No tasks directory found');
+  }
+  
+  // Scan document files for types
+  try {
+    const docFiles = await fs.readdir(path.join(databasePath, 'documents'));
+    const foundTypes = new Set<string>();
+    
+    // Extract types from filenames
+    for (const file of docFiles) {
+      const match = file.match(/^(\w+)-\d+\.md$/);
+      if (match) {
+        foundTypes.add(match[1]);
+      }
+    }
+    
+    // Check subdirectories too
+    for (const item of docFiles) {
+      const itemPath = path.join(databasePath, 'documents', item);
+      const stat = await fs.stat(itemPath);
+      if (stat.isDirectory()) {
+        foundTypes.add(item);
+      }
+    }
+    
+    // Register any unregistered document types
+    for (const type of foundTypes) {
+      if (!sequences.find((s: any) => s.type === type)) {
+        console.log(`  📁 Found unregistered document type: ${type}`);
+        sequences.push({ type, base_type: 'documents' });
+        counts.typeCountsMap[type] = 0;
+        counts.maxIds[type] = 0;
+        
+        // Register in database
+        await db.runAsync(
+          'INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)',
+          [type, 'documents']
+        );
+        console.log(`  ✅ Registered document type: ${type}`);
+      }
+    }
+  } catch (e) {
+    console.log('  ℹ️  No documents directory found');
+  }
+
+  // @ai-logic: Process task types dynamically
+  const taskTypes = sequences.filter((seq: any) => seq.base_type === 'tasks');
+  for (const typeInfo of taskTypes) {
+    const type = typeInfo.type;
+    console.log(`\n📂 Scanning ${type}...`);
+    // Task types are stored in tasks/[type] subdirectory
+    const files = globSync(path.join(databasePath, 'tasks', type, `${type}-*.md`));
+    
+    for (const file of files) {
+      const content = await fs.readFile(file, 'utf-8');
+      const parsed = parseMarkdown(content);
+    
+      // Extract ID from filename and update max ID
+      const filename = path.basename(file);
+      const idMatch = filename.match(new RegExp(`${type}-(\\d+)\\.md`));
+      if (idMatch) {
+        const id = parseInt(idMatch[1]);
+        if (id > counts.maxIds[type]) {
+          counts.maxIds[type] = id;
+        }
+      }
     
     if (parsed.metadata.tags) {
       // @ai-logic: Tags might be stored as comma-separated string or array
@@ -86,203 +160,63 @@ async function scanAndRebuild(databasePath: string, db: any) {
     if (parsed.metadata.status) {
       counts.statuses.add(parsed.metadata.status);
     }
-    counts.issues++;
+      counts.typeCountsMap[type]++;
+    }
   }
-
-  // Scan plans
-  console.log('📂 Scanning plans...');
-  const planFiles = globSync(path.join(databasePath, 'plans', 'plan-*.md'));
-  for (const file of planFiles) {
-    const content = await fs.readFile(file, 'utf-8');
-    const parsed = parseMarkdown(content);
+  
+  // @ai-logic: Process document types dynamically
+  const documentTypes = sequences.filter((seq: any) => seq.base_type === 'documents');
+  for (const typeInfo of documentTypes) {
+    const type = typeInfo.type;
+    console.log(`\n📂 Scanning ${type}...`);
     
-    // Extract ID from filename and update max ID
-    const filename = path.basename(file);
-    const idMatch = filename.match(/plan-(\d+)\.md/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1]);
-      if (id > counts.maxIds.plans) {
-        counts.maxIds.plans = id;
-      }
+    // Check if documents are in subdirectory (old structure) or main documents directory (new structure)
+    let files = globSync(path.join(databasePath, 'documents', type, `${type}-*.md`));
+    if (files.length === 0) {
+      // Try new flat structure
+      files = globSync(path.join(databasePath, 'documents', `${type}-*.md`));
     }
     
-    if (parsed.metadata.tags) {
-      // @ai-logic: Tags might be stored as comma-separated string or array
-      let tags: string[];
-      if (Array.isArray(parsed.metadata.tags)) {
-        tags = parsed.metadata.tags;
-      } else if (typeof parsed.metadata.tags === 'string') {
-        // Check if it's a JSON array string
-        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
-          try {
-            tags = JSON.parse(parsed.metadata.tags);
-          } catch {
-            // If JSON parse fails, treat as comma-separated
-            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-          }
-        } else {
-          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-        }
-      } else {
-        tags = [];
-      }
-      tags.forEach((tag: string) => counts.tags.add(tag));
-    }
-    // Collect status names
-    if (parsed.metadata.status) {
-      counts.statuses.add(parsed.metadata.status);
-    }
-    counts.plans++;
-  }
-
-  // Scan documents
-  console.log('📂 Scanning documents...');
-  const docFiles = globSync(path.join(databasePath, 'documents', 'doc', 'doc-*.md'));
-  for (const file of docFiles) {
-    const content = await fs.readFile(file, 'utf-8');
-    const parsed = parseMarkdown(content);
-    
-    // Extract ID from filename and update max ID
-    const filename = path.basename(file);
-    const idMatch = filename.match(/doc-(\d+)\.md/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1]);
-      if (id > counts.maxIds.docs) {
-        counts.maxIds.docs = id;
-      }
-    }
-    
-    if (parsed.metadata.tags) {
-      // @ai-logic: Tags might be stored as comma-separated string or array
-      let tags: string[];
-      if (Array.isArray(parsed.metadata.tags)) {
-        tags = parsed.metadata.tags;
-      } else if (typeof parsed.metadata.tags === 'string') {
-        // Check if it's a JSON array string
-        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
-          try {
-            tags = JSON.parse(parsed.metadata.tags);
-          } catch {
-            // If JSON parse fails, treat as comma-separated
-            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-          }
-        } else {
-          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-        }
-      } else {
-        tags = [];
-      }
-      tags.forEach((tag: string) => counts.tags.add(tag));
-    }
-    counts.docs++;
-  }
-
-  // Scan knowledge
-  console.log('📂 Scanning knowledge...');
-  const knowledgeFiles = globSync(path.join(databasePath, 'documents', 'knowledge', 'knowledge-*.md'));
-  for (const file of knowledgeFiles) {
-    const content = await fs.readFile(file, 'utf-8');
-    const parsed = parseMarkdown(content);
-    
-    // Extract ID from filename and update max ID
-    const filename = path.basename(file);
-    const idMatch = filename.match(/knowledge-(\d+)\.md/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1]);
-      if (id > counts.maxIds.knowledge) {
-        counts.maxIds.knowledge = id;
-      }
-    }
-    
-    if (parsed.metadata.tags) {
-      // @ai-logic: Tags might be stored as comma-separated string or array
-      let tags: string[];
-      if (Array.isArray(parsed.metadata.tags)) {
-        tags = parsed.metadata.tags;
-      } else if (typeof parsed.metadata.tags === 'string') {
-        // Check if it's a JSON array string
-        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
-          try {
-            tags = JSON.parse(parsed.metadata.tags);
-          } catch {
-            // If JSON parse fails, treat as comma-separated
-            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-          }
-        } else {
-          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-        }
-      } else {
-        tags = [];
-      }
-      tags.forEach((tag: string) => counts.tags.add(tag));
-    }
-    counts.knowledge++;
-  }
-
-  // @ai-logic: Scan custom document types
-  console.log('📂 Scanning custom document types...');
-  const documentsDir = path.join(databasePath, 'documents');
-  try {
-    const subdirs = await fs.readdir(documentsDir);
-    for (const subdir of subdirs) {
-      // Skip built-in types
-      if (subdir === 'doc' || subdir === 'knowledge') continue;
+    for (const file of files) {
+      const content = await fs.readFile(file, 'utf-8');
+      const parsed = parseMarkdown(content);
       
-      const subdirPath = path.join(documentsDir, subdir);
-      const stat = await fs.stat(subdirPath);
-      
-      if (stat.isDirectory()) {
-        counts.customTypes.add(subdir);
-        counts.maxIds.customTypes[subdir] = 0;
-        
-        // Scan files with plural prefix pattern
-        const filePrefix = subdir.endsWith('s') ? subdir : `${subdir}s`;
-        const customFiles = globSync(path.join(subdirPath, `${filePrefix}-*.md`));
-        
-        for (const file of customFiles) {
-          const content = await fs.readFile(file, 'utf-8');
-          const parsed = parseMarkdown(content);
-          
-          // Extract ID from filename and update max ID
-          const filename = path.basename(file);
-          const idMatch = filename.match(new RegExp(`${filePrefix}-(\\d+)\\.md`));
-          if (idMatch) {
-            const id = parseInt(idMatch[1]);
-            if (id > counts.maxIds.customTypes[subdir]) {
-              counts.maxIds.customTypes[subdir] = id;
-            }
-          }
-          
-          if (parsed.metadata.tags) {
-            // @ai-logic: Tags might be stored as comma-separated string or array
-            let tags: string[];
-            if (Array.isArray(parsed.metadata.tags)) {
-              tags = parsed.metadata.tags;
-            } else if (typeof parsed.metadata.tags === 'string') {
-              // Check if it's a JSON array string
-              if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
-                try {
-                  tags = JSON.parse(parsed.metadata.tags);
-                } catch {
-                  // If JSON parse fails, treat as comma-separated
-                  tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-                }
-              } else {
-                tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
-              }
-            } else {
-              tags = [];
-            }
-            tags.forEach((tag: string) => counts.tags.add(tag));
-          }
+      // Extract ID from filename and update max ID
+      const filename = path.basename(file);
+      const idMatch = filename.match(new RegExp(`${type}-(\\d+)\\.md`));
+      if (idMatch) {
+        const id = parseInt(idMatch[1]);
+        if (id > counts.maxIds[type]) {
+          counts.maxIds[type] = id;
         }
-        
-        console.log(`  📁 Found custom type: ${subdir} (${customFiles.length} files)`);
       }
+      
+      if (parsed.metadata.tags) {
+        // @ai-logic: Tags might be stored as comma-separated string or array
+        let tags: string[];
+        if (Array.isArray(parsed.metadata.tags)) {
+          tags = parsed.metadata.tags;
+        } else if (typeof parsed.metadata.tags === 'string') {
+          // Check if it's a JSON array string
+          if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+            try {
+              tags = JSON.parse(parsed.metadata.tags);
+            } catch {
+              // If JSON parse fails, treat as comma-separated
+              tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+            }
+          } else {
+            tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          }
+        } else {
+          tags = [];
+        }
+        tags.forEach((tag: string) => counts.tags.add(tag));
+      }
+      counts.typeCountsMap[type]++;
     }
-  } catch (error) {
-    console.log('  ⚠️  Could not scan custom types:', error);
   }
+
 
   // Scan sessions
   console.log('📂 Scanning sessions...');
@@ -415,35 +349,9 @@ async function rebuildDatabase() {
     
     // Update sequences with max IDs to prevent overwrites
     console.log('\n🔢 Updating sequences with max IDs...');
-    await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.issues, 'issues']);
-    await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.plans, 'plans']);
-    await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.docs, 'docs']);
-    await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [counts.maxIds.knowledge, 'knowledge']);
-    console.log(`  ✅ Updated sequences - Issues: ${counts.maxIds.issues}, Plans: ${counts.maxIds.plans}, Docs: ${counts.maxIds.docs}, Knowledge: ${counts.maxIds.knowledge}`);
-    
-    // @ai-logic: Update or create sequences for custom types
-    if (counts.customTypes.size > 0) {
-      console.log('\n🔧 Processing custom types...');
-      for (const customType of counts.customTypes) {
-        // Check if sequence exists
-        const existing = await db.getAsync('SELECT type FROM sequences WHERE type = ?', [customType]) as { type: string } | undefined;
-        
-        if (existing) {
-          // Update existing sequence
-          await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [
-            counts.maxIds.customTypes[customType] || 0,
-            customType
-          ]);
-          console.log(`  ✅ Updated sequence for custom type '${customType}' to ${counts.maxIds.customTypes[customType] || 0}`);
-        } else {
-          // Create new sequence for custom type found in directory
-          await db.runAsync(
-            'INSERT INTO sequences (type, current_value, base_type) VALUES (?, ?, ?)',
-            [customType, counts.maxIds.customTypes[customType] || 0, 'documents']
-          );
-          console.log(`  ✅ Created sequence for custom type '${customType}' with base_type 'documents'`);
-        }
-      }
+    for (const [type, maxId] of Object.entries(counts.maxIds)) {
+      await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [maxId, type]);
+      console.log(`  ✅ Updated sequence '${type}' to ${maxId}`);
     }
     
     // Tags are automatically registered during sync operations via saveEntityTags
@@ -452,11 +360,10 @@ async function rebuildDatabase() {
     console.log('  ✅ Tags were automatically registered during data sync');
     
     console.log('\n📊 Database rebuild complete:');
-    console.log(`  - Issues: ${counts.issues}`);
-    console.log(`  - Plans: ${counts.plans}`);
-    console.log(`  - Documents: ${counts.docs}`);
-    console.log(`  - Knowledge: ${counts.knowledge}`);
-    console.log(`  - Custom Types: ${counts.customTypes.size}`);
+    console.log('  Type counts:');
+    for (const [type, count] of Object.entries(counts.typeCountsMap)) {
+      console.log(`    - ${type}: ${count}`);
+    }
     console.log(`  - Sessions: ${counts.sessions}`);
     console.log(`  - Tags: ${counts.tags.size}`);
     console.log(`  - Unique Status Names: ${counts.statuses.size}`);

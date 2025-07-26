@@ -194,12 +194,24 @@ export class DatabaseConnection {
     
     if (existingSequences.length === 0) {
       // Fresh database - insert new sequences starting at 0
-      await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES 
-        ('issues', 0, 'issues'), ('plans', 0, 'plans'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
+      // Using type registry information
+      const sequenceValues: string[] = [];
+      const typeDefinitions = [
+        { type: 'issues', baseType: 'tasks' },
+        { type: 'plans', baseType: 'tasks' },
+        { type: 'docs', baseType: 'documents' },
+        { type: 'knowledge', baseType: 'documents' }
+      ];
+      
+      for (const def of typeDefinitions) {
+        sequenceValues.push(`('${def.type}', 0, '${def.baseType}')`);
+      }
+      
+      await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES ${sequenceValues.join(', ')}`);
     } else {
       // Existing database - ensure all sequences exist
       await this.db.runAsync(`INSERT OR IGNORE INTO sequences (type, current_value, base_type) VALUES 
-        ('issues', 0, 'issues'), ('plans', 0, 'plans'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
+        ('issues', 0, 'tasks'), ('plans', 0, 'tasks'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
     }
 
     // Search tables
@@ -217,25 +229,11 @@ export class DatabaseConnection {
   }
 
   private async createSearchTables(): Promise<void> {
-    // Issues search table
+    // Unified tasks search table (for both issues and plans)
     await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_issues (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        summary TEXT,
-        content TEXT,
-        priority TEXT,
-        status_id INTEGER,
-        tags TEXT,
-        created_at TEXT,
-        updated_at TEXT
-      )
-    `);
-
-    // Plans search table  
-    await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_plans (
-        id INTEGER PRIMARY KEY,
+      CREATE TABLE IF NOT EXISTS search_tasks (
+        type TEXT NOT NULL,  -- Entity type (e.g., 'issues', 'plans', etc.)
+        id INTEGER NOT NULL,
         title TEXT,
         summary TEXT,
         content TEXT,
@@ -245,7 +243,8 @@ export class DatabaseConnection {
         end_date TEXT,
         tags TEXT,
         created_at TEXT,
-        updated_at TEXT
+        updated_at TEXT,
+        PRIMARY KEY (type, id)
       )
     `);
 
@@ -277,36 +276,17 @@ export class DatabaseConnection {
     `);
 
 
-    // Create indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content, summary)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content, summary)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content, summary)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_tags ON search_issues(tags)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_tags ON search_plans(tags)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_tags ON search_sessions(tags)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_tags ON search_daily_summaries(tags)`);
   }
 
   private async createTagRelationshipTables(): Promise<void> {
     // Issue tags relationship
     await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS issue_tags (
-        issue_id INTEGER,
-        tag_id INTEGER,
-        PRIMARY KEY (issue_id, tag_id),
-        FOREIGN KEY (issue_id) REFERENCES search_issues(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
-
-    // Plan tags relationship
-    await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS plan_tags (
-        plan_id INTEGER,
-        tag_id INTEGER,
-        PRIMARY KEY (plan_id, tag_id),
-        FOREIGN KEY (plan_id) REFERENCES search_plans(id) ON DELETE CASCADE,
+      CREATE TABLE IF NOT EXISTS task_tags (
+        task_type TEXT NOT NULL,
+        task_id INTEGER NOT NULL,
+        tag_id INTEGER NOT NULL,
+        PRIMARY KEY (task_type, task_id, tag_id),
+        FOREIGN KEY (task_type, task_id) REFERENCES search_tasks(type, id) ON DELETE CASCADE,
         FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
       )
     `);
@@ -335,20 +315,32 @@ export class DatabaseConnection {
         FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
       )
     `);
+
+    // Related tasks table (normalized many-to-many relationship)
+    // @ai-context Stores relationships between tasks (issues/plans)
+    // @ai-pattern Normalized junction table for many-to-many relationships
+    await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS related_tasks (
+        source_type TEXT NOT NULL,
+        source_id INTEGER NOT NULL,
+        target_type TEXT NOT NULL,
+        target_id INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (source_type, source_id, target_type, target_id)
+      )
+    `);
   }
 
   private async createIndexes(): Promise<void> {
     // Text search indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issues_text ON search_issues(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plans_text ON search_plans(title, content)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
     
     // Tag relationship indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_issue ON issue_tags(issue_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_issue_tags_tag ON issue_tags(tag_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_plan ON plan_tags(plan_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_plan_tags_tag ON plan_tags(tag_id)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)`);
+    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)`);
     // Note: doc_tags and knowledge_tags indexes are replaced by document_tags indexes
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)`);
     await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)`);

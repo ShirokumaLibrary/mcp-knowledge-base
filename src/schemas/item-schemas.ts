@@ -10,19 +10,17 @@ import { z } from 'zod';
 
 /**
  * @ai-intent Valid content types for item operations
- * @ai-pattern Enum ensures only valid types accepted
- * @ai-critical Must match handler implementations
- * @ai-change Added 'document' for unified doc/knowledge type
- * @ai-extension Custom types are validated separately in handlers
+ * @ai-pattern Accept any string - validation happens against sequences table
+ * @ai-critical Types are validated in handlers against database
  */
-const ItemTypeSchema = z.enum(['issue', 'plan', 'doc', 'knowledge', 'document']).or(z.string());
+const ItemTypeSchema = z.string();
 
 /**
  * @ai-intent Valid subtypes for document type
- * @ai-pattern Preserves separate ID sequences
- * @ai-critical Required when type is 'document'
+ * @ai-pattern Accept any string - validation happens against sequences table
+ * @ai-deprecated Subtype concept being phased out
  */
-const DocumentSubtypeSchema = z.enum(['doc', 'knowledge']);
+const DocumentSubtypeSchema = z.string();
 
 /**
  * @ai-intent Schema for get_items tool - list by type
@@ -75,8 +73,9 @@ export const CreateItemSchema = z.object({
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
-  start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for plans
-  end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for plans
+  start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
+  end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for issues/plans
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
 }).strict();
 
 /**
@@ -96,8 +95,9 @@ export const UpdateItemSchema = z.object({
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
   tags: z.array(z.string()).optional(),
-  start_date: dateFormatSchema.optional(), // @ai-logic: For plan timeline changes
-  end_date: dateFormatSchema.optional(),   // @ai-logic: For plan timeline changes
+  start_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
+  end_date: dateFormatSchema.optional(),   // @ai-logic: For issue/plan timeline changes
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
 }).strict();
 
 /**

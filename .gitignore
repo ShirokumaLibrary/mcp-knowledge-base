@@ -39,6 +39,8 @@ logs
 *.swo
 *~
 CLAUDE.md
+GEMINI.md
+/core
 
 # OS generated files
 .DS_Store

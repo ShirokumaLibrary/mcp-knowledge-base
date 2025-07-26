@@ -1,8 +1,7 @@
 import { DatabaseConnection } from './base.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
-import { IssueRepository } from './issue-repository.js';
-import { PlanRepository } from './plan-repository.js';
+import { TaskRepository } from './task-repository.js';
 import { DocumentRepository } from './document-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { TypeRepository } from './type-repository.js';
@@ -50,8 +49,7 @@ export class FileIssueDatabase {
   private connection: DatabaseConnection;
   private statusRepo!: StatusRepository;  // @ai-logic: Initialized in initializeAsync
   private tagRepo!: TagRepository;
-  private issueRepo!: IssueRepository;
-  private planRepo!: PlanRepository;
+  private taskRepo!: TaskRepository;  // @ai-logic: Unified tasks repository (issues + plans)
   private documentRepo!: DocumentRepository;  // @ai-logic: Unified doc/knowledge repository
   private searchRepo!: SearchRepository;
   private typeRepo!: TypeRepository;  // @ai-logic: Dynamic type management
@@ -111,10 +109,9 @@ export class FileIssueDatabase {
     // @ai-critical: Use provided dataDir instead of config paths for test isolation
     this.statusRepo = new StatusRepository(db);  // @ai-logic: No dependencies
     this.tagRepo = new TagRepository(db);        // @ai-logic: No dependencies
-    this.issueRepo = new IssueRepository(db, path.join(this.dataDir, 'issues'), this.statusRepo, this.tagRepo);
-    this.planRepo = new PlanRepository(db, path.join(this.dataDir, 'plans'), this.statusRepo, this.tagRepo);
+    this.taskRepo = new TaskRepository(db, path.join(this.dataDir, 'tasks'), this.statusRepo, this.tagRepo);
     this.documentRepo = new DocumentRepository(db, path.join(this.dataDir, 'documents'));  // @ai-logic: Unified documents path
-    this.searchRepo = new SearchRepository(db, this.issueRepo, this.planRepo, this.documentRepo);
+    this.searchRepo = new SearchRepository(db, this.taskRepo, this.documentRepo);
     this.typeRepo = new TypeRepository(this);  // @ai-logic: Type definitions management
     
     // @ai-critical: Initialize document repository database tables
@@ -245,364 +242,242 @@ export class FileIssueDatabase {
     return this.tagRepo.getTagsByPattern(pattern);
   }
 
+  // Legacy task methods removed - use unified task methods instead:
+  // - getTask(type, id) instead of getIssue(), getPlan()
+  // - createTask(type, ...) instead of createIssue(), createPlan()
+  // - updateTask(type, ...) instead of updateIssue(), updatePlan()
+  // - deleteTask(type, ...) instead of deleteIssue(), deletePlan()
+  // - getAllTasksSummary(type) instead of getAllIssues(), getAllPlans()
+  // - searchTasksByTag(tag, type) instead of searchIssuesByTag(), searchPlansByTag()
+
   /**
-   * @ai-section Issue Operations
-   * @ai-intent Retrieve all issues with full details
-   * @ai-flow 1. Wait for init -> 2. Read all markdown files -> 3. Parse and return
-   * @ai-performance O(n) file reads - consider pagination for scale
-   * @ai-return Array of complete issue objects sorted by ID
+   * @ai-section Unified Document Operations (replaces getAllKnowledge, getAllDocs)
+   * @ai-intent Retrieve all documents of specified type
+   * @ai-flow 1. Wait for init -> 2. Read document files -> 3. Parse content
+   * @ai-return Array of document objects with content
    */
-  async getAllIssues(includeClosedStatuses: boolean = false, statusIds?: number[]) {
+  async getAllDocuments(type?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.issueRepo.getAllIssues(includeClosedStatuses, statusIds);
+    return this.documentRepo.getAllDocuments(type);
   }
 
   /**
-   * @ai-intent Get lightweight issue list for UI display
-   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
-   * @ai-performance Uses indexed SQLite query vs file reads
-   * @ai-return Array with id, title, priority, status fields only
-   */
-  async getAllIssuesSummary(includeClosedStatuses: boolean = false, statusIds?: number[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.getAllIssuesSummary(includeClosedStatuses, statusIds);
-  }
-
-  /**
-   * @ai-intent Create new issue with optional metadata
-   * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Write markdown -> 4. Sync SQLite
-   * @ai-side-effects Creates markdown file and SQLite record
-   * @ai-defaults Priority: 'medium', Status: 1 (default status)
-   * @ai-return Complete issue object with generated ID
-   */
-  async createIssue(title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.createIssue(title, content, priority, status, tags, description);
-  }
-
-  /**
-   * @ai-intent Update existing issue with partial changes
-   * @ai-flow 1. Wait for init -> 2. Read current -> 3. Merge changes -> 4. Write both stores
-   * @ai-pattern Partial update - undefined values preserve existing
-   * @ai-validation Issue must exist, status_id must be valid
-   * @ai-return Updated issue object or null if not found
-   */
-  async updateIssue(id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.updateIssue(id, title, content, priority, status, tags, description);
-  }
-
-  /**
-   * @ai-intent Delete issue permanently
-   * @ai-flow 1. Wait for init -> 2. Delete markdown -> 3. Delete from SQLite
-   * @ai-side-effects Removes file and database record
-   * @ai-critical No soft delete - permanent removal
-   * @ai-return true if deleted, false if not found
-   */
-  async deleteIssue(id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.deleteIssue(id);
-  }
-
-  /**
-   * @ai-intent Retrieve single issue by ID
-   * @ai-flow 1. Wait for init -> 2. Read markdown file -> 3. Parse and return
-   * @ai-source Markdown file is source of truth
-   * @ai-return Complete issue object or null if not found
-   */
-  async getIssue(id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.getIssue(id);
-  }
-
-  /**
-   * @ai-section Plan Operations
-   * @ai-intent Retrieve all plans with timeline data
-   * @ai-flow 1. Wait for init -> 2. Read plan files -> 3. Parse with dates
-   * @ai-critical Plans include start/end dates for scheduling
-   * @ai-return Array of plan objects sorted by ID
-   */
-  async getAllPlans(includeClosedStatuses: boolean = false, statusIds?: number[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.planRepo.getAllPlans(includeClosedStatuses, statusIds);
-  }
-
-  /**
-   * @ai-intent Create new plan with timeline
-   * @ai-flow 1. Wait for init -> 2. Validate dates -> 3. Create files -> 4. Sync
-   * @ai-validation Start date must be before end date
-   * @ai-pattern Dates in YYYY-MM-DD format
-   * @ai-return Complete plan object with generated ID
-   */
-  async createPlan(title: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.planRepo.createPlan(title, content, priority, status, start_date, end_date, tags, description);
-  }
-
-  /**
-   * @ai-intent Update plan including timeline adjustments
-   * @ai-flow 1. Wait for init -> 2. Read current -> 3. Validate changes -> 4. Update
-   * @ai-validation New dates must maintain start <= end relationship
-   * @ai-pattern Partial updates preserve unspecified fields
-   * @ai-return Updated plan or null if not found
-   */
-  async updatePlan(id: number, title?: string, content?: string, priority?: string, status?: string, start_date?: string, end_date?: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.planRepo.updatePlan(id, title, content, priority, status, start_date, end_date, tags, description);
-  }
-
-  /**
-   * @ai-intent Delete plan permanently
-   * @ai-flow 1. Wait for init -> 2. Remove markdown -> 3. Clean SQLite
-   * @ai-critical No cascade to related items
-   * @ai-return true if deleted, false if not found
-   */
-  async deletePlan(id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.planRepo.deletePlan(id);
-  }
-
-  /**
-   * @ai-intent Retrieve single plan with timeline
+   * @ai-intent Get single document by type and ID
    * @ai-flow 1. Wait for init -> 2. Read from markdown
-   * @ai-return Complete plan object or null
+   * @ai-return Complete document object or null
    */
-  async getPlan(id: number) {
+  async getDocument(type: string, id: number) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.planRepo.getPlan(id);
+    return this.documentRepo.getDocument(type, id);
   }
 
   /**
-   * @ai-intent Find issues with specific tag
-   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Filter exact matches
-   * @ai-pattern Exact tag match, case-sensitive
-   * @ai-performance Uses SQLite index on tags column
-   * @ai-return Array of matching issues
-   */
-  async searchIssuesByTag(tag: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.issueRepo.searchIssuesByTag(tag);
-  }
-
-  /**
-   * @ai-intent Find plans with specific tag
-   * @ai-flow 1. Wait for init -> 2. Query search_plans -> 3. Filter matches
-   * @ai-pattern Exact tag match within JSON array
-   * @ai-return Array of matching plans with timeline data
-   */
-  async searchPlansByTag(tag: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.planRepo.searchPlansByTag(tag);
-  }
-
-  /**
-   * @ai-section Knowledge Base Operations
-   * @ai-intent Retrieve all knowledge articles
-   * @ai-flow 1. Wait for init -> 2. Read knowledge files -> 3. Parse content
-   * @ai-pattern Knowledge items are reference documentation
-   * @ai-return Array of knowledge objects with content
-   */
-  async getAllKnowledge() {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getAllDocuments('knowledge');
-  }
-
-  /**
-   * @ai-intent Create new knowledge article
+   * @ai-intent Create new document of any type
    * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save markdown -> 4. Index
-   * @ai-validation Content is required for knowledge items
    * @ai-side-effects Creates file and search index entry
-   * @ai-return Complete knowledge object
+   * @ai-return Complete document object
    */
-  async createKnowledge(title: string, content: string, tags?: string[], description?: string) {
+  async createDocument(type: string, title: string, content: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.createDocument('knowledge', title, content, tags, description);
+    return this.documentRepo.createDocument(type, title, content, tags, description);
   }
 
   /**
-   * @ai-intent Update knowledge article content
+   * @ai-intent Update document content by type and ID
    * @ai-flow 1. Wait for init -> 2. Read current -> 3. Apply changes -> 4. Reindex
    * @ai-pattern Partial updates allowed
-   * @ai-return Updated knowledge or null
+   * @ai-return true if updated, false if not found
    */
-  async updateKnowledge(id: number, title?: string, content?: string, tags?: string[], description?: string) {
+  async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    const success = await this.documentRepo.updateDocument('knowledge', id, title, content, tags, description);
-    return success ? await this.documentRepo.getDocument('knowledge', id) : null;
+    return this.documentRepo.updateDocument(type, id, title, content, tags, description);
   }
 
   /**
-   * @ai-intent Delete knowledge article
+   * @ai-intent Delete document by type and ID
    * @ai-flow 1. Wait for init -> 2. Delete files and index
    * @ai-critical Permanent deletion
    * @ai-return true if deleted, false if not found
    */
-  async deleteKnowledge(id: number) {
+  async deleteDocument(type: string, id: number) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.deleteDocument('knowledge', id);
+    return this.documentRepo.deleteDocument(type, id);
   }
 
   /**
-   * @ai-intent Retrieve single knowledge article
-   * @ai-flow 1. Wait for init -> 2. Read from markdown
-   * @ai-return Complete knowledge object or null
-   */
-  async getKnowledge(id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getDocument('knowledge', id);
-  }
-
-  /**
-   * @ai-intent Find knowledge articles by tag
+   * @ai-intent Find documents by tag and optional type filter
    * @ai-flow 1. Wait for init -> 2. Query search index -> 3. Filter exact
    * @ai-pattern Tag exact match in JSON array
-   * @ai-return Array of matching knowledge items
+   * @ai-return Array of matching document items
    */
-  async searchKnowledgeByTag(tag: string) {
+  async searchDocumentsByTag(tag: string, type?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.searchDocumentsByTag(tag, 'knowledge');
+    return this.documentRepo.searchDocumentsByTag(tag, type);
   }
 
   /**
-   * @ai-section Documentation Operations
-   * @ai-intent Retrieve all technical documentation
-   * @ai-flow 1. Wait for init -> 2. Read doc files -> 3. Parse all
-   * @ai-critical Docs can be large - memory consideration
-   * @ai-return Array of complete doc objects
-   */
-  async getAllDocs() {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getAllDocuments('doc');
-  }
-
-  /**
-   * @ai-intent Get doc list without content
+   * @ai-intent Get document summary list without content
    * @ai-flow 1. Wait for init -> 2. Get all docs -> 3. Extract summaries
    * @ai-performance Avoids loading full content
-   * @ai-return Array of {id, title} objects only
+   * @ai-return Array of summary objects
    */
-  async getDocsSummary() {
+  async getAllDocumentsSummary(type?: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    const docs = await this.documentRepo.getAllDocuments('doc');
-    return docs.map(d => ({ id: d.id, title: d.title, description: d.description }));
+    return this.documentRepo.getAllDocumentsSummary(type);
+  }
+
+  // Legacy document methods removed - use unified document methods instead:
+  // - getAllDocuments(type) instead of getAllKnowledge(), getAllDocs()
+  // - createDocument(type, ...) instead of createKnowledge(), createDoc()
+  // - updateDocument(type, ...) instead of updateKnowledge(), updateDoc()
+  // - deleteDocument(type, ...) instead of deleteKnowledge(), deleteDoc()
+  // - getDocument(type, ...) instead of getKnowledge(), getDoc()
+  // - searchDocumentsByTag(tag, type) instead of searchKnowledgeByTag(), searchDocsByTag()
+
+  /**
+   * @ai-section Unified Task Operations
+   * @ai-intent Get task by type and ID through unified interface
+   * @ai-logic Validates type from sequences table
+   */
+  async getTask(type: string, id: number) {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+    // Validate type exists in sequences table
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
+    }
+    
+    return this.taskRepo.getTask(type, id);
   }
 
   /**
-   * @ai-intent Create new documentation
-   * @ai-flow 1. Wait for init -> 2. Generate ID -> 3. Save -> 4. Index
-   * @ai-validation Content required for docs
-   * @ai-return Complete doc object
+   * @ai-intent Create task through unified interface
+   * @ai-logic Validates type from sequences table
    */
-  async createDoc(title: string, content: string, tags?: string[], description?: string) {
+  async createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.createDocument('doc', title, content, tags, description);
+    // Validate type exists
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
+    }
+    
+    // Tasks require content
+    if (!content) {
+      throw new Error(`Content is required for ${type}`);
+    }
+    
+    return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
   }
 
   /**
-   * @ai-intent Update documentation content
-   * @ai-flow 1. Wait for init -> 2. Update markdown and index
-   * @ai-pattern Partial updates supported
-   * @ai-return Updated doc or null
+   * @ai-intent Get all tasks summary through unified interface
+   * @ai-logic Validates type from sequences table
    */
-  async updateDoc(id: number, title?: string, content?: string, tags?: string[], description?: string) {
+  async getAllTasksSummary(type: string, includeClosedStatuses: boolean = false, statusIds?: number[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    const success = await this.documentRepo.updateDocument('doc', id, title, content, tags, description);
-    return success ? await this.documentRepo.getDocument('doc', id) : null;
+    // Validate type exists
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
+    }
+    
+    return this.taskRepo.getAllTasksSummary(type, includeClosedStatuses, statusIds);
   }
 
   /**
-   * @ai-intent Delete documentation
-   * @ai-flow 1. Wait for init -> 2. Remove files and index
-   * @ai-return true if deleted, false if not found
+   * @ai-intent Update task through unified interface
+   * @ai-logic Validates type from sequences table
    */
-  async deleteDoc(id: number) {
+  async updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.deleteDocument('doc', id);
+    // Validate type exists
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
+    }
+    
+    return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
   }
 
   /**
-   * @ai-intent Retrieve single documentation
-   * @ai-flow 1. Wait for init -> 2. Read from markdown
-   * @ai-return Complete doc object or null
+   * @ai-intent Delete task through unified interface
+   * @ai-logic Validates type from sequences table
    */
-  async getDoc(id: number) {
+  async deleteTask(type: string, id: number) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.getDocument('doc', id);
+    // Validate type exists
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
+    }
+    
+    return this.taskRepo.deleteTask(type, id);
   }
 
   /**
-   * @ai-intent Find docs by tag
-   * @ai-flow 1. Wait for init -> 2. Query search_docs table
-   * @ai-return Array of matching docs
+   * @ai-intent Search tasks by tag through unified interface
+   * @ai-logic Validates type from sequences table
    */
-  async searchDocsByTag(tag: string) {
+  async searchTasksByTag(type: string, tag: string) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.searchDocumentsByTag(tag, 'doc');
-  }
-
-  /**
-   * @ai-intent Get lightweight plan list for UI display
-   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return summaries
-   * @ai-performance Uses indexed SQLite query vs file reads
-   * @ai-return Array with key fields including timeline data
-   */
-  async getAllPlansSummary(includeClosedStatuses: boolean = false, statusIds?: number[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
+    // Validate type exists
+    const sequence = await this.connection.getDatabase().getAsync(
+      `SELECT base_type FROM sequences WHERE type = ?`,
+      [type]
+    ) as { base_type: string } | undefined;
+    
+    if (!sequence || sequence.base_type !== 'tasks') {
+      throw new Error(`Unknown task type: ${type}`);
     }
-    return this.planRepo.getAllPlansSummary(includeClosedStatuses, statusIds);
+    
+    return this.taskRepo.searchTasksByTag(type, tag);
   }
 
   /**
@@ -775,99 +650,6 @@ export class FileIssueDatabase {
     }
   }
 
-  /**
-   * @ai-section Unified Document Operations
-   * @ai-intent Operations for unified doc/knowledge documents
-   * @ai-pattern Replaces separate doc and knowledge operations
-   * @ai-critical Uses composite key (type, id) for identification
-   */
-  
-  /**
-   * @ai-intent Get all documents of specific subtype
-   * @ai-flow 1. Wait for init -> 2. Query by type -> 3. Return sorted
-   * @ai-param type Optional filter by 'doc' or 'knowledge'
-   * @ai-return Array of Document objects
-   */
-  async getAllDocuments(type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getAllDocuments(type);
-  }
-
-  /**
-   * @ai-intent Get document summaries for lists
-   * @ai-flow 1. Wait for init -> 2. Query SQLite -> 3. Return lightweight
-   * @ai-performance Excludes content field
-   * @ai-return Array of DocumentSummary objects
-   */
-  async getAllDocumentsSummary(type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getAllDocumentsSummary(type);
-  }
-
-  /**
-   * @ai-intent Create new document with subtype
-   * @ai-flow 1. Wait for init -> 2. Get type-specific ID -> 3. Save
-   * @ai-critical Type determines ID sequence
-   * @ai-return Complete Document object
-   */
-  async createDocument(type: string, title: string, content: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.createDocument(type, title, content, tags, description);
-  }
-
-  /**
-   * @ai-intent Get single document by type and ID
-   * @ai-flow 1. Wait for init -> 2. Load from file
-   * @ai-return Document object or null
-   */
-  async getDocument(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.getDocument(type, id);
-  }
-
-  /**
-   * @ai-intent Update document with partial changes
-   * @ai-flow 1. Wait for init -> 2. Apply updates -> 3. Save
-   * @ai-return true if updated, false if not found
-   */
-  async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.updateDocument(type, id, title, content, tags, description);
-  }
-
-  /**
-   * @ai-intent Delete document by type and ID
-   * @ai-flow 1. Wait for init -> 2. Remove file and index
-   * @ai-return true if deleted, false if not found
-   */
-  async deleteDocument(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.deleteDocument(type, id);
-  }
-
-  /**
-   * @ai-intent Search documents by tag
-   * @ai-flow 1. Wait for init -> 2. Query by tag -> 3. Filter by type
-   * @ai-return Array of matching documents
-   */
-  async searchDocumentsByTag(tag: string, type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    return this.documentRepo.searchDocumentsByTag(tag, type);
-  }
 
   /**
    * @ai-intent Clean shutdown of database connections

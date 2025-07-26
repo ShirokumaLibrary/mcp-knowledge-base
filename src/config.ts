@@ -7,6 +7,7 @@
  */
 
 import * as path from 'path';
+import { typeRegistry } from './types/type-registry.js';
 
 /**
  * @ai-context System configuration interface
@@ -18,14 +19,11 @@ export interface Config {
   database: {
     path: string;        // @ai-logic: Base directory for all data files
     sqlitePath: string;  // @ai-logic: Full path to SQLite search index
-    // @ai-logic: Subdirectory paths for different entity types
-    issuesPath: string;
-    plansPath: string;
-    docsPath: string;
-    knowledgePath: string;
+    // @ai-logic: Dynamic path resolution based on type
+    getTypePath(type: string): string;
+    // @ai-logic: Dynamic file name generation
+    getTypeFileName(type: string, id: number | string): string;
     sessionsPath: string;
-    contentsPath: string;  // @ai-logic: Unified content directory
-    documentsPath: string; // @ai-logic: New unified documents directory
   };
   server: {
     name: string;    // @ai-logic: MCP server identifier
@@ -55,14 +53,21 @@ export function getConfig(): Config {
       path: baseDir,
       // @ai-logic: SQLite can be relocated independently
       sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db'),
-      // @ai-logic: Entity-specific subdirectories
-      issuesPath: path.join(baseDir, 'issues'),
-      plansPath: path.join(baseDir, 'plans'),
-      docsPath: path.join(baseDir, 'docs'),
-      knowledgePath: path.join(baseDir, 'knowledge'),
-      sessionsPath: path.join(baseDir, 'sessions'),
-      contentsPath: path.join(baseDir, 'contents'),  // @ai-logic: Unified content directory
-      documentsPath: path.join(baseDir, 'documents') // @ai-logic: New unified documents directory
+      // @ai-logic: Dynamic path resolution based on type registry
+      getTypePath(type: string): string {
+        const typeDef = typeRegistry.getType(type);
+        if (typeDef?.baseType === 'tasks') {
+          return path.join(baseDir, 'tasks');
+        }
+        // For documents and custom types, use type name as directory
+        return path.join(baseDir, type);
+      },
+      // @ai-logic: Dynamic file name generation using type registry
+      getTypeFileName(type: string, id: number | string): string {
+        const prefix = typeRegistry.getFilePrefix(type);
+        return `${prefix}-${id}.md`;
+      },
+      sessionsPath: path.join(baseDir, 'sessions')
     },
     server: {
       // @ai-default: Shirokuma knowledge base server

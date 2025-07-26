@@ -13,7 +13,8 @@
     "mcp:setup": "node scripts/setup-mcp.js",
     "mcp:test": "node scripts/test-mcp.js",
     "rebuild-db": "tsx src/rebuild-db.ts",
-    "migrate:plural": "tsx src/migrate-to-plural-filenames.ts"
+    "migrate:plural": "tsx src/migrate-to-plural-filenames.ts",
+    "migrate:tasks": "tsx src/migrate-to-unified-tasks.ts"
   },
   "keywords": [
     "mcp",

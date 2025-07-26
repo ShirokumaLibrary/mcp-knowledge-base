@@ -56,8 +56,11 @@ export interface Issue {
   title: string;                   // @ai-validation: Required, non-empty
   description?: string;            // @ai-intent: One-line description for list views
   content: string;                 // @ai-validation: Required content
+  start_date?: string | null;      // @ai-pattern: YYYY-MM-DD or null
+  end_date?: string | null;        // @ai-pattern: YYYY-MM-DD or null
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
   status?: string;                 // @ai-logic: Status name for display
+  related_tasks?: string[];        // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
@@ -75,7 +78,7 @@ export interface IssueInternal extends Issue {
  * @ai-intent Planning entity with timeline
  * @ai-pattern Task with date range for scheduling
  * @ai-critical Includes start/end dates for project planning
- * @ai-relationship Can reference related issues
+ * @ai-relationship Can reference related tasks
  * @ai-validation start_date should be <= end_date
  */
 export interface Plan {
@@ -87,7 +90,7 @@ export interface Plan {
   end_date: string | null;         // @ai-pattern: YYYY-MM-DD or null
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
   status?: string;                 // @ai-logic: Status name for display
-  related_issues?: number[];       // @ai-relationship: Issue IDs
+  related_tasks?: string[];        // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
@@ -133,57 +136,8 @@ export interface DocumentSummary {
   updated_at: string;
 }
 
-/**
- * @ai-intent Unified content entity for doc/knowledge/etc
- * @ai-pattern Base type for all content items
- * @ai-critical Supports multiple content types via type field
- * @ai-types doc, knowledge, architecture, guideline, test
- * @deprecated Being replaced by Document interface
- */
-export interface Content {
-  id: number;           // @ai-logic: Sequential ID
-  type: string;         // @ai-validation: Required type identifier
-  title: string;        // @ai-validation: Required
-  description?: string; // @ai-intent: One-line description for list views
-  content: string;      // @ai-validation: Required, main value
-  tags: string[];       // @ai-pattern: Always array, may be empty
-  created_at: string;   // @ai-pattern: ISO 8601
-  updated_at: string;   // @ai-pattern: ISO 8601
-}
 
-/**
- * @ai-intent Knowledge base article (legacy interface)
- * @ai-pattern Reference documentation
- * @ai-critical Content is required unlike issues/plans
- * @ai-assumption Knowledge items are long-lived references
- * @deprecated Use Content with type='knowledge'
- */
-export interface Knowledge {
-  id: number;           // @ai-logic: Sequential ID
-  title: string;        // @ai-validation: Required
-  description?: string; // @ai-intent: One-line description for list views
-  content: string;      // @ai-validation: Required, main value
-  tags: string[];       // @ai-pattern: Always array, may be empty
-  created_at: string;   // @ai-pattern: ISO 8601
-  updated_at: string;   // @ai-pattern: ISO 8601
-}
 
-/**
- * @ai-intent Technical documentation entity (legacy interface)
- * @ai-pattern Similar to Knowledge but separate type
- * @ai-critical Content required for documentation
- * @ai-why Separate from Knowledge for semantic clarity
- * @deprecated Use Content with type='doc'
- */
-export interface Doc {
-  id: number;           // @ai-logic: Sequential ID
-  title: string;        // @ai-validation: Required
-  description?: string; // @ai-intent: One-line description for list views
-  content: string;      // @ai-validation: Required documentation text
-  tags?: string[];      // @ai-pattern: Optional categorization
-  created_at: string;   // @ai-pattern: ISO 8601
-  updated_at: string;   // @ai-pattern: ISO 8601
-}
 
 /**
  * @ai-intent Tag entity for categorization
@@ -215,36 +169,13 @@ export interface IssueSummary {
   description?: string; // @ai-intent: One-line description
   priority: string;     // @ai-logic: For visual indicators
   status?: string;      // @ai-logic: For display
+  start_date?: string | null;
+  end_date?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-/**
- * @ai-intent Doc summary for list display
- * @ai-pattern Minimal - just ID and title
- * @ai-performance Avoids loading large content
- * @deprecated Use ContentSummary
- */
-export interface DocSummary {
-  id: number;
-  title: string;        // @ai-logic: All that's needed for lists
-  description?: string; // @ai-intent: One-line description
-}
 
-/**
- * @ai-intent Content summary for list display
- * @ai-pattern Unified summary for all content types
- * @ai-performance Avoids loading large content
- */
-export interface ContentSummary {
-  id: number;
-  type: string;         // @ai-logic: Content type identifier
-  title: string;
-  description?: string; // @ai-intent: One-line description
-  tags?: string[];      // @ai-pattern: For filtering
-  created_at: string;
-  updated_at: string;
-}
 
 /**
  * @ai-intent Plan summary for list display

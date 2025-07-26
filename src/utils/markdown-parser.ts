@@ -34,7 +34,7 @@
  * - Preserves content even if metadata parsing fails
  */
 
-import { Content } from '../types/domain-types.js';
+import { Document } from '../types/domain-types.js';
 
 export interface ParsedMarkdown {
   metadata: Record<string, any>;
@@ -76,7 +76,7 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
         // @ai-logic: Type inference based on key names and value patterns
         if (value.trim() === '') {
           metadata[key] = null;  // @ai-edge-case: Empty values become null
-        } else if (key === 'tags' || key === 'related_issues') {
+        } else if (key === 'tags' || key === 'related_tasks') {
           // @ai-why: These fields are always arrays for consistent API
           // @ai-logic: Check if value is JSON array format
           if (value.trim().startsWith('[') && value.trim().endsWith(']')) {
@@ -89,11 +89,7 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
             }
           } else {
             const items = value.split(',').map(v => v.trim()).filter(v => v);
-            if (key === 'related_issues' && items.length > 0) {
-              metadata[key] = items.map(item => Number(item));  // @ai-logic: Issue IDs are numbers
-            } else {
-              metadata[key] = items;
-            }
+            metadata[key] = items;
           }
         } else if (value.includes(',')) {
           // Simple array parsing for comma-separated values
@@ -151,16 +147,16 @@ export function generateMarkdown(metadata: Record<string, any>, content: string)
 }
 
 /**
- * @ai-intent Parse content markdown file
- * @ai-pattern Specific parser for Content type with type field
+ * @ai-intent Parse document markdown file
+ * @ai-pattern Specific parser for Document type with type field
  * @ai-validation Ensures type field exists
  */
-export function parseContentMarkdown(fileContent: string, id: number): Content {
+export function parseDocumentMarkdown(fileContent: string, id: number, type: string): Document {
   const { metadata, content } = parseMarkdown(fileContent);
   
   return {
     id,
-    type: metadata.type || 'doc', // Default to 'doc' if not specified
+    type: metadata.type || type, // Use passed type parameter
     title: metadata.title || '',
     description: metadata.description || undefined,
     content,
@@ -174,19 +170,19 @@ export function parseContentMarkdown(fileContent: string, id: number): Content {
  * @ai-intent Generate markdown for content
  * @ai-pattern Includes type field in metadata
  */
-export function generateContentMarkdown(content: Content): string {
+export function generateDocumentMarkdown(document: Document): string {
   const metadata: Record<string, any> = {
-    id: content.id,
-    type: content.type,
-    title: content.title,
-    tags: content.tags,
-    created_at: content.created_at,
-    updated_at: content.updated_at
+    id: document.id,
+    type: document.type,
+    title: document.title,
+    tags: document.tags,
+    created_at: document.created_at,
+    updated_at: document.updated_at
   };
 
-  if (content.description) {
-    metadata.description = content.description;
+  if (document.description) {
+    metadata.description = document.description;
   }
 
-  return generateMarkdown(metadata, content.content);
+  return generateMarkdown(metadata, document.content);
 }
