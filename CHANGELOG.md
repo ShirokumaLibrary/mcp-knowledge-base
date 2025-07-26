@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.10] - 2025-07-26
+
+### Added
+- Related tasks support for issues and plans
+  - New `related_tasks` field in create_item and update_item tools
+  - Array of task references (e.g., ["issues-1", "plans-2"])
+  - Comprehensive unit tests for related tasks functionality
+
+### Fixed
+- MCP tool definitions missing related_tasks field
+- Enhanced unit test coverage for edge cases
+
+### Changed
+- Improved test coverage for tag search functionality
+- Added tests for partial matching and special characters in tag searches
+
 ## [0.0.9] - 2025-07-26
 
 ### Fixed
