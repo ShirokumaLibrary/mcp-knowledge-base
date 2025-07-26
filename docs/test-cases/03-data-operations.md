@@ -101,3 +101,75 @@ mcp__shirokuma-knowledge-base__update_item(
 )
 ```
 Expected: Success with both description and content updated
+
+## Related Tasks Testing
+
+**Note**: The `related_tasks` feature is fully implemented and tested. Unit tests have been added to verify functionality at both the repository and MCP handler levels.
+
+### Create task with related tasks
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "issues",
+  title: "Implement authentication module",
+  content: "Build OAuth2/JWT authentication system",
+  priority: "high",
+  status: "Open",
+  related_tasks: ["issues-1", "plans-1"]
+)
+```
+Expected: Success with related_tasks array preserved
+
+### Update related tasks
+```
+mcp__shirokuma-knowledge-base__update_item(
+  type: "issues",
+  id: 5,  // Assuming this is the ID from previous create
+  related_tasks: ["issues-1", "plans-1", "issues-2"]
+)
+```
+Expected: Success with updated related_tasks array
+
+### Clear related tasks
+```
+mcp__shirokuma-knowledge-base__update_item(
+  type: "issues", 
+  id: 5,
+  related_tasks: []
+)
+```
+Expected: Success with empty related_tasks array
+
+### Create plan with related tasks
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "plans",
+  title: "Q1 Security Improvements",
+  content: "Security enhancement roadmap",
+  priority: "high",
+  status: "In Progress",
+  start_date: "2025-01-01",
+  end_date: "2025-03-31",
+  related_tasks: ["issues-5", "issues-1"]
+)
+```
+Expected: Success with related_tasks linking to issues
+
+### Invalid related task reference
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "issues",
+  title: "Test invalid reference",
+  content: "Testing invalid task reference",
+  related_tasks: ["invalid-format", "docs-1"]  // docs don't support related_tasks
+)
+```
+Expected: Success (invalid references are stored as-is, validation is lenient)
+
+### Verify related tasks in retrieval
+```
+mcp__shirokuma-knowledge-base__get_item_detail(
+  type: "issues",
+  id: 5
+)
+```
+Expected: Response includes related_tasks array exactly as stored
