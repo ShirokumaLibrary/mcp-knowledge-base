@@ -178,6 +178,51 @@ describe('ItemHandlers', () => {
       expect(responseData).toEqual(mockTask);
     });
 
+    it('should create task with related_tasks', async () => {
+      const mockTask = { 
+        id: 3, 
+        title: 'Task with related',
+        content: 'Content',
+        priority: 'medium',
+        status: 'Open',
+        tags: [],
+        related_tasks: ['issues-1', 'plans-1']
+      };
+      
+      mockDbConnection.getAsync
+        .mockResolvedValueOnce({ type: 'issues' })
+        .mockResolvedValueOnce({ base_type: 'tasks' });
+      mockDb.createTask = jest.fn().mockResolvedValue(mockTask);
+
+      const result = await handlers.handleCreateItem({
+        type: 'issues',
+        title: 'Task with related',
+        content: 'Content',
+        priority: 'medium',
+        related_tasks: ['issues-1', 'plans-1']
+      });
+
+      // Check that createTask was called with related_tasks
+      expect(mockDb.createTask).toHaveBeenCalledWith(
+        'issues',
+        'Task with related',
+        'Content',
+        'medium',
+        undefined, // status
+        undefined, // tags
+        undefined, // description
+        undefined, // start_date
+        undefined, // end_date
+        ['issues-1', 'plans-1'] // related_tasks
+      );
+      
+      const text = result.content[0].text;
+      expect(text).toContain('issues created:');
+      const jsonPart = text.replace('issues created: ', '');
+      const responseData = JSON.parse(jsonPart);
+      expect(responseData.related_tasks).toEqual(['issues-1', 'plans-1']);
+    });
+
     it('should create document with required fields', async () => {
       const mockDoc = { 
         id: 1, 
@@ -229,6 +274,81 @@ describe('ItemHandlers', () => {
         content: 'Content',
         status: 'InvalidStatus'
       })).rejects.toThrow('Invalid status: InvalidStatus');
+    });
+
+    it('should handle related_tasks for task types', async () => {
+      const mockTask = { 
+        id: 5, 
+        title: 'Task with Relations',
+        content: 'Task content',
+        related_tasks: ['issues-1', 'plans-2']
+      };
+      
+      mockDbConnection.getAsync
+        .mockResolvedValueOnce({ type: 'issues' })
+        .mockResolvedValueOnce({ base_type: 'tasks' });
+      mockDb.createTask = jest.fn().mockResolvedValue(mockTask);
+
+      const result = await handlers.handleCreateItem({
+        type: 'issues',
+        title: 'Task with Relations',
+        content: 'Task content',
+        related_tasks: ['issues-1', 'plans-2']
+      });
+
+      expect(mockDb.createTask).toHaveBeenCalledWith(
+        'issues',
+        'Task with Relations',
+        'Task content',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ['issues-1', 'plans-2']
+      );
+      expect(result.content[0].text).toContain('issues created:');
+      const jsonPart = result.content[0].text.replace('issues created: ', '');
+      const responseData = JSON.parse(jsonPart);
+      expect(responseData.related_tasks).toEqual(['issues-1', 'plans-2']);
+    });
+
+    it('should handle empty related_tasks array', async () => {
+      const mockTask = { 
+        id: 6, 
+        title: 'Task without Relations',
+        content: 'Task content',
+        related_tasks: []
+      };
+      
+      mockDbConnection.getAsync
+        .mockResolvedValueOnce({ type: 'plans' })
+        .mockResolvedValueOnce({ base_type: 'tasks' });
+      mockDb.createTask = jest.fn().mockResolvedValue(mockTask);
+
+      const result = await handlers.handleCreateItem({
+        type: 'plans',
+        title: 'Task without Relations',
+        content: 'Task content',
+        related_tasks: []
+      });
+
+      expect(mockDb.createTask).toHaveBeenCalledWith(
+        'plans',
+        'Task without Relations',
+        'Task content',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        []
+      );
+      const jsonPart = result.content[0].text.replace('plans created: ', '');
+      const responseData = JSON.parse(jsonPart);
+      expect(responseData.related_tasks).toEqual([]);
     });
   });
 
@@ -296,6 +416,80 @@ describe('ItemHandlers', () => {
         undefined,
         undefined
       );
+    });
+
+    it('should update related_tasks for task types', async () => {
+      const mockTask = { 
+        id: 1, 
+        title: 'Task 1',
+        content: 'Content',
+        related_tasks: ['issues-2', 'plans-3', 'issues-4']
+      };
+      
+      mockDbConnection.getAsync
+        .mockResolvedValueOnce({ type: 'issues' })
+        .mockResolvedValueOnce({ base_type: 'tasks' });
+      mockDb.updateTask = jest.fn().mockResolvedValue(mockTask);
+
+      const result = await handlers.handleUpdateItem({
+        type: 'issues',
+        id: 1,
+        related_tasks: ['issues-2', 'plans-3', 'issues-4']
+      });
+
+      expect(mockDb.updateTask).toHaveBeenCalledWith(
+        'issues',
+        1,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ['issues-2', 'plans-3', 'issues-4']
+      );
+      const jsonPart = result.content[0].text.replace('issues updated: ', '');
+      const responseData = JSON.parse(jsonPart);
+      expect(responseData.related_tasks).toEqual(['issues-2', 'plans-3', 'issues-4']);
+    });
+
+    it('should clear related_tasks when empty array provided', async () => {
+      const mockTask = { 
+        id: 1, 
+        title: 'Task 1',
+        content: 'Content',
+        related_tasks: []
+      };
+      
+      mockDbConnection.getAsync
+        .mockResolvedValueOnce({ type: 'plans' })
+        .mockResolvedValueOnce({ base_type: 'tasks' });
+      mockDb.updateTask = jest.fn().mockResolvedValue(mockTask);
+
+      const result = await handlers.handleUpdateItem({
+        type: 'plans',
+        id: 1,
+        related_tasks: []
+      });
+
+      expect(mockDb.updateTask).toHaveBeenCalledWith(
+        'plans',
+        1,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        []
+      );
+      const jsonPart = result.content[0].text.replace('plans updated: ', '');
+      const responseData = JSON.parse(jsonPart);
+      expect(responseData.related_tasks).toEqual([]);
     });
   });
 

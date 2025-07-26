@@ -199,6 +199,59 @@ describe('TagHandlers', () => {
       expect(data1).toHaveLength(1);
       expect(data2).toHaveLength(0);
     });
+
+    it('should find tags with partial matches', async () => {
+      const mockTags = [
+        { name: 'authentication', created_at: '2025-01-26T10:00:00.000Z' },
+        { name: 'authorization', created_at: '2025-01-26T11:00:00.000Z' },
+        { name: 'automation', created_at: '2025-01-26T12:00:00.000Z' }
+      ];
+      mockDb.searchTags = jest.fn().mockResolvedValue(mockTags);
+
+      const result = await handlers.handleSearchTags({
+        pattern: 'auth'
+      });
+
+      const data = JSON.parse(result.content[0].text);
+      expect(data.data).toHaveLength(3);
+      expect(data.data.map((t: any) => t.name)).toContain('authentication');
+      expect(data.data.map((t: any) => t.name)).toContain('authorization');
+      expect(data.data.map((t: any) => t.name)).toContain('automation');
+    });
+
+    it('should find tags with pattern at different positions', async () => {
+      const mockTags = [
+        { name: 'test-api', created_at: '2025-01-26T10:00:00.000Z' },
+        { name: 'api-test', created_at: '2025-01-26T11:00:00.000Z' },
+        { name: 'testing-api-v2', created_at: '2025-01-26T12:00:00.000Z' }
+      ];
+      mockDb.searchTags = jest.fn().mockResolvedValue(mockTags);
+
+      const result = await handlers.handleSearchTags({
+        pattern: 'api'
+      });
+
+      const data = JSON.parse(result.content[0].text);
+      expect(data.data).toHaveLength(3);
+    });
+
+    it('should handle SQL wildcard characters in pattern', async () => {
+      const mockTags = [
+        { name: 'test%tag', created_at: '2025-01-26T10:00:00.000Z' },
+        { name: 'test_tag', created_at: '2025-01-26T11:00:00.000Z' }
+      ];
+      
+      // Pattern with % should be treated literally
+      mockDb.searchTags = jest.fn()
+        .mockResolvedValueOnce([{ name: 'test%tag' }])
+        .mockResolvedValueOnce([{ name: 'test_tag' }]);
+
+      const result1 = await handlers.handleSearchTags({ pattern: 'test%' });
+      const result2 = await handlers.handleSearchTags({ pattern: 'test_' });
+
+      expect(mockDb.searchTags).toHaveBeenNthCalledWith(1, 'test%');
+      expect(mockDb.searchTags).toHaveBeenNthCalledWith(2, 'test_');
+    });
   });
 
   describe('Tag auto-registration', () => {
