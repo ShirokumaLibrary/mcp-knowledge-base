@@ -44,9 +44,12 @@ describe('WorkSessionManager', () => {
         if (testDb) {
             testDb.close();
         }
-        // @ai-logic: Remove all test artifacts
-        if (fs.existsSync(testDataDir)) {
+        // @ai-logic: Remove all test artifacts unless KEEP_TEST_DATA is set
+        if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDataDir)) {
             fs.rmSync(testDataDir, { recursive: true, force: true });
+        }
+        else if (process.env.KEEP_TEST_DATA === 'true') {
+            console.log(`Test data kept in: ${testDataDir}`);
         }
     });
     describe('createSession', () => {

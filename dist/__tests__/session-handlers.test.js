@@ -111,8 +111,8 @@ describe('SessionHandlers', () => {
                 title: 'New Session'
             });
             expect(mockSessionManager.createSession).toHaveBeenCalledWith('New Session', undefined, [], // Default empty array for tags
-            undefined, undefined, undefined // datetime parameter
-            );
+            undefined, undefined, undefined, // datetime parameter
+            undefined, undefined);
             const responseData = JSON.parse(result.content[0].text);
             expect(responseData.data).toEqual(mockSession);
         });
@@ -129,8 +129,8 @@ describe('SessionHandlers', () => {
                 content: 'Content'
             });
             expect(mockSessionManager.createSession).toHaveBeenCalledWith('Session with ID', 'Content', [], // Default empty array for tags
-            undefined, '2025-01-26-17.00.00.000', undefined // datetime parameter
-            );
+            undefined, '2025-01-26-17.00.00.000', undefined, // datetime parameter
+            undefined, undefined);
             const responseData = JSON.parse(result.content[0].text);
             expect(responseData.data).toEqual(mockSession);
         });
@@ -145,8 +145,8 @@ describe('SessionHandlers', () => {
                 title: 'Tagged Session',
                 tags: ['work', 'important']
             });
-            expect(mockSessionManager.createSession).toHaveBeenCalledWith('Tagged Session', undefined, ['work', 'important'], undefined, undefined, undefined // datetime parameter
-            );
+            expect(mockSessionManager.createSession).toHaveBeenCalledWith('Tagged Session', undefined, ['work', 'important'], undefined, undefined, undefined, // datetime parameter
+            undefined, undefined);
         });
         it('should create session with custom datetime', async () => {
             const customDatetime = '2024-12-01T10:30:00.000Z';
@@ -163,7 +163,7 @@ describe('SessionHandlers', () => {
                 datetime: customDatetime
             });
             expect(mockSessionManager.createSession).toHaveBeenCalledWith('Past Session', 'Historical data migration', [], // Default empty array for tags
-            undefined, undefined, customDatetime);
+            undefined, undefined, customDatetime, undefined, undefined);
             const responseData = JSON.parse(result.content[0].text);
             expect(responseData.data).toEqual(mockSession);
         });
@@ -183,7 +183,7 @@ describe('SessionHandlers', () => {
                 content: 'Updated content',
                 tags: ['updated']
             });
-            expect(mockSessionManager.updateSession).toHaveBeenCalledWith('2025-01-26-17.00.00.000', 'Updated Title', 'Updated content', ['updated'], undefined);
+            expect(mockSessionManager.updateSession).toHaveBeenCalledWith('2025-01-26-17.00.00.000', 'Updated Title', 'Updated content', ['updated'], undefined, undefined, undefined);
             const responseData = JSON.parse(result.content[0].text);
             expect(responseData.data).toEqual(mockSession);
         });
@@ -198,7 +198,7 @@ describe('SessionHandlers', () => {
                 id: '2025-01-26-17.00.00.000',
                 content: 'Updated content only'
             });
-            expect(mockSessionManager.updateSession).toHaveBeenCalledWith('2025-01-26-17.00.00.000', undefined, 'Updated content only', undefined, undefined);
+            expect(mockSessionManager.updateSession).toHaveBeenCalledWith('2025-01-26-17.00.00.000', undefined, 'Updated content only', undefined, undefined, undefined, undefined);
         });
         it('should throw error for non-existent session', async () => {
             mockSessionManager.updateSession.mockImplementation(() => {

@@ -104,7 +104,7 @@ describe('SummaryHandlers', () => {
                 content: 'Summary content',
                 tags: ['work', 'done']
             });
-            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'New Summary', 'Summary content', ['work', 'done']);
+            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'New Summary', 'Summary content', ['work', 'done'], undefined, undefined);
             const response = JSON.parse(result.content[0].text);
             expect(response.message).toBe('Daily summary created successfully');
         });
@@ -121,7 +121,7 @@ describe('SummaryHandlers', () => {
                 title: 'Simple Summary',
                 content: 'Content'
             });
-            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'Simple Summary', 'Content', []);
+            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'Simple Summary', 'Content', [], undefined, undefined);
         });
         it('should prevent duplicate summaries for same date', async () => {
             mockSessionManager.createDailySummary.mockImplementation(() => {
@@ -157,7 +157,7 @@ describe('SummaryHandlers', () => {
                 content: 'Updated content',
                 tags: ['updated']
             });
-            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', 'Updated Summary', 'Updated content', ['updated']);
+            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', 'Updated Summary', 'Updated content', ['updated'], undefined, undefined);
             const response = JSON.parse(result.content[0].text);
             expect(response.message).toBe('Daily summary updated successfully');
         });
@@ -173,7 +173,7 @@ describe('SummaryHandlers', () => {
                 date: '2025-01-26',
                 content: 'Updated content'
             });
-            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', undefined, 'Updated content', undefined);
+            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', undefined, 'Updated content', undefined, undefined, undefined);
         });
         it('should throw error for non-existent summary', async () => {
             mockSessionManager.updateDailySummary.mockReturnValue(null);

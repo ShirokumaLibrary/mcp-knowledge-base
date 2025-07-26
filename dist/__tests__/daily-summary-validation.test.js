@@ -27,8 +27,11 @@ describe('Daily Summary Validation', () => {
         if (testDb) {
             testDb.close();
         }
-        if (fs.existsSync(testDataDir)) {
+        if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDataDir)) {
             fs.rmSync(testDataDir, { recursive: true, force: true });
+        }
+        else if (process.env.KEEP_TEST_DATA === 'true') {
+            console.log(`Test data kept in: ${testDataDir}`);
         }
     });
     describe('Duplicate Summary Prevention', () => {

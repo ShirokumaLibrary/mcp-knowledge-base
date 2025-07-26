@@ -51,7 +51,8 @@ export class TaskRepository extends BaseRepository {
             updated_at: metadata.updated_at || new Date().toISOString(),
             start_date: metadata.start_date || null,
             end_date: metadata.end_date || null,
-            related_tasks: metadata.related_tasks || []
+            related_tasks: metadata.related_tasks || [],
+            related_documents: metadata.related_documents || []
         };
     }
     async getDefaultStatusName() {
@@ -100,6 +101,16 @@ export class TaskRepository extends BaseRepository {
                 }
             }
         }
+        // Update related documents
+        await this.db.runAsync('DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)', [type, task.id.toString()]);
+        if (task.related_documents && task.related_documents.length > 0) {
+            for (const docRef of task.related_documents) {
+                const [targetType, targetId] = docRef.split('-');
+                if (targetType && targetId) {
+                    await this.db.runAsync('INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [type, task.id.toString(), targetType, parseInt(targetId)]);
+                }
+            }
+        }
     }
     // Unified methods that accept type as parameter
     async getTask(type, id) {
@@ -118,7 +129,7 @@ export class TaskRepository extends BaseRepository {
             return null;
         }
     }
-    async createTask(type, title, content = '', priority = 'medium', status, tags, description, start_date, end_date, related_tasks) {
+    async createTask(type, title, content = '', priority = 'medium', status, tags, description, start_date, end_date, related_tasks, related_documents) {
         await this.ensureDirectoryExists();
         const id = await this.getNextSequenceValue(type);
         const now = new Date().toISOString();
@@ -146,7 +157,8 @@ export class TaskRepository extends BaseRepository {
             updated_at: now,
             start_date: start_date || null,
             end_date: end_date || null,
-            related_tasks: related_tasks || []
+            related_tasks: related_tasks || [],
+            related_documents: related_documents || []
         };
         // Determine the status ID
         const statuses = await this.statusRepository.getAllStatuses();
@@ -164,6 +176,7 @@ export class TaskRepository extends BaseRepository {
             start_date,
             end_date,
             related_tasks,
+            related_documents,
             created_at: now,
             updated_at: now
         };
@@ -184,7 +197,7 @@ export class TaskRepository extends BaseRepository {
         await this.syncTaskToSQLite(task, type);
         return task;
     }
-    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks) {
+    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         const existingTask = await this.getTask(type, id);
         if (!existingTask) {
             return null;
@@ -208,6 +221,7 @@ export class TaskRepository extends BaseRepository {
             start_date: start_date !== undefined ? start_date : existingTask.start_date,
             end_date: end_date !== undefined ? end_date : existingTask.end_date,
             related_tasks: related_tasks !== undefined ? related_tasks : existingTask.related_tasks,
+            related_documents: related_documents !== undefined ? related_documents : existingTask.related_documents,
             updated_at: now
         };
         // Determine the status ID
@@ -226,6 +240,7 @@ export class TaskRepository extends BaseRepository {
             start_date: updatedTask.start_date,
             end_date: updatedTask.end_date,
             related_tasks: updatedTask.related_tasks,
+            related_documents: updatedTask.related_documents,
             created_at: updatedTask.created_at,
             updated_at: updatedTask.updated_at
         };

@@ -161,14 +161,14 @@ export declare class FileIssueDatabase {
      * @ai-side-effects Creates file and search index entry
      * @ai-return Complete document object
      */
-    createDocument(type: string, title: string, content: string, tags?: string[], description?: string): Promise<import("./index.js").Document>;
+    createDocument(type: string, title: string, content: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]): Promise<import("./index.js").Document>;
     /**
      * @ai-intent Update document content by type and ID
      * @ai-flow 1. Wait for init -> 2. Read current -> 3. Apply changes -> 4. Reindex
      * @ai-pattern Partial updates allowed
      * @ai-return true if updated, false if not found
      */
-    updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<boolean>;
+    updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]): Promise<boolean>;
     /**
      * @ai-intent Delete document by type and ID
      * @ai-flow 1. Wait for init -> 2. Delete files and index
@@ -200,7 +200,7 @@ export declare class FileIssueDatabase {
      * @ai-intent Create task through unified interface
      * @ai-logic Validates type from sequences table
      */
-    createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]): Promise<import("./index.js").Issue | import("./index.js").Plan>;
+    createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]): Promise<import("./index.js").Issue | import("./index.js").Plan>;
     /**
      * @ai-intent Get all tasks summary through unified interface
      * @ai-logic Validates type from sequences table
@@ -210,7 +210,7 @@ export declare class FileIssueDatabase {
      * @ai-intent Update task through unified interface
      * @ai-logic Validates type from sequences table
      */
-    updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]): Promise<import("./index.js").Issue | import("./index.js").Plan | null>;
+    updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]): Promise<import("./index.js").Issue | import("./index.js").Plan | null>;
     /**
      * @ai-intent Delete task through unified interface
      * @ai-logic Validates type from sequences table

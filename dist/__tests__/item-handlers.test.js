@@ -173,7 +173,8 @@ describe('ItemHandlers', () => {
             undefined, // description
             undefined, // start_date
             undefined, // end_date
-            ['issues-1', 'plans-1'] // related_tasks
+            ['issues-1', 'plans-1'], // related_tasks
+            undefined // related_documents
             );
             const text = result.content[0].text;
             expect(text).toContain('issues created:');
@@ -242,7 +243,7 @@ describe('ItemHandlers', () => {
                 content: 'Task content',
                 related_tasks: ['issues-1', 'plans-2']
             });
-            expect(mockDb.createTask).toHaveBeenCalledWith('issues', 'Task with Relations', 'Task content', undefined, undefined, undefined, undefined, undefined, undefined, ['issues-1', 'plans-2']);
+            expect(mockDb.createTask).toHaveBeenCalledWith('issues', 'Task with Relations', 'Task content', undefined, undefined, undefined, undefined, undefined, undefined, ['issues-1', 'plans-2'], undefined);
             expect(result.content[0].text).toContain('issues created:');
             const jsonPart = result.content[0].text.replace('issues created: ', '');
             const responseData = JSON.parse(jsonPart);
@@ -265,7 +266,7 @@ describe('ItemHandlers', () => {
                 content: 'Task content',
                 related_tasks: []
             });
-            expect(mockDb.createTask).toHaveBeenCalledWith('plans', 'Task without Relations', 'Task content', undefined, undefined, undefined, undefined, undefined, undefined, []);
+            expect(mockDb.createTask).toHaveBeenCalledWith('plans', 'Task without Relations', 'Task content', undefined, undefined, undefined, undefined, undefined, undefined, [], undefined);
             const jsonPart = result.content[0].text.replace('plans created: ', '');
             const responseData = JSON.parse(jsonPart);
             expect(responseData.related_tasks).toEqual([]);
@@ -315,7 +316,7 @@ describe('ItemHandlers', () => {
                 status: 'In Progress'
                 // only updating status
             });
-            expect(mockDb.updateTask).toHaveBeenCalledWith('issues', 1, undefined, undefined, undefined, 'In Progress', undefined, undefined, undefined, undefined, undefined);
+            expect(mockDb.updateTask).toHaveBeenCalledWith('issues', 1, undefined, undefined, undefined, 'In Progress', undefined, undefined, undefined, undefined, undefined, undefined);
         });
         it('should update related_tasks for task types', async () => {
             const mockTask = {
@@ -333,7 +334,7 @@ describe('ItemHandlers', () => {
                 id: 1,
                 related_tasks: ['issues-2', 'plans-3', 'issues-4']
             });
-            expect(mockDb.updateTask).toHaveBeenCalledWith('issues', 1, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, ['issues-2', 'plans-3', 'issues-4']);
+            expect(mockDb.updateTask).toHaveBeenCalledWith('issues', 1, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, ['issues-2', 'plans-3', 'issues-4'], undefined);
             const jsonPart = result.content[0].text.replace('issues updated: ', '');
             const responseData = JSON.parse(jsonPart);
             expect(responseData.related_tasks).toEqual(['issues-2', 'plans-3', 'issues-4']);
@@ -354,7 +355,7 @@ describe('ItemHandlers', () => {
                 id: 1,
                 related_tasks: []
             });
-            expect(mockDb.updateTask).toHaveBeenCalledWith('plans', 1, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, []);
+            expect(mockDb.updateTask).toHaveBeenCalledWith('plans', 1, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, [], undefined);
             const jsonPart = result.content[0].text.replace('plans updated: ', '');
             const responseData = JSON.parse(jsonPart);
             expect(responseData.related_tasks).toEqual([]);

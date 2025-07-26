@@ -332,16 +332,21 @@ async function rebuildDatabase() {
         fullDb.close();
         console.log('\n✨ Database rebuild successful!');
         console.log('\n💡 Tip: You can verify the rebuild by running the MCP server and checking the data.');
-        process.exit(0);
     }
     catch (error) {
         console.error('\n❌ Error rebuilding database:', error);
-        process.exit(1);
+        throw error;
     }
 }
-// Run the rebuild
-rebuildDatabase().catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-});
+// Export for use in other modules
+export { rebuildDatabase };
+// Run the rebuild if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    rebuildDatabase().then(() => {
+        process.exit(0);
+    }).catch(error => {
+        console.error('Fatal error:', error);
+        process.exit(1);
+    });
+}
 //# sourceMappingURL=rebuild-db.js.map

@@ -105,6 +105,11 @@ export const toolDefinitions = [
                     items: { type: 'string' },
                     description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
                 },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])',
+                },
             },
             required: ['type', 'title'],
         },
@@ -161,6 +166,11 @@ export const toolDefinitions = [
                     type: 'array',
                     items: { type: 'string' },
                     description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
+                },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])',
                 },
             },
             required: ['type', 'id'],
@@ -319,7 +329,7 @@ export const toolDefinitions = [
     },
     {
         name: 'create_session',
-        description: 'Create or update work session.',
+        description: 'Create new work session. Sessions are identified by YYYY-MM-DD-HH.MM.SS.sss format.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -347,6 +357,16 @@ export const toolDefinitions = [
                 datetime: {
                     type: 'string',
                     description: 'ISO 8601 datetime for session creation (optional, for past data migration)',
+                },
+                related_tasks: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])',
+                },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])',
                 },
             },
             required: ['title'],
@@ -378,6 +398,16 @@ export const toolDefinitions = [
                 category: {
                     type: 'string',
                     description: 'New category (optional)',
+                },
+                related_tasks: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])',
+                },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])',
                 },
             },
             required: ['id'],
@@ -454,6 +484,16 @@ export const toolDefinitions = [
                     items: { type: 'string' },
                     description: 'Array of tag names (optional)',
                 },
+                related_tasks: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])',
+                },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])',
+                },
             },
             required: ['date', 'title', 'content'],
         },
@@ -480,6 +520,16 @@ export const toolDefinitions = [
                     type: 'array',
                     items: { type: 'string' },
                     description: 'New array of tag names (optional)',
+                },
+                related_tasks: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])',
+                },
+                related_documents: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])',
                 },
             },
             required: ['date'],

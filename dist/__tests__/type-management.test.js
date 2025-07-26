@@ -4,7 +4,6 @@ import * as path from 'path';
 import { TypeRepository } from '../database/type-repository.js';
 import { TypeHandlers } from '../handlers/type-handlers.js';
 import { FileIssueDatabase } from '../database/index.js';
-import * as os from 'os';
 describe('Type Management', () => {
     let testDataDir;
     let sqlitePath;
@@ -12,7 +11,7 @@ describe('Type Management', () => {
     let typeRepo;
     beforeEach(async () => {
         // Create temporary test directory
-        testDataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'type-test-'));
+        testDataDir = await fs.mkdtemp(path.join(process.cwd(), 'tmp', 'type-test-'));
         sqlitePath = path.join(testDataDir, 'test.db');
         db = new FileIssueDatabase(testDataDir, sqlitePath);
         await db.initialize();

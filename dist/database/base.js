@@ -274,6 +274,19 @@ export class DatabaseConnection {
         PRIMARY KEY (source_type, source_id, target_type, target_id)
       )
     `);
+        // Related documents table (normalized many-to-many relationship)
+        // @ai-context Stores relationships between items and documents
+        // @ai-pattern Normalized junction table for many-to-many relationships
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS related_documents (
+        source_type TEXT NOT NULL,
+        source_id TEXT NOT NULL,  -- TEXT to support both integer and string IDs
+        target_type TEXT NOT NULL,
+        target_id INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (source_type, source_id, target_type, target_id)
+      )
+    `);
     }
     async createIndexes() {
         // Text search indexes
@@ -291,6 +304,11 @@ export class DatabaseConnection {
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)`);
         // Tag name index for quick lookups
         await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)`);
+        // Related tasks and documents indexes
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)`);
+        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)`);
     }
     getDatabase() {
         if (!this.db) {

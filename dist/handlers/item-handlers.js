@@ -123,11 +123,11 @@ export class ItemHandlers {
         }
         if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
             // Use unified task interface
-            item = await this.db.createTask(validatedArgs.type, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.description, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.related_tasks);
+            item = await this.db.createTask(validatedArgs.type, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.description, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.related_tasks, validatedArgs.related_documents);
         }
         else {
             // Handle all other types as documents
-            item = await this.db.createDocument(validatedArgs.type, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.description);
+            item = await this.db.createDocument(validatedArgs.type, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.description, validatedArgs.related_tasks, validatedArgs.related_documents);
         }
         return {
             content: [
@@ -149,12 +149,12 @@ export class ItemHandlers {
         }
         if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
             // @ai-logic: Use unified task interface
-            updatedItem = await this.db.updateTask(validatedArgs.type, validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.description, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.related_tasks);
+            updatedItem = await this.db.updateTask(validatedArgs.type, validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.priority, validatedArgs.status, validatedArgs.tags, validatedArgs.description, validatedArgs.start_date, validatedArgs.end_date, validatedArgs.related_tasks, validatedArgs.related_documents);
             success = updatedItem !== null;
         }
         else {
             // Handle all other types as documents
-            success = await this.db.updateDocument(validatedArgs.type, validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.description);
+            success = await this.db.updateDocument(validatedArgs.type, validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.description, validatedArgs.related_tasks, validatedArgs.related_documents);
             if (success)
                 updatedItem = await this.db.getDocument(validatedArgs.type, validatedArgs.id);
         }

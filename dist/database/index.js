@@ -258,11 +258,11 @@ export class FileIssueDatabase {
      * @ai-side-effects Creates file and search index entry
      * @ai-return Complete document object
      */
-    async createDocument(type, title, content, tags, description) {
+    async createDocument(type, title, content, tags, description, related_tasks, related_documents) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.documentRepo.createDocument(type, title, content, tags, description);
+        return this.documentRepo.createDocument(type, title, content, tags, description, related_tasks, related_documents);
     }
     /**
      * @ai-intent Update document content by type and ID
@@ -270,11 +270,11 @@ export class FileIssueDatabase {
      * @ai-pattern Partial updates allowed
      * @ai-return true if updated, false if not found
      */
-    async updateDocument(type, id, title, content, tags, description) {
+    async updateDocument(type, id, title, content, tags, description, related_tasks, related_documents) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        return this.documentRepo.updateDocument(type, id, title, content, tags, description);
+        return this.documentRepo.updateDocument(type, id, title, content, tags, description, related_tasks, related_documents);
     }
     /**
      * @ai-intent Delete document by type and ID
@@ -339,7 +339,7 @@ export class FileIssueDatabase {
      * @ai-intent Create task through unified interface
      * @ai-logic Validates type from sequences table
      */
-    async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks) {
+    async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
@@ -352,7 +352,7 @@ export class FileIssueDatabase {
         if (!content) {
             throw new Error(`Content is required for ${type}`);
         }
-        return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
+        return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
     }
     /**
      * @ai-intent Get all tasks summary through unified interface
@@ -373,7 +373,7 @@ export class FileIssueDatabase {
      * @ai-intent Update task through unified interface
      * @ai-logic Validates type from sequences table
      */
-    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks) {
+    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
@@ -382,7 +382,7 @@ export class FileIssueDatabase {
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
-        return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
+        return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
     }
     /**
      * @ai-intent Delete task through unified interface
@@ -526,6 +526,26 @@ export class FileIssueDatabase {
             // Clear all tag relationships if no tags
             await db.runAsync('DELETE FROM session_tags WHERE session_id = ?', [session.id]);
         }
+        // Update related tasks
+        await db.runAsync('DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)', ['sessions', session.id]);
+        if (session.related_tasks && session.related_tasks.length > 0) {
+            for (const taskRef of session.related_tasks) {
+                const [targetType, targetId] = taskRef.split('-');
+                if (targetType && targetId) {
+                    await db.runAsync('INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', ['sessions', session.id, targetType, parseInt(targetId)]);
+                }
+            }
+        }
+        // Update related documents
+        await db.runAsync('DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)', ['sessions', session.id]);
+        if (session.related_documents && session.related_documents.length > 0) {
+            for (const docRef of session.related_documents) {
+                const [targetType, targetId] = docRef.split('-');
+                if (targetType && targetId) {
+                    await db.runAsync('INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', ['sessions', session.id, targetType, parseInt(targetId)]);
+                }
+            }
+        }
     }
     /**
      * @ai-intent Sync daily summary to SQLite
@@ -563,6 +583,26 @@ export class FileIssueDatabase {
             // Clear all tag relationships if no tags
             await db.runAsync('DELETE FROM summary_tags WHERE summary_date = ?', [summary.date]);
         }
+        // Update related tasks
+        await db.runAsync('DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)', ['summaries', summary.date]);
+        if (summary.related_tasks && summary.related_tasks.length > 0) {
+            for (const taskRef of summary.related_tasks) {
+                const [targetType, targetId] = taskRef.split('-');
+                if (targetType && targetId) {
+                    await db.runAsync('INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', ['summaries', summary.date, targetType, parseInt(targetId)]);
+                }
+            }
+        }
+        // Update related documents
+        await db.runAsync('DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)', ['summaries', summary.date]);
+        if (summary.related_documents && summary.related_documents.length > 0) {
+            for (const docRef of summary.related_documents) {
+                const [targetType, targetId] = docRef.split('-');
+                if (targetType && targetId) {
+                    await db.runAsync('INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', ['summaries', summary.date, targetType, parseInt(targetId)]);
+                }
+            }
+        }
     }
     /**
      * @ai-intent Clean shutdown of database connections
@@ -572,6 +612,7 @@ export class FileIssueDatabase {
      */
     close() {
         this.connection.close();
+        this.initializationPromise = null;
     }
 }
 //# sourceMappingURL=index.js.map

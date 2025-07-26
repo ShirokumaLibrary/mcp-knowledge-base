@@ -84,7 +84,7 @@ export class DocumentRepository extends BaseRepository {
      * @ai-side-effects Creates markdown file and SQLite record
      */
     async createDocument(type, // Allow any type, not just 'doc' | 'knowledge'
-    title, content, tags = [], description) {
+    title, content, tags = [], description, related_tasks, related_documents) {
         await this.ensureDirectories();
         // Ensure documents directory exists
         await this.ensureDirectories();
@@ -99,6 +99,8 @@ export class DocumentRepository extends BaseRepository {
             description,
             content,
             tags: tags || [],
+            related_tasks: related_tasks || [],
+            related_documents: related_documents || [],
             created_at: now,
             updated_at: now
         };
@@ -113,6 +115,8 @@ export class DocumentRepository extends BaseRepository {
             title: document.title,
             description: document.description,
             tags: document.tags,
+            related_tasks: document.related_tasks,
+            related_documents: document.related_documents,
             created_at: document.created_at,
             updated_at: document.updated_at
         };
@@ -147,6 +151,8 @@ export class DocumentRepository extends BaseRepository {
                 description: metadata.description,
                 content: markdownContent,
                 tags: metadata.tags || [],
+                related_tasks: metadata.related_tasks || [],
+                related_documents: metadata.related_documents || [],
                 created_at: metadata.created_at,
                 updated_at: metadata.updated_at
             };
@@ -160,7 +166,7 @@ export class DocumentRepository extends BaseRepository {
      * @ai-flow 1. Load current -> 2. Apply changes -> 3. Save -> 4. Sync
      * @ai-pattern Partial updates supported
      */
-    async updateDocument(type, id, title, content, tags, description) {
+    async updateDocument(type, id, title, content, tags, description, related_tasks, related_documents) {
         const current = await this.getDocument(type, id);
         if (!current)
             return false;
@@ -175,6 +181,10 @@ export class DocumentRepository extends BaseRepository {
             current.tags = tags;
             await this.tagRepo.ensureTagsExist(tags);
         }
+        if (related_tasks !== undefined)
+            current.related_tasks = related_tasks;
+        if (related_documents !== undefined)
+            current.related_documents = related_documents;
         current.updated_at = new Date().toISOString();
         // Save to file with consistent naming
         const sequenceType = await this.normalizeSequenceType(type);
@@ -187,6 +197,8 @@ export class DocumentRepository extends BaseRepository {
             title: current.title,
             description: current.description,
             tags: current.tags,
+            related_tasks: current.related_tasks,
+            related_documents: current.related_documents,
             created_at: current.created_at,
             updated_at: current.updated_at
         };
@@ -253,6 +265,8 @@ export class DocumentRepository extends BaseRepository {
                     description: metadata.description,
                     content: markdownContent,
                     tags: metadata.tags || [],
+                    related_tasks: metadata.related_tasks || [],
+                    related_documents: metadata.related_documents || [],
                     created_at: metadata.created_at,
                     updated_at: metadata.updated_at
                 });
@@ -330,6 +344,26 @@ export class DocumentRepository extends BaseRepository {
             const tagIdMap = await this.tagRepo.getTagIds(tagList);
             for (const [, tagId] of tagIdMap) {
                 await this.db.runAsync('INSERT INTO document_tags (document_type, document_id, tag_id) VALUES (?, ?, ?)', [document.type, document.id, tagId]);
+                // Update related tasks
+                await this.db.runAsync('DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)', [document.type, document.id]);
+                if (document.related_tasks && document.related_tasks.length > 0) {
+                    for (const taskRef of document.related_tasks) {
+                        const [targetType, targetId] = taskRef.split('-');
+                        if (targetType && targetId) {
+                            await this.db.runAsync('INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [document.type, document.id, targetType, parseInt(targetId)]);
+                        }
+                    }
+                }
+                // Update related documents
+                await this.db.runAsync('DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)', [document.type, document.id.toString()]);
+                if (document.related_documents && document.related_documents.length > 0) {
+                    for (const docRef of document.related_documents) {
+                        const [targetType, targetId] = docRef.split('-');
+                        if (targetType && targetId) {
+                            await this.db.runAsync('INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [document.type, document.id.toString(), targetType, parseInt(targetId)]);
+                        }
+                    }
+                }
             }
         }
     }

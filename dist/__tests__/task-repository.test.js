@@ -4,7 +4,6 @@ import { StatusRepository } from '../database/status-repository.js';
 import { TagRepository } from '../database/tag-repository.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as os from 'os';
 describe('TaskRepository', () => {
     let db;
     let taskRepo;
@@ -13,7 +12,7 @@ describe('TaskRepository', () => {
     let testDir;
     beforeEach(async () => {
         // Create a temporary directory for test data
-        testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-test-tasks-'));
+        testDir = await fs.mkdtemp(path.join(process.cwd(), 'tmp', 'mcp-test-tasks-'));
         // Initialize database
         const connection = new DatabaseConnection(':memory:');
         await connection.initialize();
@@ -24,8 +23,13 @@ describe('TaskRepository', () => {
         taskRepo = new TaskRepository(db, testDir, statusRepo, tagRepo);
     });
     afterEach(async () => {
-        // Clean up test directory
-        await fs.rm(testDir, { recursive: true, force: true });
+        // Clean up test directory unless KEEP_TEST_DATA is set
+        if (process.env.KEEP_TEST_DATA !== 'true') {
+            await fs.rm(testDir, { recursive: true, force: true });
+        }
+        else {
+            console.log(`Test data kept in: ${testDir}`);
+        }
     });
     describe('Task operations', () => {
         it('should create an issue task', async () => {

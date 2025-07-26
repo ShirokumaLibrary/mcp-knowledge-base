@@ -66,6 +66,7 @@ export const CreateItemSchema = z.object({
     start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
     end_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+    related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
 }).strict();
 /**
  * @ai-intent Schema for update_item tool
@@ -87,6 +88,7 @@ export const UpdateItemSchema = z.object({
     start_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
     end_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+    related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
 }).strict();
 /**
  * @ai-intent Schema for delete_item tool

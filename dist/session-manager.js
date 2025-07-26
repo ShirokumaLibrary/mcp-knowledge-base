@@ -62,8 +62,8 @@ export class WorkSessionManager {
      * @ai-return Complete session object with generated metadata
      */
     createSession(title, content, tags, category, id, // @ai-logic: Custom ID for imports
-    datetime // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
-    ) {
+    datetime, // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
+    related_tasks, related_documents) {
         const sessionDate = datetime ? new Date(datetime) : new Date();
         const date = sessionDate.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
         const sessionId = id || this.generateSessionId(sessionDate);
@@ -73,6 +73,8 @@ export class WorkSessionManager {
             content,
             tags,
             category,
+            related_tasks,
+            related_documents,
             date,
             createdAt: sessionDate.toISOString() // @ai-pattern: ISO 8601 timestamp
         };
@@ -87,7 +89,7 @@ export class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id, title, content, tags, category) {
+    updateSession(id, title, content, tags, category, related_tasks, related_documents) {
         // @ai-logic: Use getSessionDetail to find session in any date directory
         const session = this.repository.getSessionDetail(id);
         if (!session) {
@@ -100,6 +102,8 @@ export class WorkSessionManager {
             content: content !== undefined ? content : session.content,
             tags: tags !== undefined ? tags : session.tags,
             category: category !== undefined ? category : session.category,
+            related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
+            related_documents: related_documents !== undefined ? related_documents : session.related_documents,
             updatedAt: new Date().toISOString() // @ai-logic: Track modification time
         };
         this.repository.saveSession(updatedSession);
@@ -142,13 +146,15 @@ export class WorkSessionManager {
      * @ai-critical One summary per date - overwrites existing
      * @ai-return Complete summary object
      */
-    createDailySummary(date, title, content, tags = []) {
+    createDailySummary(date, title, content, tags = [], related_tasks, related_documents) {
         const now = new Date().toISOString();
         const summary = {
             date, // @ai-critical: Primary key for summaries
             title,
             content, // @ai-logic: Main summary text
             tags,
+            related_tasks: related_tasks || [],
+            related_documents: related_documents || [],
             createdAt: now
         };
         this.repository.saveDailySummary(summary); // @ai-side-effect: Creates new, throws if exists
@@ -162,7 +168,7 @@ export class WorkSessionManager {
      * @ai-bug Empty string updates ignored due to || operator
      * @ai-return Updated summary object
      */
-    updateDailySummary(date, title, content, tags) {
+    updateDailySummary(date, title, content, tags, related_tasks, related_documents) {
         const existing = this.repository.loadDailySummary(date);
         if (!existing) {
             throw new Error(`Daily summary for ${date} not found`);
@@ -173,6 +179,8 @@ export class WorkSessionManager {
             title: title !== undefined ? title : existing.title,
             content: content !== undefined ? content : existing.content,
             tags: tags !== undefined ? tags : existing.tags,
+            related_tasks: related_tasks !== undefined ? related_tasks : existing.related_tasks,
+            related_documents: related_documents !== undefined ? related_documents : existing.related_documents,
             updatedAt: new Date().toISOString()
         };
         this.repository.updateDailySummary(updated);

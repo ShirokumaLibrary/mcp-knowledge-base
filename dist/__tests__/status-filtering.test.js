@@ -6,7 +6,7 @@ describe('Status Filtering Tests', () => {
     let db;
     let statusRepo;
     const testDbPath = ':memory:';
-    const testDataDir = path.join(__dirname, 'test-status-filtering');
+    const testDataDir = path.join(process.cwd(), 'tmp', 'test-status-filtering-' + process.pid);
     beforeEach(async () => {
         // Clean up test directory
         try {
@@ -33,10 +33,15 @@ describe('Status Filtering Tests', () => {
     });
     afterEach(async () => {
         await db.close();
-        try {
-            await fs.rm(testDataDir, { recursive: true });
+        if (process.env.KEEP_TEST_DATA !== 'true') {
+            try {
+                await fs.rm(testDataDir, { recursive: true });
+            }
+            catch { }
         }
-        catch { }
+        else {
+            console.log(`Test data kept in: ${testDataDir}`);
+        }
     });
     describe('Default status filtering', () => {
         beforeEach(async () => {

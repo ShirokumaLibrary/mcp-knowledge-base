@@ -38,8 +38,8 @@ export class SummaryHandlers {
             const summary = this.sessionManager.createDailySummary(validatedArgs.date, // @ai-critical: Primary key
             validatedArgs.title, // @ai-validation: Required
             validatedArgs.content, // @ai-validation: Required
-            validatedArgs.tags // @ai-default: Empty array
-            );
+            validatedArgs.tags, // @ai-default: Empty array
+            validatedArgs.related_tasks, validatedArgs.related_documents);
             return {
                 content: [
                     {
@@ -71,8 +71,8 @@ export class SummaryHandlers {
             const summary = this.sessionManager.updateDailySummary(validatedArgs.date, // @ai-critical: Identifies summary
             validatedArgs.title, // @ai-bug: || prevents clearing
             validatedArgs.content, // @ai-bug: || prevents clearing
-            validatedArgs.tags // @ai-logic: Can be cleared
-            );
+            validatedArgs.tags, // @ai-logic: Can be cleared
+            validatedArgs.related_tasks, validatedArgs.related_documents);
             return {
                 content: [
                     {

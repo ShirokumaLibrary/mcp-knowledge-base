@@ -45,7 +45,8 @@ export declare class WorkSessionManager {
      * @ai-return Complete session object with generated metadata
      */
     createSession(title: string, content?: string, tags?: string[], category?: string, id?: string, // @ai-logic: Custom ID for imports
-    datetime?: string): WorkSession;
+    datetime?: string, // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
+    related_tasks?: string[], related_documents?: string[]): WorkSession;
     /**
      * @ai-intent Update existing work session
      * @ai-flow 1. Extract date from ID -> 2. Load current -> 3. Merge changes -> 4. Save
@@ -54,7 +55,7 @@ export declare class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id: string, title?: string, content?: string, tags?: string[], category?: string): WorkSession;
+    updateSession(id: string, title?: string, content?: string, tags?: string[], category?: string, related_tasks?: string[], related_documents?: string[]): WorkSession;
     /**
      * @ai-intent Retrieve session by ID
      * @ai-flow 1. Extract date from ID -> 2. Load from repository
@@ -80,7 +81,7 @@ export declare class WorkSessionManager {
      * @ai-critical One summary per date - overwrites existing
      * @ai-return Complete summary object
      */
-    createDailySummary(date: string, title: string, content: string, tags?: string[]): DailySummary;
+    createDailySummary(date: string, title: string, content: string, tags?: string[], related_tasks?: string[], related_documents?: string[]): DailySummary;
     /**
      * @ai-intent Update existing daily summary
      * @ai-flow 1. Load current -> 2. Merge changes -> 3. Save updated
@@ -89,7 +90,7 @@ export declare class WorkSessionManager {
      * @ai-bug Empty string updates ignored due to || operator
      * @ai-return Updated summary object
      */
-    updateDailySummary(date: string, title?: string, content?: string, tags?: string[]): DailySummary;
+    updateDailySummary(date: string, title?: string, content?: string, tags?: string[], related_tasks?: string[], related_documents?: string[]): DailySummary;
     /**
      * @ai-section Search Operations
      * @ai-intent Search sessions by exact tag match

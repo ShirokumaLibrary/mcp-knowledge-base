@@ -59,6 +59,7 @@ export interface Issue {
     priority: string;
     status?: string;
     related_tasks?: string[];
+    related_documents?: string[];
     tags?: string[];
     created_at: string;
     updated_at: string;
@@ -87,6 +88,7 @@ export interface Plan {
     priority: string;
     status?: string;
     related_tasks?: string[];
+    related_documents?: string[];
     tags?: string[];
     created_at: string;
     updated_at: string;
@@ -110,6 +112,8 @@ export interface Document {
     title: string;
     description?: string;
     content: string;
+    related_tasks?: string[];
+    related_documents?: string[];
     tags: string[];
     created_at: string;
     updated_at: string;

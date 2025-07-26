@@ -68,6 +68,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     title: string;
     type: string;
@@ -79,6 +80,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     subtype?: string | undefined;
 }, {
     title: string;
@@ -91,6 +93,7 @@ export declare const CreateItemSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     subtype?: string | undefined;
 }>;
 /**
@@ -113,6 +116,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     id: number;
     type: string;
@@ -125,6 +129,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     subtype?: string | undefined;
 }, {
     id: number;
@@ -138,6 +143,7 @@ export declare const UpdateItemSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     subtype?: string | undefined;
 }>;
 /**

@@ -17,6 +17,8 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     title: z.ZodString;
     content: z.ZodOptional<z.ZodString>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
     datetime: z.ZodOptional<z.ZodString>;
@@ -24,14 +26,18 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     title: string;
     tags: string[];
     content?: string | undefined;
+    related_tasks?: string[] | undefined;
     id?: string | undefined;
+    related_documents?: string[] | undefined;
     category?: string | undefined;
     datetime?: string | undefined;
 }, {
     title: string;
     content?: string | undefined;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
     id?: string | undefined;
+    related_documents?: string[] | undefined;
     category?: string | undefined;
     datetime?: string | undefined;
 }>;
@@ -46,6 +52,8 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     id: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
@@ -53,12 +61,16 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     category?: string | undefined;
 }, {
     id: string;
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
     category?: string | undefined;
 }>;
 /**
@@ -72,17 +84,23 @@ export declare const CreateDailySummarySchema: z.ZodObject<{
     date: z.ZodString;
     title: z.ZodString;
     content: z.ZodString;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     title: string;
     content: string;
     tags: string[];
     date: string;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
 }, {
     title: string;
     content: string;
     date: string;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
 }>;
 /**
  * @ai-intent Schema for update_summary tool
@@ -95,17 +113,23 @@ export declare const UpdateDailySummarySchema: z.ZodObject<{
     date: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     date: string;
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
 }, {
     date: string;
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
 }>;
 /**
  * @ai-intent Schema for search_sessions_by_tag tool

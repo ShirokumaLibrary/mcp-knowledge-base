@@ -20,8 +20,8 @@ export declare class TaskRepository extends BaseRepository {
     private isValidStatus;
     syncTaskToSQLite(task: Issue | Plan, type: string): Promise<void>;
     getTask(type: string, id: number): Promise<Issue | Plan | null>;
-    createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]): Promise<Issue | Plan>;
-    updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]): Promise<Issue | Plan | null>;
+    createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]): Promise<Issue | Plan>;
+    updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]): Promise<Issue | Plan | null>;
     deleteTask(type: string, id: number): Promise<boolean>;
     getAllTasksSummary(type: string, includeClosedStatuses?: boolean, statusIds?: number[]): Promise<IssueSummary[] | PlanSummary[]>;
     searchTasksByTag(type: string, tag: string): Promise<(Issue | Plan)[]>;

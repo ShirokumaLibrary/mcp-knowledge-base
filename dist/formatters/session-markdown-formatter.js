@@ -30,6 +30,12 @@ export class SessionMarkdownFormatter {
         }
         if (session.category)
             content += `category: "${session.category}"\n`;
+        if (session.related_tasks && session.related_tasks.length > 0) {
+            content += `related_tasks: [${session.related_tasks.map(t => `"${t}"`).join(', ')}]\n`;
+        }
+        if (session.related_documents && session.related_documents.length > 0) {
+            content += `related_documents: [${session.related_documents.map(d => `"${d}"`).join(', ')}]\n`;
+        }
         content += `date: ${session.date}\n`; // @ai-pattern: YYYY-MM-DD unquoted
         content += `createdAt: ${session.createdAt}\n`; // @ai-pattern: ISO 8601 unquoted
         if (session.updatedAt)
@@ -91,6 +97,8 @@ export class SessionMarkdownFormatter {
         const titleMatch = frontMatter.match(/title: "(.+)"/);
         const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
         const categoryMatch = frontMatter.match(/category: "(.+)"/);
+        const relatedTasksMatch = frontMatter.match(/related_tasks: \[(.*)\]/);
+        const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
         const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
         const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
         // @ai-logic: Content is everything after the frontmatter
@@ -101,6 +109,8 @@ export class SessionMarkdownFormatter {
             content,
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : undefined,
             category: categoryMatch?.[1],
+            related_tasks: relatedTasksMatch?.[1] ? relatedTasksMatch[1].split(', ').map(t => t.replace(/"/g, '')) : undefined,
+            related_documents: relatedDocsMatch?.[1] ? relatedDocsMatch[1].split(', ').map(d => d.replace(/"/g, '')) : undefined,
             date,
             createdAt: createdAtMatch?.[1] || '',
             updatedAt: updatedAtMatch?.[1]
@@ -145,6 +155,12 @@ export class SessionMarkdownFormatter {
         if (summary.tags.length > 0) {
             content += `tags: [${summary.tags.map(tag => `"${tag}"`).join(', ')}]\n`;
         }
+        if (summary.related_tasks && summary.related_tasks.length > 0) {
+            content += `related_tasks: [${summary.related_tasks.map(t => `"${t}"`).join(', ')}]\n`;
+        }
+        if (summary.related_documents && summary.related_documents.length > 0) {
+            content += `related_documents: [${summary.related_documents.map(d => `"${d}"`).join(', ')}]\n`;
+        }
         content += `createdAt: ${summary.createdAt}\n`;
         if (summary.updatedAt)
             content += `updatedAt: ${summary.updatedAt}\n`;
@@ -170,6 +186,8 @@ export class SessionMarkdownFormatter {
         const dateMatch = frontMatter.match(/date: (.+)/);
         const titleMatch = frontMatter.match(/title: "(.+)"/);
         const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
+        const relatedTasksMatch = frontMatter.match(/related_tasks: \[(.*)\]/);
+        const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
         const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
         const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
         return {
@@ -177,6 +195,8 @@ export class SessionMarkdownFormatter {
             title: titleMatch?.[1] || 'Untitled',
             content: bodyContent.replace(/^# .+\n\n/, '').trim(),
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : [],
+            related_tasks: relatedTasksMatch?.[1] ? relatedTasksMatch[1].split(', ').map(t => t.replace(/"/g, '')) : [],
+            related_documents: relatedDocsMatch?.[1] ? relatedDocsMatch[1].split(', ').map(d => d.replace(/"/g, '')) : [],
             createdAt: createdAtMatch?.[1] || '',
             updatedAt: updatedAtMatch?.[1]
         };

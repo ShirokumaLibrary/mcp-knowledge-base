@@ -53,7 +53,7 @@ export declare class DocumentRepository extends BaseRepository {
      * @ai-side-effects Creates markdown file and SQLite record
      */
     createDocument(type: string, // Allow any type, not just 'doc' | 'knowledge'
-    title: string, content: string, tags?: string[], description?: string): Promise<Document>;
+    title: string, content: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]): Promise<Document>;
     /**
      * @ai-intent Get document by type and ID
      * @ai-flow 1. Check file exists -> 2. Parse markdown -> 3. Return document
@@ -65,7 +65,7 @@ export declare class DocumentRepository extends BaseRepository {
      * @ai-flow 1. Load current -> 2. Apply changes -> 3. Save -> 4. Sync
      * @ai-pattern Partial updates supported
      */
-    updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string): Promise<boolean>;
+    updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]): Promise<boolean>;
     /**
      * @ai-intent Delete document by type and ID
      * @ai-flow 1. Delete file -> 2. Remove from SQLite

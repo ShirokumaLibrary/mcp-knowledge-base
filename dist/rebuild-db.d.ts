@@ -6,4 +6,5 @@
  * @ai-why Markdown files are source of truth, SQLite can be rebuilt anytime
  * Usage: npm run rebuild-db
  */
-export {};
+declare function rebuildDatabase(): Promise<void>;
+export { rebuildDatabase };

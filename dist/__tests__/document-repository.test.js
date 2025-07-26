@@ -2,14 +2,13 @@ import { DocumentRepository } from '../database/document-repository.js';
 import { DatabaseConnection } from '../database/base.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as os from 'os';
 describe('DocumentRepository', () => {
     let db;
     let repo;
     let testDir;
     beforeEach(async () => {
         // Create a temporary directory for test data
-        testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-test-documents-'));
+        testDir = await fs.mkdtemp(path.join(process.cwd(), 'tmp', 'mcp-test-documents-'));
         // Initialize database
         const connection = new DatabaseConnection(':memory:');
         await connection.initialize();
@@ -19,8 +18,13 @@ describe('DocumentRepository', () => {
         await repo.initializeDatabase();
     });
     afterEach(async () => {
-        // Clean up test directory
-        await fs.rm(testDir, { recursive: true, force: true });
+        // Clean up test directory unless KEEP_TEST_DATA is set
+        if (process.env.KEEP_TEST_DATA !== 'true') {
+            await fs.rm(testDir, { recursive: true, force: true });
+        }
+        else {
+            console.log(`Test data kept in: ${testDir}`);
+        }
     });
     describe('createDocument', () => {
         it('should create a doc with proper ID sequence', async () => {

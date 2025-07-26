@@ -38,6 +38,8 @@ export interface WorkSession {
     id: string;
     title: string;
     content?: string;
+    related_tasks?: string[];
+    related_documents?: string[];
     tags?: string[];
     category?: string;
     date: string;
@@ -55,6 +57,8 @@ export interface DailySummary {
     date: string;
     title: string;
     content: string;
+    related_tasks?: string[];
+    related_documents?: string[];
     tags: string[];
     createdAt: string;
     updatedAt?: string;
