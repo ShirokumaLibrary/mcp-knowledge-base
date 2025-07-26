@@ -60,6 +60,24 @@ describe('TaskRepository', () => {
             const deleted = await taskRepo.getTask('issues', issue.id);
             expect(deleted).toBeNull();
         });
+        it('should handle related_tasks', async () => {
+            // Create a few tasks first
+            const issue1 = await taskRepo.createTask('issues', 'Issue 1');
+            const plan1 = await taskRepo.createTask('plans', 'Plan 1');
+            // Create issue with related tasks
+            const issue2 = await taskRepo.createTask('issues', 'Issue with related tasks', 'Content', 'high', undefined, ['important'], undefined, undefined, undefined, ['issues-1', 'plans-1']);
+            expect(issue2.related_tasks).toEqual(['issues-1', 'plans-1']);
+            // Verify it's saved correctly
+            const loaded = await taskRepo.getTask('issues', issue2.id);
+            expect(loaded?.related_tasks).toEqual(['issues-1', 'plans-1']);
+            // Update related tasks
+            const updated = await taskRepo.updateTask('issues', issue2.id, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, ['issues-1', 'plans-1', 'issues-2'] // Note: issues-2 doesn't exist but should still be stored
+            );
+            expect(updated?.related_tasks).toEqual(['issues-1', 'plans-1', 'issues-2']);
+            // Clear related tasks
+            const cleared = await taskRepo.updateTask('issues', issue2.id, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, []);
+            expect(cleared?.related_tasks).toEqual([]);
+        });
     });
     it('should create a plan task', async () => {
         const plan = await taskRepo.createTask('plans', 'Test Plan', 'Plan content', 'high', undefined, ['milestone'], undefined, '2025-07-25', '2025-08-25');
@@ -113,6 +131,44 @@ describe('TaskRepository', () => {
             const taskTagRows = await db.allAsync('SELECT * FROM task_tags WHERE task_type = ? AND task_id = ?', ['issues', issue.id]);
             expect(taskTagRows).toHaveLength(2);
             expect(taskTagRows.map((r) => r.tag_id).sort()).toEqual(tagIds.sort());
+        });
+    });
+    describe('Related tasks operations', () => {
+        it('should create task with related_tasks', async () => {
+            const task1 = await taskRepo.createTask('issues', 'Issue 1', 'Content 1');
+            const task2 = await taskRepo.createTask('plans', 'Plan 1', 'Content 2');
+            const task3 = await taskRepo.createTask('issues', 'Issue with relations', 'Content', 'medium', undefined, ['test'], undefined, undefined, undefined, [`issues-${task1.id}`, `plans-${task2.id}`]);
+            expect(task3.related_tasks).toEqual([`issues-${task1.id}`, `plans-${task2.id}`]);
+            // Verify file content
+            const filePath = path.join(testDir, 'issues', `issues-${task3.id}.md`);
+            const fileContent = await fs.readFile(filePath, 'utf-8');
+            expect(fileContent).toContain('related_tasks:');
+            expect(fileContent).toContain(`issues-${task1.id}`);
+            expect(fileContent).toContain(`plans-${task2.id}`);
+        });
+        it('should update related_tasks', async () => {
+            const task1 = await taskRepo.createTask('issues', 'Issue 1', 'Content 1');
+            const task2 = await taskRepo.createTask('plans', 'Plan 1', 'Content 2');
+            const task3 = await taskRepo.createTask('issues', 'Issue 3', 'Content 3');
+            const updated = await taskRepo.updateTask('issues', task1.id, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, [`issues-${task3.id}`, `plans-${task2.id}`]);
+            expect(updated).toBeTruthy();
+            expect(updated?.related_tasks).toEqual([`issues-${task3.id}`, `plans-${task2.id}`]);
+        });
+        it('should clear related_tasks with empty array', async () => {
+            const task1 = await taskRepo.createTask('issues', 'Issue with relations', 'Content', undefined, undefined, undefined, undefined, undefined, undefined, ['issues-999', 'plans-999']);
+            expect(task1.related_tasks).toEqual(['issues-999', 'plans-999']);
+            const updated = await taskRepo.updateTask('issues', task1.id, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, []);
+            expect(updated).toBeTruthy();
+            expect(updated?.related_tasks).toEqual([]);
+        });
+        it('should preserve related_tasks when not updating them', async () => {
+            const task = await taskRepo.createTask('plans', 'Plan with relations', 'Content', undefined, undefined, undefined, undefined, undefined, undefined, ['issues-1', 'plans-2']);
+            // Update other fields without touching related_tasks
+            await taskRepo.updateTask('plans', task.id, 'Updated title', undefined, 'high');
+            const retrieved = await taskRepo.getTask('plans', task.id);
+            expect(retrieved?.title).toBe('Updated title');
+            expect(retrieved?.priority).toBe('high');
+            expect(retrieved?.related_tasks).toEqual(['issues-1', 'plans-2']);
         });
     });
     describe('Search operations', () => {
