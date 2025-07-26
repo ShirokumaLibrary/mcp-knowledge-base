@@ -47,7 +47,8 @@ export class SessionHandlers {
       validatedArgs.content,
       validatedArgs.tags,
       validatedArgs.category,
-      validatedArgs.id  // @ai-logic: Optional custom ID
+      validatedArgs.id,  // @ai-logic: Optional custom ID
+      validatedArgs.datetime  // @ai-logic: Optional datetime for past data migration
     );
     
     return {

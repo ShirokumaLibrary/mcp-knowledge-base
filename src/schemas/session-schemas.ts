@@ -21,6 +21,7 @@ export const CreateWorkSessionSchema = z.object({
   content: z.string().optional(),  // @ai-logic: Work details and notes
   tags: z.array(z.string()).default([]),  // @ai-default: Empty array
   category: z.string().optional(),  // @ai-logic: Work categorization
+  datetime: z.string().optional(),  // @ai-logic: ISO 8601 datetime for past data migration
 }).strict();
 
 /**
@@ -91,7 +92,7 @@ export const GetSessionsSchema = z.object({
 /**
  * @ai-intent Schema for get_session_detail tool
  * @ai-validation Session ID is required
- * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
+ * @ai-pattern ID format: YYYY-MM-DD-HH.MM.SS.sss
  * @ai-return Complete session object or error
  */
 export const GetSessionDetailSchema = z.object({
