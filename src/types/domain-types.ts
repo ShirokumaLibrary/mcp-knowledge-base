@@ -61,6 +61,7 @@ export interface Issue {
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
   status?: string;                 // @ai-logic: Status name for display
   related_tasks?: string[];        // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
+  related_documents?: string[];    // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
@@ -91,6 +92,7 @@ export interface Plan {
   priority: string;                // @ai-pattern: 'high' | 'medium' | 'low'
   status?: string;                 // @ai-logic: Status name for display
   related_tasks?: string[];        // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
+  related_documents?: string[];    // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags?: string[];                 // @ai-pattern: Categorization
   created_at: string;              // @ai-pattern: ISO 8601
   updated_at: string;              // @ai-pattern: ISO 8601
@@ -116,6 +118,8 @@ export interface Document {
   title: string;              // @ai-validation: Required
   description?: string;       // @ai-intent: One-line description for list views
   content: string;            // @ai-validation: Required, main value
+  related_tasks?: string[];   // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
+  related_documents?: string[]; // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags: string[];             // @ai-pattern: Always array, may be empty
   created_at: string;         // @ai-pattern: ISO 8601
   updated_at: string;         // @ai-pattern: ISO 8601

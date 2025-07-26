@@ -60,7 +60,8 @@ export class TaskRepository extends BaseRepository {
       updated_at: metadata.updated_at || new Date().toISOString(),
       start_date: metadata.start_date || null,
       end_date: metadata.end_date || null,
-      related_tasks: metadata.related_tasks || []
+      related_tasks: metadata.related_tasks || [],
+      related_documents: metadata.related_documents || []
     };
   }
 
@@ -134,6 +135,24 @@ export class TaskRepository extends BaseRepository {
         }
       }
     }
+
+    // Update related documents
+    await this.db.runAsync(
+      'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
+      [type, task.id.toString()]
+    );
+    
+    if (task.related_documents && task.related_documents.length > 0) {
+      for (const docRef of task.related_documents) {
+        const [targetType, targetId] = docRef.split('-');
+        if (targetType && targetId) {
+          await this.db.runAsync(
+            'INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+            [type, task.id.toString(), targetType, parseInt(targetId)]
+          );
+        }
+      }
+    }
   }
 
 
@@ -178,7 +197,8 @@ export class TaskRepository extends BaseRepository {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[]
+    related_tasks?: string[],
+    related_documents?: string[]
   ): Promise<Issue | Plan> {
     await this.ensureDirectoryExists();
     
@@ -209,7 +229,8 @@ export class TaskRepository extends BaseRepository {
       updated_at: now,
       start_date: start_date || null,
       end_date: end_date || null,
-      related_tasks: related_tasks || []
+      related_tasks: related_tasks || [],
+      related_documents: related_documents || []
     };
     
     // Determine the status ID
@@ -229,6 +250,7 @@ export class TaskRepository extends BaseRepository {
       start_date,
       end_date,
       related_tasks,
+      related_documents,
       created_at: now,
       updated_at: now
     };
@@ -267,7 +289,8 @@ export class TaskRepository extends BaseRepository {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[]
+    related_tasks?: string[],
+    related_documents?: string[]
   ): Promise<Issue | Plan | null> {
     const existingTask = await this.getTask(type, id);
     if (!existingTask) {
@@ -294,6 +317,7 @@ export class TaskRepository extends BaseRepository {
       start_date: start_date !== undefined ? start_date : existingTask.start_date,
       end_date: end_date !== undefined ? end_date : existingTask.end_date,
       related_tasks: related_tasks !== undefined ? related_tasks : existingTask.related_tasks,
+      related_documents: related_documents !== undefined ? related_documents : existingTask.related_documents,
       updated_at: now
     };
     
@@ -314,6 +338,7 @@ export class TaskRepository extends BaseRepository {
       start_date: updatedTask.start_date,
       end_date: updatedTask.end_date,
       related_tasks: updatedTask.related_tasks,
+      related_documents: updatedTask.related_documents,
       created_at: updatedTask.created_at,
       updated_at: updatedTask.updated_at
     };

@@ -172,7 +172,8 @@ export class ItemHandlers {
         validatedArgs.description,
         validatedArgs.start_date,
         validatedArgs.end_date,
-        validatedArgs.related_tasks
+        validatedArgs.related_tasks,
+        validatedArgs.related_documents
       );
     } else {
       // Handle all other types as documents
@@ -181,7 +182,9 @@ export class ItemHandlers {
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
-        validatedArgs.description
+        validatedArgs.description,
+        validatedArgs.related_tasks,
+        validatedArgs.related_documents
       );
     }
 
@@ -219,7 +222,8 @@ export class ItemHandlers {
         validatedArgs.description,
         validatedArgs.start_date,
         validatedArgs.end_date,
-        validatedArgs.related_tasks
+        validatedArgs.related_tasks,
+        validatedArgs.related_documents
       );
       success = updatedItem !== null;
     } else {
@@ -230,7 +234,9 @@ export class ItemHandlers {
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
-        validatedArgs.description
+        validatedArgs.description,
+        validatedArgs.related_tasks,
+        validatedArgs.related_documents
       );
       if (success) updatedItem = await this.db.getDocument(validatedArgs.type as any, validatedArgs.id);
     }

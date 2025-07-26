@@ -39,6 +39,8 @@ export interface WorkSession {
   id: string;           // @ai-pattern: YYYY-MM-DD-HH.MM.SS.sss format
   title: string;        // @ai-validation: Required session name
   content?: string;     // @ai-logic: Work details and extended notes/logs
+  related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
+  related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags?: string[];      // @ai-pattern: Categorization
   category?: string;    // @ai-logic: Work type classification
   date: string;         // @ai-pattern: YYYY-MM-DD format
@@ -57,6 +59,8 @@ export interface DailySummary {
   date: string;         // @ai-pattern: YYYY-MM-DD, primary key
   title: string;        // @ai-validation: Required summary title
   content: string;      // @ai-validation: Required summary text
+  related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
+  related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags: string[];       // @ai-pattern: Day-level categorization
   createdAt: string;    // @ai-pattern: ISO 8601 creation time
   updatedAt?: string;   // @ai-pattern: ISO 8601 modification time

@@ -281,11 +281,11 @@ export class FileIssueDatabase {
    * @ai-side-effects Creates file and search index entry
    * @ai-return Complete document object
    */
-  async createDocument(type: string, title: string, content: string, tags?: string[], description?: string) {
+  async createDocument(type: string, title: string, content: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.createDocument(type, title, content, tags, description);
+    return this.documentRepo.createDocument(type, title, content, tags, description, related_tasks, related_documents);
   }
 
   /**
@@ -294,11 +294,11 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates allowed
    * @ai-return true if updated, false if not found
    */
-  async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string) {
+  async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
-    return this.documentRepo.updateDocument(type, id, title, content, tags, description);
+    return this.documentRepo.updateDocument(type, id, title, content, tags, description, related_tasks, related_documents);
   }
 
   /**
@@ -374,7 +374,7 @@ export class FileIssueDatabase {
    * @ai-intent Create task through unified interface
    * @ai-logic Validates type from sequences table
    */
-  async createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]) {
+  async createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
@@ -393,7 +393,7 @@ export class FileIssueDatabase {
       throw new Error(`Content is required for ${type}`);
     }
     
-    return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
+    return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
   }
 
   /**
@@ -421,7 +421,7 @@ export class FileIssueDatabase {
    * @ai-intent Update task through unified interface
    * @ai-logic Validates type from sequences table
    */
-  async updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[]) {
+  async updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]) {
     if (this.initializationPromise) {
       await this.initializationPromise;
     }
@@ -435,7 +435,7 @@ export class FileIssueDatabase {
       throw new Error(`Unknown task type: ${type}`);
     }
     
-    return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks);
+    return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
   }
 
   /**
@@ -604,6 +604,42 @@ export class FileIssueDatabase {
       // Clear all tag relationships if no tags
       await db.runAsync('DELETE FROM session_tags WHERE session_id = ?', [session.id]);
     }
+
+    // Update related tasks
+    await db.runAsync(
+      'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
+      ['sessions', session.id]
+    );
+    
+    if (session.related_tasks && session.related_tasks.length > 0) {
+      for (const taskRef of session.related_tasks) {
+        const [targetType, targetId] = taskRef.split('-');
+        if (targetType && targetId) {
+          await db.runAsync(
+            'INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+            ['sessions', session.id, targetType, parseInt(targetId)]
+          );
+        }
+      }
+    }
+
+    // Update related documents
+    await db.runAsync(
+      'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
+      ['sessions', session.id]
+    );
+    
+    if (session.related_documents && session.related_documents.length > 0) {
+      for (const docRef of session.related_documents) {
+        const [targetType, targetId] = docRef.split('-');
+        if (targetType && targetId) {
+          await db.runAsync(
+            'INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+            ['sessions', session.id, targetType, parseInt(targetId)]
+          );
+        }
+      }
+    }
   }
 
   /**
@@ -648,6 +684,42 @@ export class FileIssueDatabase {
       // Clear all tag relationships if no tags
       await db.runAsync('DELETE FROM summary_tags WHERE summary_date = ?', [summary.date]);
     }
+
+    // Update related tasks
+    await db.runAsync(
+      'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
+      ['summaries', summary.date]
+    );
+    
+    if (summary.related_tasks && summary.related_tasks.length > 0) {
+      for (const taskRef of summary.related_tasks) {
+        const [targetType, targetId] = taskRef.split('-');
+        if (targetType && targetId) {
+          await db.runAsync(
+            'INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+            ['summaries', summary.date, targetType, parseInt(targetId)]
+          );
+        }
+      }
+    }
+
+    // Update related documents
+    await db.runAsync(
+      'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
+      ['summaries', summary.date]
+    );
+    
+    if (summary.related_documents && summary.related_documents.length > 0) {
+      for (const docRef of summary.related_documents) {
+        const [targetType, targetId] = docRef.split('-');
+        if (targetType && targetId) {
+          await db.runAsync(
+            'INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+            ['summaries', summary.date, targetType, parseInt(targetId)]
+          );
+        }
+      }
+    }
   }
 
 
@@ -659,5 +731,6 @@ export class FileIssueDatabase {
    */
   close(): void {
     this.connection.close();
+    this.initializationPromise = null;
   }
 }

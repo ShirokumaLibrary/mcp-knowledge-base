@@ -19,6 +19,8 @@ export const CreateWorkSessionSchema = z.object({
   id: z.string().optional(),  // @ai-logic: Custom ID for imports
   title: z.string().min(1, 'Session title is required'),
   content: z.string().optional(),  // @ai-logic: Work details and notes
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
   tags: z.array(z.string()).default([]),  // @ai-default: Empty array
   category: z.string().optional(),  // @ai-logic: Work categorization
   datetime: z.string().optional(),  // @ai-logic: ISO 8601 datetime for past data migration
@@ -35,6 +37,8 @@ export const UpdateWorkSessionSchema = z.object({
   id: z.string().min(1, 'Session ID is required'),  // @ai-critical: Must exist
   title: z.string().min(1).optional(),  // @ai-validation: Non-empty if provided
   content: z.string().optional(),  // @ai-logic: Work details and notes
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
   tags: z.array(z.string()).optional(),
   category: z.string().optional(),
 }).strict();
@@ -50,6 +54,8 @@ export const CreateDailySummarySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),  // @ai-pattern: Strict date
   title: z.string().min(1, 'Title is required'),
   content: z.string().min(1, 'Content is required'),  // @ai-validation: Non-empty summary
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
   tags: z.array(z.string()).default([]),
 }).strict();
 
@@ -64,6 +70,8 @@ export const UpdateDailySummarySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),  // @ai-critical: Identifies summary
   title: z.string().min(1).optional(),    // @ai-bug: Can't clear with empty string
   content: z.string().min(1).optional(),  // @ai-bug: Can't clear with empty string
+  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
+  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
   tags: z.array(z.string()).optional(),
 }).strict();
 

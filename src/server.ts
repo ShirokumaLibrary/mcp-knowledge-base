@@ -73,13 +73,6 @@ class IssueTrackerServer {
   private sessionManager: WorkSessionManager;
   
   // @ai-logic: Separate handlers for different tool categories
-  // @ai-handler-responsibility
-  // - ItemHandlers: CRUD for issues, plans, docs, knowledge (get_items, create_item, etc.)
-  // - StatusHandlers: Workflow status management (get_statuses, create_status, etc.)
-  // - TagHandlers: Tag management and cross-type search (get_tags, search_items_by_tag)
-  // - SessionHandlers: Work session tracking (get_sessions, create_session)
-  // - SummaryHandlers: Daily summary management (get_summaries, create_summary)
-  // - TypeHandlers: Dynamic type management (create_type, get_types, delete_type)
   private itemHandlers: ItemHandlers;
   private statusHandlers: StatusHandlers;
   private tagHandlers: TagHandlers;
@@ -102,7 +95,6 @@ class IssueTrackerServer {
     this.sessionHandlers = new SessionHandlers(this.sessionManager);
     this.summaryHandlers = new SummaryHandlers(this.sessionManager);
     this.typeHandlers = new TypeHandlers(this.db);
-    
     this.server = new Server(
       {
         name: 'shirokuma-ai-project-management-server',
