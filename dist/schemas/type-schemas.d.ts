@@ -8,22 +8,22 @@ import { z } from 'zod';
  */
 export declare const CreateTypeSchema: z.ZodObject<{
     name: z.ZodString;
+    base_type: z.ZodDefault<z.ZodOptional<z.ZodEnum<["tasks", "documents"]>>>;
 }, "strict", z.ZodTypeAny, {
     name: string;
+    base_type: "tasks" | "documents";
 }, {
     name: string;
+    base_type?: "tasks" | "documents" | undefined;
 }>;
 /**
  * @ai-intent Schema for get_types tool
  */
 export declare const GetTypesSchema: z.ZodObject<{
-    include_built_in: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     include_definitions: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
 }, "strict", z.ZodTypeAny, {
-    include_built_in: boolean;
     include_definitions: boolean;
 }, {
-    include_built_in?: boolean | undefined;
     include_definitions?: boolean | undefined;
 }>;
 /**

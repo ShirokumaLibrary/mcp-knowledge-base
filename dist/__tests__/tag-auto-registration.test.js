@@ -50,7 +50,7 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when creating issue', async () => {
             // Create issue with new tags
-            await db.createIssue('Test Issue', 'Description', 'high', undefined, ['auto-tag1', 'auto-tag2']);
+            await db.createTask('issues', 'Test Issue', 'Description', 'high', undefined, ['auto-tag1', 'auto-tag2']);
             // Verify tags were created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -68,7 +68,7 @@ describe('Tag Auto Registration', () => {
             // Pre-create a tag
             await db.createTag('existing-tag');
             // Create issue with existing and new tags
-            await db.createIssue('Test Issue', 'Description', 'high', undefined, ['existing-tag', 'new-tag']);
+            await db.createTask('issues', 'Test Issue', 'Description', 'high', undefined, ['existing-tag', 'new-tag']);
             // Verify only one instance of each tag exists
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -84,9 +84,9 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when updating issue', async () => {
             // Create issue without tags
-            const issue = await db.createIssue('Test Issue', 'Description', 'high');
+            const issue = await db.createTask('issues', 'Test Issue', 'Description', 'high');
             // Update issue with new tags
-            await db.updateIssue(issue.id, undefined, undefined, undefined, undefined, ['update-tag1', 'update-tag2']);
+            await db.updateTask('issues', issue.id, undefined, undefined, undefined, undefined, ['update-tag1', 'update-tag2']);
             // Verify tags were created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -104,7 +104,7 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when creating plan', async () => {
             // Create plan with new tags
-            await db.createPlan('Test Plan', 'Description', 'high', undefined, '2025-01-01', '2025-12-31', ['plan-tag1', 'plan-tag2']);
+            await db.createTask('plans', 'Test Plan', 'Description', 'high', undefined, ['plan-tag1', 'plan-tag2'], undefined, '2025-01-01', '2025-12-31');
             // Verify tags were created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -119,9 +119,9 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when updating plan', async () => {
             // Create plan without tags
-            const plan = await db.createPlan('Test Plan', 'Description', 'high');
+            const plan = await db.createTask('plans', 'Test Plan', 'Description', 'high');
             // Update plan with new tags
-            await db.updatePlan(plan.id, undefined, undefined, undefined, undefined, undefined, undefined, ['plan-update-tag']);
+            await db.updateTask('plans', plan.id, undefined, undefined, undefined, undefined, ['plan-update-tag']);
             // Verify tag was created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -138,7 +138,7 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when creating knowledge', async () => {
             // Create knowledge with new tags
-            await db.createKnowledge('Test Knowledge', 'Content', ['knowledge-tag1', 'knowledge-tag2']);
+            await db.createDocument('knowledge', 'Test Knowledge', 'Content', ['knowledge-tag1', 'knowledge-tag2']);
             // Verify tags were created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -153,9 +153,9 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when updating knowledge', async () => {
             // Create knowledge without tags
-            const knowledge = await db.createKnowledge('Test Knowledge', 'Content', []);
+            const knowledge = await db.createDocument('knowledge', 'Test Knowledge', 'Content', []);
             // Update knowledge with new tags
-            await db.updateKnowledge(knowledge.id, undefined, undefined, ['knowledge-update-tag']);
+            await db.updateDocument('knowledge', knowledge.id, undefined, undefined, ['knowledge-update-tag']);
             // Verify tag was created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -171,7 +171,7 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when creating doc', async () => {
             // Create doc with new tags
-            await db.createDoc('Test Doc', 'Content', ['doc-tag1', 'doc-tag2']);
+            await db.createDocument('docs', 'Test Doc', 'Content', ['doc-tag1', 'doc-tag2']);
             // Verify tags were created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -186,9 +186,9 @@ describe('Tag Auto Registration', () => {
          */
         it('should automatically create tags when updating doc', async () => {
             // Create doc without tags
-            const doc = await db.createDoc('Test Doc', 'Content', []);
+            const doc = await db.createDocument('docs', 'Test Doc', 'Content', []);
             // Update doc with new tags
-            await db.updateDoc(doc.id, undefined, undefined, ['doc-update-tag']);
+            await db.updateDocument('docs', doc.id, undefined, undefined, ['doc-update-tag']);
             // Verify tag was created
             const tags = await db.getTags();
             const tagNames = tags.map(t => t.name);
@@ -263,10 +263,10 @@ describe('Tag Auto Registration', () => {
         it('should efficiently create multiple tags at once', async () => {
             // Create multiple items with overlapping tags
             await Promise.all([
-                db.createIssue('Issue 1', 'Desc', 'high', undefined, ['common-tag', 'issue-specific']),
-                db.createPlan('Plan 1', 'Desc', 'medium', undefined, undefined, undefined, ['common-tag', 'plan-specific']),
-                db.createKnowledge('Knowledge 1', 'Content', ['common-tag', 'knowledge-specific']),
-                db.createDoc('Doc 1', 'Content', ['common-tag', 'doc-specific'])
+                db.createTask('issues', 'Issue 1', 'Desc', 'high', undefined, ['common-tag', 'issue-specific']),
+                db.createTask('plans', 'Plan 1', 'Desc', 'medium', undefined, ['common-tag', 'plan-specific']),
+                db.createDocument('knowledge', 'Knowledge 1', 'Content', ['common-tag', 'knowledge-specific']),
+                db.createDocument('docs', 'Doc 1', 'Content', ['common-tag', 'doc-specific'])
             ]);
             // Verify all unique tags were created
             const tags = await db.getTags();

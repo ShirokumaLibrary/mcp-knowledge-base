@@ -15,13 +15,9 @@ export interface Config {
     database: {
         path: string;
         sqlitePath: string;
-        issuesPath: string;
-        plansPath: string;
-        docsPath: string;
-        knowledgePath: string;
+        getTypePath(type: string): string;
+        getTypeFileName(type: string, id: number | string): string;
         sessionsPath: string;
-        contentsPath: string;
-        documentsPath: string;
     };
     server: {
         name: string;

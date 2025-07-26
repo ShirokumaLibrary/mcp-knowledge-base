@@ -38,8 +38,8 @@ export declare class DocumentRepository extends BaseRepository {
     private normalizeSequenceType;
     /**
      * @ai-intent Get directory name for a given type
-     * @ai-logic Maps 'doc' to 'docs' directory
-     * @ai-why Ensures consistent directory structure
+     * @ai-logic Documents are stored in a single documents directory
+     * @ai-why Simplifies directory structure for document types
      */
     private getTypeDirectory;
     /**

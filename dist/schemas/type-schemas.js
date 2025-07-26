@@ -7,13 +7,13 @@ import { z } from 'zod';
  * @ai-intent Schema for create_type tool
  */
 export const CreateTypeSchema = z.object({
-    name: z.string().min(1).regex(/^[a-z][a-z0-9_]*$/, 'Type name must start with a letter and contain only lowercase letters, numbers, and underscores')
+    name: z.string().min(1).regex(/^[a-z][a-z0-9_]*$/, 'Type name must start with a letter and contain only lowercase letters, numbers, and underscores'),
+    base_type: z.enum(['tasks', 'documents']).optional().default('documents')
 }).strict();
 /**
  * @ai-intent Schema for get_types tool
  */
 export const GetTypesSchema = z.object({
-    include_built_in: z.boolean().optional().default(true),
     include_definitions: z.boolean().optional().default(false)
 }).strict();
 /**

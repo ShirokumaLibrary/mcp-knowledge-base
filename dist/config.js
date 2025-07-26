@@ -6,6 +6,7 @@
  * @ai-why Centralized config for easy deployment changes
  */
 import * as path from 'path';
+import { typeRegistry } from './types/type-registry.js';
 /**
  * @ai-intent Load configuration from environment with defaults
  * @ai-flow 1. Check env vars -> 2. Apply defaults -> 3. Build paths
@@ -22,14 +23,21 @@ export function getConfig() {
             path: baseDir,
             // @ai-logic: SQLite can be relocated independently
             sqlitePath: process.env.MCP_SQLITE_PATH || path.join(baseDir, 'search.db'),
-            // @ai-logic: Entity-specific subdirectories
-            issuesPath: path.join(baseDir, 'issues'),
-            plansPath: path.join(baseDir, 'plans'),
-            docsPath: path.join(baseDir, 'docs'),
-            knowledgePath: path.join(baseDir, 'knowledge'),
-            sessionsPath: path.join(baseDir, 'sessions'),
-            contentsPath: path.join(baseDir, 'contents'), // @ai-logic: Unified content directory
-            documentsPath: path.join(baseDir, 'documents') // @ai-logic: New unified documents directory
+            // @ai-logic: Dynamic path resolution based on type registry
+            getTypePath(type) {
+                const typeDef = typeRegistry.getType(type);
+                if (typeDef?.baseType === 'tasks') {
+                    return path.join(baseDir, 'tasks');
+                }
+                // For documents and custom types, use type name as directory
+                return path.join(baseDir, type);
+            },
+            // @ai-logic: Dynamic file name generation using type registry
+            getTypeFileName(type, id) {
+                const prefix = typeRegistry.getFilePrefix(type);
+                return `${prefix}-${id}.md`;
+            },
+            sessionsPath: path.join(baseDir, 'sessions')
         },
         server: {
             // @ai-default: Shirokuma knowledge base server

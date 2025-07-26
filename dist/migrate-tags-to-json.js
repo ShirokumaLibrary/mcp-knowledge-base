@@ -10,21 +10,34 @@ import { globSync } from 'glob';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { parseMarkdown, generateMarkdown } from './utils/markdown-parser.js';
+import { typeRegistry } from './types/type-registry.js';
 async function migrateTagsToJson() {
     console.log('🔄 Starting tag format migration...\n');
     const config = getConfig();
     const databasePath = config.database.path;
     let totalFiles = 0;
     let updatedFiles = 0;
-    // Define file patterns to migrate
-    const patterns = [
-        'issues/issue-*.md',
-        'plans/plan-*.md',
-        'docs/doc-*.md',
-        'knowledge/knowledge-*.md',
-        'sessions/**/session-*.md',
-        'sessions/**/daily-summary-*.md'
-    ];
+    // Define file patterns to migrate dynamically
+    const patterns = [];
+    // Get patterns for all known types
+    const allTypes = typeRegistry.getAllTypes();
+    for (const typeDef of allTypes) {
+        const dirName = typeRegistry.getDirectoryName(typeDef.type);
+        const prefix = typeRegistry.getFilePrefix(typeDef.type);
+        // Handle different directory structures
+        if (typeDef.baseType === 'tasks') {
+            patterns.push(`tasks/${prefix}-*.md`);
+        }
+        else if (typeDef.baseType === 'documents') {
+            patterns.push(`${prefix}-*.md`); // Documents are in root documents directory
+        }
+        else {
+            patterns.push(`${dirName}/${prefix}-*.md`);
+        }
+    }
+    // Add session patterns (these are special cases)
+    patterns.push('sessions/**/session-*.md');
+    patterns.push('sessions/**/daily-summary-*.md');
     for (const pattern of patterns) {
         const files = globSync(path.join(databasePath, pattern));
         console.log(`📂 Processing ${pattern}: ${files.length} files`);

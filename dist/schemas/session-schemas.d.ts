@@ -20,16 +20,16 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
-    tags: string[];
     title: string;
-    id?: string | undefined;
+    tags: string[];
     content?: string | undefined;
+    id?: string | undefined;
     category?: string | undefined;
 }, {
     title: string;
-    id?: string | undefined;
-    tags?: string[] | undefined;
     content?: string | undefined;
+    tags?: string[] | undefined;
+    id?: string | undefined;
     category?: string | undefined;
 }>;
 /**
@@ -47,15 +47,15 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     category: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
     id: string;
-    tags?: string[] | undefined;
-    content?: string | undefined;
     title?: string | undefined;
+    content?: string | undefined;
+    tags?: string[] | undefined;
     category?: string | undefined;
 }, {
     id: string;
-    tags?: string[] | undefined;
-    content?: string | undefined;
     title?: string | undefined;
+    content?: string | undefined;
+    tags?: string[] | undefined;
     category?: string | undefined;
 }>;
 /**
@@ -71,14 +71,14 @@ export declare const CreateDailySummarySchema: z.ZodObject<{
     content: z.ZodString;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
-    date: string;
+    title: string;
+    content: string;
     tags: string[];
-    content: string;
-    title: string;
-}, {
     date: string;
-    content: string;
+}, {
     title: string;
+    content: string;
+    date: string;
     tags?: string[] | undefined;
 }>;
 /**
@@ -95,14 +95,14 @@ export declare const UpdateDailySummarySchema: z.ZodObject<{
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     date: string;
-    tags?: string[] | undefined;
-    content?: string | undefined;
     title?: string | undefined;
+    content?: string | undefined;
+    tags?: string[] | undefined;
 }, {
     date: string;
-    tags?: string[] | undefined;
-    content?: string | undefined;
     title?: string | undefined;
+    content?: string | undefined;
+    tags?: string[] | undefined;
 }>;
 /**
  * @ai-intent Schema for search_sessions_by_tag tool

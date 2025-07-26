@@ -8,7 +8,6 @@ export declare class TypeRepository {
     private fileDb;
     private db;
     private dataDirectory;
-    private builtInTypes;
     constructor(fileDb: FileIssueDatabase);
     /**
      * @ai-intent Initialize types - no-op now as we use database
@@ -24,13 +23,12 @@ export declare class TypeRepository {
     getAllTypes(): Promise<Array<{
         type: string;
         base_type: string;
-        is_custom: boolean;
     }>>;
     /**
      * @ai-intent Create a new custom type by adding to sequences table
-     * @ai-validation Ensure type name is unique and only documents base type allowed
+     * @ai-validation Ensure type name is unique and base type is valid
      */
-    createType(name: string): Promise<void>;
+    createType(name: string, baseType?: string): Promise<void>;
     /**
      * @ai-intent Delete a custom type
      * @ai-validation Ensure type exists and has no items

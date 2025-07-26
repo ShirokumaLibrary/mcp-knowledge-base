@@ -25,12 +25,12 @@ export class TypeHandlers {
     async handleCreateType(args) {
         try {
             const validatedArgs = CreateTypeSchema.parse(args);
-            await this.typeRepo.createType(validatedArgs.name);
+            await this.typeRepo.createType(validatedArgs.name, validatedArgs.base_type);
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `Type "${validatedArgs.name}" created successfully`
+                        text: `Type "${validatedArgs.name}" created successfully with base_type "${validatedArgs.base_type}"`
                     }
                 ]
             };
@@ -44,22 +44,72 @@ export class TypeHandlers {
     }
     /**
      * @ai-intent Get all available types
-     * @ai-return List of built-in and custom types
+     * @ai-return List of types grouped by base_type with descriptions
      */
     async handleGetTypes(args) {
         const validatedArgs = GetTypesSchema.parse(args);
-        let types = await this.typeRepo.getAllTypes();
-        // @ai-logic: Filter based on include_built_in flag
-        if (!validatedArgs.include_built_in) {
-            types = types.filter(t => t.is_custom);
-        }
-        // @ai-logic: Format as markdown table
-        let output = '## Available Types\n\n';
-        output += '| Type | Base Type | Custom |\n';
-        output += '|------|-----------|--------|\n';
+        const types = await this.typeRepo.getAllTypes();
+        // @ai-logic: Group types by base_type
+        const typesByBase = {};
         for (const type of types) {
-            const isCustom = type.is_custom ? 'Yes' : 'No';
-            output += `| ${type.type} | ${type.base_type} | ${isCustom} |\n`;
+            if (!typesByBase[type.base_type]) {
+                typesByBase[type.base_type] = [];
+            }
+            typesByBase[type.base_type].push(type);
+        }
+        // @ai-logic: Format response with base_type explanations
+        let output = '## Available Types\n\n';
+        // Tasks types
+        if (typesByBase['tasks']) {
+            output += '### Tasks (タスク管理)\n';
+            output += 'ステータスと優先度を持つタスク型。プロジェクト管理やバグトラッキングに使用。\n\n';
+            output += '| Type | Description |\n';
+            output += '|------|-------------|\n';
+            for (const type of typesByBase['tasks']) {
+                const desc = type.type === 'issues' ? 'バグ・課題・タスク管理' :
+                    type.type === 'plans' ? 'プロジェクト計画（開始・終了日付き）' :
+                        'カスタムタスク型';
+                output += `| ${type.type} | ${desc} |\n`;
+            }
+            output += '\n';
+        }
+        // Documents types
+        if (typesByBase['documents']) {
+            output += '### Documents (ドキュメント)\n';
+            output += 'コンテンツが必須のドキュメント型。知識ベースや技術文書に使用。\n\n';
+            output += '| Type | Description |\n';
+            output += '|------|-------------|\n';
+            for (const type of typesByBase['documents']) {
+                const desc = type.type === 'docs' ? '技術ドキュメント' :
+                    type.type === 'knowledge' ? 'ナレッジベース' :
+                        'カスタムドキュメント型';
+                output += `| ${type.type} | ${desc} |\n`;
+            }
+            output += '\n';
+        }
+        // Other base types
+        for (const [baseType, typeList] of Object.entries(typesByBase)) {
+            if (baseType !== 'tasks' && baseType !== 'documents') {
+                output += `### ${baseType}\n\n`;
+                output += '| Type | Base Type |\n';
+                output += '|------|-----------|\n';
+                for (const type of typeList) {
+                    output += `| ${type.type} | ${type.base_type} |\n`;
+                }
+                output += '\n';
+            }
+        }
+        // @ai-logic: Include full type definitions if requested
+        if (validatedArgs.include_definitions) {
+            output += '## Type Definitions (JSON)\n\n';
+            output += '```json\n';
+            const definitions = types.map(t => ({
+                type: t.type,
+                base_type: t.base_type,
+                supported_fields: this.getFieldsForBaseType(t.base_type)
+            }));
+            output += JSON.stringify(definitions, null, 2);
+            output += '\n```\n';
         }
         return {
             content: [
@@ -69,6 +119,19 @@ export class TypeHandlers {
                 }
             ]
         };
+    }
+    /**
+     * @ai-intent Get supported fields for a base type
+     */
+    getFieldsForBaseType(baseType) {
+        switch (baseType) {
+            case 'tasks':
+                return ['title', 'content', 'description', 'priority', 'status', 'tags', 'start_date', 'end_date', 'related_tasks'];
+            case 'documents':
+                return ['title', 'content', 'description', 'tags'];
+            default:
+                return ['title', 'content', 'tags'];
+        }
     }
     /**
      * @ai-intent Delete a custom type

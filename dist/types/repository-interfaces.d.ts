@@ -8,7 +8,7 @@
 /**
  * @ai-intent Status repository contract
  * @ai-pattern CRUD operations for workflow statuses
- * @ai-critical Used by IssueRepository and PlanRepository
+ * @ai-critical Used by TaskRepository
  * @ai-debt Replace 'any' with proper Status type
  */
 export interface IStatusRepository {

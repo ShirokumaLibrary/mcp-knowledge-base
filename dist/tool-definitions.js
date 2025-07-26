@@ -8,11 +8,11 @@
 // Tool definitions for MCP server
 export const toolDefinitions = [
     // @ai-pattern CRUD operations for all content types
-    // @ai-intent Single API for issues, plans, docs, and knowledge
+    // @ai-intent Single API for all content types
     // @ai-why Reduces API surface and simplifies client implementation
     {
         name: 'get_items',
-        description: 'Retrieve list of items by type (issue, plan, doc, knowledge). For issue/plan types, defaults to excluding closed statuses.',
+        description: 'Retrieve list of items by type. Tasks types support status filtering. Document types return all items.',
         // @ai-flow Returns array of items with summary fields only
         // @ai-performance Optimized for listing - minimal data per item
         inputSchema: {
@@ -24,12 +24,12 @@ export const toolDefinitions = [
                 },
                 includeClosedStatuses: {
                     type: 'boolean',
-                    description: 'Include items with closed statuses (issue/plan only, default: false)',
+                    description: 'Include items with closed statuses (tasks types only, default: false)',
                 },
                 statusIds: {
                     type: 'array',
                     items: { type: 'number' },
-                    description: 'Filter by specific status IDs (issue/plan only)',
+                    description: 'Filter by specific status IDs (tasks types only)',
                 },
             },
             required: ['type'],
@@ -58,7 +58,7 @@ export const toolDefinitions = [
         description: 'Create new item.',
         // @ai-flow 1. Validate type-specific fields -> 2. Create file -> 3. Sync to DB
         // @ai-critical Different types have different required fields
-        // @ai-validation Content required for doc/knowledge, dates optional for plans
+        // @ai-validation Content required for document types, dates optional for task types
         inputSchema: {
             type: 'object',
             properties: {
@@ -76,16 +76,16 @@ export const toolDefinitions = [
                 },
                 content: {
                     type: 'string',
-                    description: 'Item content (required for doc/knowledge/document)',
+                    description: 'Item content (required for document types)',
                 },
                 priority: {
                     type: 'string',
                     enum: ['high', 'medium', 'low'],
-                    description: 'Priority (for issue/plan)',
+                    description: 'Priority (for tasks types)',
                 },
                 status: {
                     type: 'string',
-                    description: 'Status name (for issue/plan)',
+                    description: 'Status name (for tasks types)',
                 },
                 tags: {
                     type: 'array',
@@ -94,11 +94,11 @@ export const toolDefinitions = [
                 },
                 start_date: {
                     type: 'string',
-                    description: 'Start date in YYYY-MM-DD format (for plan)',
+                    description: 'Start date in YYYY-MM-DD format (for tasks types)',
                 },
                 end_date: {
                     type: 'string',
-                    description: 'End date in YYYY-MM-DD format (for plan)',
+                    description: 'End date in YYYY-MM-DD format (for tasks types)',
                 },
             },
             required: ['type', 'title'],
@@ -128,16 +128,16 @@ export const toolDefinitions = [
                 },
                 content: {
                     type: 'string',
-                    description: 'New content (for doc/knowledge/document)',
+                    description: 'New content (for document types)',
                 },
                 priority: {
                     type: 'string',
                     enum: ['high', 'medium', 'low'],
-                    description: 'New priority (for issue/plan)',
+                    description: 'New priority (for tasks types)',
                 },
                 status: {
                     type: 'string',
-                    description: 'New status name (for issue/plan)',
+                    description: 'New status name (for tasks types)',
                 },
                 tags: {
                     type: 'array',
@@ -146,11 +146,11 @@ export const toolDefinitions = [
                 },
                 start_date: {
                     type: 'string',
-                    description: 'New start date (for plan)',
+                    description: 'New start date (for tasks types)',
                 },
                 end_date: {
                     type: 'string',
-                    description: 'New end date (for plan)',
+                    description: 'New end date (for tasks types)',
                 },
             },
             required: ['type', 'id'],
@@ -199,7 +199,7 @@ export const toolDefinitions = [
         },
     },
     // @ai-pattern Status workflow management tools
-    // @ai-intent Manage workflow states for issues and plans
+    // @ai-intent Manage workflow states for tasks types
     // @ai-critical Status IDs must exist before referencing in content
     {
         name: 'get_statuses',
@@ -490,20 +490,21 @@ export const toolDefinitions = [
                     type: 'string',
                     description: 'Type name (lowercase letters, numbers, and underscores only)',
                 },
+                base_type: {
+                    type: 'string',
+                    enum: ['tasks', 'documents'],
+                    description: 'Base type for the new type (default: documents)',
+                },
             },
             required: ['name'],
         },
     },
     {
         name: 'get_types',
-        description: 'Get all available content types',
+        description: 'Get all available content types grouped by base_type (tasks, documents)',
         inputSchema: {
             type: 'object',
             properties: {
-                include_built_in: {
-                    type: 'boolean',
-                    description: 'Include built-in types (default: true)',
-                },
                 include_definitions: {
                     type: 'boolean',
                     description: 'Include full type definitions (default: false)',

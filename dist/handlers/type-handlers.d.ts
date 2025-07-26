@@ -19,9 +19,13 @@ export declare class TypeHandlers {
     handleCreateType(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Get all available types
-     * @ai-return List of built-in and custom types
+     * @ai-return List of types grouped by base_type with descriptions
      */
     handleGetTypes(args: unknown): Promise<ToolResponse>;
+    /**
+     * @ai-intent Get supported fields for a base type
+     */
+    private getFieldsForBaseType;
     /**
      * @ai-intent Delete a custom type
      * @ai-validation Checks for existing documents before deletion

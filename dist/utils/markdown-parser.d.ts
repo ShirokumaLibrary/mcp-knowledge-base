@@ -33,7 +33,7 @@
  * - Handles missing frontmatter gracefully
  * - Preserves content even if metadata parsing fails
  */
-import { Content } from '../types/domain-types.js';
+import { Document } from '../types/domain-types.js';
 export interface ParsedMarkdown {
     metadata: Record<string, any>;
     content: string;
@@ -55,13 +55,13 @@ export declare function parseMarkdown(fileContent: string): ParsedMarkdown;
  */
 export declare function generateMarkdown(metadata: Record<string, any>, content: string): string;
 /**
- * @ai-intent Parse content markdown file
- * @ai-pattern Specific parser for Content type with type field
+ * @ai-intent Parse document markdown file
+ * @ai-pattern Specific parser for Document type with type field
  * @ai-validation Ensures type field exists
  */
-export declare function parseContentMarkdown(fileContent: string, id: number): Content;
+export declare function parseDocumentMarkdown(fileContent: string, id: number, type: string): Document;
 /**
  * @ai-intent Generate markdown for content
  * @ai-pattern Includes type field in metadata
  */
-export declare function generateContentMarkdown(content: Content): string;
+export declare function generateDocumentMarkdown(document: Document): string;

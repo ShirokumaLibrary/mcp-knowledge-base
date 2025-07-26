@@ -90,14 +90,14 @@ describe('FileIssueDatabase Async Tests', () => {
             expect(success).toBe(true);
         });
     });
-    describe('Issue operations', () => {
+    describe('Task operations', () => {
         /**
-         * @ai-intent Test issue creation with all fields
+         * @ai-intent Test task (issue) creation with all fields
          * @ai-validation Ensures all fields are stored correctly
-         * @ai-critical Issues must have timestamps and unique ID
+         * @ai-critical Tasks must have timestamps and unique ID
          */
-        test('should create new issue', async () => {
-            const issue = await db.createIssue('Test Issue', 'This is a test issue', 'high');
+        test('should create new issue task', async () => {
+            const issue = await db.createTask('issues', 'Test Issue', 'This is a test issue', 'high');
             expect(issue.title).toBe('Test Issue');
             expect(issue.content).toBe('This is a test issue');
             expect(issue.priority).toBe('high'); // @ai-pattern: high/medium/low
@@ -106,61 +106,87 @@ describe('FileIssueDatabase Async Tests', () => {
             expect(issue.updated_at).toBeDefined(); // @ai-pattern: ISO timestamp
         });
         /**
-         * @ai-intent Test issue listing
-         * @ai-validation Ensures all created issues are returned
-         * @ai-pattern Issues returned in ID order
+         * @ai-intent Test task listing
+         * @ai-validation Ensures all created tasks are returned
+         * @ai-pattern Tasks returned in ID order
          */
-        test('should get all issues', async () => {
-            await db.createIssue('Issue 1');
-            await db.createIssue('Issue 2');
-            const issues = await db.getAllIssues();
+        test('should get all tasks by type', async () => {
+            await db.createTask('issues', 'Issue 1', 'Test content for issue 1');
+            await db.createTask('issues', 'Issue 2', 'Test content for issue 2');
+            const issues = await db.getAllTasksSummary('issues');
             expect(issues.length).toBeGreaterThanOrEqual(2); // @ai-validation: At least our 2 issues exist
             // Check that our issues are in the results
-            const hasIssue1 = issues.some(i => i.title === 'Issue 1');
-            const hasIssue2 = issues.some(i => i.title === 'Issue 2');
+            const hasIssue1 = issues.some((i) => i.title === 'Issue 1');
+            const hasIssue2 = issues.some((i) => i.title === 'Issue 2');
             expect(hasIssue1).toBe(true);
             expect(hasIssue2).toBe(true);
         });
         /**
-         * @ai-intent Test issue retrieval by ID
+         * @ai-intent Test task retrieval by ID
          * @ai-validation Ensures data integrity after save
          * @ai-pattern Null returned for non-existent IDs
          */
-        test('should get issue by id', async () => {
-            const created = await db.createIssue('Specific Issue', 'Details here');
-            const issue = await db.getIssue(created.id);
+        test('should get task by id', async () => {
+            const created = await db.createTask('issues', 'Specific Issue', 'Details here');
+            const issue = await db.getTask('issues', created.id);
             expect(issue).not.toBeNull();
             expect(issue.title).toBe('Specific Issue');
             expect(issue.content).toBe('Details here');
         });
         /**
-         * @ai-intent Test issue update functionality
+         * @ai-intent Test task update functionality
          * @ai-validation Ensures all fields can be updated
          * @ai-flow 1. Create -> 2. Update -> 3. Verify changes
          */
-        test('should update issue', async () => {
-            const issue = await db.createIssue('Old Title');
-            const success = await db.updateIssue(issue.id, 'New Title', 'New description', 'low');
-            expect(success).toBe(true);
-            // @ai-validation: Verify changes persisted
-            const updated = await db.getIssue(issue.id);
+        test('should update task', async () => {
+            const issue = await db.createTask('issues', 'Old Title', 'Initial content');
+            const updated = await db.updateTask('issues', issue.id, 'New Title', 'New description', 'low');
             expect(updated).not.toBeNull();
             expect(updated.title).toBe('New Title');
             expect(updated.content).toBe('New description');
             expect(updated.priority).toBe('low'); // @ai-logic: Priority changed
         });
         /**
-         * @ai-intent Test issue deletion
-         * @ai-validation Ensures issue is removed from storage
+         * @ai-intent Test task deletion
+         * @ai-validation Ensures task is removed from storage
          * @ai-critical Deletion should be permanent
          */
-        test('should delete issue', async () => {
-            const issue = await db.createIssue('To Delete');
-            const success = await db.deleteIssue(issue.id);
+        test('should delete task', async () => {
+            const issue = await db.createTask('issues', 'To Delete', 'Content to delete');
+            const success = await db.deleteTask('issues', issue.id);
             expect(success).toBe(true);
             // @ai-validation: Verify deletion
-            const deleted = await db.getIssue(issue.id);
+            const deleted = await db.getTask('issues', issue.id);
             expect(deleted).toBeNull(); // @ai-pattern: Null for deleted items
+        });
+        /**
+         * @ai-intent Test new task fields: start_date, end_date, related_tasks
+         * @ai-validation Ensures new fields are properly stored and retrieved
+         * @ai-pattern Dates in YYYY-MM-DD format, related_tasks as array
+         */
+        test('should handle new task fields', async () => {
+            const issue = await db.createTask('issues', 'Task with dates', 'Test content', 'high', undefined, ['planning'], 'Test description', '2025-07-25', '2025-07-30', ['plans-1', 'issues-2']);
+            expect(issue.start_date).toBe('2025-07-25');
+            expect(issue.end_date).toBe('2025-07-30');
+            expect(issue.related_tasks).toEqual(['plans-1', 'issues-2']);
+            // @ai-validation: Verify persistence
+            const retrieved = await db.getTask('issues', issue.id);
+            expect(retrieved.start_date).toBe('2025-07-25');
+            expect(retrieved.end_date).toBe('2025-07-30');
+            expect(retrieved.related_tasks).toEqual(['plans-1', 'issues-2']);
+        });
+        /**
+         * @ai-intent Test updating issue with new fields
+         * @ai-validation Ensures all fields can be updated together
+         */
+        test('should update issue with new fields', async () => {
+            const issue = await db.createTask('issues', 'Original Task', 'Original content');
+            const updated = await db.updateTask('issues', issue.id, 'Updated Task', 'Updated content', 'low', undefined, ['updated'], 'Updated description', '2025-08-01', '2025-08-15', ['plans-3']);
+            expect(updated).not.toBeNull();
+            expect(updated.title).toBe('Updated Task');
+            expect(updated.start_date).toBe('2025-08-01');
+            expect(updated.end_date).toBe('2025-08-15');
+            expect(updated.related_tasks).toEqual(['plans-3']);
         });
     });
     describe('Tag operations', () => {
@@ -219,9 +245,9 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should search all by tag', async () => {
             // @ai-logic: Create items with same tag across types
-            const issue = await db.createIssue('Tagged Issue', 'Description', 'medium', undefined, ['important']);
-            const plan = await db.createPlan('Tagged Plan', 'Description', 'high', undefined, undefined, undefined, ['important']);
-            const knowledge = await db.createKnowledge('Tagged Knowledge', 'Content here', ['important']);
+            const issue = await db.createTask('issues', 'Tagged Issue', 'Issue content', 'medium', undefined, ['important']);
+            const plan = await db.createTask('plans', 'Tagged Plan', 'Plan content', 'high', undefined, ['important']);
+            const knowledge = await db.createDocument('knowledge', 'Tagged Knowledge', 'Content here', ['important']);
             const results = await db.searchAllByTag('important');
             expect(results.issues).toHaveLength(1); // @ai-validation: Issue found
             expect(results.plans).toHaveLength(1);
@@ -234,9 +260,9 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should search all by query', async () => {
             // @ai-logic: Create items with keyword in different fields
-            await db.createIssue('Searchable Issue', 'Contains keyword');
-            await db.createPlan('Searchable Plan', 'Contains keyword');
-            await db.createKnowledge('Searchable Knowledge', 'Contains keyword');
+            await db.createTask('issues', 'Searchable Issue', 'Contains keyword');
+            await db.createTask('plans', 'Searchable Plan', 'Contains keyword');
+            await db.createDocument('knowledge', 'Searchable Knowledge', 'Contains keyword', []);
             const results = await db.searchAll('keyword'); // @ai-pattern: Text search
             expect(results.issues).toHaveLength(1);
             expect(results.plans).toHaveLength(1);

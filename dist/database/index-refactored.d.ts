@@ -62,10 +62,10 @@ export declare class FileIssueDatabaseRefactored {
      * @ai-why Unified search across all domains
      */
     searchAllByTag(tag: string): Promise<{
-        issues: import("./index.js").Issue[];
-        plans: import("./index.js").Plan[];
-        docs: import("./index.js").Doc[];
-        knowledge: import("./index.js").Knowledge[];
+        issues: any;
+        plans: any;
+        docs: any;
+        knowledge: any;
     }>;
     /**
      * @ai-intent Close database connections
@@ -92,20 +92,17 @@ export declare class FileIssueDatabaseRefactored {
     deletePlan(id: number): Promise<boolean>;
     getAllPlans(): Promise<import("./index.js").Plan[]>;
     searchPlansByTag(tag: string): Promise<import("./index.js").Plan[]>;
-    createKnowledge(...args: Parameters<KnowledgeFacade['createKnowledge']>): Promise<import("./index.js").Knowledge>;
-    getKnowledge(id: number): Promise<import("./index.js").Knowledge | null>;
-    updateKnowledge(...args: Parameters<KnowledgeFacade['updateKnowledge']>): Promise<boolean>;
-    deleteKnowledge(id: number): Promise<boolean>;
-    getAllKnowledge(): Promise<import("./index.js").Knowledge[]>;
-    searchKnowledgeByTag(tag: string): Promise<import("./index.js").Knowledge[]>;
-    createDoc(...args: Parameters<DocFacade['createDoc']>): Promise<import("./index.js").Doc>;
-    getDoc(id: number): Promise<import("./index.js").Doc | null>;
-    updateDoc(...args: Parameters<DocFacade['updateDoc']>): Promise<boolean>;
-    deleteDoc(id: number): Promise<boolean>;
-    getAllDocs(): Promise<import("./index.js").Doc[]>;
-    getDocsSummary(): Promise<{
-        id: number;
-        title: string;
-    }[]>;
-    searchDocsByTag(tag: string): Promise<import("./index.js").Doc[]>;
+    createKnowledge(...args: Parameters<KnowledgeFacade['createKnowledge']>): Promise<any>;
+    getKnowledge(id: number): Promise<any>;
+    updateKnowledge(...args: Parameters<KnowledgeFacade['updateKnowledge']>): Promise<any>;
+    deleteKnowledge(id: number): Promise<any>;
+    getAllKnowledge(): Promise<any>;
+    searchKnowledgeByTag(tag: string): Promise<any>;
+    createDoc(...args: Parameters<DocFacade['createDoc']>): Promise<any>;
+    getDoc(id: number): Promise<any>;
+    updateDoc(...args: Parameters<DocFacade['updateDoc']>): Promise<any>;
+    deleteDoc(id: number): Promise<any>;
+    getAllDocs(): Promise<any>;
+    getDocsSummary(): Promise<any>;
+    searchDocsByTag(tag: string): Promise<any>;
 }

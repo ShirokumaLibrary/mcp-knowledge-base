@@ -9,7 +9,6 @@ export class TypeRepository {
     fileDb;
     db;
     dataDirectory;
-    builtInTypes = ['issues', 'plans', 'docs', 'knowledge'];
     constructor(fileDb) {
         this.fileDb = fileDb;
         // @ai-critical: Don't call getDatabase() in constructor as DB might not be initialized
@@ -34,21 +33,14 @@ export class TypeRepository {
      */
     async getAllTypes() {
         const rows = await this.db.allAsync(`SELECT type, base_type FROM sequences ORDER BY type`);
-        return rows.map(row => ({
-            type: row.type,
-            base_type: row.base_type,
-            is_custom: !this.builtInTypes.includes(row.type)
-        }));
+        return rows;
     }
     /**
      * @ai-intent Create a new custom type by adding to sequences table
-     * @ai-validation Ensure type name is unique and only documents base type allowed
+     * @ai-validation Ensure type name is unique and base type is valid
      */
-    async createType(name) {
+    async createType(name, baseType = 'documents') {
         // @ai-validation: Check if type already exists
-        if (this.builtInTypes.includes(name)) {
-            throw new Error(`Type "${name}" is a built-in type and cannot be created`);
-        }
         const existingType = await this.typeExists(name);
         if (existingType) {
             throw new Error(`Type "${name}" already exists`);
@@ -57,10 +49,15 @@ export class TypeRepository {
         if (!/^[a-z][a-z0-9_]*$/.test(name)) {
             throw new Error('Type name must start with a letter and contain only lowercase letters, numbers, and underscores');
         }
-        // @ai-logic: Only allow documents base type for custom types
-        await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, 'documents')`, [name]);
+        // @ai-validation: Validate base type
+        const validBaseTypes = ['tasks', 'documents'];
+        if (!validBaseTypes.includes(baseType)) {
+            throw new Error(`Invalid base type "${baseType}". Must be one of: ${validBaseTypes.join(', ')}`);
+        }
+        // @ai-logic: Create type with specified base type
+        await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)`, [name, baseType]);
         // Create directory for the new type
-        const typeDir = path.join(this.dataDirectory, 'documents', name);
+        const typeDir = path.join(this.dataDirectory, baseType, name);
         await this.ensureDirectoryExists(typeDir);
     }
     /**
@@ -68,10 +65,6 @@ export class TypeRepository {
      * @ai-validation Ensure type exists and has no items
      */
     async deleteType(name) {
-        // @ai-validation: Check if built-in type
-        if (this.builtInTypes.includes(name)) {
-            throw new Error(`Cannot delete built-in type "${name}"`);
-        }
         // @ai-validation: Check if type exists
         const exists = await this.typeExists(name);
         if (!exists) {

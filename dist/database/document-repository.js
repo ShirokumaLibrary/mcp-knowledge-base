@@ -12,6 +12,7 @@ import * as fs from 'fs/promises';
 import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
 import { glob } from 'glob';
 import { TagRepository } from './tag-repository.js';
+// Type registry removed - using direct type names
 /**
  * @ai-intent Repository for unified document management
  * @ai-pattern Combines doc and knowledge repositories
@@ -38,8 +39,8 @@ export class DocumentRepository extends BaseRepository {
      * @ai-filesystem Creates documents/docs and documents/knowledge subdirectories
      */
     async ensureDirectories() {
-        await fs.mkdir(path.join(this.documentsPath, 'docs'), { recursive: true });
-        await fs.mkdir(path.join(this.documentsPath, 'knowledge'), { recursive: true });
+        // Create main documents directory
+        await fs.mkdir(this.documentsPath, { recursive: true });
     }
     /**
      * @ai-intent Normalize type to sequence type for consistency
@@ -51,46 +52,28 @@ export class DocumentRepository extends BaseRepository {
         const sequenceType = await this.getSequenceType(type);
         if (sequenceType)
             return sequenceType;
-        // Handle special cases
-        if (type === 'doc')
-            return 'docs';
         // Default: return as-is
         return type;
     }
     /**
      * @ai-intent Get directory name for a given type
-     * @ai-logic Maps 'doc' to 'docs' directory
-     * @ai-why Ensures consistent directory structure
+     * @ai-logic Documents are stored in a single documents directory
+     * @ai-why Simplifies directory structure for document types
      */
     getTypeDirectory(type) {
-        if (type === 'doc')
-            return 'docs';
-        return type;
+        // All documents go in the same directory
+        return '';
     }
     /**
      * @ai-intent Get all document patterns including custom types
      */
     async getAllDocumentPatterns() {
-        const patterns = [
-            `${this.documentsPath}/docs/docs-*.md`,
-            `${this.documentsPath}/knowledge/knowledge-*.md`
-        ];
-        try {
-            const subdirs = await fs.readdir(this.documentsPath);
-            for (const subdir of subdirs) {
-                if (subdir === 'docs' || subdir === 'knowledge')
-                    continue;
-                const subdirPath = path.join(this.documentsPath, subdir);
-                const stat = await fs.stat(subdirPath);
-                if (stat.isDirectory()) {
-                    // Add pattern for custom type
-                    const filePrefix = subdir.endsWith('s') ? subdir : `${subdir}s`;
-                    patterns.push(`${subdirPath}/${filePrefix}-*.md`);
-                }
-            }
-        }
-        catch (error) {
-            // Documents directory might not exist yet
+        const patterns = [];
+        // Get all document types from sequences table
+        const sequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'documents'`);
+        // Add pattern for each type in its subdirectory
+        for (const seq of sequences) {
+            patterns.push(`${this.documentsPath}/${seq.type}/${seq.type}-*.md`);
         }
         return patterns;
     }
@@ -103,11 +86,8 @@ export class DocumentRepository extends BaseRepository {
     async createDocument(type, // Allow any type, not just 'doc' | 'knowledge'
     title, content, tags = [], description) {
         await this.ensureDirectories();
-        // Create directory for custom type if needed
-        const typeDir = this.getTypeDirectory(type);
-        if (type !== 'doc' && type !== 'knowledge') {
-            await fs.mkdir(path.join(this.documentsPath, typeDir), { recursive: true });
-        }
+        // Ensure documents directory exists
+        await this.ensureDirectories();
         // Get next ID for the specific type
         const sequenceType = await this.normalizeSequenceType(type);
         const id = await this.getNextSequenceValue(sequenceType);
@@ -122,8 +102,12 @@ export class DocumentRepository extends BaseRepository {
             created_at: now,
             updated_at: now
         };
-        // @ai-critical: Use sequence type for consistent file naming
-        const filePath = path.join(this.documentsPath, typeDir, this.getEntityFileName(sequenceType, id));
+        // @ai-critical: Create file with type-specific naming
+        const fileName = `${sequenceType}-${id}.md`;
+        // Create in type-specific subdirectory
+        const typeDir = path.join(this.documentsPath, sequenceType);
+        await fs.mkdir(typeDir, { recursive: true });
+        const filePath = path.join(typeDir, fileName);
         const metadata = {
             id: document.id,
             title: document.title,
@@ -147,10 +131,12 @@ export class DocumentRepository extends BaseRepository {
      * @ai-return Document object or null if not found
      */
     async getDocument(type, id) {
-        // @ai-logic: Use consistent file naming
+        // @ai-logic: Use type registry for consistent file naming
         const sequenceType = await this.normalizeSequenceType(type);
-        const typeDir = this.getTypeDirectory(type);
-        const filePath = path.join(this.documentsPath, typeDir, this.getEntityFileName(sequenceType, id));
+        const fileName = `${sequenceType}-${id}.md`;
+        const typeDir = path.join(this.documentsPath, sequenceType);
+        await fs.mkdir(typeDir, { recursive: true });
+        const filePath = path.join(typeDir, fileName);
         try {
             const content = await fs.readFile(filePath, 'utf-8');
             const { metadata, content: markdownContent } = parseMarkdown(content);
@@ -192,8 +178,10 @@ export class DocumentRepository extends BaseRepository {
         current.updated_at = new Date().toISOString();
         // Save to file with consistent naming
         const sequenceType = await this.normalizeSequenceType(type);
-        const typeDir = this.getTypeDirectory(type);
-        const filePath = path.join(this.documentsPath, typeDir, this.getEntityFileName(sequenceType, id));
+        const fileName = `${sequenceType}-${id}.md`;
+        const typeDir = path.join(this.documentsPath, sequenceType);
+        await fs.mkdir(typeDir, { recursive: true });
+        const filePath = path.join(typeDir, fileName);
         const metadata = {
             id: current.id,
             title: current.title,
@@ -214,10 +202,10 @@ export class DocumentRepository extends BaseRepository {
      * @ai-side-effects Permanent deletion, cascades to document_tags
      */
     async deleteDocument(type, id) {
-        // @ai-logic: Use consistent file naming
+        // @ai-logic: Delete file from type-specific subdirectory
         const sequenceType = await this.normalizeSequenceType(type);
-        const typeDir = this.getTypeDirectory(type);
-        const filePath = path.join(this.documentsPath, typeDir, this.getEntityFileName(sequenceType, id));
+        const fileName = `${sequenceType}-${id}.md`;
+        const filePath = path.join(this.documentsPath, sequenceType, fileName);
         try {
             await fs.unlink(filePath);
             // CASCADE DELETE handles document_tags cleanup
@@ -235,15 +223,11 @@ export class DocumentRepository extends BaseRepository {
      */
     async getAllDocuments(type) {
         await this.ensureDirectories();
-        // @ai-logic: Handle directory names and file prefixes
+        // @ai-logic: Use type registry for pattern generation
         const patterns = type
-            ? type === 'doc'
-                ? [`${this.documentsPath}/docs/docs-*.md`]
-                : type === 'knowledge'
-                    ? [`${this.documentsPath}/knowledge/knowledge-*.md`]
-                    : type.endsWith('s')
-                        ? [`${this.documentsPath}/${type}/${type}-*.md`]
-                        : [`${this.documentsPath}/${type}/${type}s-*.md`]
+            ? (() => {
+                return [`${this.documentsPath}/${type}/${type}-*.md`];
+            })()
             : await this.getAllDocumentPatterns();
         const documents = [];
         for (const pattern of patterns) {
@@ -251,13 +235,17 @@ export class DocumentRepository extends BaseRepository {
             for (const file of files) {
                 const content = await fs.readFile(file, 'utf-8');
                 const { metadata, content: markdownContent } = parseMarkdown(content);
-                // Extract type from directory structure
-                const dirPath = path.dirname(file);
-                const dirName = path.basename(dirPath);
-                // Convert directory name back to type (docs -> doc)
-                const fileType = dirName === 'docs' ? 'doc' : dirName;
+                // Extract type from filename pattern
                 const filename = path.basename(file);
-                const id = parseInt(filename.match(/\d+/)[0]);
+                const match = filename.match(/^(\w+)-(\d+)\.md$/);
+                if (!match)
+                    continue;
+                const prefix = match[1];
+                const id = parseInt(match[2]);
+                // Find type by prefix
+                let fileType = prefix;
+                // Use the prefix as the type directly
+                fileType = prefix;
                 documents.push({
                     type: fileType,
                     id,

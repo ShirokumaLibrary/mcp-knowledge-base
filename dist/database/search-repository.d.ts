@@ -1,5 +1,5 @@
 import { BaseRepository, Database } from './base.js';
-import { Issue, Plan, Knowledge, Doc } from '../types/domain-types.js';
+import { Issue, Plan, Document } from '../types/domain-types.js';
 import { WorkSession } from '../types/session-types.js';
 /**
  * @ai-context Centralized search functionality across all content types
@@ -9,11 +9,10 @@ import { WorkSession } from '../types/session-types.js';
  * @ai-assumption SQLite search tables are kept in sync with markdown files
  */
 export declare class SearchRepository extends BaseRepository {
-    private issueRepository;
-    private planRepository;
+    private taskRepository;
     private documentRepository;
     private sessionRepository;
-    constructor(db: Database, issueRepository: any, planRepository: any, documentRepository: any, sessionRepository?: any);
+    constructor(db: Database, taskRepository: any, documentRepository: any, sessionRepository?: any);
     /**
      * @ai-intent Full-text search across issues, plans, and knowledge
      * @ai-flow 1. Query search tables -> 2. Get IDs -> 3. Fetch full objects -> 4. Filter nulls
@@ -24,7 +23,7 @@ export declare class SearchRepository extends BaseRepository {
     searchAll(query: string): Promise<{
         issues: Issue[];
         plans: Plan[];
-        knowledge: Knowledge[];
+        knowledge: Document[];
     }>;
     /**
      * @ai-intent Find all content tagged with specific tag
@@ -36,8 +35,8 @@ export declare class SearchRepository extends BaseRepository {
     searchAllByTag(tag: string): Promise<{
         issues: Issue[];
         plans: Plan[];
-        docs: Doc[];
-        knowledge: Knowledge[];
+        docs: Document[];
+        knowledge: Document[];
         sessions: WorkSession[];
     }>;
     searchSessions(query: string): Promise<any[]>;
