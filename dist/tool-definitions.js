@@ -331,10 +331,6 @@ export const toolDefinitions = [
                     type: 'string',
                     description: 'Session title (required)',
                 },
-                description: {
-                    type: 'string',
-                    description: 'Session description (optional)',
-                },
                 content: {
                     type: 'string',
                     description: 'Session content (optional)',
@@ -347,6 +343,10 @@ export const toolDefinitions = [
                 category: {
                     type: 'string',
                     description: 'Session category (optional)',
+                },
+                datetime: {
+                    type: 'string',
+                    description: 'ISO 8601 datetime for session creation (optional, for past data migration)',
                 },
             },
             required: ['title'],
@@ -365,10 +365,6 @@ export const toolDefinitions = [
                 title: {
                     type: 'string',
                     description: 'New title (optional)',
-                },
-                description: {
-                    type: 'string',
-                    description: 'New description (optional)',
                 },
                 content: {
                     type: 'string',

@@ -37,13 +37,13 @@ export class WorkSessionManager {
     /**
      * @ai-intent Generate unique session ID from timestamp
      * @ai-flow 1. Get current time -> 2. Format components -> 3. Concatenate
-     * @ai-pattern YYYYMMDD-HHMMSSsss format for chronological sorting
+     * @ai-pattern YYYY-MM-DD-HH.MM.SS.sss format for better readability
      * @ai-critical IDs embed date for directory organization
      * @ai-assumption Millisecond precision prevents collisions
-     * @ai-example 20240115-143052123 (Jan 15, 2024, 2:30:52.123 PM)
+     * @ai-example 2024-01-15-14.30.52.123 (Jan 15, 2024, 2:30:52.123 PM)
      */
-    generateSessionId() {
-        const now = new Date();
+    generateSessionId(date) {
+        const now = date || new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0'); // @ai-logic: 0-indexed months
         const day = String(now.getDate()).padStart(2, '0');
@@ -51,7 +51,7 @@ export class WorkSessionManager {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
         const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-        return `${year}${month}${day}-${hours}${minutes}${seconds}${milliseconds}`;
+        return `${year}-${month}-${day}-${hours}.${minutes}.${seconds}.${milliseconds}`;
     }
     /**
      * @ai-intent Create new work session
@@ -61,11 +61,12 @@ export class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title, content, tags, category, id // @ai-logic: Custom ID for imports
+    createSession(title, content, tags, category, id, // @ai-logic: Custom ID for imports
+    datetime // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
     ) {
-        const now = new Date();
-        const date = now.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
-        const sessionId = id || this.generateSessionId();
+        const sessionDate = datetime ? new Date(datetime) : new Date();
+        const date = sessionDate.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
+        const sessionId = id || this.generateSessionId(sessionDate);
         const session = {
             id: sessionId,
             title,
@@ -73,7 +74,7 @@ export class WorkSessionManager {
             tags,
             category,
             date,
-            createdAt: now.toISOString() // @ai-pattern: ISO 8601 timestamp
+            createdAt: sessionDate.toISOString() // @ai-pattern: ISO 8601 timestamp
         };
         this.repository.saveSession(session); // @ai-critical: Synchronous save
         return session;
@@ -107,7 +108,7 @@ export class WorkSessionManager {
     /**
      * @ai-intent Retrieve session by ID
      * @ai-flow 1. Extract date from ID -> 2. Load from repository
-     * @ai-assumption Session ID format: YYYYMMDD-HHMMSSsss
+     * @ai-assumption Session ID format: YYYY-MM-DD-HH.MM.SS.sss
      * @ai-return Session object or null if not found
      * @ai-why Date needed to locate correct directory
      */

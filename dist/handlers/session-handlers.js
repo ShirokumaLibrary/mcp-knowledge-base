@@ -34,7 +34,8 @@ export class SessionHandlers {
      */
     async handleCreateWorkSession(args) {
         const validatedArgs = CreateWorkSessionSchema.parse(args); // @ai-critical: Validates required fields
-        const session = this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.category, validatedArgs.id // @ai-logic: Optional custom ID
+        const session = this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.category, validatedArgs.id, // @ai-logic: Optional custom ID
+        validatedArgs.datetime // @ai-logic: Optional datetime for past data migration
         );
         return {
             content: [

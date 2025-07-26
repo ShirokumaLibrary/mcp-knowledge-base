@@ -19,18 +19,21 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     category: z.ZodOptional<z.ZodString>;
+    datetime: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
     title: string;
     tags: string[];
     content?: string | undefined;
     id?: string | undefined;
     category?: string | undefined;
+    datetime?: string | undefined;
 }, {
     title: string;
     content?: string | undefined;
     tags?: string[] | undefined;
     id?: string | undefined;
     category?: string | undefined;
+    datetime?: string | undefined;
 }>;
 /**
  * @ai-intent Schema for update_session tool
@@ -137,7 +140,7 @@ export declare const GetSessionsSchema: z.ZodObject<{
 /**
  * @ai-intent Schema for get_session_detail tool
  * @ai-validation Session ID is required
- * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
+ * @ai-pattern ID format: YYYY-MM-DD-HH.MM.SS.sss
  * @ai-return Complete session object or error
  */
 export declare const GetSessionDetailSchema: z.ZodObject<{

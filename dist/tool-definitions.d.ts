@@ -41,6 +41,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -77,6 +78,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -144,6 +146,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -214,6 +217,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -253,6 +257,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -283,6 +288,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -316,6 +322,7 @@ export declare const toolDefinitions: ({
             types?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -349,6 +356,7 @@ export declare const toolDefinitions: ({
             types?: undefined;
             name?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -385,6 +393,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -418,6 +427,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -438,7 +448,55 @@ export declare const toolDefinitions: ({
                 type: string;
                 description: string;
             };
-            description: {
+            content: {
+                type: string;
+                description: string;
+            };
+            tags: {
+                type: string;
+                items: {
+                    type: string;
+                };
+                description: string;
+            };
+            category: {
+                type: string;
+                description: string;
+            };
+            datetime: {
+                type: string;
+                description: string;
+            };
+            type?: undefined;
+            includeClosedStatuses?: undefined;
+            statusIds?: undefined;
+            description?: undefined;
+            priority?: undefined;
+            status?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            related_tasks?: undefined;
+            tag?: undefined;
+            types?: undefined;
+            name?: undefined;
+            pattern?: undefined;
+            date?: undefined;
+            base_type?: undefined;
+            include_definitions?: undefined;
+        };
+        required: string[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            id: {
+                type: string;
+                description: string;
+            };
+            title: {
                 type: string;
                 description: string;
             };
@@ -460,6 +518,7 @@ export declare const toolDefinitions: ({
             type?: undefined;
             includeClosedStatuses?: undefined;
             statusIds?: undefined;
+            description?: undefined;
             priority?: undefined;
             status?: undefined;
             start_date?: undefined;
@@ -469,6 +528,7 @@ export declare const toolDefinitions: ({
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -502,6 +562,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
@@ -536,6 +597,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
         };
@@ -581,6 +643,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
         };
@@ -618,6 +681,7 @@ export declare const toolDefinitions: ({
             types?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             include_definitions?: undefined;
         };
@@ -651,6 +715,7 @@ export declare const toolDefinitions: ({
             name?: undefined;
             pattern?: undefined;
             category?: undefined;
+            datetime?: undefined;
             date?: undefined;
             base_type?: undefined;
         };

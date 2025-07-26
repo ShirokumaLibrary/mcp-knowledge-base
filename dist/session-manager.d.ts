@@ -30,10 +30,10 @@ export declare class WorkSessionManager {
     /**
      * @ai-intent Generate unique session ID from timestamp
      * @ai-flow 1. Get current time -> 2. Format components -> 3. Concatenate
-     * @ai-pattern YYYYMMDD-HHMMSSsss format for chronological sorting
+     * @ai-pattern YYYY-MM-DD-HH.MM.SS.sss format for better readability
      * @ai-critical IDs embed date for directory organization
      * @ai-assumption Millisecond precision prevents collisions
-     * @ai-example 20240115-143052123 (Jan 15, 2024, 2:30:52.123 PM)
+     * @ai-example 2024-01-15-14.30.52.123 (Jan 15, 2024, 2:30:52.123 PM)
      */
     private generateSessionId;
     /**
@@ -44,7 +44,8 @@ export declare class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title: string, content?: string, tags?: string[], category?: string, id?: string): WorkSession;
+    createSession(title: string, content?: string, tags?: string[], category?: string, id?: string, // @ai-logic: Custom ID for imports
+    datetime?: string): WorkSession;
     /**
      * @ai-intent Update existing work session
      * @ai-flow 1. Extract date from ID -> 2. Load current -> 3. Merge changes -> 4. Save
@@ -57,7 +58,7 @@ export declare class WorkSessionManager {
     /**
      * @ai-intent Retrieve session by ID
      * @ai-flow 1. Extract date from ID -> 2. Load from repository
-     * @ai-assumption Session ID format: YYYYMMDD-HHMMSSsss
+     * @ai-assumption Session ID format: YYYY-MM-DD-HH.MM.SS.sss
      * @ai-return Session object or null if not found
      * @ai-why Date needed to locate correct directory
      */

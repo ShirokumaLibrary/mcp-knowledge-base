@@ -9,7 +9,7 @@
  * Work Sessions:
  * - Stored in database/sessions/YYYY-MM-DD/session-{timestamp}.md
  * - Multiple sessions per day in date-organized directories
- * - ID format: YYYYMMDD-HHMMSSsss (date + timestamp + milliseconds)
+ * - ID format: YYYY-MM-DD-HH.MM.SS.sss (date + timestamp + milliseconds)
  *
  * Daily Summaries:
  * - Stored in database/sessions/YYYY-MM-DD/daily-summary-YYYY-MM-DD.md
