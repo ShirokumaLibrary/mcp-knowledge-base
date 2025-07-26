@@ -31,14 +31,14 @@ describe('DocumentRepository', () => {
   describe('createDocument', () => {
     it('should create a doc with proper ID sequence', async () => {
       const doc = await repo.createDocument(
-        'doc',
+        'docs',
         'Test Document',
         'This is test content',
         ['test', 'doc'],
         'Test description'
       );
 
-      expect(doc.type).toBe('doc');
+      expect(doc.type).toBe('docs');
       expect(doc.id).toBe(1);
       expect(doc.title).toBe('Test Document');
       expect(doc.content).toBe('This is test content');
@@ -71,11 +71,11 @@ describe('DocumentRepository', () => {
       expect(exists).toBe(true);
     });
 
-    it('should maintain separate ID sequences for doc and knowledge', async () => {
+    it('should maintain separate ID sequences for docs and knowledge', async () => {
       // Create multiple documents of each type
-      const doc1 = await repo.createDocument('doc', 'Doc 1', 'Content 1');
+      const doc1 = await repo.createDocument('docs', 'Doc 1', 'Content 1');
       const knowledge1 = await repo.createDocument('knowledge', 'Knowledge 1', 'Content 1');
-      const doc2 = await repo.createDocument('doc', 'Doc 2', 'Content 2');
+      const doc2 = await repo.createDocument('docs', 'Doc 2', 'Content 2');
       const knowledge2 = await repo.createDocument('knowledge', 'Knowledge 2', 'Content 2');
 
       expect(doc1.id).toBe(1);
@@ -88,22 +88,22 @@ describe('DocumentRepository', () => {
   describe('getDocument', () => {
     it('should retrieve document by type and ID', async () => {
       const created = await repo.createDocument(
-        'doc',
+        'docs',
         'Test Document',
         'Test content',
         ['test']
       );
 
-      const retrieved = await repo.getDocument('doc', created.id);
+      const retrieved = await repo.getDocument('docs', created.id);
       expect(retrieved).not.toBeNull();
-      expect(retrieved!.type).toBe('doc');
+      expect(retrieved!.type).toBe('docs');
       expect(retrieved!.id).toBe(created.id);
       expect(retrieved!.title).toBe('Test Document');
       expect(retrieved!.content).toBe('Test content');
     });
 
     it('should return null for non-existent document', async () => {
-      const result = await repo.getDocument('doc', 999);
+      const result = await repo.getDocument('docs', 999);
       expect(result).toBeNull();
     });
   });
@@ -138,25 +138,25 @@ describe('DocumentRepository', () => {
 
   describe('deleteDocument', () => {
     it('should delete document', async () => {
-      const created = await repo.createDocument('doc', 'To Delete', 'Content');
+      const created = await repo.createDocument('docs', 'To Delete', 'Content');
       
-      const success = await repo.deleteDocument('doc', created.id);
+      const success = await repo.deleteDocument('docs', created.id);
       expect(success).toBe(true);
 
-      const retrieved = await repo.getDocument('doc', created.id);
+      const retrieved = await repo.getDocument('docs', created.id);
       expect(retrieved).toBeNull();
     });
   });
 
   describe('getAllDocuments', () => {
     it('should retrieve all documents of specific type', async () => {
-      await repo.createDocument('doc', 'Doc 1', 'Content 1');
-      await repo.createDocument('doc', 'Doc 2', 'Content 2');
+      await repo.createDocument('docs', 'Doc 1', 'Content 1');
+      await repo.createDocument('docs', 'Doc 2', 'Content 2');
       await repo.createDocument('knowledge', 'Knowledge 1', 'Content 1');
 
-      const docs = await repo.getAllDocuments('doc');
+      const docs = await repo.getAllDocuments('docs');
       expect(docs).toHaveLength(2);
-      expect(docs.every(d => d.type === 'doc')).toBe(true);
+      expect(docs.every(d => d.type === 'docs')).toBe(true);
 
       const knowledge = await repo.getAllDocuments('knowledge');
       expect(knowledge).toHaveLength(1);
@@ -164,35 +164,35 @@ describe('DocumentRepository', () => {
     });
 
     it('should retrieve all documents when type not specified', async () => {
-      await repo.createDocument('doc', 'Doc 1', 'Content 1');
+      await repo.createDocument('docs', 'Doc 1', 'Content 1');
       await repo.createDocument('knowledge', 'Knowledge 1', 'Content 1');
 
       const all = await repo.getAllDocuments();
       expect(all).toHaveLength(2);
-      expect(all.some(d => d.type === 'doc')).toBe(true);
+      expect(all.some(d => d.type === 'docs')).toBe(true);
       expect(all.some(d => d.type === 'knowledge')).toBe(true);
     });
   });
 
   describe('searchDocumentsByTag', () => {
     it('should find documents by tag', async () => {
-      await repo.createDocument('doc', 'Doc 1', 'Content 1', ['shared', 'doc']);
+      await repo.createDocument('docs', 'Doc 1', 'Content 1', ['shared', 'doc']);
       await repo.createDocument('knowledge', 'Knowledge 1', 'Content 1', ['shared', 'knowledge']);
-      await repo.createDocument('doc', 'Doc 2', 'Content 2', ['other']);
+      await repo.createDocument('docs', 'Doc 2', 'Content 2', ['other']);
 
       const results = await repo.searchDocumentsByTag('shared');
       expect(results).toHaveLength(2);
-      expect(results.some(d => d.type === 'doc' && d.title === 'Doc 1')).toBe(true);
+      expect(results.some(d => d.type === 'docs' && d.title === 'Doc 1')).toBe(true);
       expect(results.some(d => d.type === 'knowledge' && d.title === 'Knowledge 1')).toBe(true);
     });
 
     it('should filter by type when specified', async () => {
-      await repo.createDocument('doc', 'Doc 1', 'Content 1', ['shared']);
+      await repo.createDocument('docs', 'Doc 1', 'Content 1', ['shared']);
       await repo.createDocument('knowledge', 'Knowledge 1', 'Content 1', ['shared']);
 
-      const docs = await repo.searchDocumentsByTag('shared', 'doc');
+      const docs = await repo.searchDocumentsByTag('shared', 'docs');
       expect(docs).toHaveLength(1);
-      expect(docs[0].type).toBe('doc');
+      expect(docs[0].type).toBe('docs');
     });
   });
 });

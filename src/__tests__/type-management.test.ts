@@ -44,7 +44,7 @@ describe('Type Management', () => {
       
       expect(guideline).toBeDefined();
       expect(guideline?.base_type).toBe('documents');
-      expect(guideline?.is_custom).toBe(true);
+      // is_custom is deprecated, all types are treated equally
       
       // Verify directory was created
       const typeDir = path.join(testDataDir, 'documents', 'guideline');
@@ -73,10 +73,10 @@ describe('Type Management', () => {
       expect(types.filter(t => t.type === 'temp_type')).toHaveLength(0);
     });
 
-    it('should get all types including built-in', async () => {
+    it('should get all types including default types', async () => {
       const allTypes = await typeRepo.getAllTypes();
       
-      // Should include built-in types
+      // Should include default types
       const typeNames = allTypes.map(t => t.type);
       expect(typeNames).toContain('issues');
       expect(typeNames).toContain('plans');
@@ -84,7 +84,7 @@ describe('Type Management', () => {
       expect(typeNames).toContain('knowledge');
       
       allTypes.forEach(type => {
-        expect(type.is_custom).toBeDefined();
+        expect(type.base_type).toBeDefined();
         expect(type.base_type).toBeDefined();
       });
     });
@@ -151,9 +151,7 @@ describe('Type Management', () => {
       // Create a custom type first
       await typeRepo.createType('custom_test');
 
-      const result = await typeHandlers.handleGetTypes({
-        include_built_in: true
-      });
+      const result = await typeHandlers.handleGetTypes({});
 
       expect(result.content[0].text).toContain('Available Types');
       expect(result.content[0].text).toContain('issues');
@@ -173,6 +171,21 @@ describe('Type Management', () => {
       const exists = await typeRepo.typeExists('to_delete');
       expect(exists).toBe(false);
     });
+
+    it('should create task type with base_type', async () => {
+      const result = await typeHandlers.handleCreateType({
+        name: 'bugs',
+        base_type: 'tasks'
+      });
+
+      expect(result.content[0].text).toContain('Type "bugs" created successfully with base_type "tasks"');
+      
+      // Verify type exists with correct base_type
+      const types = await typeRepo.getAllTypes();
+      const bugs = types.find(t => t.type === 'bugs');
+      expect(bugs).toBeDefined();
+      expect(bugs?.base_type).toBe('tasks');
+    });
   });
 
   describe('Integration with create_item', () => {
@@ -187,7 +200,7 @@ describe('Type Management', () => {
       expect(item.id).toBe(1);
       expect(item.title).toBe('Chocolate Cake');
       
-      // Verify file was created with type name as prefix (custom types use their name as-is)
+      // Verify file was created in type-specific subdirectory
       const filePath = path.join(testDataDir, 'documents', 'recipe', 'recipe-1.md');
       const fileExists = await fs.stat(filePath).then(() => true).catch(() => false);
       expect(fileExists).toBe(true);
