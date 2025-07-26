@@ -105,10 +105,10 @@ describe('WorkSessionManager', () => {
     /**
      * @ai-intent Test custom session ID override
      * @ai-validation Ensures custom IDs are accepted
-     * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
+     * @ai-pattern ID format: YYYY-MM-DD-HH.MM.SS.sss
      */
     it('should create session with custom ID', () => {
-      const customId = '20231201-120000000';  // @ai-example: Manual ID
+      const customId = '2023-12-01-12.00.00.000';  // @ai-example: Manual ID
       const session = sessionManager.createSession(
         'Custom ID Session',
         'Custom content',
@@ -130,6 +130,28 @@ describe('WorkSessionManager', () => {
       const session = sessionManager.createSession('Test Session', undefined, ['test', 'session']);
       
       expect(session.tags).toEqual(['test', 'session']);
+    });
+
+    /**
+     * @ai-intent Test custom datetime for past data migration
+     * @ai-validation Ensures sessions can be created with past dates
+     * @ai-pattern ISO 8601 datetime format
+     */
+    it('should create session with custom datetime', () => {
+      const customDatetime = '2024-01-15T14:30:00.000Z';
+      const session = sessionManager.createSession(
+        'Past Session',
+        'Historical data',
+        ['migration'],
+        'historical',
+        undefined,
+        customDatetime
+      );
+      
+      expect(session.date).toBe('2024-01-15');  // @ai-validation: Date extracted from datetime
+      expect(session.createdAt).toBe(customDatetime);
+      // ID will be based on the datetime converted to local time
+      expect(session.id).toMatch(/^2024-01-15-\d{2}\.\d{2}\.\d{2}\.\d{3}$/);  // @ai-pattern: ID based on custom datetime
     });
   });
 
@@ -204,7 +226,7 @@ describe('WorkSessionManager', () => {
       // Debug: Check if session was created properly
       expect(session).toBeDefined();
       expect(session.id).toBeDefined();
-      expect(session.id).toMatch(/^\d{8}-\d{9}$/); // YYYYMMDD-HHMMSSsss format
+      expect(session.id).toMatch(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/); // YYYY-MM-DD-HH.MM.SS.sss format
       
       // Verify the session file was created
       // Use the date from the session object, not parsed from ID
