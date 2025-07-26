@@ -101,6 +101,11 @@ export const toolDefinitions = [
           type: 'string',
           description: 'End date in YYYY-MM-DD format (for tasks types)',
         },
+        related_tasks: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
+        },
       },
       required: ['type', 'title'],
     },
@@ -152,6 +157,11 @@ export const toolDefinitions = [
         end_date: {
           type: 'string',
           description: 'New end date (for tasks types)',
+        },
+        related_tasks: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
         },
       },
       required: ['type', 'id'],
