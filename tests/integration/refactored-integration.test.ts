@@ -274,7 +274,6 @@ describe('Refactored MCP Integration Tests', () => {
       const session = await client.callTool('create_session',
         TestDataBuilder.createSession({
           title: 'Productive Work Session',
-          category: 'development',
           tags: ['productive', 'coding']
         })
       );

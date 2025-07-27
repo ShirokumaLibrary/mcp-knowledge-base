@@ -185,7 +185,6 @@ export class TestDataBuilder {
     return {
       title: 'Test Session',
       content: 'Test session content',
-      category: 'test',
       tags: ['test'],
       ...overrides
     };

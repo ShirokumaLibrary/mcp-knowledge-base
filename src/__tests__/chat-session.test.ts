@@ -94,14 +94,12 @@ describe('WorkSessionManager', () => {
       const session = sessionManager.createSession(
         'Test Session',
         '## Implementation\n\n- Task 1\n- Task 2',  // @ai-example: Markdown content
-        ['test', 'session'],  // @ai-pattern: Tag array
-        'development'         // @ai-pattern: Category string
+        ['test', 'session']  // @ai-pattern: Tag array
       );
       
       expect(session.title).toBe('Test Session');
       expect(session.content).toContain('Task 1');
       expect(session.tags).toEqual(['test', 'session']);
-      expect(session.category).toBe('development');
     });
 
     /**
@@ -114,7 +112,6 @@ describe('WorkSessionManager', () => {
       const session = sessionManager.createSession(
         'Custom ID Session',
         'Custom content',
-        undefined,
         undefined,
         customId
       );
@@ -145,7 +142,6 @@ describe('WorkSessionManager', () => {
         'Past Session',
         'Historical data',
         ['migration'],
-        'historical',
         undefined,
         customDatetime
       );
@@ -196,14 +192,13 @@ describe('WorkSessionManager', () => {
      * @ai-pattern Partial updates common in UI
      */
     it('should preserve unchanged fields', () => {
-      const session = sessionManager.createSession('Title', 'Content', ['tag1'], 'work');
+      const session = sessionManager.createSession('Title', 'Content', ['tag1']);
       
       const updated = sessionManager.updateSession(session.id, 'New Title');  // @ai-logic: Only title updated
       
       expect(updated.title).toBe('New Title');
       expect(updated.content).toBe('Content');
       expect(updated.tags).toEqual(['tag1']);
-      expect(updated.category).toBe('work');
     });
   });
 

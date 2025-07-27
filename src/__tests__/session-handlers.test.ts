@@ -144,7 +144,6 @@ describe('SessionHandlers', () => {
         undefined,
         [],  // Default empty array for tags
         undefined,
-        undefined,
         undefined,  // datetime parameter
         undefined,
         undefined
@@ -171,7 +170,6 @@ describe('SessionHandlers', () => {
         'Session with ID',
         'Content',
         [],  // Default empty array for tags
-        undefined,
         '2025-01-26-17.00.00.000',
         undefined,  // datetime parameter
         undefined,
@@ -199,7 +197,6 @@ describe('SessionHandlers', () => {
         undefined,
         ['work', 'important'],
         undefined,
-        undefined,
         undefined,  // datetime parameter
         undefined,
         undefined
@@ -226,7 +223,6 @@ describe('SessionHandlers', () => {
         'Past Session',
         'Historical data migration',
         [],  // Default empty array for tags
-        undefined,
         undefined,
         customDatetime,
         undefined,
@@ -260,7 +256,6 @@ describe('SessionHandlers', () => {
         'Updated content',
         ['updated'],
         undefined,
-        undefined,
         undefined
       );
       const responseData = JSON.parse(result.content[0].text);
@@ -284,7 +279,6 @@ describe('SessionHandlers', () => {
         '2025-01-26-17.00.00.000',
         undefined,
         'Updated content only',
-        undefined,
         undefined,
         undefined,
         undefined

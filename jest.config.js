@@ -39,7 +39,8 @@ export default {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   testTimeout: 60000,
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFiles: ['<rootDir>/jest.presetup.js'],  // Run BEFORE test environment is set up
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],  // Run AFTER test environment is set up
   maxWorkers: 1,  // 並列実行を無効化
   maxConcurrency: 1  // 並列実行を無効化
 };

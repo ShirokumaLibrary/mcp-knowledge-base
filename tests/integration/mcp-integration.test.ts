@@ -263,7 +263,6 @@ describe('MCP Server Integration Tests', () => {
       const session = await callTool('create_session', {
         title: 'Test Session',
         content: 'Session content',
-        category: 'testing',
         tags: ['test', 'session']
       });
 
@@ -433,13 +432,6 @@ describe('MCP Server Integration Tests', () => {
         priority: 'urgent'  // Should be high/medium/low
       })).rejects.toThrow();
 
-      // Empty session category is actually allowed
-      const sessionWithEmptyCategory = await callTool('create_session', {
-        title: 'Invalid Session',
-        content: 'Testing',
-        category: ''  // Empty category - allowed
-      });
-      expect(sessionWithEmptyCategory.data).toBeDefined();
     });
 
     test('should handle invalid references', async () => {

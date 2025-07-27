@@ -238,7 +238,6 @@ describe('Comprehensive MCP Integration Tests', () => {
       const session = await callTool('create_session', {
         title: 'Sprint Planning Meeting',
         content: '## Meeting Notes\n\n- Reviewed project plan\n- Assigned tasks\n- Set milestones',
-        category: 'meeting',
         tags: ['product', 'planning'],
         related_tasks: [`plans-${project.id}`, `issues-${issues[0].id}`],
         related_documents: [`docs-${docs[0].id}`]
@@ -601,7 +600,6 @@ This guide covers the system architecture.
         const session = await callTool('create_session', {
           title: `Work on ${dateStr}`,
           content: `Progress made on ${dateStr}`,
-          category: 'development',
           tags: ['daily-work'],
           datetime: date.toISOString()
         });

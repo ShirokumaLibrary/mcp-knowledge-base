@@ -107,7 +107,6 @@ export const testScenarios: TestScenario[] = [
           title: 'Development Work',
           content: 'Implemented new features',
           tags: ['development'],
-          category: 'coding',
           related_tasks: ['issues-1', 'plans-1']
         },
         saveAs: 'session'

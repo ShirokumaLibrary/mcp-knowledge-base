@@ -1,4 +1,10 @@
-// Increase listener limit during test execution to prevent EventEmitter memory leak warnings
+// MUST be at the very top before any imports
+import { EventEmitter } from 'events';
+
+// Increase default max listeners for all EventEmitters FIRST
+EventEmitter.defaultMaxListeners = 100;
+
+// Then increase for process
 process.setMaxListeners(100);
 
 // Also increase listener limit for Console object (with type extension)
@@ -6,9 +12,14 @@ if (typeof (console as any).setMaxListeners === 'function') {
   (console as any).setMaxListeners(100);
 }
 
-// Set listener limit for winston logger
-import { EventEmitter } from 'events';
-EventEmitter.defaultMaxListeners = 100;
+// Suppress the warning entirely
+process.removeAllListeners('warning');
+process.on('warning', (warning) => {
+  if (warning.name === 'MaxListenersExceededWarning') {
+    return; // Ignore this warning
+  }
+  console.warn(warning);
+});
 
 // Test environment configuration
 process.env.NODE_ENV = 'test';
@@ -47,5 +58,3 @@ if (process.env.SHOW_TEST_LOGS !== 'true') {
   };
 }
 
-// Suppress MaxListenersExceededWarning
-process.removeAllListeners('warning');

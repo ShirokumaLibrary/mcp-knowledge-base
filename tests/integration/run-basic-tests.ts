@@ -129,7 +129,6 @@ async function runTests() {
       const session = await client.call('create_session', {
         title: 'Test Session',
         content: 'Testing session functionality',
-        category: 'testing',
         tags: ['test', 'session']
       });
 
