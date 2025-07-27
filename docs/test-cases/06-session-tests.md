@@ -9,8 +9,7 @@ This test suite verifies work session creation, retrieval, and update functional
 mcp__shirokuma-knowledge-base__create_session(
   title: "Authentication Bug Investigation and Fix",
   content: "## Work Done\n- Bug root cause investigation\n- Fixed escaping logic\n- Added unit tests\n\n## Next Steps\n- Code review\n- Integration testing",
-  tags: ["bugfix", "authentication"],
-  category: "development"
+  tags: ["bugfix", "authentication"]
 )
 ```
 Expected: Success with session ID in format YYYY-MM-DD-HH.MM.SS.sss
@@ -21,7 +20,6 @@ mcp__shirokuma-knowledge-base__create_session(
   title: "Security Implementation Work",
   content: "## Work Done\n- Implemented JWT validation\n- Added rate limiting middleware\n- Updated documentation\n\n## Related Work\n- See related issues and documents for context",
   tags: ["security", "implementation"],
-  category: "development",
   related_tasks: ["issues-5", "plans-4"],
   related_documents: ["docs-5", "knowledge-5"]
 )
@@ -66,8 +64,7 @@ Expected: Array containing the created session
 mcp__shirokuma-knowledge-base__create_session(
   title: "Performance Optimization Research",
   content: "## Research\n- Analyzed slow queries\n- Identified bottlenecks\n- Proposed caching strategy",
-  tags: ["performance", "research"],
-  category: "investigation"
+  tags: ["performance", "research"]
 )
 ```
 Expected: Success with unique session ID
@@ -78,29 +75,7 @@ Expected: Success with unique session ID
 - [ ] Search sessions by tag: `mcp__shirokuma-knowledge-base__search_sessions_by_tag(tag: "authentication")`  
       Expected: Array containing only the first session
 
-## 6.3 Session Categories
-
-### Create session with different category
-```
-mcp__shirokuma-knowledge-base__create_session(
-  title: "Team Meeting Notes",
-  content: "## Discussed\n- Sprint progress\n- Blockers\n- Next sprint planning",
-  tags: ["meeting", "planning"],
-  category: "meeting"
-)
-```
-Expected: Success
-
-### Update session category
-```
-mcp__shirokuma-knowledge-base__update_session(
-  id: "[third session ID]",
-  category: "team-sync"
-)
-```
-Expected: Success with category updated
-
-## 6.4 Past Data Migration
+## 6.3 Past Data Migration
 
 ### Create session with custom datetime
 ```
@@ -108,7 +83,6 @@ mcp__shirokuma-knowledge-base__create_session(
   title: "Historical Session Import",
   content: "## Work Done\n- Legacy project migration\n- Database schema update\n- Data validation",
   tags: ["migration", "historical"],
-  category: "maintenance",
   datetime: "2024-12-15T10:30:00.000Z"
 )
 ```

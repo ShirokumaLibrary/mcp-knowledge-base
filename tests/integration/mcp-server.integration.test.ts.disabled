@@ -219,13 +219,11 @@ describe('MCP Server Integration Tests', () => {
       const session = await client.call('create_session', {
         title: 'Test Session',
         content: 'Testing session functionality',
-        category: 'testing',
         tags: ['test', 'session']
       });
 
       expect(session.id).toMatch(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/);
       expect(session.title).toBe('Test Session');
-      expect(session.category).toBe('testing');
     });
 
     test('should get latest session', async () => {
