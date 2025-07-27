@@ -83,13 +83,11 @@ describe('WorkSessionManager', () => {
          */
         it('should create session with content', () => {
             const session = sessionManager.createSession('Test Session', '## Implementation\n\n- Task 1\n- Task 2', // @ai-example: Markdown content
-            ['test', 'session'], // @ai-pattern: Tag array
-            'development' // @ai-pattern: Category string
+            ['test', 'session'] // @ai-pattern: Tag array
             );
             expect(session.title).toBe('Test Session');
             expect(session.content).toContain('Task 1');
             expect(session.tags).toEqual(['test', 'session']);
-            expect(session.category).toBe('development');
         });
         /**
          * @ai-intent Test custom session ID override
@@ -98,7 +96,7 @@ describe('WorkSessionManager', () => {
          */
         it('should create session with custom ID', () => {
             const customId = '2023-12-01-12.00.00.000'; // @ai-example: Manual ID
-            const session = sessionManager.createSession('Custom ID Session', 'Custom content', undefined, undefined, customId);
+            const session = sessionManager.createSession('Custom ID Session', 'Custom content', undefined, customId);
             expect(session.id).toBe(customId);
             expect(session.title).toBe('Custom ID Session');
             expect(session.content).toBe('Custom content');
@@ -118,7 +116,7 @@ describe('WorkSessionManager', () => {
          */
         it('should create session with custom datetime', () => {
             const customDatetime = '2024-01-15T14:30:00.000Z';
-            const session = sessionManager.createSession('Past Session', 'Historical data', ['migration'], 'historical', undefined, customDatetime);
+            const session = sessionManager.createSession('Past Session', 'Historical data', ['migration'], undefined, customDatetime);
             expect(session.date).toBe('2024-01-15'); // @ai-validation: Date extracted from datetime
             expect(session.createdAt).toBe(customDatetime);
             // ID will be based on the datetime converted to local time
@@ -156,12 +154,11 @@ describe('WorkSessionManager', () => {
          * @ai-pattern Partial updates common in UI
          */
         it('should preserve unchanged fields', () => {
-            const session = sessionManager.createSession('Title', 'Content', ['tag1'], 'work');
+            const session = sessionManager.createSession('Title', 'Content', ['tag1']);
             const updated = sessionManager.updateSession(session.id, 'New Title'); // @ai-logic: Only title updated
             expect(updated.title).toBe('New Title');
             expect(updated.content).toBe('Content');
             expect(updated.tags).toEqual(['tag1']);
-            expect(updated.category).toBe('work');
         });
     });
     describe('getSession', () => {

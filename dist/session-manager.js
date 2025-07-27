@@ -61,7 +61,7 @@ export class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title, content, tags, category, id, // @ai-logic: Custom ID for imports
+    createSession(title, content, tags, id, // @ai-logic: Custom ID for imports
     datetime, // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
     related_tasks, related_documents) {
         const sessionDate = datetime ? new Date(datetime) : new Date();
@@ -72,7 +72,6 @@ export class WorkSessionManager {
             title,
             content,
             tags,
-            category,
             related_tasks,
             related_documents,
             date,
@@ -89,7 +88,7 @@ export class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id, title, content, tags, category, related_tasks, related_documents) {
+    updateSession(id, title, content, tags, related_tasks, related_documents) {
         // @ai-logic: Use getSessionDetail to find session in any date directory
         const session = this.repository.getSessionDetail(id);
         if (!session) {
@@ -101,7 +100,6 @@ export class WorkSessionManager {
             title: title !== undefined ? title : session.title,
             content: content !== undefined ? content : session.content,
             tags: tags !== undefined ? tags : session.tags,
-            category: category !== undefined ? category : session.category,
             related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
             related_documents: related_documents !== undefined ? related_documents : session.related_documents,
             updatedAt: new Date().toISOString() // @ai-logic: Track modification time

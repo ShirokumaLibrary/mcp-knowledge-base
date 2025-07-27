@@ -42,7 +42,7 @@ export class SessionRepository {
         const dailyDir = this.ensureDailyDirectory(session.date);
         const filePath = path.join(dailyDir, `session-${session.id}.md`);
         // @ai-logic: Choose format based on content richness
-        const content = session.tags || session.content || session.category
+        const content = session.tags || session.content
             ? this.formatter.generateSessionMarkdown(session)
             : this.formatter.generateLegacySessionMarkdown(session);
         fs.writeFileSync(filePath, content, 'utf8');

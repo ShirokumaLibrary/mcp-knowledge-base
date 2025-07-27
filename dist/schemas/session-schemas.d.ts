@@ -20,7 +20,6 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
-    category: z.ZodOptional<z.ZodString>;
     datetime: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
     title: string;
@@ -29,7 +28,6 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     related_tasks?: string[] | undefined;
     id?: string | undefined;
     related_documents?: string[] | undefined;
-    category?: string | undefined;
     datetime?: string | undefined;
 }, {
     title: string;
@@ -38,7 +36,6 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
     related_tasks?: string[] | undefined;
     id?: string | undefined;
     related_documents?: string[] | undefined;
-    category?: string | undefined;
     datetime?: string | undefined;
 }>;
 /**
@@ -55,7 +52,6 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-    category: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
     id: string;
     title?: string | undefined;
@@ -63,7 +59,6 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     tags?: string[] | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
-    category?: string | undefined;
 }, {
     id: string;
     title?: string | undefined;
@@ -71,7 +66,6 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
     tags?: string[] | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
-    category?: string | undefined;
 }>;
 /**
  * @ai-intent Schema for create_summary tool

@@ -64,7 +64,6 @@ describe('MarkdownTransformers', () => {
                 id: '2024-01-01-10.30.00.000',
                 title: 'Development Session',
                 date: '2024-01-01',
-                category: 'development',
                 startTime: '10:30:00',
                 endTime: '12:30:00',
                 summary: 'Fixed bugs',
@@ -78,7 +77,6 @@ describe('MarkdownTransformers', () => {
             expect(result).toContain('# Development Session');
             expect(result).toContain('**ID:** 2024-01-01-10.30.00.000');
             expect(result).toContain('**Date:** 2024-01-01');
-            expect(result).toContain('**Category:** development');
             expect(result).toContain('**Time:** 10:30:00 - 12:30:00');
             expect(result).toContain('## Summary');
             expect(result).toContain('Fixed bugs');

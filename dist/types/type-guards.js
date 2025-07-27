@@ -122,7 +122,6 @@ export function isWorkSession(value) {
         typeof obj.createdAt === 'string' &&
         (obj.tags === undefined || Array.isArray(obj.tags)) &&
         (obj.content === undefined || typeof obj.content === 'string') &&
-        (obj.category === undefined || typeof obj.category === 'string') &&
         (obj.startTime === undefined || typeof obj.startTime === 'string') &&
         (obj.endTime === undefined || typeof obj.endTime === 'string') &&
         (obj.summary === undefined || typeof obj.summary === 'string') &&

@@ -437,7 +437,7 @@ export class FileIssueDatabase {
             session.id,
             session.title,
             session.content || '',
-            session.category || '',
+            '', // category removed but keep column for backward compatibility
             tags,
             session.date,
             session.startTime,

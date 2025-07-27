@@ -28,9 +28,6 @@ export class SessionMarkdownFormatter {
         if (session.tags && session.tags.length > 0) {
             content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`; // @ai-pattern: JSON array format
         }
-        if (session.category) {
-            content += `category: "${session.category}"\n`;
-        }
         if (session.related_tasks && session.related_tasks.length > 0) {
             content += `related_tasks: [${session.related_tasks.map(t => `"${t}"`).join(', ')}]\n`;
         }
@@ -98,7 +95,6 @@ export class SessionMarkdownFormatter {
         // @ai-logic: Extract each field with specific regex
         const titleMatch = frontMatter.match(/title: "(.+)"/);
         const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
-        const categoryMatch = frontMatter.match(/category: "(.+)"/);
         const relatedTasksMatch = frontMatter.match(/related_tasks: \[(.*)\]/);
         const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
         const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
@@ -110,7 +106,6 @@ export class SessionMarkdownFormatter {
             title: titleMatch?.[1] || 'Unknown Session',
             content,
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : undefined,
-            category: categoryMatch?.[1],
             related_tasks: relatedTasksMatch?.[1] ? relatedTasksMatch[1].split(', ').map(t => t.replace(/"/g, '')) : undefined,
             related_documents: relatedDocsMatch?.[1] ? relatedDocsMatch[1].split(', ').map(d => d.replace(/"/g, '')) : undefined,
             date,

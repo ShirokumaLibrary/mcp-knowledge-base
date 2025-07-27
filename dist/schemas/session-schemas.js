@@ -20,7 +20,6 @@ export const CreateWorkSessionSchema = z.object({
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
     tags: z.array(z.string()).default([]), // @ai-default: Empty array
-    category: z.string().optional(), // @ai-logic: Work categorization
     datetime: z.string().optional() // @ai-logic: ISO 8601 datetime for past data migration
 }).strict();
 /**
@@ -36,8 +35,7 @@ export const UpdateWorkSessionSchema = z.object({
     content: z.string().optional(), // @ai-logic: Work details and notes
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
-    tags: z.array(z.string()).optional(),
-    category: z.string().optional()
+    tags: z.array(z.string()).optional()
 }).strict();
 /**
  * @ai-intent Schema for create_summary tool

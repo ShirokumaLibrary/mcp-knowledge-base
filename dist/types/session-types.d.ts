@@ -41,7 +41,6 @@ export interface WorkSession {
     related_tasks?: string[];
     related_documents?: string[];
     tags?: string[];
-    category?: string;
     date: string;
     startTime?: string;
     endTime?: string;
