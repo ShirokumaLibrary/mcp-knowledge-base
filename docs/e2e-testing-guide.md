@@ -4,39 +4,49 @@
 
 End-to-end (E2E) tests validate the complete functionality of the MCP Knowledge Base system by testing through the actual MCP protocol interface.
 
-## Test Structure
+## Current Implementation
 
-### Test Suites
+### Test Structure
 
-1. **CRUD Operations** (`crud-operations.e2e.test.ts`)
-   - Complete lifecycle testing for all entity types
-   - Cross-type operations
-   - Batch operations
+```
+tests/e2e/
+├── README.md         # Quick reference
+├── custom-runner.ts  # Simple test runner implementation
+└── old/             # Deprecated test files (for reference)
+```
 
-2. **Search Functionality** (`search-functionality.e2e.test.ts`)
-   - Full-text search
-   - Tag-based search
-   - Advanced search features
+### Available Test Method
 
-3. **Performance** (`performance.e2e.test.ts`)
-   - Response time benchmarks
-   - Load testing
-   - Memory usage monitoring
+#### Custom Runner
 
-4. **Security** (`security.e2e.test.ts`)
-   - Input validation
-   - SQL injection prevention
-   - XSS prevention
-   - Error handling
+The project includes a simple custom test runner that starts the MCP server and runs basic tests:
 
-5. **Workflows** (`workflow.e2e.test.ts`)
-   - Project management workflow
-   - Knowledge management workflow
-   - Tag organization workflow
+```bash
+# Run the custom E2E test runner
+npx tsx tests/e2e/custom-runner.ts
+```
+
+Features:
+- Starts MCP server with test database
+- Runs connection and basic operation tests
+- Cleans up test data after completion
+- No external dependencies beyond TypeScript
+
+### Interactive Testing with MCP Inspector
+
+For manual testing and debugging:
+
+```bash
+# Start the server with MCP Inspector
+npx @modelcontextprotocol/inspector node dist/server.js
+```
+
+This opens a browser-based interface where you can:
+- Manually call MCP tools
+- Inspect requests and responses
+- Debug tool implementations
 
 ## Running E2E Tests
-
-> **Update**: We now have multiple solutions for E2E testing, including the MCP-specific test framework `mcp-jest`.
 
 ### Prerequisites
 
@@ -45,256 +55,98 @@ End-to-end (E2E) tests validate the complete functionality of the MCP Knowledge 
    npm run build
    ```
 
-2. Ensure no MCP server is running on the default port
+2. Ensure the distribution files are up to date
 
-### Testing Options
-
-#### Option 1: Using mcp-jest (Recommended)
+### Running the Custom Runner
 
 ```bash
-# Install mcp-jest
-npm install --save-dev mcp-jest
+# Direct execution
+npx tsx tests/e2e/custom-runner.ts
 
-# Run tests
-npm run test:e2e:mcp-jest
+# With debug logging
+LOG_LEVEL=debug npx tsx tests/e2e/custom-runner.ts
 ```
 
-#### Option 2: Using MCP Inspector
+## Test Scenarios
 
-```bash
-# Interactive testing
-npx @modelcontextprotocol/inspector node dist/server.js
-```
+The custom runner currently tests:
 
-#### Option 3: Custom Test Runner
+1. **Server Connection**
+   - Server startup
+   - Basic connectivity
 
-```bash
-# Run custom E2E tests
-npm run test:e2e:custom
-```
+2. **Basic CRUD Operations**
+   - Create issue
+   - Get issue details
+   - Search by tag
+   - Delete issue
 
-### Known Issues and Solutions
+3. **Performance Checks**
+   - Operation response times
+   - Batch operations
 
-- **ESM Module Resolution**: The MCP SDK has known issues with Jest ESM module resolution
-- **Solution**: Use `mcp-jest` or custom test runners as documented in [E2E Testing Solutions](../docs.ja/e2e-testing-solutions.md)
+## Writing New E2E Tests
 
-Or using the test runner directly:
+To add tests to the custom runner:
 
-```bash
-npx tsx tests/e2e/run-e2e-tests.ts
-```
+1. Open `tests/e2e/custom-runner.ts`
+2. Add your test in the `runTests()` method:
 
-### Run Individual Test Suite
-
-```bash
-npx jest tests/e2e/crud-operations.e2e.test.ts
-```
-
-### Run with Debugging
-
-```bash
-SHOW_TEST_LOGS=true npm run test:e2e
-```
-
-## Test Environment
-
-### Setup
-
-Each test suite:
-1. Creates a temporary test database
-2. Starts an MCP server instance
-3. Connects an MCP client
-4. Runs test scenarios
-5. Cleans up all resources
-
-### Test Utilities
-
-**Setup Functions**:
 ```typescript
-// Setup test environment
-const context = await setupE2ETest();
-
-// Call MCP tool
-const result = await callTool(context.client, 'tool_name', { params });
-
-// Run test scenario
-await runScenario('Scenario Name', [
-  {
-    name: 'Step name',
-    action: async () => { /* test action */ },
-    assertions: (result) => { /* assertions */ }
+await runner.runTest('Your Test Name', async () => {
+  // Your test implementation
+  // Throw an error to fail the test
+  if (!condition) {
+    throw new Error('Test failed: reason');
   }
-]);
-```
-
-**Performance Testing**:
-```typescript
-const { result, duration } = await measurePerformance(
-  async () => { /* operation */ },
-  'Operation Name'
-);
-```
-
-## Performance Targets
-
-### Response Times
-
-- **Create**: < 100ms
-- **Read**: < 50ms
-- **Update**: < 100ms
-- **Delete**: < 50ms
-- **List**: < 200ms
-- **Search**: < 500ms
-
-### Load Testing
-
-- Handle 10 concurrent operations
-- Support 100+ items per type
-- No memory leaks during extended operation
-
-## Writing E2E Tests
-
-### Best Practices
-
-1. **Use Descriptive Names**
-   ```typescript
-   it('should perform complete issue lifecycle', async () => {
-   ```
-
-2. **Clean Up After Tests**
-   ```typescript
-   afterAll(async () => {
-     await context.cleanup();
-   });
-   ```
-
-3. **Use Test Fixtures**
-   ```typescript
-   const testIssue = {
-     title: 'Test Issue',
-     content: 'Test content',
-     priority: 'high'
-   };
-   ```
-
-4. **Test Real Workflows**
-   ```typescript
-   await runScenario('Project Management', [
-     { name: 'Create project', ... },
-     { name: 'Add tasks', ... },
-     { name: 'Update status', ... }
-   ]);
-   ```
-
-5. **Validate Edge Cases**
-   - Empty inputs
-   - Invalid data
-   - Large datasets
-   - Concurrent operations
-
-### Example Test
-
-```typescript
-describe('E2E: Feature Name', () => {
-  let context: E2ETestContext;
-  
-  beforeAll(async () => {
-    context = await setupE2ETest();
-  });
-  
-  afterAll(async () => {
-    await context.cleanup();
-  });
-  
-  it('should test specific feature', async () => {
-    await runScenario('Feature Test', [
-      {
-        name: 'Setup test data',
-        action: async () => {
-          return await callTool(context.client, 'create_item', {
-            type: 'issues',
-            title: 'Test',
-            content: 'Content'
-          });
-        },
-        assertions: (result) => {
-          expect(result.id).toBeDefined();
-        }
-      }
-    ]);
-  });
 });
 ```
 
+## Known Limitations
+
+1. **MCP Client Implementation**: The current custom runner simulates MCP interactions rather than using a full MCP client
+2. **Limited Test Coverage**: Only basic scenarios are tested
+3. **No Jest Integration**: Due to ESM module resolution issues with the MCP SDK
+
+## Future Improvements
+
+Potential enhancements for E2E testing:
+
+1. **Full MCP Client Integration**: Implement proper MCP client for protocol-compliant testing
+2. **Comprehensive Test Suites**: Add tests for:
+   - All entity types (plans, docs, knowledge)
+   - Session management
+   - Tag operations
+   - Status filtering
+   - Type management
+3. **Performance Benchmarking**: Add detailed performance metrics
+4. **CI/CD Integration**: Automate E2E tests in GitHub Actions
+
 ## Troubleshooting
 
-### Common Issues
+### Server Startup Issues
 
-1. **Server Startup Timeout**
-   - Check if port is already in use
-   - Increase timeout in `setupE2ETest()`
-   - Check server logs for errors
+If the server fails to start:
+- Check if another process is using the MCP stdio interface
+- Verify the build completed successfully
+- Check server logs for initialization errors
 
-2. **Test Failures**
-   - Run with `SHOW_TEST_LOGS=true`
-   - Check temporary test database
-   - Verify MCP server is building correctly
+### Test Failures
 
-3. **Memory Issues**
-   - Run tests individually
-   - Check for cleanup in afterAll hooks
-   - Monitor with `--detectOpenHandles`
-
-### Debug Mode
-
-Enable detailed logging:
+Enable debug logging:
 ```bash
-LOG_LEVEL=debug SHOW_TEST_LOGS=true npm run test:e2e
+LOG_LEVEL=debug npx tsx tests/e2e/custom-runner.ts
 ```
 
-## CI/CD Integration
+### Manual Debugging
 
-### GitHub Actions
-
-```yaml
-- name: Run E2E Tests
-  run: |
-    npm ci
-    npm run build
-    npm run test:e2e
-  env:
-    CI: true
+Use MCP Inspector for interactive debugging:
+```bash
+npx @modelcontextprotocol/inspector node dist/server.js
 ```
 
-### Test Reports
+## References
 
-E2E tests generate JSON reports in `test-results/e2e/`:
-- Test summary
-- Individual suite results
-- Performance metrics
-- Environment information
-
-## Maintenance
-
-### Adding New Tests
-
-1. Create test file in `tests/e2e/`
-2. Add to `testSuites` in `run-e2e-tests.ts`
-3. Follow existing patterns
-4. Update documentation
-
-### Updating Tests
-
-When API changes:
-1. Update test fixtures
-2. Modify tool calls
-3. Adjust assertions
-4. Run full suite
-
-### Performance Monitoring
-
-Regular tasks:
-- Review test reports
-- Update performance targets
-- Optimize slow tests
-- Add new scenarios
+- [MCP SDK Documentation](https://github.com/modelcontextprotocol/sdk)
+- [Custom Runner Implementation](../tests/e2e/custom-runner.ts)
+- [E2E Test README](../tests/e2e/README.md)

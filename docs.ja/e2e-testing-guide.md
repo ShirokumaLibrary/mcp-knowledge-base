@@ -2,39 +2,49 @@
 
 ## 概要
 
-エンドツーエンド（E2E）テストは、実際のMCPプロトコルインターフェースを通じてMCPナレッジベースシステムの完全な機能を検証します。
+エンドツーエンド（E2E）テストは、MCPプロトコルインターフェースを通じてMCP Knowledge Baseシステムの完全な機能を検証します。
 
-> **更新**: mcp-jestを含む複数のE2Eテストソリューションが利用可能になりました。
+## 現在の実装
 
-## テスト構造
+### テスト構造
 
-### テストスイート
+```
+tests/e2e/
+├── README.md         # クイックリファレンス
+├── custom-runner.ts  # シンプルなテストランナー実装
+└── old/             # 廃止されたテストファイル（参考用）
+```
 
-1. **CRUD操作** (`crud-operations.e2e.test.ts`)
-   - 全エンティティタイプの完全なライフサイクルテスト
-   - クロスタイプ操作
-   - バッチ操作
+### 利用可能なテスト方法
 
-2. **検索機能** (`search-functionality.e2e.test.ts`)
-   - 全文検索
-   - タグベース検索
-   - 高度な検索機能
+#### カスタムランナー
 
-3. **パフォーマンス** (`performance.e2e.test.ts`)
-   - レスポンスタイムベンチマーク
-   - 負荷テスト
-   - メモリ使用監視
+プロジェクトには、MCPサーバーを起動して基本的なテストを実行するシンプルなカスタムテストランナーが含まれています：
 
-4. **セキュリティ** (`security.e2e.test.ts`)
-   - 入力検証
-   - SQLインジェクション防止
-   - XSS防止
-   - エラーハンドリング
+```bash
+# カスタムE2Eテストランナーを実行
+npx tsx tests/e2e/custom-runner.ts
+```
 
-5. **ワークフロー** (`workflow.e2e.test.ts`)
-   - プロジェクト管理ワークフロー
-   - ナレッジ管理ワークフロー
-   - タグ組織化ワークフロー
+機能：
+- テストデータベースでMCPサーバーを起動
+- 接続と基本操作のテストを実行
+- 完了後にテストデータをクリーンアップ
+- TypeScript以外の外部依存関係なし
+
+### MCP Inspectorによる対話的テスト
+
+手動テストとデバッグには：
+
+```bash
+# MCP Inspectorでサーバーを起動
+npx @modelcontextprotocol/inspector node dist/server.js
+```
+
+これによりブラウザベースのインターフェースが開き、以下のことができます：
+- MCPツールを手動で呼び出す
+- リクエストとレスポンスを検査
+- ツール実装をデバッグ
 
 ## E2Eテストの実行
 
@@ -45,256 +55,98 @@
    npm run build
    ```
 
-2. デフォルトポートでMCPサーバーが実行されていないことを確認
+2. 配布ファイルが最新であることを確認
 
-### テストオプション
-
-#### オプション1: mcp-jestを使用（推奨）
+### カスタムランナーの実行
 
 ```bash
-# mcp-jestをインストール
-npm install --save-dev mcp-jest
+# 直接実行
+npx tsx tests/e2e/custom-runner.ts
 
-# テストを実行
-npm run test:e2e:mcp-jest
+# デバッグログ付き
+LOG_LEVEL=debug npx tsx tests/e2e/custom-runner.ts
 ```
 
-#### オプション2: MCP Inspectorを使用
+## テストシナリオ
 
-```bash
-# インタラクティブテスト
-npx @modelcontextprotocol/inspector node dist/server.js
-```
+カスタムランナーは現在以下をテストします：
 
-#### オプション3: カスタムテストランナー
+1. **サーバー接続**
+   - サーバー起動
+   - 基本的な接続性
 
-```bash
-# カスタムE2Eテストを実行
-npm run test:e2e:custom
-```
+2. **基本的なCRUD操作**
+   - イシューの作成
+   - イシューの詳細取得
+   - タグによる検索
+   - イシューの削除
 
-### 既知の問題と解決策
+3. **パフォーマンスチェック**
+   - 操作のレスポンスタイム
+   - バッチ操作
 
-- **ESMモジュール解決**: MCP SDKにはJest ESMモジュール解決の既知の問題があります
-- **解決策**: [E2Eテスト実装ソリューション](./e2e-testing-solutions.md)に記載されている`mcp-jest`またはカスタムテストランナーを使用
+## 新しいE2Eテストの作成
 
-または、テストランナーを直接使用：
+カスタムランナーにテストを追加するには：
 
-```bash
-npx tsx tests/e2e/run-e2e-tests.ts
-```
+1. `tests/e2e/custom-runner.ts`を開く
+2. `runTests()`メソッドにテストを追加：
 
-### 個別のテストスイートを実行
-
-```bash
-npx jest tests/e2e/crud-operations.e2e.test.ts
-```
-
-### デバッグ付きで実行
-
-```bash
-SHOW_TEST_LOGS=true npm run test:e2e
-```
-
-## テスト環境
-
-### セットアップ
-
-各テストスイートは：
-1. 一時的なテストデータベースを作成
-2. MCPサーバーインスタンスを開始
-3. MCPクライアントを接続
-4. テストシナリオを実行
-5. 全リソースをクリーンアップ
-
-### テストユーティリティ
-
-**セットアップ関数**：
 ```typescript
-// テスト環境をセットアップ
-const context = await setupE2ETest();
-
-// MCPツールを呼び出し
-const result = await callTool(context.client, 'tool_name', { params });
-
-// テストシナリオを実行
-await runScenario('シナリオ名', [
-  {
-    name: 'ステップ名',
-    action: async () => { /* テストアクション */ },
-    assertions: (result) => { /* アサーション */ }
+await runner.runTest('テスト名', async () => {
+  // テスト実装
+  // テストを失敗させるにはエラーをスロー
+  if (!condition) {
+    throw new Error('テスト失敗: 理由');
   }
-]);
-```
-
-**パフォーマンステスト**：
-```typescript
-const { result, duration } = await measurePerformance(
-  async () => { /* 操作 */ },
-  '操作名'
-);
-```
-
-## パフォーマンス目標
-
-### レスポンスタイム
-
-- **作成**: < 100ms
-- **読み取り**: < 50ms
-- **更新**: < 100ms
-- **削除**: < 50ms
-- **リスト**: < 200ms
-- **検索**: < 500ms
-
-### 負荷テスト
-
-- 10の同時操作を処理
-- タイプごとに100以上のアイテムをサポート
-- 長時間の操作中にメモリリークなし
-
-## E2Eテストの作成
-
-### ベストプラクティス
-
-1. **説明的な名前を使用**
-   ```typescript
-   it('完全なイシューライフサイクルを実行する', async () => {
-   ```
-
-2. **テスト後のクリーンアップ**
-   ```typescript
-   afterAll(async () => {
-     await context.cleanup();
-   });
-   ```
-
-3. **テストフィクスチャを使用**
-   ```typescript
-   const testIssue = {
-     title: 'テストイシュー',
-     content: 'テストコンテンツ',
-     priority: 'high'
-   };
-   ```
-
-4. **実際のワークフローをテスト**
-   ```typescript
-   await runScenario('プロジェクト管理', [
-     { name: 'プロジェクトを作成', ... },
-     { name: 'タスクを追加', ... },
-     { name: 'ステータスを更新', ... }
-   ]);
-   ```
-
-5. **エッジケースを検証**
-   - 空の入力
-   - 無効なデータ
-   - 大きなデータセット
-   - 同時操作
-
-### テスト例
-
-```typescript
-describe('E2E: 機能名', () => {
-  let context: E2ETestContext;
-  
-  beforeAll(async () => {
-    context = await setupE2ETest();
-  });
-  
-  afterAll(async () => {
-    await context.cleanup();
-  });
-  
-  it('特定の機能をテストする', async () => {
-    await runScenario('機能テスト', [
-      {
-        name: 'テストデータをセットアップ',
-        action: async () => {
-          return await callTool(context.client, 'create_item', {
-            type: 'issues',
-            title: 'テスト',
-            content: 'コンテンツ'
-          });
-        },
-        assertions: (result) => {
-          expect(result.id).toBeDefined();
-        }
-      }
-    ]);
-  });
 });
 ```
 
+## 既知の制限事項
+
+1. **MCPクライアント実装**: 現在のカスタムランナーは完全なMCPクライアントではなく、MCP相互作用をシミュレート
+2. **限定的なテストカバレッジ**: 基本的なシナリオのみテスト
+3. **Jest統合なし**: MCP SDKのESMモジュール解決の問題のため
+
+## 将来の改善点
+
+E2Eテストの潜在的な強化：
+
+1. **完全なMCPクライアント統合**: プロトコル準拠のテストのための適切なMCPクライアント実装
+2. **包括的なテストスイート**: 以下のテストを追加：
+   - すべてのエンティティタイプ（plans、docs、knowledge）
+   - セッション管理
+   - タグ操作
+   - ステータスフィルタリング
+   - タイプ管理
+3. **パフォーマンスベンチマーク**: 詳細なパフォーマンスメトリクスを追加
+4. **CI/CD統合**: GitHub ActionsでE2Eテストを自動化
+
 ## トラブルシューティング
 
-### 一般的な問題
+### サーバー起動の問題
 
-1. **サーバー起動タイムアウト**
-   - ポートが既に使用されているかチェック
-   - `setupE2ETest()`でタイムアウトを増やす
-   - エラーのためサーバーログをチェック
+サーバーの起動に失敗する場合：
+- 他のプロセスがMCP stdioインターフェースを使用していないか確認
+- ビルドが正常に完了したことを確認
+- 初期化エラーのサーバーログを確認
 
-2. **テストの失敗**
-   - `SHOW_TEST_LOGS=true`で実行
-   - 一時的なテストデータベースをチェック
-   - MCPサーバーが正しくビルドされているか確認
+### テストの失敗
 
-3. **メモリの問題**
-   - テストを個別に実行
-   - afterAllフックでのクリーンアップをチェック
-   - `--detectOpenHandles`で監視
-
-### デバッグモード
-
-詳細なログを有効化：
+デバッグログを有効化：
 ```bash
-LOG_LEVEL=debug SHOW_TEST_LOGS=true npm run test:e2e
+LOG_LEVEL=debug npx tsx tests/e2e/custom-runner.ts
 ```
 
-## CI/CD統合
+### 手動デバッグ
 
-### GitHub Actions
-
-```yaml
-- name: E2Eテストを実行
-  run: |
-    npm ci
-    npm run build
-    npm run test:e2e
-  env:
-    CI: true
+対話的デバッグにはMCP Inspectorを使用：
+```bash
+npx @modelcontextprotocol/inspector node dist/server.js
 ```
 
-### テストレポート
+## 参考資料
 
-E2Eテストは`test-results/e2e/`にJSONレポートを生成：
-- テストサマリー
-- 個別のスイート結果
-- パフォーマンスメトリクス
-- 環境情報
-
-## メンテナンス
-
-### 新しいテストの追加
-
-1. `tests/e2e/`にテストファイルを作成
-2. `run-e2e-tests.ts`の`testSuites`に追加
-3. 既存のパターンに従う
-4. ドキュメントを更新
-
-### テストの更新
-
-API変更時：
-1. テストフィクスチャを更新
-2. ツール呼び出しを修正
-3. アサーションを調整
-4. 完全なスイートを実行
-
-### パフォーマンス監視
-
-定期的なタスク：
-- テストレポートをレビュー
-- パフォーマンス目標を更新
-- 遅いテストを最適化
-- 新しいシナリオを追加
+- [MCP SDKドキュメント](https://github.com/modelcontextprotocol/sdk)
+- [カスタムランナー実装](../tests/e2e/custom-runner.ts)
+- [E2Eテスト README](../tests/e2e/README.md)
