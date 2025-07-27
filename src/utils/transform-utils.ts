@@ -170,7 +170,6 @@ export class MarkdownTransformers {
       '',
       `**ID:** ${session.id}`,
       `**Date:** ${session.date}`,
-      `**Category:** ${session.category || 'Uncategorized'}`,
       ''
     ];
 

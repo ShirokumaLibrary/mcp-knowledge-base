@@ -152,15 +152,14 @@ export class SearchRepository extends BaseRepository {
     try {
       const rows = await this.db.allAsync(
         `SELECT * FROM search_sessions WHERE 
-         title LIKE ? OR content LIKE ? OR summary LIKE ? OR category LIKE ?`,
-        [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]
+         title LIKE ? OR content LIKE ? OR summary LIKE ?`,
+        [`%${query}%`, `%${query}%`, `%${query}%`]
       );
 
       return rows.map((row: any) => ({
         id: row.id,
         title: row.title,
         content: row.content,
-        category: row.category,
         tags: row.tags ? row.tags.split(',') : [],
         date: row.date,
         startTime: row.start_time,
@@ -269,7 +268,6 @@ export class SearchRepository extends BaseRepository {
         id: row.id,
         title: row.title,
         content: row.content,
-        category: row.category,
         tags: row.tags ? row.tags.split(',') : [],
         date: row.date,
         startTime: row.start_time,

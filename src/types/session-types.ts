@@ -42,7 +42,6 @@ export interface WorkSession {
   related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
   related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags?: string[];      // @ai-pattern: Categorization
-  category?: string;    // @ai-logic: Work type classification
   date: string;         // @ai-pattern: YYYY-MM-DD format
   startTime?: string;   // @ai-pattern: HH:MM:SS format
   endTime?: string;     // @ai-pattern: HH:MM:SS format

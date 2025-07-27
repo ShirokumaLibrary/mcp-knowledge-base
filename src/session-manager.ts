@@ -77,7 +77,6 @@ export class WorkSessionManager {
     title: string,
     content?: string,
     tags?: string[],
-    category?: string,
     id?: string,  // @ai-logic: Custom ID for imports
     datetime?: string,  // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
     related_tasks?: string[],
@@ -92,7 +91,6 @@ export class WorkSessionManager {
       title,
       content,
       tags,
-      category,
       related_tasks,
       related_documents,
       date,
@@ -116,7 +114,6 @@ export class WorkSessionManager {
     title?: string,
     content?: string,
     tags?: string[],
-    category?: string,
     related_tasks?: string[],
     related_documents?: string[]
   ): WorkSession {
@@ -132,7 +129,6 @@ export class WorkSessionManager {
       title: title !== undefined ? title : session.title,
       content: content !== undefined ? content : session.content,
       tags: tags !== undefined ? tags : session.tags,
-      category: category !== undefined ? category : session.category,
       related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
       related_documents: related_documents !== undefined ? related_documents : session.related_documents,
       updatedAt: new Date().toISOString()  // @ai-logic: Track modification time

@@ -50,7 +50,6 @@ export class SessionHandlers {
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
-        validatedArgs.category,
         validatedArgs.id,  // @ai-logic: Optional custom ID
         validatedArgs.datetime,  // @ai-logic: Optional datetime for past data migration
         validatedArgs.related_tasks,
@@ -93,7 +92,6 @@ export class SessionHandlers {
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
-        validatedArgs.category,
         validatedArgs.related_tasks,
         validatedArgs.related_documents
       );
