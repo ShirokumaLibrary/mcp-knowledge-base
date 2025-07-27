@@ -284,7 +284,6 @@ Create a new work session.
 **Parameters:**
 - `title` (string, required): Session title
 - `content` (string): Session content
-- `category` (string): Session category
 - `tags` (string[]): Tags
 - `related_tasks` (string[]): Related task references
 - `related_documents` (string[]): Related document references
@@ -294,7 +293,6 @@ Create a new work session.
 ```json
 {
   "title": "Code review session",
-  "category": "Development",
   "content": "Reviewed authentication module",
   "tags": ["review", "security"]
 }

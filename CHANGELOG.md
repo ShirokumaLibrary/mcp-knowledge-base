@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-01-27
+
+### Removed
+- Session category field - tags provide sufficient categorization
+  - Removed `category` parameter from create_session and update_session tools
+  - Removed category field from WorkSession type
+  - Created migration script to remove category from existing markdown files
+  - Updated all tests and documentation
+
+### Fixed
+- MaxListenersExceededWarning in tests by properly configuring Jest setup
+  - Added jest.presetup.js to increase EventEmitter limits before module loading
+  - Warnings no longer appear during test execution
+
 ## [0.1.0] - 2025-01-27
 
 > **Note**: E2E tests require special setup due to MCP SDK module resolution issues.
