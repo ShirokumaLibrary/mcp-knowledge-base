@@ -196,7 +196,6 @@ interface DocumentEntity extends BaseEntity {
 **パラメータ:**
 - `title` (string, 必須): セッションタイトル
 - `content` (string): セッションコンテンツ
-- `category` (string): セッションカテゴリ
 - `tags` (string[]): タグ
 - `related_tasks` (string[]): 関連タスクの参照
 - `related_documents` (string[]): 関連ドキュメントの参照
