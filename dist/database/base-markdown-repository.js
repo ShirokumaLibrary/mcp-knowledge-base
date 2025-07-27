@@ -152,8 +152,9 @@ export class BaseMarkdownRepository extends BaseRepository {
      */
     async getEntity(id) {
         const content = await this.readFile(id);
-        if (!content)
-            return null; // @ai-logic: File doesn't exist
+        if (!content) {
+            return null;
+        } // @ai-logic: File doesn't exist
         return this.parseMarkdownContent(content);
     }
     /**

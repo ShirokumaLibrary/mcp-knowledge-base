@@ -7,6 +7,7 @@
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { CreateDailySummarySchema, UpdateDailySummarySchema, GetDailySummariesSchema, GetDailySummaryDetailSchema } from '../schemas/session-schemas.js';
+import { createLogger } from '../utils/logger.js';
 /**
  * @ai-context Handles MCP tool calls for daily summaries
  * @ai-pattern Each method validates and delegates
@@ -16,6 +17,7 @@ import { CreateDailySummarySchema, UpdateDailySummarySchema, GetDailySummariesSc
  */
 export class SummaryHandlers {
     sessionManager;
+    logger = createLogger('SummaryHandlers');
     /**
      * @ai-intent Initialize with session manager
      * @ai-pattern Dependency injection
@@ -33,8 +35,8 @@ export class SummaryHandlers {
      * @ai-return Complete summary with success message
      */
     async handleCreateDailySummary(args) {
-        const validatedArgs = CreateDailySummarySchema.parse(args); // @ai-validation: Strict date format
         try {
+            const validatedArgs = CreateDailySummarySchema.parse(args); // @ai-validation: Strict date format
             const summary = this.sessionManager.createDailySummary(validatedArgs.date, // @ai-critical: Primary key
             validatedArgs.title, // @ai-validation: Required
             validatedArgs.content, // @ai-validation: Required
@@ -44,17 +46,21 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' }, null, 2),
-                    },
-                ],
+                        text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' }, null, 2)
+                    }
+                ]
             };
         }
         catch (error) {
+            this.logger.error('Failed to create daily summary', { error, args });
             // @ai-error-handling: Convert duplicate error to MCP format
-            if (error.message && error.message.includes('already exists')) {
+            if (error instanceof Error && error.message.includes('already exists')) {
                 throw new McpError(ErrorCode.InvalidRequest, error.message);
             }
-            throw error;
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to create daily summary: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
     /**
@@ -66,8 +72,8 @@ export class SummaryHandlers {
      * @ai-return Updated summary with success message
      */
     async handleUpdateDailySummary(args) {
-        const validatedArgs = UpdateDailySummarySchema.parse(args);
         try {
+            const validatedArgs = UpdateDailySummarySchema.parse(args);
             const summary = this.sessionManager.updateDailySummary(validatedArgs.date, // @ai-critical: Identifies summary
             validatedArgs.title, // @ai-bug: || prevents clearing
             validatedArgs.content, // @ai-bug: || prevents clearing
@@ -77,14 +83,18 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summary, message: 'Daily summary updated successfully' }, null, 2),
-                    },
-                ],
+                        text: JSON.stringify({ data: summary, message: 'Daily summary updated successfully' }, null, 2)
+                    }
+                ]
             };
         }
         catch (error) {
+            this.logger.error('Failed to update daily summary', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
             // @ai-error-handling: Convert to MCP error format
-            throw new McpError(ErrorCode.InvalidRequest, `Daily summary for ${validatedArgs.date} not found or cannot be updated`);
+            throw new McpError(ErrorCode.InternalError, `Failed to update daily summary: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
     /**
@@ -96,18 +106,27 @@ export class SummaryHandlers {
      * @ai-return Array of summaries in date order
      */
     async handleGetDailySummaries(args) {
-        const validatedArgs = GetDailySummariesSchema.parse(args);
-        const summaries = this.sessionManager.getDailySummaries(validatedArgs.start_date, // @ai-optional: Start of range
-        validatedArgs.end_date // @ai-optional: End of range
-        );
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify({ data: summaries }, null, 2),
-                },
-            ],
-        };
+        try {
+            const validatedArgs = GetDailySummariesSchema.parse(args);
+            const summaries = this.sessionManager.getDailySummaries(validatedArgs.start_date, // @ai-optional: Start of range
+            validatedArgs.end_date // @ai-optional: End of range
+            );
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ data: summaries }, null, 2)
+                    }
+                ]
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to get daily summaries', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to get daily summaries: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle get_summary_detail MCP tool call
@@ -118,20 +137,29 @@ export class SummaryHandlers {
      * @ai-why View specific day's summary
      */
     async handleGetDailySummaryDetail(args) {
-        const validatedArgs = GetDailySummaryDetailSchema.parse(args);
-        const summary = this.sessionManager.getDailySummaryDetail(validatedArgs.date);
-        if (!summary) {
-            throw new McpError(ErrorCode.InvalidRequest, `Daily summary for ${validatedArgs.date} not found` // @ai-ux: Include date in error
-            );
+        try {
+            const validatedArgs = GetDailySummaryDetailSchema.parse(args);
+            const summary = this.sessionManager.getDailySummaryDetail(validatedArgs.date);
+            if (!summary) {
+                throw new McpError(ErrorCode.InvalidRequest, `Daily summary for ${validatedArgs.date} not found` // @ai-ux: Include date in error
+                );
+            }
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ data: summary }, null, 2)
+                    }
+                ]
+            };
         }
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify({ data: summary }, null, 2),
-                },
-            ],
-        };
+        catch (error) {
+            this.logger.error('Failed to get daily summary detail', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to get daily summary detail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 }
 //# sourceMappingURL=summary-handlers.js.map

@@ -28,7 +28,7 @@ async function scanAndRebuild(databasePath, db) {
         sessions: 0,
         tags: new Set(),
         statuses: new Set(), // @ai-logic: Now we only store status names
-        maxIds: {}, // @ai-critical: Track maximum IDs to update sequences correctly
+        maxIds: {} // @ai-critical: Track maximum IDs to update sequences correctly
     };
     // Initialize counts for all known types
     for (const seq of sequences) {
@@ -290,12 +290,14 @@ async function rebuildDatabase() {
         // Pre-register all session and summary tags to avoid race conditions
         const sessionTags = new Set();
         sessions.forEach((session) => {
-            if (session.tags)
+            if (session.tags) {
                 session.tags.forEach((tag) => sessionTags.add(tag));
+            }
         });
         summaries.forEach((summary) => {
-            if (summary.tags)
+            if (summary.tags) {
                 summary.tags.forEach((tag) => sessionTags.add(tag));
+            }
         });
         if (sessionTags.size > 0) {
             const tagRepo = fullDb.tagRepo;

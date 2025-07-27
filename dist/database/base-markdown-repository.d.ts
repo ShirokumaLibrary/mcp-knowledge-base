@@ -5,7 +5,8 @@
  * @ai-why Reduces code duplication across issue/plan/doc/knowledge repos
  * @ai-assumption All entities use markdown files with numeric IDs
  */
-import { BaseRepository, Database } from './base.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
 /**
  * @ai-context Base interface for all markdown-stored entities
  * @ai-pattern Common fields across all content types

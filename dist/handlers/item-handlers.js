@@ -19,7 +19,7 @@ export class ItemHandlers {
      */
     async isValidType(type) {
         const db = this.db.getDatabase();
-        const row = await db.getAsync(`SELECT type FROM sequences WHERE type = ?`, [type]);
+        const row = await db.getAsync('SELECT type FROM sequences WHERE type = ?', [type]);
         return !!row;
     }
     /**
@@ -28,7 +28,7 @@ export class ItemHandlers {
      */
     async isTypeOfBase(type, baseType) {
         const db = this.db.getDatabase();
-        const row = await db.getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const row = await db.getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         return row ? row.base_type === baseType : false;
     }
     /**
@@ -62,9 +62,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify({ data }, null, 2),
-                },
-            ],
+                    text: JSON.stringify({ data }, null, 2)
+                }
+            ]
         };
     }
     /**
@@ -98,9 +98,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify({ data: item }, null, 2),
-                },
-            ],
+                    text: JSON.stringify({ data: item }, null, 2)
+                }
+            ]
         };
     }
     /**
@@ -133,9 +133,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: `${validatedArgs.type} created: ${JSON.stringify(item, null, 2)}`,
-                },
-            ],
+                    text: `${validatedArgs.type} created: ${JSON.stringify(item, null, 2)}`
+                }
+            ]
         };
     }
     async handleUpdateItem(args) {
@@ -155,8 +155,9 @@ export class ItemHandlers {
         else {
             // Handle all other types as documents
             success = await this.db.updateDocument(validatedArgs.type, validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.description, validatedArgs.related_tasks, validatedArgs.related_documents);
-            if (success)
+            if (success) {
                 updatedItem = await this.db.getDocument(validatedArgs.type, validatedArgs.id);
+            }
         }
         if (!success) {
             throw new McpError(ErrorCode.InvalidRequest, `${validatedArgs.type} ID ${validatedArgs.id} not found`);
@@ -165,9 +166,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: `${validatedArgs.type} updated: ${JSON.stringify(updatedItem, null, 2)}`,
-                },
-            ],
+                    text: `${validatedArgs.type} updated: ${JSON.stringify(updatedItem, null, 2)}`
+                }
+            ]
         };
     }
     async handleDeleteItem(args) {
@@ -193,9 +194,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: `${validatedArgs.type} ID ${validatedArgs.id} deleted`,
-                },
-            ],
+                    text: `${validatedArgs.type} ID ${validatedArgs.id} deleted`
+                }
+            ]
         };
     }
     async handleSearchItemsByTag(args) {
@@ -204,7 +205,7 @@ export class ItemHandlers {
         // Support searching multiple types
         const db = this.db.getDatabase();
         const types = validatedArgs.types ||
-            (await db.allAsync(`SELECT type FROM sequences`, [])).map((row) => row.type);
+            (await db.allAsync('SELECT type FROM sequences', [])).map((row) => row.type);
         for (const type of types) {
             // Validate type exists
             const typeExists = await this.isValidType(type);
@@ -215,16 +216,18 @@ export class ItemHandlers {
                 // @ai-logic: Use unified task search
                 const tasks = await this.db.searchTasksByTag(type, validatedArgs.tag);
                 // Add all tasks to a generic results object
-                if (!results.tasks)
+                if (!results.tasks) {
                     results.tasks = {};
+                }
                 results.tasks[type] = tasks;
             }
             else {
                 // Handle document types
                 const documents = await this.db.searchDocumentsByTag(validatedArgs.tag, type);
                 // Add all documents to a generic results object
-                if (!results.documents)
+                if (!results.documents) {
                     results.documents = {};
+                }
                 results.documents[type] = documents;
             }
         }
@@ -232,9 +235,9 @@ export class ItemHandlers {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify({ data: results }, null, 2),
-                },
-            ],
+                    text: JSON.stringify({ data: results }, null, 2)
+                }
+            ]
         };
     }
 }

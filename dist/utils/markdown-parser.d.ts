@@ -33,7 +33,7 @@
  * - Handles missing frontmatter gracefully
  * - Preserves content even if metadata parsing fails
  */
-import { Document } from '../types/domain-types.js';
+import type { Document } from '../types/domain-types.js';
 export interface ParsedMarkdown {
     metadata: Record<string, any>;
     content: string;

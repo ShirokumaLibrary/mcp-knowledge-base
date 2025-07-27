@@ -12,8 +12,8 @@
  * @ai-data-flow MCP client -> server.ts -> StatusHandlers -> Database -> StatusRepository
  * @ai-integration-point Used by issues and plans for workflow state
  */
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for status operations
  * @ai-pattern CRUD handlers with validation and error handling
@@ -23,6 +23,7 @@ import { ToolResponse } from '../types/mcp-types.js';
  */
 export declare class StatusHandlers {
     private db;
+    private logger;
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection for testability
@@ -46,7 +47,7 @@ export declare class StatusHandlers {
      * @ai-assumption Status names should be unique (not enforced)
      * @ai-return JSON formatted new status object
      */
-    handleCreateStatus(args: any): Promise<ToolResponse>;
+    handleCreateStatus(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle update_status MCP tool call
      * @ai-flow 1. Validate args -> 2. Update in DB -> 3. Check success -> 4. Return
@@ -55,7 +56,7 @@ export declare class StatusHandlers {
      * @ai-bug Missing await on updateStatus call
      * @ai-return Success message with status ID
      */
-    handleUpdateStatus(args: any): Promise<ToolResponse>;
+    handleUpdateStatus(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle delete_status MCP tool call
      * @ai-flow 1. Validate ID -> 2. Delete from DB -> 3. Check success -> 4. Return
@@ -64,5 +65,5 @@ export declare class StatusHandlers {
      * @ai-bug Missing await on deleteStatus call
      * @ai-return Success message or McpError
      */
-    handleDeleteStatus(args: any): Promise<ToolResponse>;
+    handleDeleteStatus(args: unknown): Promise<ToolResponse>;
 }

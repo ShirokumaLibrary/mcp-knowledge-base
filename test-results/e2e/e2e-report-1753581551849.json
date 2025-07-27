@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-07-27T01:59:11.849Z",
+  "summary": {
+    "total": 5,
+    "passed": 0,
+    "failed": 5,
+    "duration": 2231
+  },
+  "results": [
+    {
+      "suite": "CRUD Operations",
+      "passed": false,
+      "duration": 452,
+      "error": "Error: Command failed with code 1"
+    },
+    {
+      "suite": "Search Functionality",
+      "passed": false,
+      "duration": 437,
+      "error": "Error: Command failed with code 1"
+    },
+    {
+      "suite": "Performance",
+      "passed": false,
+      "duration": 458,
+      "error": "Error: Command failed with code 1"
+    },
+    {
+      "suite": "Security",
+      "passed": false,
+      "duration": 446,
+      "error": "Error: Command failed with code 1"
+    },
+    {
+      "suite": "Workflows",
+      "passed": false,
+      "duration": 438,
+      "error": "Error: Command failed with code 1"
+    }
+  ],
+  "environment": {
+    "node": "v22.16.0",
+    "platform": "linux",
+    "arch": "arm64"
+  }
+}

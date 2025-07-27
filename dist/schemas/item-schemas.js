@@ -31,7 +31,7 @@ export const GetItemsSchema = z.object({
     type: ItemTypeSchema,
     subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
     includeClosedStatuses: z.boolean().optional().default(false),
-    statusIds: z.array(z.number().int().positive()).optional(),
+    statusIds: z.array(z.number().int().positive()).optional()
 }).strict();
 /**
  * @ai-intent Schema for get_item_detail tool
@@ -42,7 +42,7 @@ export const GetItemsSchema = z.object({
 export const GetItemDetailSchema = z.object({
     type: ItemTypeSchema,
     subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
-    id: z.number().int().positive(), // @ai-validation: Must be > 0
+    id: z.number().int().positive() // @ai-validation: Must be > 0
 }).strict();
 /**
  * @ai-intent Schema for create_item tool
@@ -66,7 +66,7 @@ export const CreateItemSchema = z.object({
     start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
     end_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-    related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+    related_documents: z.array(z.string()).optional() // @ai-pattern: ["docs-1", "knowledge-2"]
 }).strict();
 /**
  * @ai-intent Schema for update_item tool
@@ -88,7 +88,7 @@ export const UpdateItemSchema = z.object({
     start_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
     end_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-    related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+    related_documents: z.array(z.string()).optional() // @ai-pattern: ["docs-1", "knowledge-2"]
 }).strict();
 /**
  * @ai-intent Schema for delete_item tool
@@ -99,7 +99,7 @@ export const UpdateItemSchema = z.object({
 export const DeleteItemSchema = z.object({
     type: ItemTypeSchema,
     subtype: DocumentSubtypeSchema.optional(), // @ai-logic: Required when type='document'
-    id: z.number().int().positive(),
+    id: z.number().int().positive()
 }).strict();
 /**
  * @ai-intent Schema for search_items_by_tag tool
@@ -110,6 +110,6 @@ export const DeleteItemSchema = z.object({
  */
 export const SearchItemsByTagSchema = z.object({
     tag: z.string().min(1, 'Tag is required'), // @ai-validation: Non-empty
-    types: z.array(ItemTypeSchema).optional(), // @ai-logic: Filter results by type
+    types: z.array(ItemTypeSchema).optional() // @ai-logic: Filter results by type
 }).strict();
 //# sourceMappingURL=item-schemas.js.map

@@ -5,8 +5,8 @@
  * @ai-dependencies SessionManager for business logic, Zod for validation
  * @ai-assumption All responses follow MCP JSON format
  */
-import { WorkSessionManager } from '../session-manager.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { WorkSessionManager } from '../session-manager.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for session operations
  * @ai-pattern Each method validates args and returns JSON response
@@ -16,6 +16,7 @@ import { ToolResponse } from '../types/mcp-types.js';
  */
 export declare class SessionHandlers {
     private sessionManager;
+    private logger;
     /**
      * @ai-intent Initialize with session manager dependency
      * @ai-pattern Dependency injection for testability
@@ -30,7 +31,7 @@ export declare class SessionHandlers {
      * @ai-return MCP response with complete session object
      * @ai-error-handling Zod throws on validation failure
      */
-    handleCreateWorkSession(args: any): Promise<ToolResponse>;
+    handleCreateWorkSession(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle update_session MCP tool call
      * @ai-flow 1. Validate with ID required -> 2. Update -> 3. Return updated
@@ -39,7 +40,7 @@ export declare class SessionHandlers {
      * @ai-error-handling Manager throws if session not found
      * @ai-return Updated session in MCP format
      */
-    handleUpdateWorkSession(args: any): Promise<ToolResponse>;
+    handleUpdateWorkSession(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_latest_session MCP tool call
      * @ai-flow 1. Get today's latest -> 2. Check exists -> 3. Return
@@ -48,7 +49,7 @@ export declare class SessionHandlers {
      * @ai-return Most recent session from today
      * @ai-why Quick access to continue current work
      */
-    handleGetLatestSession(args: any): Promise<ToolResponse>;
+    handleGetLatestSession(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle search_sessions_by_tag MCP tool call
      * @ai-flow 1. Validate tag -> 2. Search files -> 3. Return matches
@@ -57,7 +58,7 @@ export declare class SessionHandlers {
      * @ai-pattern Exact tag match, case-sensitive
      * @ai-return Array of matching sessions
      */
-    handleSearchSessionsByTag(args: any): Promise<ToolResponse>;
+    handleSearchSessionsByTag(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_sessions MCP tool call
      * @ai-flow 1. Parse date range -> 2. Get sessions -> 3. Return list
@@ -66,7 +67,7 @@ export declare class SessionHandlers {
      * @ai-performance Reads multiple directories if date range
      * @ai-return Chronologically ordered session array
      */
-    handleGetSessions(args: any): Promise<ToolResponse>;
+    handleGetSessions(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_session_detail MCP tool call
      * @ai-flow 1. Validate ID -> 2. Search all dates -> 3. Return or error
@@ -75,5 +76,5 @@ export declare class SessionHandlers {
      * @ai-error-handling Specific error message with ID
      * @ai-return Complete session object or McpError
      */
-    handleGetSessionDetail(args: any): Promise<ToolResponse>;
+    handleGetSessionDetail(args: unknown): Promise<ToolResponse>;
 }

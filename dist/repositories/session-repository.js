@@ -148,8 +148,9 @@ export class SessionRepository {
         const dateDirs = fs.readdirSync(this.sessionsDir);
         for (const dateDir of dateDirs) {
             const datePath = path.join(this.sessionsDir, dateDir);
-            if (!fs.statSync(datePath).isDirectory())
-                continue; // @ai-logic: Skip non-directories
+            if (!fs.statSync(datePath).isDirectory()) {
+                continue;
+            } // @ai-logic: Skip non-directories
             const sessionFiles = fs.readdirSync(datePath)
                 .filter(f => f.startsWith('session-') && f.endsWith('.md'));
             for (const sessionFile of sessionFiles) {
@@ -182,8 +183,9 @@ export class SessionRepository {
         const dateDirs = fs.readdirSync(this.sessionsDir);
         for (const dateDir of dateDirs) {
             const datePath = path.join(this.sessionsDir, dateDir);
-            if (!fs.statSync(datePath).isDirectory())
+            if (!fs.statSync(datePath).isDirectory()) {
                 continue;
+            }
             const sessionFiles = fs.readdirSync(datePath)
                 .filter(f => f.startsWith('session-') && f.endsWith('.md'));
             for (const sessionFile of sessionFiles) {
@@ -213,11 +215,13 @@ export class SessionRepository {
             .sort(); // Ensure chronological order
         for (const dateDir of dateDirs) {
             // Skip if before start date
-            if (startDate && dateDir < startDate)
+            if (startDate && dateDir < startDate) {
                 continue;
+            }
             // Skip if after end date
-            if (endDate && dateDir > endDate)
+            if (endDate && dateDir > endDate) {
                 continue;
+            }
             const sessions = this.getSessionsForDate(dateDir);
             results.push(...sessions);
         }
@@ -256,11 +260,13 @@ export class SessionRepository {
             .sort(); // Ensure chronological order
         for (const dateDir of dateDirs) {
             // Skip if before start date
-            if (startDate && dateDir < startDate)
+            if (startDate && dateDir < startDate) {
                 continue;
+            }
             // Skip if after end date
-            if (endDate && dateDir > endDate)
+            if (endDate && dateDir > endDate) {
                 continue;
+            }
             const summary = this.loadDailySummary(dateDir);
             if (summary) {
                 results.push(summary);

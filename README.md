@@ -83,14 +83,56 @@ The rebuild process preserves:
 - Custom status definitions (beyond the default ones)
 - All tags and relationships
 
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests
+npm run test:integration
+
+# Run E2E tests
+npm run test:e2e
+
+# Run all tests including E2E
+npm run test:all
+
+# Debug with MCP Inspector (opens browser)
+npm run inspect
+```
+
+See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing documentation.
+
 ## Documentation
 
-- [API Reference](docs/api-reference.md) - Complete API documentation
+### English Documentation
+- [API Reference](docs/API.md) - Complete API documentation
 - [Examples](docs/examples.md) - Usage examples and code snippets
 - [Architecture](docs/architecture.md) - System design and implementation details
 - [Development](docs/development.md) - Development setup and guidelines
-- [Test Cases](docs/test-cases.md) - Comprehensive test cases for validation
-- [AI Annotation Rules](docs/ai-annotation-rules.md) - Guidelines for AI-friendly code annotations
+- [Contributing](docs/CONTRIBUTING.md) - Contribution guidelines
+- [Changelog](CHANGELOG.md) - Version history and changes
+- [Upgrade Guide](docs/UPGRADE.md) - Migration instructions
+- [Security Guide](docs/security-guide.md) - Security best practices
+- [Performance Guide](docs/performance-optimization.md) - Performance tuning
+- [Testing Guide](docs/testing-guide.md) - Testing strategies
+- [E2E Testing](docs/e2e-testing-guide.md) - End-to-end testing guide
+
+### 日本語ドキュメント
+- [README](docs.ja/README.md) - プロジェクト概要
+- [APIリファレンス](docs.ja/API.md) - 完全なAPIドキュメント
+- [アーキテクチャ](docs.ja/architecture.md) - システム設計と実装の詳細
+- [開発ガイド](docs.ja/development.md) - 開発セットアップとガイドライン
+- [貢献ガイド](docs.ja/CONTRIBUTING.md) - 貢献のためのガイドライン
+- [アップグレードガイド](docs.ja/UPGRADE.md) - マイグレーション手順
+- [セキュリティガイド](docs.ja/security-guide.md) - セキュリティのベストプラクティス
+- [パフォーマンスガイド](docs.ja/performance-optimization.md) - パフォーマンスチューニング
+- [テストガイド](docs.ja/testing-guide.md) - テスト戦略
+- [E2Eテストガイド](docs.ja/e2e-testing-guide.md) - エンドツーエンドテストガイド
 
 
 

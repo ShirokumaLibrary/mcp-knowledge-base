@@ -46,8 +46,9 @@ const prodFormat = combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors(
  * @ai-intent Determine active log level from config
  * @ai-logic If logging disabled, only show errors
  * @ai-pattern Respects config.logging.enabled flag
+ * @ai-priority Environment variable > config > default
  */
-const logLevel = config.logging.enabled ? config.logging.level : 'error';
+const logLevel = process.env.LOG_LEVEL || (config.logging.enabled ? config.logging.level : 'error');
 /**
  * @ai-intent Configure log destinations (transports)
  * @ai-pattern Always log to console, conditionally to files
@@ -92,6 +93,7 @@ if (process.env.NODE_ENV === 'production' && config.logging.enabled) {
 export function createLogger(service) {
     return winston.createLogger({
         level: logLevel,
+        silent: logLevel === 'silent', // @ai-logic: Complete silence for tests
         defaultMeta: { service }, // @ai-logic: Service tagged on all logs
         transports,
         // @ai-critical: Prevent process crash from uncaught errors

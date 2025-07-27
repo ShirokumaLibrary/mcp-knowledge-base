@@ -59,11 +59,13 @@ export class StaticTypeRegistry {
     }
     getDirectoryName(typeName) {
         const type = this.types.get(typeName);
-        if (!type)
+        if (!type) {
             return typeName;
+        }
         // Use custom directory if specified
-        if (type.directoryName)
+        if (type.directoryName) {
             return type.directoryName;
+        }
         // Otherwise use base type's default directory
         const baseConfig = BASE_TYPE_CONFIGS.find(c => c.name === type.baseType);
         return baseConfig ? baseConfig.defaultDirectory : type.baseType;
@@ -85,17 +87,20 @@ export class DynamicTypeRegistry {
         this.db = db;
     }
     async load() {
-        if (this.loaded)
+        if (this.loaded) {
             return;
+        }
         // Load all types from database
         const rows = await this.db.allAsync('SELECT type, base_type FROM sequences');
         for (const row of rows) {
             // Get fields based on base type
-            const fields = BASE_TYPE_FIELDS[row.base_type] || new Set(['title', 'content', 'tags', 'description']);
-            this.types.set(row.type, {
-                type: row.type,
-                baseType: row.base_type,
-                pluralForm: row.type, // Use type name as-is (already plural in DB)
+            const baseType = String(row.base_type);
+            const typeName = String(row.type);
+            const fields = BASE_TYPE_FIELDS[baseType] || new Set(['title', 'content', 'tags', 'description']);
+            this.types.set(typeName, {
+                type: String(row.type),
+                baseType: String(row.base_type),
+                pluralForm: String(row.type), // Use type name as-is (already plural in DB)
                 supportedFields: fields
             });
         }
@@ -119,11 +124,13 @@ export class DynamicTypeRegistry {
     }
     getDirectoryName(typeName) {
         const type = this.types.get(typeName);
-        if (!type)
+        if (!type) {
             return typeName;
+        }
         // Use custom directory if specified
-        if (type.directoryName)
+        if (type.directoryName) {
             return type.directoryName;
+        }
         // Otherwise use base type's default directory
         const baseConfig = BASE_TYPE_CONFIGS.find(c => c.name === type.baseType);
         return baseConfig ? baseConfig.defaultDirectory : type.baseType;

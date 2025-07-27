@@ -25,20 +25,21 @@ export class SearchRepository extends BaseRepository {
      */
     async searchAll(query) {
         // @ai-logic: Search tasks (issues and plans) from unified table
-        const taskRows = await this.db.allAsync(`SELECT type, id FROM search_tasks WHERE title LIKE ? OR content LIKE ?`, [`%${query}%`, `%${query}%`]);
+        const taskRows = await this.db.allAsync('SELECT type, id FROM search_tasks WHERE title LIKE ? OR content LIKE ?', [`%${query}%`, `%${query}%`]);
         // Get task types from sequences table
-        const sequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`);
+        const sequences = await this.db.allAsync('SELECT type FROM sequences WHERE base_type = \'tasks\' ORDER BY type');
         // Group task rows by type
         const tasksByType = {};
         for (const row of taskRows) {
-            if (!tasksByType[row.type]) {
-                tasksByType[row.type] = [];
+            const rowType = String(row.type);
+            if (!tasksByType[rowType]) {
+                tasksByType[rowType] = [];
             }
-            tasksByType[row.type].push(row);
+            tasksByType[rowType].push(row);
         }
         // For backward compatibility, map first two task types to issues/plans
-        const issueType = sequences[0]?.type;
-        const planType = sequences[1]?.type;
+        const issueType = sequences[0] ? String(sequences[0].type) : null;
+        const planType = sequences[1] ? String(sequences[1].type) : null;
         const issueRows = issueType ? (tasksByType[issueType] || []) : [];
         const planRows = planType ? (tasksByType[planType] || []) : [];
         const issuePromises = issueRows.map((row) => this.taskRepository.getTask(issueType, row.id));
@@ -46,14 +47,15 @@ export class SearchRepository extends BaseRepository {
         const planPromises = planRows.map((row) => this.taskRepository.getTask(planType, row.id));
         const plans = (await Promise.all(planPromises)).filter(Boolean);
         // @ai-logic: Search all document types
-        const documentRows = await this.db.allAsync(`SELECT type, id FROM search_documents WHERE title LIKE ? OR content LIKE ?`, [`%${query}%`, `%${query}%`]);
+        const documentRows = await this.db.allAsync('SELECT type, id FROM search_documents WHERE title LIKE ? OR content LIKE ?', [`%${query}%`, `%${query}%`]);
         // Group document rows by type
         const documentsByType = {};
         for (const row of documentRows) {
-            if (!documentsByType[row.type]) {
-                documentsByType[row.type] = [];
+            const rowType = String(row.type);
+            if (!documentsByType[rowType]) {
+                documentsByType[rowType] = [];
             }
-            documentsByType[row.type].push(row);
+            documentsByType[rowType].push(row);
         }
         // Get all documents
         const allDocuments = [];
@@ -76,7 +78,7 @@ export class SearchRepository extends BaseRepository {
     async searchAllByTag(tag) {
         // @ai-performance: Parallel fetching for better response time
         // Get task types from sequences
-        const taskSequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`);
+        const taskSequences = await this.db.allAsync('SELECT type FROM sequences WHERE base_type = \'tasks\' ORDER BY type');
         // Fetch all tasks by type
         const taskPromises = taskSequences.map((seq) => this.taskRepository.getAllTasks(seq.type));
         const results = await Promise.all([
@@ -226,7 +228,7 @@ export class SearchRepository extends BaseRepository {
         ]);
         // @ai-logic: Load all content from markdown files
         // Get task types from sequences
-        const taskSequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`);
+        const taskSequences = await this.db.allAsync('SELECT type FROM sequences WHERE base_type = \'tasks\' ORDER BY type');
         // Fetch all tasks by type
         const taskPromises = taskSequences.map((seq) => this.taskRepository.getAllTasks(seq.type));
         const results = await Promise.all([
@@ -242,21 +244,24 @@ export class SearchRepository extends BaseRepository {
         // @ai-critical: Pre-register all tags to avoid race conditions
         const allTags = new Set();
         issues.forEach((issue) => {
-            if (issue.tags)
+            if (issue.tags) {
                 issue.tags.forEach(tag => allTags.add(tag));
+            }
         });
         plans.forEach((plan) => {
-            if (plan.tags)
+            if (plan.tags) {
                 plan.tags.forEach(tag => allTags.add(tag));
+            }
         });
         documents.forEach((doc) => {
-            if (doc.tags)
+            if (doc.tags) {
                 doc.tags.forEach(tag => allTags.add(tag));
+            }
         });
         // @ai-logic: Tags are auto-registered during document sync operations
         // @ai-performance: Batch sync for better performance
         // Get task types from sequences
-        const sequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'tasks' ORDER BY type`);
+        const sequences = await this.db.allAsync('SELECT type FROM sequences WHERE base_type = \'tasks\' ORDER BY type');
         const issueType = sequences[0]?.type;
         const planType = sequences[1]?.type;
         if (!issueType || !planType) {

@@ -1,3 +1,4 @@
+import { WorkSession, DailySummary } from '../types/complete-domain-types.js';
 export * from '../types/domain-types.js';
 /**
  * @ai-context Main database facade coordinating all repositories
@@ -244,7 +245,7 @@ export declare class FileIssueDatabase {
         plans: import("./index.js").Plan[];
         docs: import("./index.js").Document[];
         knowledge: import("./index.js").Document[];
-        sessions: import("../types/session-types.js").WorkSession[];
+        sessions: WorkSession[];
     }>;
     /**
      * @ai-intent Full-text search work sessions
@@ -282,7 +283,7 @@ export declare class FileIssueDatabase {
      * @ai-assumption Session object has expected properties
      * @ai-database-schema Uses session_tags relationship table for normalized tag storage
      */
-    syncSessionToSQLite(session: any): Promise<void>;
+    syncSessionToSQLite(session: WorkSession): Promise<void>;
     /**
      * @ai-intent Sync daily summary to SQLite
      * @ai-flow 1. Wait for init -> 2. Ensure tags -> 3. UPSERT summary -> 4. Update tag relationships
@@ -291,7 +292,7 @@ export declare class FileIssueDatabase {
      * @ai-assumption Summary has required date and title fields
      * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
      */
-    syncDailySummaryToSQLite(summary: any): Promise<void>;
+    syncDailySummaryToSQLite(summary: DailySummary): Promise<void>;
     /**
      * @ai-intent Clean shutdown of database connections
      * @ai-flow 1. Close SQLite connection -> 2. Flush pending writes

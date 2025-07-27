@@ -1,5 +1,6 @@
-import { BaseRepository, Database } from './base.js';
-import { Tag } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Tag } from '../types/domain-types.js';
 /**
  * @ai-context Repository for tag management across all content types
  * @ai-pattern Shared tagging system with auto-registration and ID-based relationships

@@ -2,9 +2,9 @@
  * @ai-context Repository interfaces for dependency injection
  * @ai-pattern Interface segregation for loose coupling
  * @ai-critical Prevents circular dependencies between repositories
- * @ai-debt Heavy use of 'any' type - needs proper typing
  * @ai-why Enables testing with mock implementations
  */
+import type { Status, Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary, Tag, WorkSession, DailySummary } from './complete-domain-types.js';
 /**
  * @ai-intent Status repository contract
  * @ai-pattern CRUD operations for workflow statuses
@@ -12,17 +12,9 @@
  * @ai-debt Replace 'any' with proper Status type
  */
 export interface IStatusRepository {
-    getStatus(id: number): Promise<any>;
-    getAllStatuses(): Promise<Array<{
-        id: number;
-        name: string;
-        is_closed?: boolean;
-    }>>;
-    createStatus(name: string, is_closed?: boolean): Promise<{
-        id: number;
-        name: string;
-        is_closed?: boolean;
-    }>;
+    getStatus(id: number): Promise<Status | null>;
+    getAllStatuses(): Promise<Status[]>;
+    createStatus(name: string, is_closed?: boolean): Promise<Status>;
     updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean>;
     deleteStatus(id: number): Promise<boolean>;
 }
@@ -33,47 +25,51 @@ export interface IStatusRepository {
  * @ai-debt Missing proper Tag type definitions
  */
 export interface ITagRepository {
-    getTag(id: number): Promise<any>;
-    getAllTags(): Promise<any[]>;
-    createTag(name: string): Promise<any>;
+    getTag(id: number): Promise<Tag | null>;
+    getAllTags(): Promise<Tag[]>;
+    createTag(name: string): Promise<Tag>;
     deleteTag(id: number): Promise<boolean>;
-    searchTags(pattern: string): Promise<any[]>;
+    searchTags(pattern: string): Promise<Tag[]>;
+    getTags(): Promise<Tag[]>;
+    getOrCreateTagId(name: string): Promise<number>;
+    ensureTagsExist(tags: string[]): Promise<void>;
+    getTagsByPattern(pattern: string): Promise<Tag[]>;
 }
 export interface IIssueRepository {
-    getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
-    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
-    createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<any>;
+    getAllIssues(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Issue[]>;
+    getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<IssueSummary[]>;
+    createIssue(title: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<Issue>;
     updateIssue(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[]): Promise<boolean>;
     deleteIssue(id: number): Promise<boolean>;
-    getIssue(id: number): Promise<any | null>;
-    searchIssuesByTag(tag: string): Promise<any[]>;
+    getIssue(id: number): Promise<Issue | null>;
+    searchIssuesByTag(tag: string): Promise<Issue[]>;
 }
 export interface IPlanRepository {
-    getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<any[]>;
-    getAllPlansSummary(): Promise<any[]>;
-    createPlan(title: string, description?: string, priority?: string, status_id?: number, tags?: string[], start_date?: string, end_date?: string): Promise<any>;
+    getAllPlans(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Plan[]>;
+    getAllPlansSummary(): Promise<PlanSummary[]>;
+    createPlan(title: string, description?: string, priority?: string, status_id?: number, tags?: string[], start_date?: string, end_date?: string): Promise<Plan>;
     updatePlan(id: number, title?: string, description?: string, priority?: string, status_id?: number, tags?: string[], start_date?: string, end_date?: string): Promise<boolean>;
     deletePlan(id: number): Promise<boolean>;
-    getPlan(id: number): Promise<any | null>;
-    searchPlansByTag(tag: string): Promise<any[]>;
+    getPlan(id: number): Promise<Plan | null>;
+    searchPlansByTag(tag: string): Promise<Plan[]>;
 }
 export interface IDocRepository {
-    getAllDocs(): Promise<any[]>;
-    getAllDocsSummary(): Promise<any[]>;
-    createDoc(title: string, content: string, tags?: string[]): Promise<any>;
+    getAllDocs(): Promise<Document[]>;
+    getAllDocsSummary(): Promise<DocumentSummary[]>;
+    createDoc(title: string, content: string, tags?: string[]): Promise<Document>;
     updateDoc(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean>;
     deleteDoc(id: number): Promise<boolean>;
-    getDoc(id: number): Promise<any | null>;
-    searchDocsByTag(tag: string): Promise<any[]>;
+    getDoc(id: number): Promise<Document | null>;
+    searchDocsByTag(tag: string): Promise<Document[]>;
 }
 export interface IKnowledgeRepository {
-    getAllKnowledge(): Promise<any[]>;
-    getAllKnowledgeSummary(): Promise<any[]>;
-    createKnowledge(title: string, content: string, tags?: string[]): Promise<any>;
+    getAllKnowledge(): Promise<Document[]>;
+    getAllKnowledgeSummary(): Promise<DocumentSummary[]>;
+    createKnowledge(title: string, content: string, tags?: string[]): Promise<Document>;
     updateKnowledge(id: number, title?: string, content?: string, tags?: string[]): Promise<boolean>;
     deleteKnowledge(id: number): Promise<boolean>;
-    getKnowledge(id: number): Promise<any | null>;
-    searchKnowledgeByTag(tag: string): Promise<any[]>;
+    getKnowledge(id: number): Promise<Document | null>;
+    searchKnowledgeByTag(tag: string): Promise<Document[]>;
 }
 /**
  * @ai-intent Search repository contract
@@ -84,12 +80,20 @@ export interface IKnowledgeRepository {
  */
 export interface ISearchRepository {
     searchAllByTag(tag: string): Promise<{
-        issues: any[];
-        plans: any[];
-        docs: any[];
-        knowledge: any[];
-        sessions?: any[];
+        issues: Issue[];
+        plans: Plan[];
+        docs: Document[];
+        knowledge: Document[];
+        sessions?: WorkSession[];
     }>;
-    searchSessionsByTag(tag: string): Promise<any[]>;
-    searchSessionsByContent(query: string): Promise<any[]>;
+    searchSessionsByTag(tag: string): Promise<WorkSession[]>;
+    searchSessionsByContent(query: string): Promise<WorkSession[]>;
+    searchAll(query: string): Promise<{
+        issues: Issue[];
+        plans: Plan[];
+        knowledge: Document[];
+    }>;
+    searchSessions(query: string): Promise<WorkSession[]>;
+    searchDailySummaries(query: string): Promise<DailySummary[]>;
+    rebuildSearchIndex(): Promise<void>;
 }

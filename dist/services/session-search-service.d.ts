@@ -5,9 +5,9 @@
  * @ai-dependencies Database for SQLite search, Repository for file search
  * @ai-why SQLite may be out of sync, files are source of truth
  */
-import { WorkSession, DailySummary } from '../types/session-types.js';
-import { FileIssueDatabase } from '../database.js';
-import { SessionRepository } from '../repositories/session-repository.js';
+import type { WorkSession, DailySummary } from '../types/session-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { SessionRepository } from '../repositories/session-repository.js';
 /**
  * @ai-context Orchestrates session search operations
  * @ai-pattern Service layer abstracting search complexity

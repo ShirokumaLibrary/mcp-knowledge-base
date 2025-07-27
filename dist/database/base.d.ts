@@ -1,14 +1,15 @@
 import sqlite3 from 'sqlite3';
-import winston from 'winston';
+import type winston from 'winston';
+import type { DatabaseRow, QueryParameters } from './types/database-types.js';
 /**
  * @ai-context Promise-based wrapper for SQLite3 database operations
  * @ai-pattern Adapter pattern to convert callback-based API to Promise-based
  * @ai-why Native sqlite3 uses callbacks, but async/await is cleaner for our codebase
  */
 export interface Database extends sqlite3.Database {
-    runAsync(sql: string, params?: any[]): Promise<sqlite3.RunResult>;
-    getAsync(sql: string, params?: any[]): Promise<any>;
-    allAsync(sql: string, params?: any[]): Promise<any[]>;
+    runAsync(sql: string, params?: QueryParameters): Promise<sqlite3.RunResult>;
+    getAsync(sql: string, params?: QueryParameters): Promise<DatabaseRow | undefined>;
+    allAsync(sql: string, params?: QueryParameters): Promise<DatabaseRow[]>;
 }
 /**
  * @ai-context Base class for all repository implementations

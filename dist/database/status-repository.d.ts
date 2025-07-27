@@ -1,5 +1,6 @@
-import { BaseRepository, Database } from './base.js';
-import { Status } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Status } from '../types/domain-types.js';
 /**
  * @ai-context Repository for workflow status management
  * @ai-pattern Simple CRUD repository for status definitions

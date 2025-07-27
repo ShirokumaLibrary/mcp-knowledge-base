@@ -5,7 +5,7 @@
  * @ai-assumption Sessions use complex format, summaries use simple format
  * @ai-why Human-readable format allows manual editing
  */
-import { WorkSession, DailySummary } from '../types/session-types.js';
+import type { WorkSession, DailySummary } from '../types/session-types.js';
 /**
  * @ai-context Formats work sessions and daily summaries to/from markdown
  * @ai-pattern Two-way conversion maintaining data integrity

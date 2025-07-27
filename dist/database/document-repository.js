@@ -50,8 +50,9 @@ export class DocumentRepository extends BaseRepository {
     async normalizeSequenceType(type) {
         // Check if this type exists in sequences table
         const sequenceType = await this.getSequenceType(type);
-        if (sequenceType)
+        if (sequenceType) {
             return sequenceType;
+        }
         // Default: return as-is
         return type;
     }
@@ -70,7 +71,7 @@ export class DocumentRepository extends BaseRepository {
     async getAllDocumentPatterns() {
         const patterns = [];
         // Get all document types from sequences table
-        const sequences = await this.db.allAsync(`SELECT type FROM sequences WHERE base_type = 'documents'`);
+        const sequences = await this.db.allAsync('SELECT type FROM sequences WHERE base_type = \'documents\'');
         // Add pattern for each type in its subdirectory
         for (const seq of sequences) {
             patterns.push(`${this.documentsPath}/${seq.type}/${seq.type}-*.md`);
@@ -168,23 +169,29 @@ export class DocumentRepository extends BaseRepository {
      */
     async updateDocument(type, id, title, content, tags, description, related_tasks, related_documents) {
         const current = await this.getDocument(type, id);
-        if (!current)
+        if (!current) {
             return false;
+        }
         // Apply updates
-        if (title !== undefined)
+        if (title !== undefined) {
             current.title = title;
-        if (content !== undefined)
+        }
+        if (content !== undefined) {
             current.content = content;
-        if (description !== undefined)
+        }
+        if (description !== undefined) {
             current.description = description || undefined;
+        }
         if (tags !== undefined) {
             current.tags = tags;
             await this.tagRepo.ensureTagsExist(tags);
         }
-        if (related_tasks !== undefined)
+        if (related_tasks !== undefined) {
             current.related_tasks = related_tasks;
-        if (related_documents !== undefined)
+        }
+        if (related_documents !== undefined) {
             current.related_documents = related_documents;
+        }
         current.updated_at = new Date().toISOString();
         // Save to file with consistent naming
         const sequenceType = await this.normalizeSequenceType(type);
@@ -250,8 +257,9 @@ export class DocumentRepository extends BaseRepository {
                 // Extract type from filename pattern
                 const filename = path.basename(file);
                 const match = filename.match(/^(\w+)-(\d+)\.md$/);
-                if (!match)
+                if (!match) {
                     continue;
+                }
                 const prefix = match[1];
                 const id = parseInt(match[2]);
                 // Find type by prefix
@@ -310,9 +318,10 @@ export class DocumentRepository extends BaseRepository {
        WHERE t.name = ? ${typeClause}`, params);
         const documents = [];
         for (const row of rows) {
-            const doc = await this.getDocument(row.type, row.id);
-            if (doc)
+            const doc = await this.getDocument(String(row.type), Number(row.id));
+            if (doc) {
                 documents.push(doc);
+            }
         }
         return documents;
     }

@@ -13,7 +13,7 @@ import { z } from 'zod';
  * @ai-pattern Auto-created when items use new tags
  */
 export const CreateTagSchema = z.object({
-    name: z.string().min(1, 'Tag name is required'), // @ai-validation: Non-empty
+    name: z.string().min(1, 'Tag name is required') // @ai-validation: Non-empty
 }).strict();
 /**
  * @ai-intent Schema for delete_tag tool
@@ -22,7 +22,7 @@ export const CreateTagSchema = z.object({
  * @ai-bug Parameter named 'name' not 'id' - inconsistent
  */
 export const DeleteTagSchema = z.object({
-    name: z.string().min(1, 'Tag name is required'), // @ai-bug: Should be 'id' for consistency
+    name: z.string().min(1, 'Tag name is required') // @ai-bug: Should be 'id' for consistency
 }).strict();
 /**
  * @ai-intent Schema for search_tags tool
@@ -31,7 +31,7 @@ export const DeleteTagSchema = z.object({
  * @ai-return Tags matching pattern with usage counts
  */
 export const SearchTagSchema = z.object({
-    pattern: z.string().min(1, 'Search pattern is required'), // @ai-pattern: SQL LIKE %pattern%
+    pattern: z.string().min(1, 'Search pattern is required') // @ai-pattern: SQL LIKE %pattern%
 }).strict();
 /**
  * @ai-intent Schema for cross-type tag search
@@ -40,6 +40,6 @@ export const SearchTagSchema = z.object({
  * @ai-return Categorized results by type
  */
 export const SearchAllByTagSchema = z.object({
-    tag: z.string().min(1, 'Tag is required'), // @ai-pattern: Exact match
+    tag: z.string().min(1, 'Tag is required') // @ai-pattern: Exact match
 }).strict();
 //# sourceMappingURL=tag-schemas.js.map

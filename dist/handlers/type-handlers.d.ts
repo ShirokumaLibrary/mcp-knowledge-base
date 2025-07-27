@@ -2,8 +2,8 @@
  * @ai-context MCP handlers for type management operations
  * @ai-pattern Handler pattern for dynamic type system
  */
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 export declare class TypeHandlers {
     private db;
     private typeRepo;

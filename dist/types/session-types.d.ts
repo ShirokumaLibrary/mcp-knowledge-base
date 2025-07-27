@@ -43,6 +43,9 @@ export interface WorkSession {
     tags?: string[];
     category?: string;
     date: string;
+    startTime?: string;
+    endTime?: string;
+    summary?: string;
     createdAt: string;
     updatedAt?: string;
 }

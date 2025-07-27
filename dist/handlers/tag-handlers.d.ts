@@ -5,8 +5,8 @@
  * @ai-dependencies Database for tag persistence
  * @ai-assumption Tag names are unique (case-insensitive)
  */
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for tag operations
  * @ai-pattern CRUD handlers plus search functionality
@@ -16,6 +16,7 @@ import { ToolResponse } from '../types/mcp-types.js';
  */
 export declare class TagHandlers {
     private db;
+    private logger;
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection
@@ -38,7 +39,7 @@ export declare class TagHandlers {
      * @ai-side-effects Inserts into tags table
      * @ai-pattern Auto-creation usually preferred over manual
      */
-    handleCreateTag(args: any): Promise<ToolResponse>;
+    handleCreateTag(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle delete_tag MCP tool call
      * @ai-flow 1. Validate name -> 2. Delete tag -> 3. Check success -> 4. Return
@@ -47,7 +48,7 @@ export declare class TagHandlers {
      * @ai-bug Parameter is name not ID - inconsistent with other deletes
      * @ai-return Success message or error
      */
-    handleDeleteTag(args: any): Promise<ToolResponse>;
+    handleDeleteTag(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle search_tags MCP tool call
      * @ai-flow 1. Validate pattern -> 2. Search tags -> 3. Return matches
@@ -55,7 +56,7 @@ export declare class TagHandlers {
      * @ai-pattern Case-insensitive LIKE search with % wildcards
      * @ai-return Array of matching tags with usage counts
      */
-    handleSearchTags(args: any): Promise<ToolResponse>;
+    handleSearchTags(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle cross-type tag search
      * @ai-flow 1. Validate tag -> 2. Search all types -> 3. Return categorized
@@ -64,5 +65,5 @@ export declare class TagHandlers {
      * @ai-bug Missing await on searchAllByTag call
      * @ai-return Object with arrays for each content type
      */
-    handleSearchAllByTag(args: any): Promise<ToolResponse>;
+    handleSearchAllByTag(args: unknown): Promise<ToolResponse>;
 }

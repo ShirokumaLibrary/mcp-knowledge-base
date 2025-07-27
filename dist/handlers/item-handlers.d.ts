@@ -1,5 +1,5 @@
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context MCP tool handlers for all content types
  * @ai-pattern Strategy pattern with type-based dispatch

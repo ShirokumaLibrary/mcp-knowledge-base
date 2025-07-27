@@ -25,14 +25,14 @@ export class TypeRepository {
      * @ai-intent Check if a type exists in sequences table
      */
     async typeExists(name) {
-        const row = await this.db.getAsync(`SELECT type FROM sequences WHERE type = ?`, [name]);
+        const row = await this.db.getAsync('SELECT type FROM sequences WHERE type = ?', [name]);
         return !!row;
     }
     /**
      * @ai-intent Get all types from sequences table
      */
     async getAllTypes() {
-        const rows = await this.db.allAsync(`SELECT type, base_type FROM sequences ORDER BY type`);
+        const rows = await this.db.allAsync('SELECT type, base_type FROM sequences ORDER BY type');
         return rows;
     }
     /**
@@ -55,7 +55,7 @@ export class TypeRepository {
             throw new Error(`Invalid base type "${baseType}". Must be one of: ${validBaseTypes.join(', ')}`);
         }
         // @ai-logic: Create type with specified base type
-        await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)`, [name, baseType]);
+        await this.db.runAsync('INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)', [name, baseType]);
         // Create directory for the new type
         const typeDir = path.join(this.dataDirectory, baseType, name);
         await this.ensureDirectoryExists(typeDir);
@@ -76,7 +76,7 @@ export class TypeRepository {
             throw new Error(`Cannot delete type "${name}" because it has existing documents`);
         }
         // Delete from sequences table
-        await this.db.runAsync(`DELETE FROM sequences WHERE type = ?`, [name]);
+        await this.db.runAsync('DELETE FROM sequences WHERE type = ?', [name]);
         // Remove directory if it exists
         const typeDir = path.join(this.dataDirectory, 'documents', name);
         try {

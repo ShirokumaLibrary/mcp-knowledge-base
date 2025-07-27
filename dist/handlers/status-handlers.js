@@ -14,6 +14,7 @@
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { CreateStatusSchema, UpdateStatusSchema, DeleteStatusSchema } from '../schemas/status-schemas.js';
+import { createLogger } from '../utils/logger.js';
 /**
  * @ai-context Handles MCP tool calls for status operations
  * @ai-pattern CRUD handlers with validation and error handling
@@ -23,6 +24,7 @@ import { CreateStatusSchema, UpdateStatusSchema, DeleteStatusSchema } from '../s
  */
 export class StatusHandlers {
     db;
+    logger = createLogger('StatusHandlers');
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection for testability
@@ -40,33 +42,42 @@ export class StatusHandlers {
      * @ai-return Markdown formatted status list
      */
     async handleGetStatuses() {
-        const statuses = await this.db.getAllStatuses();
-        if (statuses.length === 0) {
+        try {
+            const statuses = await this.db.getAllStatuses();
+            if (statuses.length === 0) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: '## Statuses\n\nNo statuses found. Please create statuses first.' // @ai-ux: Guide user
+                        }
+                    ]
+                };
+            }
+            // @ai-pattern: Markdown table for readability
+            const markdown = [
+                '## Available Statuses',
+                '',
+                '| Name | Is Closed |',
+                '|------|-----------|',
+                ...statuses.map(status => `| ${status.name} | ${status.is_closed ? 'Yes' : 'No'} |`)
+            ].join('\n');
             return {
                 content: [
                     {
                         type: 'text',
-                        text: '## Statuses\n\nNo statuses found. Please create statuses first.', // @ai-ux: Guide user
-                    },
-                ],
+                        text: markdown
+                    }
+                ]
             };
         }
-        // @ai-pattern: Markdown table for readability
-        const markdown = [
-            '## Available Statuses',
-            '',
-            '| Name | Is Closed |',
-            '|------|-----------|',
-            ...statuses.map(status => `| ${status.name} | ${status.is_closed ? 'Yes' : 'No'} |`)
-        ].join('\n');
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: markdown,
-                },
-            ],
-        };
+        catch (error) {
+            this.logger.error('Failed to get statuses', { error });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to retrieve statuses: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle create_status MCP tool call
@@ -77,16 +88,25 @@ export class StatusHandlers {
      * @ai-return JSON formatted new status object
      */
     async handleCreateStatus(args) {
-        const validatedArgs = CreateStatusSchema.parse(args); // @ai-validation: Throws on invalid
-        const status = await this.db.createStatus(validatedArgs.name, validatedArgs.is_closed);
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `Status created: ${JSON.stringify(status, null, 2)}`, // @ai-pattern: Pretty JSON
-                },
-            ],
-        };
+        try {
+            const validatedArgs = CreateStatusSchema.parse(args); // @ai-validation: Throws on invalid
+            const status = await this.db.createStatus(validatedArgs.name, validatedArgs.is_closed);
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Status created: ${JSON.stringify(status, null, 2)}` // @ai-pattern: Pretty JSON
+                    }
+                ]
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to create status', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to create status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle update_status MCP tool call
@@ -97,19 +117,28 @@ export class StatusHandlers {
      * @ai-return Success message with status ID
      */
     async handleUpdateStatus(args) {
-        const validatedArgs = UpdateStatusSchema.parse(args);
-        const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name, validatedArgs.is_closed); // @ai-fix: Added missing await
-        if (!success) {
-            throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);
+        try {
+            const validatedArgs = UpdateStatusSchema.parse(args);
+            const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name, validatedArgs.is_closed); // @ai-fix: Added missing await
+            if (!success) {
+                throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);
+            }
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Status ID ${validatedArgs.id} updated`
+                    }
+                ]
+            };
         }
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `Status ID ${validatedArgs.id} updated`,
-                },
-            ],
-        };
+        catch (error) {
+            this.logger.error('Failed to update status', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to update status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle delete_status MCP tool call
@@ -120,19 +149,28 @@ export class StatusHandlers {
      * @ai-return Success message or McpError
      */
     async handleDeleteStatus(args) {
-        const validatedArgs = DeleteStatusSchema.parse(args);
-        const success = await this.db.deleteStatus(validatedArgs.id); // @ai-fix: Added missing await
-        if (!success) {
-            throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);
+        try {
+            const validatedArgs = DeleteStatusSchema.parse(args);
+            const success = await this.db.deleteStatus(validatedArgs.id); // @ai-fix: Added missing await
+            if (!success) {
+                throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);
+            }
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Status ID ${validatedArgs.id} deleted`
+                    }
+                ]
+            };
         }
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `Status ID ${validatedArgs.id} deleted`,
-                },
-            ],
-        };
+        catch (error) {
+            this.logger.error('Failed to delete status', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to delete status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 }
 //# sourceMappingURL=status-handlers.js.map

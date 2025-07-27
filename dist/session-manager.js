@@ -19,7 +19,7 @@ import { getConfig } from './config.js';
 export class WorkSessionManager {
     db;
     repository; // @ai-logic: Handles file persistence
-    searchService; // @ai-logic: Manages search operations  
+    searchService; // @ai-logic: Manages search operations
     formatter; // @ai-logic: Markdown generation
     /**
      * @ai-intent Initialize session management system

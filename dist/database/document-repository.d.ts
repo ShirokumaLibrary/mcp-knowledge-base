@@ -6,8 +6,9 @@
  * @ai-filesystem Documents stored in {dataDir}/documents/{type}/{type}-{id}.md
  * @ai-database-schema Uses search_documents table with composite key (type, id)
  */
-import { BaseRepository, Database } from './base.js';
-import { Document, DocumentSummary } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Document, DocumentSummary } from '../types/domain-types.js';
 /**
  * @ai-intent Repository for unified document management
  * @ai-pattern Combines doc and knowledge repositories

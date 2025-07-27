@@ -4,7 +4,7 @@
  * @ai-critical Single source of truth for type definitions
  * @ai-why Eliminates hardcoding of type strings throughout codebase
  */
-import { Database } from '../database/base.js';
+import type { Database } from '../database/base.js';
 export interface TypeDefinition {
     type: string;
     baseType: string;

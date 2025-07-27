@@ -39,7 +39,7 @@
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError, } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { FileIssueDatabase } from './database.js';
 import { WorkSessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
@@ -81,11 +81,11 @@ class IssueTrackerServer {
         this.typeHandlers = new TypeHandlers(this.db);
         this.server = new Server({
             name: 'shirokuma-ai-project-management-server',
-            version: '1.0.0',
+            version: '1.0.0'
         }, {
             capabilities: {
-                tools: {},
-            },
+                tools: {}
+            }
         });
         this.setupToolHandlers();
         // @ai-critical: Global error handler prevents server crashes

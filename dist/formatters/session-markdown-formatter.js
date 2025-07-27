@@ -28,8 +28,9 @@ export class SessionMarkdownFormatter {
         if (session.tags && session.tags.length > 0) {
             content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`; // @ai-pattern: JSON array format
         }
-        if (session.category)
+        if (session.category) {
             content += `category: "${session.category}"\n`;
+        }
         if (session.related_tasks && session.related_tasks.length > 0) {
             content += `related_tasks: [${session.related_tasks.map(t => `"${t}"`).join(', ')}]\n`;
         }
@@ -38,8 +39,9 @@ export class SessionMarkdownFormatter {
         }
         content += `date: ${session.date}\n`; // @ai-pattern: YYYY-MM-DD unquoted
         content += `createdAt: ${session.createdAt}\n`; // @ai-pattern: ISO 8601 unquoted
-        if (session.updatedAt)
+        if (session.updatedAt) {
             content += `updatedAt: ${session.updatedAt}\n`;
+        }
         content += '---\n\n';
         // @ai-logic: Content should be stored as-is without additional formatting
         if (session.content) {
@@ -162,8 +164,9 @@ export class SessionMarkdownFormatter {
             content += `related_documents: [${summary.related_documents.map(d => `"${d}"`).join(', ')}]\n`;
         }
         content += `createdAt: ${summary.createdAt}\n`;
-        if (summary.updatedAt)
+        if (summary.updatedAt) {
             content += `updatedAt: ${summary.updatedAt}\n`;
+        }
         content += '---\n\n';
         content += `# ${summary.title}\n\n`; // @ai-ux: Visual title
         content += summary.content; // @ai-logic: Main summary text

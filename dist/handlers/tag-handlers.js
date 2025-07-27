@@ -7,6 +7,7 @@
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { CreateTagSchema, DeleteTagSchema, SearchTagSchema, SearchAllByTagSchema } from '../schemas/tag-schemas.js';
+import { createLogger } from '../utils/logger.js';
 /**
  * @ai-context Handles MCP tool calls for tag operations
  * @ai-pattern CRUD handlers plus search functionality
@@ -16,6 +17,7 @@ import { CreateTagSchema, DeleteTagSchema, SearchTagSchema, SearchAllByTagSchema
  */
 export class TagHandlers {
     db;
+    logger = createLogger('TagHandlers');
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection
@@ -32,15 +34,24 @@ export class TagHandlers {
      * @ai-performance May include usage statistics
      */
     async handleGetTags() {
-        const tags = await this.db.getTags(); // @ai-logic: Includes usage counts
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify({ data: tags }, null, 2),
-                },
-            ],
-        };
+        try {
+            const tags = await this.db.getTags(); // @ai-logic: Includes usage counts
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ data: tags }, null, 2)
+                    }
+                ]
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to get tags', { error });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to retrieve tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle create_tag MCP tool call
@@ -51,21 +62,25 @@ export class TagHandlers {
      * @ai-pattern Auto-creation usually preferred over manual
      */
     async handleCreateTag(args) {
-        const validatedArgs = CreateTagSchema.parse(args);
         try {
+            const validatedArgs = CreateTagSchema.parse(args);
             const tag = await this.db.createTag(validatedArgs.name);
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `Tag created: ${tag}`, // @ai-logic: Returns tag name
-                    },
-                ],
+                        text: `Tag created: ${tag}` // @ai-logic: Returns tag name
+                    }
+                ]
             };
         }
         catch (error) {
+            this.logger.error('Failed to create tag', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
             // @ai-error-handling: Convert DB errors to MCP format
-            throw new McpError(ErrorCode.InvalidRequest, error instanceof Error ? error.message : 'Failed to create tag');
+            throw new McpError(ErrorCode.InternalError, `Failed to create tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
     /**
@@ -77,19 +92,28 @@ export class TagHandlers {
      * @ai-return Success message or error
      */
     async handleDeleteTag(args) {
-        const validatedArgs = DeleteTagSchema.parse(args);
-        const success = await this.db.deleteTag(validatedArgs.name); // @ai-bug: Uses name not ID
-        if (!success) {
-            throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+        try {
+            const validatedArgs = DeleteTagSchema.parse(args);
+            const success = await this.db.deleteTag(validatedArgs.name); // @ai-bug: Uses name not ID
+            if (!success) {
+                throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+            }
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Tag "${validatedArgs.name}" deleted`
+                    }
+                ]
+            };
         }
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `Tag "${validatedArgs.name}" deleted`,
-                },
-            ],
-        };
+        catch (error) {
+            this.logger.error('Failed to delete tag', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to delete tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle search_tags MCP tool call
@@ -99,16 +123,25 @@ export class TagHandlers {
      * @ai-return Array of matching tags with usage counts
      */
     async handleSearchTags(args) {
-        const validatedArgs = SearchTagSchema.parse(args);
-        const tags = await this.db.searchTags(validatedArgs.pattern); // @ai-pattern: SQL LIKE %pattern%
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify({ data: tags }, null, 2),
-                },
-            ],
-        };
+        try {
+            const validatedArgs = SearchTagSchema.parse(args);
+            const tags = await this.db.searchTags(validatedArgs.pattern); // @ai-pattern: SQL LIKE %pattern%
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ data: tags }, null, 2)
+                    }
+                ]
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to search tags', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to search tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
     /**
      * @ai-intent Handle cross-type tag search
@@ -119,16 +152,25 @@ export class TagHandlers {
      * @ai-return Object with arrays for each content type
      */
     async handleSearchAllByTag(args) {
-        const validatedArgs = SearchAllByTagSchema.parse(args);
-        const results = await this.db.searchAllByTag(validatedArgs.tag); // @ai-fix: Added missing await
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify({ data: results }, null, 2), // @ai-pattern: Categorized by type
-                },
-            ],
-        };
+        try {
+            const validatedArgs = SearchAllByTagSchema.parse(args);
+            const results = await this.db.searchAllByTag(validatedArgs.tag); // @ai-fix: Added missing await
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ data: results }, null, 2) // @ai-pattern: Categorized by type
+                    }
+                ]
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to search all by tag', { error, args });
+            if (error instanceof McpError) {
+                throw error;
+            }
+            throw new McpError(ErrorCode.InternalError, `Failed to search items by tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 }
 //# sourceMappingURL=tag-handlers.js.map

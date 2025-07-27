@@ -1,3 +1,12 @@
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 import { DatabaseConnection } from './base.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
@@ -6,6 +15,7 @@ import { DocumentRepository } from './document-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
+import { ensureInitialized } from '../utils/decorators.js';
 import * as path from 'path';
 // Re-export types
 export * from '../types/domain-types.js';
@@ -117,9 +127,6 @@ export class FileIssueDatabase {
      * @ai-return Array of all workflow statuses
      */
     async getAllStatuses() {
-        if (this.initializationPromise) {
-            await this.initializationPromise; // @ai-critical: Must wait for DB ready
-        }
         return this.statusRepo.getAllStatuses();
     }
     /**
@@ -139,9 +146,6 @@ export class FileIssueDatabase {
      * @ai-return New status object with generated ID
      */
     async createStatus(name, is_closed = false) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.statusRepo.createStatus(name, is_closed);
     }
     /**
@@ -152,9 +156,6 @@ export class FileIssueDatabase {
      * @ai-return Updated status object or null if not found
      */
     async updateStatus(id, name, is_closed) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.statusRepo.updateStatus(id, name, is_closed);
     }
     /**
@@ -165,9 +166,6 @@ export class FileIssueDatabase {
      * @ai-return true if deleted, false if not found or in use
      */
     async deleteStatus(id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.statusRepo.deleteStatus(id);
     }
     /**
@@ -178,9 +176,6 @@ export class FileIssueDatabase {
      * @ai-return Array of tags with name and usage count
      */
     async getTags() {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.tagRepo.getTags();
     }
     /**
@@ -191,9 +186,6 @@ export class FileIssueDatabase {
      * @ai-return Created tag object
      */
     async createTag(name) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.tagRepo.createTag(name);
     }
     /**
@@ -204,9 +196,6 @@ export class FileIssueDatabase {
      * @ai-return true if deleted, false if not found
      */
     async deleteTag(id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise; // @ai-bug: Misleading parameter name
-        }
         return this.tagRepo.deleteTag(id);
     }
     /**
@@ -217,9 +206,6 @@ export class FileIssueDatabase {
      * @ai-return Array of matching tags with usage counts
      */
     async searchTags(pattern) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.tagRepo.getTagsByPattern(pattern);
     }
     // Legacy task methods removed - use unified task methods instead:
@@ -236,9 +222,6 @@ export class FileIssueDatabase {
      * @ai-return Array of document objects with content
      */
     async getAllDocuments(type) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.getAllDocuments(type);
     }
     /**
@@ -247,9 +230,6 @@ export class FileIssueDatabase {
      * @ai-return Complete document object or null
      */
     async getDocument(type, id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.getDocument(type, id);
     }
     /**
@@ -259,9 +239,6 @@ export class FileIssueDatabase {
      * @ai-return Complete document object
      */
     async createDocument(type, title, content, tags, description, related_tasks, related_documents) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.createDocument(type, title, content, tags, description, related_tasks, related_documents);
     }
     /**
@@ -271,9 +248,6 @@ export class FileIssueDatabase {
      * @ai-return true if updated, false if not found
      */
     async updateDocument(type, id, title, content, tags, description, related_tasks, related_documents) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.updateDocument(type, id, title, content, tags, description, related_tasks, related_documents);
     }
     /**
@@ -283,9 +257,6 @@ export class FileIssueDatabase {
      * @ai-return true if deleted, false if not found
      */
     async deleteDocument(type, id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.deleteDocument(type, id);
     }
     /**
@@ -295,9 +266,6 @@ export class FileIssueDatabase {
      * @ai-return Array of matching document items
      */
     async searchDocumentsByTag(tag, type) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.searchDocumentsByTag(tag, type);
     }
     /**
@@ -307,9 +275,6 @@ export class FileIssueDatabase {
      * @ai-return Array of summary objects
      */
     async getAllDocumentsSummary(type) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.documentRepo.getAllDocumentsSummary(type);
     }
     // Legacy document methods removed - use unified document methods instead:
@@ -325,11 +290,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async getTask(type, id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists in sequences table
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -340,11 +302,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -359,11 +318,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async getAllTasksSummary(type, includeClosedStatuses = false, statusIds) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -374,11 +330,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -389,11 +342,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async deleteTask(type, id) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -404,11 +354,8 @@ export class FileIssueDatabase {
      * @ai-logic Validates type from sequences table
      */
     async searchTasksByTag(type, tag) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // Validate type exists
-        const sequence = await this.connection.getDatabase().getAsync(`SELECT base_type FROM sequences WHERE type = ?`, [type]);
+        const sequence = await this.connection.getDatabase().getAsync('SELECT base_type FROM sequences WHERE type = ?', [type]);
         if (!sequence || sequence.base_type !== 'tasks') {
             throw new Error(`Unknown task type: ${type}`);
         }
@@ -422,9 +369,6 @@ export class FileIssueDatabase {
      * @ai-return Categorized results by type
      */
     async searchAll(query) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.searchAll(query);
     }
     /**
@@ -434,9 +378,6 @@ export class FileIssueDatabase {
      * @ai-return Categorized results by content type
      */
     async searchAllByTag(tag) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.searchAllByTag(tag);
     }
     /**
@@ -446,9 +387,6 @@ export class FileIssueDatabase {
      * @ai-return Array of matching sessions
      */
     async searchSessions(query) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.searchSessions(query);
     }
     /**
@@ -457,9 +395,6 @@ export class FileIssueDatabase {
      * @ai-return Array of matching summaries
      */
     async searchDailySummaries(query) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.searchDailySummaries(query);
     }
     /**
@@ -468,9 +403,6 @@ export class FileIssueDatabase {
      * @ai-return Array of matching sessions
      */
     async searchSessionsByTag(tag) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.searchSessionsByTag(tag);
     }
     /**
@@ -481,9 +413,6 @@ export class FileIssueDatabase {
      * @ai-performance Can be slow with many files
      */
     async rebuildSearchIndex() {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         return this.searchRepo.rebuildSearchIndex();
     }
     /**
@@ -496,9 +425,6 @@ export class FileIssueDatabase {
      * @ai-database-schema Uses session_tags relationship table for normalized tag storage
      */
     async syncSessionToSQLite(session) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // @ai-logic: Tags must exist before foreign key reference
         if (session.tags && session.tags.length > 0) {
             await this.tagRepo.ensureTagsExist(session.tags);
@@ -556,9 +482,6 @@ export class FileIssueDatabase {
      * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
      */
     async syncDailySummaryToSQLite(summary) {
-        if (this.initializationPromise) {
-            await this.initializationPromise;
-        }
         // @ai-logic: Create tags before referencing
         if (summary.tags && summary.tags.length > 0) {
             await this.tagRepo.ensureTagsExist(summary.tags);
@@ -615,4 +538,178 @@ export class FileIssueDatabase {
         this.initializationPromise = null;
     }
 }
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getAllStatuses", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "createStatus", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, Boolean]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "updateStatus", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "deleteStatus", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getTags", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "createTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "deleteTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchTags", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getAllDocuments", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getDocument", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, Array, String, Array, Array]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "createDocument", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, String, String, Array, String, Array, Array]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "updateDocument", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "deleteDocument", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchDocumentsByTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getAllDocumentsSummary", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getTask", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "createTask", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean, Array]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "getAllTasksSummary", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "updateTask", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "deleteTask", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchTasksByTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchAll", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchAllByTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchSessions", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchDailySummaries", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "searchSessionsByTag", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "rebuildSearchIndex", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "syncSessionToSQLite", null);
+__decorate([
+    ensureInitialized,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], FileIssueDatabase.prototype, "syncDailySummaryToSQLite", null);
 //# sourceMappingURL=index.js.map

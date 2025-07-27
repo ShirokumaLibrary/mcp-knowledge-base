@@ -10,8 +10,8 @@ export declare const CreateTypeSchema: z.ZodObject<{
     name: z.ZodString;
     base_type: z.ZodDefault<z.ZodOptional<z.ZodEnum<["tasks", "documents"]>>>;
 }, "strict", z.ZodTypeAny, {
-    name: string;
     base_type: "tasks" | "documents";
+    name: string;
 }, {
     name: string;
     base_type?: "tasks" | "documents" | undefined;

@@ -21,7 +21,7 @@ export const CreateWorkSessionSchema = z.object({
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
     tags: z.array(z.string()).default([]), // @ai-default: Empty array
     category: z.string().optional(), // @ai-logic: Work categorization
-    datetime: z.string().optional(), // @ai-logic: ISO 8601 datetime for past data migration
+    datetime: z.string().optional() // @ai-logic: ISO 8601 datetime for past data migration
 }).strict();
 /**
  * @ai-intent Schema for update_session tool
@@ -37,7 +37,7 @@ export const UpdateWorkSessionSchema = z.object({
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
     tags: z.array(z.string()).optional(),
-    category: z.string().optional(),
+    category: z.string().optional()
 }).strict();
 /**
  * @ai-intent Schema for create_summary tool
@@ -52,7 +52,7 @@ export const CreateDailySummarySchema = z.object({
     content: z.string().min(1, 'Content is required'), // @ai-validation: Non-empty summary
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
-    tags: z.array(z.string()).default([]),
+    tags: z.array(z.string()).default([])
 }).strict();
 /**
  * @ai-intent Schema for update_summary tool
@@ -67,7 +67,7 @@ export const UpdateDailySummarySchema = z.object({
     content: z.string().min(1).optional(), // @ai-bug: Can't clear with empty string
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional()
 }).strict();
 /**
  * @ai-intent Schema for search_sessions_by_tag tool
@@ -76,7 +76,7 @@ export const UpdateDailySummarySchema = z.object({
  * @ai-return Array of sessions with specified tag
  */
 export const SearchSessionsByTagSchema = z.object({
-    tag: z.string().min(1, 'Tag is required'), // @ai-validation: Non-empty tag
+    tag: z.string().min(1, 'Tag is required') // @ai-validation: Non-empty tag
 }).strict();
 /**
  * @ai-intent Schema for get_sessions tool
@@ -87,7 +87,7 @@ export const SearchSessionsByTagSchema = z.object({
  */
 export const GetSessionsSchema = z.object({
     start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
-    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD format
+    end_date: z.string().optional() // @ai-pattern: YYYY-MM-DD format
 }).strict();
 /**
  * @ai-intent Schema for get_session_detail tool
@@ -96,7 +96,7 @@ export const GetSessionsSchema = z.object({
  * @ai-return Complete session object or error
  */
 export const GetSessionDetailSchema = z.object({
-    id: z.string().min(1, 'Session ID is required'), // @ai-validation: Non-empty
+    id: z.string().min(1, 'Session ID is required') // @ai-validation: Non-empty
 }).strict();
 /**
  * @ai-intent Schema for get_summaries tool
@@ -107,7 +107,7 @@ export const GetSessionDetailSchema = z.object({
  */
 export const GetDailySummariesSchema = z.object({
     start_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
-    end_date: z.string().optional(), // @ai-pattern: YYYY-MM-DD
+    end_date: z.string().optional() // @ai-pattern: YYYY-MM-DD
 }).strict();
 /**
  * @ai-intent Schema for get_summary_detail tool
@@ -117,6 +117,6 @@ export const GetDailySummariesSchema = z.object({
  * @ai-return Daily summary or null
  */
 export const GetDailySummaryDetailSchema = z.object({
-    date: z.string().min(1, 'Date is required'), // @ai-pattern: YYYY-MM-DD
+    date: z.string().min(1, 'Date is required') // @ai-pattern: YYYY-MM-DD
 }).strict();
 //# sourceMappingURL=session-schemas.js.map

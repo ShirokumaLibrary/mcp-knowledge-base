@@ -3,7 +3,7 @@
  * @ai-pattern Repository pattern for type definitions using sequences table
  * @ai-critical Manages type registration in database
  */
-import { FileIssueDatabase } from './index.js';
+import type { FileIssueDatabase } from './index.js';
 export declare class TypeRepository {
     private fileDb;
     private db;

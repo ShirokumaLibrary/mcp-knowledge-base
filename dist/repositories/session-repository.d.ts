@@ -1,5 +1,5 @@
-import { WorkSession, DailySummary } from '../types/session-types.js';
-import { FileIssueDatabase } from '../database.js';
+import type { WorkSession, DailySummary } from '../types/session-types.js';
+import type { FileIssueDatabase } from '../database.js';
 /**
  * @ai-context Repository for work session tracking and daily summaries
  * @ai-pattern Date-based directory structure for chronological organization

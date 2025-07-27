@@ -1,6 +1,7 @@
-import { BaseRepository, Database } from './base.js';
-import { Issue, Plan, Document } from '../types/domain-types.js';
-import { WorkSession } from '../types/session-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Issue, Plan, Document } from '../types/domain-types.js';
+import type { WorkSession } from '../types/session-types.js';
 /**
  * @ai-context Centralized search functionality across all content types
  * @ai-pattern Facade pattern for unified search interface

@@ -3,6 +3,7 @@ import * as path from 'path';
 import { BaseRepository } from './base.js';
 import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
 import { TagRepository } from './tag-repository.js';
+import { validateTaskInput, prepareTaskData, prepareTaskMetadata, registerTaskTags, validateUpdateInput, mergeTaskData } from './task-repository-helpers.js';
 /**
  * @ai-context Unified repository for tasks (issues and plans)
  * @ai-pattern Single repository for both types with type field distinction
@@ -133,130 +134,94 @@ export class TaskRepository extends BaseRepository {
         await this.ensureDirectoryExists();
         const id = await this.getNextSequenceValue(type);
         const now = new Date().toISOString();
-        // Validate status if provided
-        let statusName;
-        if (status) {
-            const isValid = await this.isValidStatus(status);
-            if (!isValid) {
-                throw new Error(`Invalid status: ${status}`);
-            }
-            statusName = status;
-        }
-        else {
-            statusName = await this.getDefaultStatusName();
-        }
-        const task = {
+        // Validate and get status name
+        const statusName = await validateTaskInput(status, this.statusRepository);
+        // Prepare task data
+        const task = prepareTaskData({
             id,
             title,
             description,
             content,
             priority,
-            status: statusName,
-            tags: tags || [],
-            created_at: now,
-            updated_at: now,
-            start_date: start_date || null,
-            end_date: end_date || null,
-            related_tasks: related_tasks || [],
-            related_documents: related_documents || []
-        };
-        // Determine the status ID
-        const statuses = await this.statusRepository.getAllStatuses();
-        const statusObj = statuses.find(s => s.name === statusName);
-        const statusId = statusObj ? statusObj.id : null;
-        // Generate markdown content
-        const metadata = {
-            id,
-            title,
-            description,
-            priority,
-            status: statusName,
-            status_id: statusId,
+            statusName,
             tags,
             start_date,
             end_date,
             related_tasks,
             related_documents,
-            created_at: now,
-            updated_at: now
-        };
-        const markdownContent = generateMarkdown(metadata, content);
-        const filePath = this.getTaskFilePath(type, id);
-        // Ensure directory exists
-        const dir = path.dirname(filePath);
-        await this.ensureDirectoryExists(dir);
-        await fsPromises.writeFile(filePath, markdownContent, 'utf-8');
-        this.logger.info(`Created ${type}: ${title} (ID: ${id})`);
-        // Auto-register tags
-        if (tags && tags.length > 0) {
-            for (const tag of tags) {
-                await this.tagRepository.getOrCreateTagId(tag);
-            }
-        }
+            now
+        });
+        // Save task to file
+        await this.saveTaskToFile(task, type);
+        // Register tags
+        await registerTaskTags(tags, this.tagRepository);
         // Sync to SQLite
         await this.syncTaskToSQLite(task, type);
         return task;
     }
+    /**
+     * @ai-intent Save task to markdown file
+     * @ai-pattern Extracted from createTask for single responsibility
+     * @ai-side-effects Creates file on disk
+     */
+    async saveTaskToFile(task, type) {
+        const metadata = await prepareTaskMetadata(task, this.statusRepository);
+        const markdownContent = generateMarkdown(metadata, task.content);
+        const filePath = this.getTaskFilePath(type, task.id);
+        // Ensure directory exists
+        const dir = path.dirname(filePath);
+        await this.ensureDirectoryExists(dir);
+        await fsPromises.writeFile(filePath, markdownContent, 'utf-8');
+        this.logger.info(`Created ${type}: ${task.title} (ID: ${task.id})`);
+    }
     async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
-        const existingTask = await this.getTask(type, id);
+        // Load existing task
+        const existingTask = await this.loadExistingTask(type, id);
         if (!existingTask) {
             return null;
         }
-        // Validate status if provided
-        if (status !== undefined) {
-            const isValid = await this.isValidStatus(status);
-            if (!isValid) {
-                throw new Error(`Invalid status: ${status}`);
-            }
-        }
-        const now = new Date().toISOString();
-        const updatedTask = {
-            ...existingTask,
-            title: title !== undefined ? title : existingTask.title,
-            content: content !== undefined ? content : existingTask.content,
-            priority: priority !== undefined ? priority : existingTask.priority,
-            status: status !== undefined ? status : existingTask.status,
-            tags: tags !== undefined ? tags : existingTask.tags,
-            description: description !== undefined ? description : existingTask.description,
-            start_date: start_date !== undefined ? start_date : existingTask.start_date,
-            end_date: end_date !== undefined ? end_date : existingTask.end_date,
-            related_tasks: related_tasks !== undefined ? related_tasks : existingTask.related_tasks,
-            related_documents: related_documents !== undefined ? related_documents : existingTask.related_documents,
-            updated_at: now
-        };
-        // Determine the status ID
-        const statuses = await this.statusRepository.getAllStatuses();
-        const statusObj = statuses.find(s => s.name === updatedTask.status);
-        const statusId = statusObj ? statusObj.id : null;
-        // Generate updated markdown
-        const metadata = {
-            id: updatedTask.id,
-            title: updatedTask.title,
-            description: updatedTask.description,
-            priority: updatedTask.priority,
-            status: updatedTask.status,
-            status_id: statusId,
-            tags: updatedTask.tags,
-            start_date: updatedTask.start_date,
-            end_date: updatedTask.end_date,
-            related_tasks: updatedTask.related_tasks,
-            related_documents: updatedTask.related_documents,
-            created_at: updatedTask.created_at,
-            updated_at: updatedTask.updated_at
-        };
-        const markdownContent = generateMarkdown(metadata, updatedTask.content);
-        const filePath = this.getTaskFilePath(type, id);
-        await fsPromises.writeFile(filePath, markdownContent, 'utf-8');
-        this.logger.info(`Updated ${type} ${id}`);
-        // Auto-register new tags
-        if (tags && tags.length > 0) {
-            for (const tag of tags) {
-                await this.tagRepository.getOrCreateTagId(tag);
-            }
-        }
+        // Validate update input
+        await validateUpdateInput(status, this.statusRepository);
+        // Merge data
+        const updatedTask = mergeTaskData(existingTask, {
+            title,
+            content,
+            priority,
+            status,
+            tags,
+            description,
+            start_date,
+            end_date,
+            related_tasks,
+            related_documents
+        });
+        // Save updated task
+        await this.saveUpdatedTask(updatedTask, type);
+        // Register new tags
+        await registerTaskTags(tags, this.tagRepository);
         // Sync to SQLite
         await this.syncTaskToSQLite(updatedTask, type);
         return updatedTask;
+    }
+    /**
+     * @ai-intent Load existing task for update
+     * @ai-pattern Extracted from updateTask
+     * @ai-return Task or null if not found
+     */
+    async loadExistingTask(type, id) {
+        return this.getTask(type, id);
+    }
+    /**
+     * @ai-intent Save updated task to file
+     * @ai-pattern Extracted from updateTask
+     * @ai-side-effects Updates file on disk
+     */
+    async saveUpdatedTask(task, type) {
+        const metadata = await prepareTaskMetadata(task, this.statusRepository);
+        const markdownContent = generateMarkdown(metadata, task.content);
+        const filePath = this.getTaskFilePath(type, task.id);
+        await fsPromises.writeFile(filePath, markdownContent, 'utf-8');
+        this.logger.info(`Updated ${type} ${task.id}`);
     }
     async deleteTask(type, id) {
         const filePath = this.getTaskFilePath(type, id);

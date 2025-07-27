@@ -5,8 +5,8 @@
  * @ai-dependencies Repository for storage, SearchService for queries
  * @ai-assumption Sessions organized by date (YYYY-MM-DD folders)
  */
-import { WorkSession, DailySummary } from './types/session-types.js';
-import { FileIssueDatabase } from './database.js';
+import type { WorkSession, DailySummary } from './types/session-types.js';
+import type { FileIssueDatabase } from './database.js';
 /**
  * @ai-context Central manager for work tracking and daily summaries
  * @ai-pattern Service layer coordinating multiple subsystems

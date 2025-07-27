@@ -5,8 +5,8 @@
  * @ai-dependencies SessionManager for business logic
  * @ai-assumption One summary per date maximum
  */
-import { WorkSessionManager } from '../session-manager.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { WorkSessionManager } from '../session-manager.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for daily summaries
  * @ai-pattern Each method validates and delegates
@@ -16,6 +16,7 @@ import { ToolResponse } from '../types/mcp-types.js';
  */
 export declare class SummaryHandlers {
     private sessionManager;
+    private logger;
     /**
      * @ai-intent Initialize with session manager
      * @ai-pattern Dependency injection
@@ -30,7 +31,7 @@ export declare class SummaryHandlers {
      * @ai-side-effects Creates/replaces markdown file, syncs SQLite
      * @ai-return Complete summary with success message
      */
-    handleCreateDailySummary(args: any): Promise<ToolResponse>;
+    handleCreateDailySummary(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle update_summary MCP tool call
      * @ai-flow 1. Validate date -> 2. Load existing -> 3. Update -> 4. Return
@@ -39,7 +40,7 @@ export declare class SummaryHandlers {
      * @ai-bug Empty strings blocked by schema validation
      * @ai-return Updated summary with success message
      */
-    handleUpdateDailySummary(args: any): Promise<ToolResponse>;
+    handleUpdateDailySummary(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_summaries MCP tool call
      * @ai-flow 1. Parse date range -> 2. Query summaries -> 3. Return list
@@ -48,7 +49,7 @@ export declare class SummaryHandlers {
      * @ai-performance Reads multiple directories if range
      * @ai-return Array of summaries in date order
      */
-    handleGetDailySummaries(args: any): Promise<ToolResponse>;
+    handleGetDailySummaries(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_summary_detail MCP tool call
      * @ai-flow 1. Validate date -> 2. Load summary -> 3. Check exists -> 4. Return
@@ -57,5 +58,5 @@ export declare class SummaryHandlers {
      * @ai-return Complete summary object or McpError
      * @ai-why View specific day's summary
      */
-    handleGetDailySummaryDetail(args: any): Promise<ToolResponse>;
+    handleGetDailySummaryDetail(args: unknown): Promise<ToolResponse>;
 }

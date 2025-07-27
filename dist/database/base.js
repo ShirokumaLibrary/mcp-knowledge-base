@@ -44,8 +44,8 @@ export class BaseRepository {
     async getNextSequenceValue(sequenceName) {
         try {
             // @ai-logic: Atomic increment prevents race conditions
-            await this.db.runAsync(`UPDATE sequences SET current_value = current_value + 1 WHERE type = ?`, [sequenceName]);
-            const row = await this.db.getAsync(`SELECT current_value FROM sequences WHERE type = ?`, [sequenceName]);
+            await this.db.runAsync('UPDATE sequences SET current_value = current_value + 1 WHERE type = ?', [sequenceName]);
+            const row = await this.db.getAsync('SELECT current_value FROM sequences WHERE type = ?', [sequenceName]);
             if (!row || !row.current_value) {
                 throw new Error(`Failed to get sequence value for ${sequenceName}`);
             }
@@ -150,7 +150,7 @@ export class DatabaseConnection {
         // Initialize sequences - reset to 0 if database is empty
         this.logger.debug('Initializing sequences...');
         // Check if sequences already exist
-        const existingSequences = await this.db.allAsync(`SELECT type FROM sequences`);
+        const existingSequences = await this.db.allAsync('SELECT type FROM sequences');
         if (existingSequences.length === 0) {
             // Fresh database - insert new sequences starting at 0
             // Using type registry information
@@ -290,25 +290,25 @@ export class DatabaseConnection {
     }
     async createIndexes() {
         // Text search indexes
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)');
         // Tag relationship indexes
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)`);
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)');
         // Note: doc_tags and knowledge_tags indexes are replaced by document_tags indexes
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)`);
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)');
         // Tag name index for quick lookups
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)`);
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)');
         // Related tasks and documents indexes
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)`);
-        await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)`);
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)');
     }
     getDatabase() {
         if (!this.db) {
