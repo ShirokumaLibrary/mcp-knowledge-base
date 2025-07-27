@@ -247,7 +247,8 @@ describe('Tag Auto Registration', () => {
         date: '2025-01-24',
         startTime: '10:00:00',
         endTime: '12:00:00',
-        summary: 'Test summary'
+        summary: 'Test summary',
+        createdAt: new Date().toISOString()
       };
       
       await db.syncSessionToSQLite(session);
