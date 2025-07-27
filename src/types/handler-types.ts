@@ -145,7 +145,7 @@ export class ErrorHandler {
     if (error instanceof McpError) {
       return error;
     }
-    
+
     // @ai-logic: Standard Error - preserve message
     if (error instanceof Error) {
       return new McpError(
@@ -154,7 +154,7 @@ export class ErrorHandler {
         { originalError: error.name }  // @ai-debug: Preserve error type
       );
     }
-    
+
     // @ai-edge-case: Non-Error objects (strings, numbers, etc)
     return new McpError(
       ErrorCode.InternalError,

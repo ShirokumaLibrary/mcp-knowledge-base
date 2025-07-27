@@ -6,8 +6,8 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Database } from './base.js';
-import { FileIssueDatabase } from './index.js';
+import type { Database } from './base.js';
+import type { FileIssueDatabase } from './index.js';
 
 export class TypeRepository {
   private db!: Database;
@@ -31,7 +31,7 @@ export class TypeRepository {
    */
   async typeExists(name: string): Promise<boolean> {
     const row = await this.db.getAsync(
-      `SELECT type FROM sequences WHERE type = ?`,
+      'SELECT type FROM sequences WHERE type = ?',
       [name]
     ) as { type: string } | undefined;
     return !!row;
@@ -42,9 +42,9 @@ export class TypeRepository {
    */
   async getAllTypes(): Promise<Array<{ type: string; base_type: string }>> {
     const rows = await this.db.allAsync(
-      `SELECT type, base_type FROM sequences ORDER BY type`
+      'SELECT type, base_type FROM sequences ORDER BY type'
     ) as Array<{ type: string; base_type: string }>;
-    
+
     return rows;
   }
 
@@ -72,7 +72,7 @@ export class TypeRepository {
 
     // @ai-logic: Create type with specified base type
     await this.db.runAsync(
-      `INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)`,
+      'INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)',
       [name, baseType]
     );
 
@@ -100,7 +100,7 @@ export class TypeRepository {
 
     // Delete from sequences table
     await this.db.runAsync(
-      `DELETE FROM sequences WHERE type = ?`,
+      'DELETE FROM sequences WHERE type = ?',
       [name]
     );
 
@@ -118,7 +118,7 @@ export class TypeRepository {
    */
   async hasDocumentsOfType(typeName: string): Promise<boolean> {
     const typeDir = path.join(this.dataDirectory, 'documents', typeName);
-    
+
     try {
       const files = await fs.readdir(typeDir);
       // Check for any markdown files

@@ -25,12 +25,12 @@ const config = getConfig();
  */
 const customFormat = printf(({ level, message, timestamp, service, ...metadata }) => {
   let msg = `${timestamp} [${service}] ${level}: ${message}`;
-  
+
   // @ai-logic: Append metadata as JSON if present
   if (Object.keys(metadata).length > 0) {
     msg += ` ${JSON.stringify(metadata)}`;
   }
-  
+
   return msg;
 });
 
@@ -61,8 +61,9 @@ const prodFormat = combine(
  * @ai-intent Determine active log level from config
  * @ai-logic If logging disabled, only show errors
  * @ai-pattern Respects config.logging.enabled flag
+ * @ai-priority Environment variable > config > default
  */
-const logLevel = config.logging.enabled ? config.logging.level : 'error';
+const logLevel = process.env.LOG_LEVEL || (config.logging.enabled ? config.logging.level : 'error');
 
 /**
  * @ai-intent Configure log destinations (transports)
@@ -111,6 +112,7 @@ if (process.env.NODE_ENV === 'production' && config.logging.enabled) {
 export function createLogger(service: string): winston.Logger {
   return winston.createLogger({
     level: logLevel,
+    silent: logLevel === 'silent',  // @ai-logic: Complete silence for tests
     defaultMeta: { service },  // @ai-logic: Service tagged on all logs
     transports,
     // @ai-critical: Prevent process crash from uncaught errors

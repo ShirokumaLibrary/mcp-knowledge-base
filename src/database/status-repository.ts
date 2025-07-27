@@ -1,5 +1,6 @@
-import { BaseRepository, Database } from './base.js';
-import { Status } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Status } from '../types/domain-types.js';
 
 /**
  * @ai-context Repository for workflow status management
@@ -24,13 +25,13 @@ export class StatusRepository extends BaseRepository {
     const rows = await this.db.allAsync(
       'SELECT id, name, is_closed, created_at FROM statuses ORDER BY id'
     );
-    
+
     // @ai-logic: Type safety through explicit mapping
     return rows.map((row: any) => ({
-      id: row.id,
-      name: row.name,
+      id: Number(row.id),
+      name: String(row.name),
       is_closed: row.is_closed === 1,
-      created_at: row.created_at
+      created_at: String(row.created_at)
     }));
   }
 
@@ -43,13 +44,15 @@ export class StatusRepository extends BaseRepository {
       'SELECT id, name, is_closed, created_at FROM statuses WHERE id = ?',
       [id]
     );
-    
-    if (!row) return null;
+
+    if (!row) {
+      return null;
+    }
     return {
-      id: row.id,
-      name: row.name,
+      id: Number(row.id),
+      name: String(row.name),
       is_closed: row.is_closed === 1,
-      created_at: row.created_at
+      created_at: String(row.created_at)
     };
   }
 
@@ -65,7 +68,7 @@ export class StatusRepository extends BaseRepository {
       'INSERT INTO statuses (name, is_closed) VALUES (?, ?)',
       [name, is_closed ? 1 : 0]
     );
-    
+
     return {
       id: (result as any).lastID!,  // @ai-assumption: SQLite always provides lastID
       name,
@@ -77,17 +80,17 @@ export class StatusRepository extends BaseRepository {
   async updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean> {
     let sql = 'UPDATE statuses SET name = ?';
     const params: any[] = [name];
-    
+
     if (is_closed !== undefined) {
       sql += ', is_closed = ?';
       params.push(is_closed ? 1 : 0);
     }
-    
+
     sql += ' WHERE id = ?';
     params.push(id);
-    
+
     const result = await this.db.runAsync(sql, params);
-    
+
     return (result as any).changes! > 0;
   }
 
@@ -103,7 +106,7 @@ export class StatusRepository extends BaseRepository {
       'DELETE FROM statuses WHERE id = ?',
       [id]
     );
-    
+
     // @ai-logic: changes > 0 means row was actually deleted
     return (result as any).changes! > 0;
   }

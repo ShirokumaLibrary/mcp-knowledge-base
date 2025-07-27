@@ -26,24 +26,24 @@ import { parseMarkdown } from './utils/markdown-parser.js';
 async function scanAndRebuild(databasePath: string, db: any) {
   // First, get all types from sequences table
   const sequences = await db.allAsync('SELECT type, base_type FROM sequences');
-  
+
   const counts = {
     typeCountsMap: {} as Record<string, number>,  // Dynamic type counts
     sessions: 0,
     tags: new Set<string>(),
     statuses: new Set<string>(),  // @ai-logic: Now we only store status names
-    maxIds: {} as Record<string, number>,  // @ai-critical: Track maximum IDs to update sequences correctly
+    maxIds: {} as Record<string, number>  // @ai-critical: Track maximum IDs to update sequences correctly
   };
-  
+
   // Initialize counts for all known types
   for (const seq of sequences) {
     counts.typeCountsMap[seq.type] = 0;
     counts.maxIds[seq.type] = 0;
   }
-  
+
   // @ai-logic: Also scan filesystem for types that may not be in database yet
   console.log('\n🔍 Scanning filesystem for additional types...');
-  
+
   // Scan task directories
   try {
     const taskDirs = await fs.readdir(path.join(databasePath, 'tasks'));
@@ -56,7 +56,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
         sequences.push({ type: dir, base_type: 'tasks' });
         counts.typeCountsMap[dir] = 0;
         counts.maxIds[dir] = 0;
-        
+
         // Register in database
         await db.runAsync(
           'INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)',
@@ -68,12 +68,12 @@ async function scanAndRebuild(databasePath: string, db: any) {
   } catch (e) {
     console.log('  ℹ️  No tasks directory found');
   }
-  
+
   // Scan document files for types
   try {
     const docFiles = await fs.readdir(path.join(databasePath, 'documents'));
     const foundTypes = new Set<string>();
-    
+
     // Extract types from filenames
     for (const file of docFiles) {
       const match = file.match(/^(\w+)-\d+\.md$/);
@@ -81,7 +81,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
         foundTypes.add(match[1]);
       }
     }
-    
+
     // Check subdirectories too
     for (const item of docFiles) {
       const itemPath = path.join(databasePath, 'documents', item);
@@ -90,7 +90,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
         foundTypes.add(item);
       }
     }
-    
+
     // Register any unregistered document types
     for (const type of foundTypes) {
       if (!sequences.find((s: any) => s.type === type)) {
@@ -98,7 +98,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
         sequences.push({ type, base_type: 'documents' });
         counts.typeCountsMap[type] = 0;
         counts.maxIds[type] = 0;
-        
+
         // Register in database
         await db.runAsync(
           'INSERT INTO sequences (type, current_value, base_type) VALUES (?, 0, ?)',
@@ -118,11 +118,11 @@ async function scanAndRebuild(databasePath: string, db: any) {
     console.log(`\n📂 Scanning ${type}...`);
     // Task types are stored in tasks/[type] subdirectory
     const files = globSync(path.join(databasePath, 'tasks', type, `${type}-*.md`));
-    
+
     for (const file of files) {
       const content = await fs.readFile(file, 'utf-8');
       const parsed = parseMarkdown(content);
-    
+
       // Extract ID from filename and update max ID
       const filename = path.basename(file);
       const idMatch = filename.match(new RegExp(`${type}-(\\d+)\\.md`));
@@ -132,55 +132,55 @@ async function scanAndRebuild(databasePath: string, db: any) {
           counts.maxIds[type] = id;
         }
       }
-    
-    if (parsed.metadata.tags) {
+
+      if (parsed.metadata.tags) {
       // @ai-logic: Tags might be stored as comma-separated string or array
-      let tags: string[];
-      if (Array.isArray(parsed.metadata.tags)) {
-        tags = parsed.metadata.tags;
-      } else if (typeof parsed.metadata.tags === 'string') {
+        let tags: string[];
+        if (Array.isArray(parsed.metadata.tags)) {
+          tags = parsed.metadata.tags;
+        } else if (typeof parsed.metadata.tags === 'string') {
         // Check if it's a JSON array string
-        if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
-          try {
-            tags = JSON.parse(parsed.metadata.tags);
-          } catch {
+          if (parsed.metadata.tags.startsWith('[') && parsed.metadata.tags.endsWith(']')) {
+            try {
+              tags = JSON.parse(parsed.metadata.tags);
+            } catch {
             // If JSON parse fails, treat as comma-separated
+              tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+            }
+          } else {
             tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
           }
         } else {
-          tags = parsed.metadata.tags.split(',').map((t: string) => t.trim());
+          tags = [];
         }
-      } else {
-        tags = [];
+        tags.forEach((tag: string) => counts.tags.add(tag));
       }
-      tags.forEach((tag: string) => counts.tags.add(tag));
-    }
-    // @ai-critical: Collect status names from files
-    // @ai-why: We now store status names, not IDs
-    if (parsed.metadata.status) {
-      counts.statuses.add(parsed.metadata.status);
-    }
+      // @ai-critical: Collect status names from files
+      // @ai-why: We now store status names, not IDs
+      if (parsed.metadata.status) {
+        counts.statuses.add(parsed.metadata.status);
+      }
       counts.typeCountsMap[type]++;
     }
   }
-  
+
   // @ai-logic: Process document types dynamically
   const documentTypes = sequences.filter((seq: any) => seq.base_type === 'documents');
   for (const typeInfo of documentTypes) {
     const type = typeInfo.type;
     console.log(`\n📂 Scanning ${type}...`);
-    
+
     // Check if documents are in subdirectory (old structure) or main documents directory (new structure)
     let files = globSync(path.join(databasePath, 'documents', type, `${type}-*.md`));
     if (files.length === 0) {
       // Try new flat structure
       files = globSync(path.join(databasePath, 'documents', `${type}-*.md`));
     }
-    
+
     for (const file of files) {
       const content = await fs.readFile(file, 'utf-8');
       const parsed = parseMarkdown(content);
-      
+
       // Extract ID from filename and update max ID
       const filename = path.basename(file);
       const idMatch = filename.match(new RegExp(`${type}-(\\d+)\\.md`));
@@ -190,7 +190,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
           counts.maxIds[type] = id;
         }
       }
-      
+
       if (parsed.metadata.tags) {
         // @ai-logic: Tags might be stored as comma-separated string or array
         let tags: string[];
@@ -237,7 +237,7 @@ async function scanAndRebuild(databasePath: string, db: any) {
       }
       counts.sessions++;
     }
-    
+
     // Also scan daily summaries
     const summaryFiles = globSync(path.join(dir, 'daily-summary-*.md'));
     for (const file of summaryFiles) {
@@ -254,11 +254,11 @@ async function scanAndRebuild(databasePath: string, db: any) {
 
 async function rebuildDatabase() {
   console.log('🔄 Starting database rebuild from Markdown files...');
-  
+
   const config = getConfig();
   const databasePath = config.database.path;
   const sqlitePath = config.database.sqlitePath;
-  
+
   try {
     // Remove existing database if it exists
     try {
@@ -268,17 +268,17 @@ async function rebuildDatabase() {
     } catch {
       console.log('📝 No existing database found, creating new one...');
     }
-    
+
     // Create new database connection
     const connection = new DatabaseConnection(sqlitePath);
     await connection.initialize();
     const db = connection.getDatabase();
-    
+
     console.log('✅ Database initialized');
-    
+
     // Scan all markdown files and get counts
     const counts = await scanAndRebuild(databasePath, db);
-    
+
     // Note: Status restoration is no longer needed
     // @ai-why: Statuses are now managed through database initialization only
     // @ai-logic: Custom statuses are not supported - only default statuses exist
@@ -286,15 +286,15 @@ async function rebuildDatabase() {
     console.log('  - Statuses are managed through database initialization');
     console.log('  - Custom statuses found in files: ', Array.from(counts.statuses));
     console.log('  - Only default statuses will be available after rebuild');
-    
+
     // Now initialize the full database which will trigger the sync
     const { FileIssueDatabase } = await import('./database/index.js');
     const fullDb = new FileIssueDatabase(databasePath, sqlitePath);
     await fullDb.initialize();
-    
+
     // Force sync all data from markdown to SQLite
     console.log('\n🔄 Syncing data to search tables...');
-    
+
     // Use the search repository's rebuild method
     const searchRepo = (fullDb as any).searchRepo;
     if (searchRepo && searchRepo.rebuildSearchIndex) {
@@ -303,62 +303,66 @@ async function rebuildDatabase() {
     } else {
       console.log('  ⚠️  Search repository not available, manual sync required');
     }
-    
+
     // Docs are now handled in rebuildSearchIndex through DocumentRepository
     console.log('  ✅ Documents synced as part of search index rebuild');
-    
+
     // Sync sessions and daily summaries
     console.log('\n🔄 Syncing sessions and daily summaries...');
-    
+
     // Import SessionRepository
     const { SessionRepository } = await import('./repositories/session-repository.js');
     const sessionRepo = new SessionRepository(path.join(databasePath, 'sessions'), fullDb);
-    
+
     // Get all sessions
     const sessions = sessionRepo.getSessions();
     console.log(`  📅 Syncing ${sessions.length} sessions...`);
-    
+
     // Get all daily summaries
     const summaries = sessionRepo.getDailySummaries();
     console.log(`  📝 Syncing ${summaries.length} daily summaries...`);
-    
+
     // Pre-register all session and summary tags to avoid race conditions
     const sessionTags = new Set<string>();
     sessions.forEach((session: any) => {
-      if (session.tags) session.tags.forEach((tag: string) => sessionTags.add(tag));
+      if (session.tags) {
+        session.tags.forEach((tag: string) => sessionTags.add(tag));
+      }
     });
     summaries.forEach((summary: any) => {
-      if (summary.tags) summary.tags.forEach((tag: string) => sessionTags.add(tag));
+      if (summary.tags) {
+        summary.tags.forEach((tag: string) => sessionTags.add(tag));
+      }
     });
-    
+
     if (sessionTags.size > 0) {
       const tagRepo = (fullDb as any).tagRepo;
       if (tagRepo) {
         await tagRepo.ensureTagsExist(Array.from(sessionTags));
       }
     }
-    
+
     // Now sync sessions and summaries
     for (const session of sessions) {
       await fullDb.syncSessionToSQLite(session);
     }
-    
+
     for (const summary of summaries) {
       await fullDb.syncDailySummaryToSQLite(summary);
     }
-    
+
     // Update sequences with max IDs to prevent overwrites
     console.log('\n🔢 Updating sequences with max IDs...');
     for (const [type, maxId] of Object.entries(counts.maxIds)) {
       await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [maxId, type]);
       console.log(`  ✅ Updated sequence '${type}' to ${maxId}`);
     }
-    
+
     // Tags are automatically registered during sync operations via saveEntityTags
     console.log('\n🏷️  Tags registration:');
     console.log('  Collected tags:', Array.from(counts.tags).sort());
     console.log('  ✅ Tags were automatically registered during data sync');
-    
+
     console.log('\n📊 Database rebuild complete:');
     console.log('  Type counts:');
     for (const [type, count] of Object.entries(counts.typeCountsMap)) {
@@ -367,13 +371,13 @@ async function rebuildDatabase() {
     console.log(`  - Sessions: ${counts.sessions}`);
     console.log(`  - Tags: ${counts.tags.size}`);
     console.log(`  - Unique Status Names: ${counts.statuses.size}`);
-    
+
     // Close connections
     fullDb.close();
-    
+
     console.log('\n✨ Database rebuild successful!');
     console.log('\n💡 Tip: You can verify the rebuild by running the MCP server and checking the data.');
-    
+
   } catch (error) {
     console.error('\n❌ Error rebuilding database:', error);
     throw error;

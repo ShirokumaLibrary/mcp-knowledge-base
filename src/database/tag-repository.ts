@@ -1,5 +1,6 @@
-import { BaseRepository, Database } from './base.js';
-import { Tag } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Tag } from '../types/domain-types.js';
 
 /**
  * @ai-context Repository for tag management across all content types
@@ -18,7 +19,7 @@ export class TagRepository extends BaseRepository {
     const rows = await this.db.allAsync(
       'SELECT id, name, created_at FROM tags ORDER BY name'
     );
-    
+
     return rows.map((row: any) => ({
       name: row.name,
       createdAt: row.created_at
@@ -35,12 +36,14 @@ export class TagRepository extends BaseRepository {
       'SELECT id, name, created_at FROM tags WHERE id = ?',
       [id]
     );
-    
-    if (!row) return null;
-    
+
+    if (!row) {
+      return null;
+    }
+
     return {
-      name: row.name,
-      createdAt: row.created_at
+      name: String(row.name),
+      createdAt: row.created_at ? String(row.created_at) : undefined
     };
   }
 
@@ -56,11 +59,11 @@ export class TagRepository extends BaseRepository {
       'SELECT id FROM tags WHERE name = ?',
       [name]
     );
-    
+
     if (existing) {
-      return existing.id;
+      return Number(existing.id);
     }
-    
+
     // Create new tag using regular INSERT since we already checked
     try {
       const result = await this.db.runAsync(
@@ -75,7 +78,7 @@ export class TagRepository extends BaseRepository {
           'SELECT id FROM tags WHERE name = ?',
           [name]
         );
-        return existing.id;
+        return Number(existing?.id || 0);
       }
       throw err;
     }
@@ -88,23 +91,25 @@ export class TagRepository extends BaseRepository {
    * @ai-return Map of tag name to ID
    */
   async getTagIds(names: string[]): Promise<Map<string, number>> {
-    if (!names || names.length === 0) return new Map();
-    
+    if (!names || names.length === 0) {
+      return new Map();
+    }
+
     // Ensure all tags exist first
     await this.ensureTagsExist(names);
-    
+
     // Get all IDs in one query
     const placeholders = names.map(() => '?').join(',');
     const rows = await this.db.allAsync(
       `SELECT id, name FROM tags WHERE name IN (${placeholders})`,
       names
     );
-    
+
     const idMap = new Map<string, number>();
     rows.forEach((row: any) => {
       idMap.set(row.name, row.id);
     });
-    
+
     return idMap;
   }
 
@@ -118,16 +123,16 @@ export class TagRepository extends BaseRepository {
   async createTag(name: string): Promise<string> {
     // Use INSERT OR IGNORE to avoid AUTOINCREMENT increase
     const result = await this.db.runAsync(
-      'INSERT OR IGNORE INTO tags (name) VALUES (?)', 
+      'INSERT OR IGNORE INTO tags (name) VALUES (?)',
       [name]
     );
-    
+
     // Check if the tag was actually inserted
     if ((result as any).changes === 0) {
       // Tag already existed
       throw new Error(`Tag "${name}" already exists`);
     }
-    
+
     return name;
   }
 
@@ -144,7 +149,7 @@ export class TagRepository extends BaseRepository {
       'DELETE FROM tags WHERE name = ?',
       [id]  // @ai-logic: 'id' parameter is actually tag name
     );
-    
+
     return (result as any).changes! > 0;
   }
 
@@ -153,7 +158,7 @@ export class TagRepository extends BaseRepository {
       'SELECT id, name, created_at FROM tags WHERE name LIKE ? ORDER BY name',
       [`%${pattern}%`]
     );
-    
+
     return rows.map((row: any) => ({
       name: row.name,
       createdAt: row.created_at
@@ -168,10 +173,10 @@ export class TagRepository extends BaseRepository {
    */
   async getEntityTags(entityType: string, entityId: number | string): Promise<string[]> {
     const tableName = `${entityType}_tags`;
-    const idColumn = entityType === 'session' || entityType === 'summary' ? 
-      `${entityType}_${entityType === 'session' ? 'id' : 'date'}` : 
+    const idColumn = entityType === 'session' || entityType === 'summary' ?
+      `${entityType}_${entityType === 'session' ? 'id' : 'date'}` :
       `${entityType}_id`;
-    
+
     const rows = await this.db.allAsync(
       `SELECT t.name 
        FROM tags t 
@@ -180,7 +185,7 @@ export class TagRepository extends BaseRepository {
        ORDER BY t.name`,
       [entityId]
     );
-    
+
     return rows.map((row: any) => row.name);
   }
 
@@ -191,29 +196,31 @@ export class TagRepository extends BaseRepository {
    * @ai-transaction Should be called within a transaction for consistency
    */
   async saveEntityTags(entityType: string, entityId: number | string, tagNames: string[]): Promise<void> {
-    if (!tagNames || tagNames.length === 0) return;
-    
+    if (!tagNames || tagNames.length === 0) {
+      return;
+    }
+
     const tableName = `${entityType}_tags`;
-    const idColumn = entityType === 'session' || entityType === 'summary' ? 
-      `${entityType}_${entityType === 'session' ? 'id' : 'date'}` : 
+    const idColumn = entityType === 'session' || entityType === 'summary' ?
+      `${entityType}_${entityType === 'session' ? 'id' : 'date'}` :
       `${entityType}_id`;
-    
+
     // Get or create tag IDs
     const tagIdMap = await this.getTagIds(tagNames);
-    
+
     // Delete existing relationships
     await this.db.runAsync(
       `DELETE FROM ${tableName} WHERE ${idColumn} = ?`,
       [entityId]
     );
-    
+
     // Insert new relationships
-    const values = Array.from(tagIdMap.values()).map(() => `(?, ?)`).join(',');
+    const values = Array.from(tagIdMap.values()).map(() => '(?, ?)').join(',');
     const params: any[] = [];
     tagIdMap.forEach(tagId => {
       params.push(entityId, tagId);
     });
-    
+
     if (params.length > 0) {
       await this.db.runAsync(
         `INSERT INTO ${tableName} (${idColumn}, tag_id) VALUES ${values}`,
@@ -231,27 +238,29 @@ export class TagRepository extends BaseRepository {
    * @ai-why INSERT OR IGNORE makes operation idempotent
    */
   async ensureTagsExist(tags: string[]): Promise<void> {
-    if (!tags || tags.length === 0) return;  // @ai-edge-case: Empty arrays handled gracefully
-    
+    if (!tags || tags.length === 0) {
+      return;
+    }  // @ai-edge-case: Empty arrays handled gracefully
+
     // First, check which tags already exist to minimize INSERT attempts
     const placeholdersForSelect = tags.map(() => '?').join(',');
     const existingRows = await this.db.allAsync(
       `SELECT name FROM tags WHERE name IN (${placeholdersForSelect})`,
       tags
     );
-    
+
     const existingNames = new Set(existingRows.map((row: any) => row.name));
     const newTags = tags.filter(tag => !existingNames.has(tag));
-    
+
     if (newTags.length === 0) {
       this.logger.debug(`All tags already exist: ${tags.join(', ')}`);
       return;
     }
-    
+
     // Only insert tags that don't exist
     const placeholders = newTags.map(() => '(?)').join(',');
     const query = `INSERT OR IGNORE INTO tags (name) VALUES ${placeholders}`;
-    
+
     try {
       await this.db.runAsync(query, newTags);
       this.logger.debug(`Ensured tags exist: ${tags.join(', ')} (${newTags.length} new)`);

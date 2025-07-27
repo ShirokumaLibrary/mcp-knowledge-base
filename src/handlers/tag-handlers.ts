@@ -7,14 +7,15 @@
  */
 
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
-import { 
-  CreateTagSchema, 
-  DeleteTagSchema, 
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
+import {
+  CreateTagSchema,
+  DeleteTagSchema,
   SearchTagSchema,
-  SearchAllByTagSchema 
+  SearchAllByTagSchema
 } from '../schemas/tag-schemas.js';
+import { createLogger } from '../utils/logger.js';
 
 /**
  * @ai-context Handles MCP tool calls for tag operations
@@ -24,6 +25,8 @@ import {
  * @ai-why Flexible categorization across all content types
  */
 export class TagHandlers {
+  private logger = createLogger('TagHandlers');
+
   /**
    * @ai-intent Initialize with database dependency
    * @ai-pattern Dependency injection
@@ -39,15 +42,26 @@ export class TagHandlers {
    * @ai-performance May include usage statistics
    */
   async handleGetTags(): Promise<ToolResponse> {
-    const tags = await this.db.getTags();  // @ai-logic: Includes usage counts
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: JSON.stringify({ data: tags }, null, 2),
-        },
-      ],
-    };
+    try {
+      const tags = await this.db.getTags();  // @ai-logic: Includes usage counts
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ data: tags }, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error('Failed to get tags', { error });
+      if (error instanceof McpError) {
+        throw error;
+      }
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to retrieve tags: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 
   /**
@@ -58,22 +72,29 @@ export class TagHandlers {
    * @ai-side-effects Inserts into tags table
    * @ai-pattern Auto-creation usually preferred over manual
    */
-  async handleCreateTag(args: any): Promise<ToolResponse> {
-    const validatedArgs = CreateTagSchema.parse(args);
+  async handleCreateTag(args: unknown): Promise<ToolResponse> {
     try {
+      const validatedArgs = CreateTagSchema.parse(args);
       const tag = await this.db.createTag(validatedArgs.name);
-      
+
       return {
         content: [
           {
             type: 'text' as const,
-            text: `Tag created: ${tag}`,  // @ai-logic: Returns tag name
-          },
-        ],
+            text: `Tag created: ${tag}`  // @ai-logic: Returns tag name
+          }
+        ]
       };
     } catch (error) {
+      this.logger.error('Failed to create tag', { error, args });
+      if (error instanceof McpError) {
+        throw error;
+      }
       // @ai-error-handling: Convert DB errors to MCP format
-      throw new McpError(ErrorCode.InvalidRequest, error instanceof Error ? error.message : 'Failed to create tag');
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to create tag: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -86,22 +107,33 @@ export class TagHandlers {
    * @ai-bug Parameter is name not ID - inconsistent with other deletes
    * @ai-return Success message or error
    */
-  async handleDeleteTag(args: any): Promise<ToolResponse> {
-    const validatedArgs = DeleteTagSchema.parse(args);
-    const success = await this.db.deleteTag(validatedArgs.name);  // @ai-bug: Uses name not ID
-    
-    if (!success) {
-      throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+  async handleDeleteTag(args: unknown): Promise<ToolResponse> {
+    try {
+      const validatedArgs = DeleteTagSchema.parse(args);
+      const success = await this.db.deleteTag(validatedArgs.name);  // @ai-bug: Uses name not ID
+
+      if (!success) {
+        throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Tag "${validatedArgs.name}" deleted`
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error('Failed to delete tag', { error, args });
+      if (error instanceof McpError) {
+        throw error;
+      }
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to delete tag: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
-    
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: `Tag "${validatedArgs.name}" deleted`,
-        },
-      ],
-    };
   }
 
   /**
@@ -111,18 +143,29 @@ export class TagHandlers {
    * @ai-pattern Case-insensitive LIKE search with % wildcards
    * @ai-return Array of matching tags with usage counts
    */
-  async handleSearchTags(args: any): Promise<ToolResponse> {
-    const validatedArgs = SearchTagSchema.parse(args);
-    const tags = await this.db.searchTags(validatedArgs.pattern);  // @ai-pattern: SQL LIKE %pattern%
-    
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: JSON.stringify({ data: tags }, null, 2),
-        },
-      ],
-    };
+  async handleSearchTags(args: unknown): Promise<ToolResponse> {
+    try {
+      const validatedArgs = SearchTagSchema.parse(args);
+      const tags = await this.db.searchTags(validatedArgs.pattern);  // @ai-pattern: SQL LIKE %pattern%
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ data: tags }, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error('Failed to search tags', { error, args });
+      if (error instanceof McpError) {
+        throw error;
+      }
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to search tags: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 
   /**
@@ -133,17 +176,28 @@ export class TagHandlers {
    * @ai-bug Missing await on searchAllByTag call
    * @ai-return Object with arrays for each content type
    */
-  async handleSearchAllByTag(args: any): Promise<ToolResponse> {
-    const validatedArgs = SearchAllByTagSchema.parse(args);
-    const results = await this.db.searchAllByTag(validatedArgs.tag);  // @ai-fix: Added missing await
-    
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: JSON.stringify({ data: results }, null, 2),  // @ai-pattern: Categorized by type
-        },
-      ],
-    };
+  async handleSearchAllByTag(args: unknown): Promise<ToolResponse> {
+    try {
+      const validatedArgs = SearchAllByTagSchema.parse(args);
+      const results = await this.db.searchAllByTag(validatedArgs.tag);  // @ai-fix: Added missing await
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ data: results }, null, 2)  // @ai-pattern: Categorized by type
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error('Failed to search all by tag', { error, args });
+      if (error instanceof McpError) {
+        throw error;
+      }
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to search items by tag: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 }

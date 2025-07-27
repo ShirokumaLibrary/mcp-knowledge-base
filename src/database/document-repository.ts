@@ -7,8 +7,9 @@
  * @ai-database-schema Uses search_documents table with composite key (type, id)
  */
 
-import { BaseRepository, Database } from './base.js';
-import { Document, DocumentSummary } from '../types/domain-types.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
+import type { Document, DocumentSummary } from '../types/domain-types.js';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
@@ -56,9 +57,11 @@ export class DocumentRepository extends BaseRepository {
   private async normalizeSequenceType(type: string): Promise<string> {
     // Check if this type exists in sequences table
     const sequenceType = await this.getSequenceType(type);
-    if (sequenceType) return sequenceType;
-    
-    
+    if (sequenceType) {
+      return sequenceType;
+    }
+
+
     // Default: return as-is
     return type;
   }
@@ -78,12 +81,12 @@ export class DocumentRepository extends BaseRepository {
    */
   private async getAllDocumentPatterns(): Promise<string[]> {
     const patterns: string[] = [];
-    
+
     // Get all document types from sequences table
     const sequences = await this.db.allAsync(
-      `SELECT type FROM sequences WHERE base_type = 'documents'`
+      'SELECT type FROM sequences WHERE base_type = \'documents\''
     ) as Array<{ type: string }>;
-    
+
     // Add pattern for each type in its subdirectory
     for (const seq of sequences) {
       patterns.push(`${this.documentsPath}/${seq.type}/${seq.type}-*.md`);
@@ -108,14 +111,14 @@ export class DocumentRepository extends BaseRepository {
     related_documents?: string[]
   ): Promise<Document> {
     await this.ensureDirectories();
-    
+
     // Ensure documents directory exists
     await this.ensureDirectories();
-    
+
     // Get next ID for the specific type
     const sequenceType = await this.normalizeSequenceType(type);
     const id = await this.getNextSequenceValue(sequenceType);
-    
+
     const now = new Date().toISOString();
     const document: Document = {
       type,
@@ -147,10 +150,10 @@ export class DocumentRepository extends BaseRepository {
       updated_at: document.updated_at
     };
     const markdown = generateMarkdown(metadata, document.content);
-    
+
     await fs.writeFile(filePath, markdown, 'utf-8');
     await this.syncDocumentToSQLite(document);
-    
+
     // @ai-side-effect: Auto-register tags
     if (tags && tags.length > 0) {
       await this.tagRepo.ensureTagsExist(tags);
@@ -171,11 +174,11 @@ export class DocumentRepository extends BaseRepository {
     const typeDir = path.join(this.documentsPath, sequenceType);
     await fs.mkdir(typeDir, { recursive: true });
     const filePath = path.join(typeDir, fileName);
-    
+
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const { metadata, content: markdownContent } = parseMarkdown(content);
-      
+
       return {
         type,
         id,
@@ -209,18 +212,30 @@ export class DocumentRepository extends BaseRepository {
     related_documents?: string[]
   ): Promise<boolean> {
     const current = await this.getDocument(type, id);
-    if (!current) return false;
+    if (!current) {
+      return false;
+    }
 
     // Apply updates
-    if (title !== undefined) current.title = title;
-    if (content !== undefined) current.content = content;
-    if (description !== undefined) current.description = description || undefined;
+    if (title !== undefined) {
+      current.title = title;
+    }
+    if (content !== undefined) {
+      current.content = content;
+    }
+    if (description !== undefined) {
+      current.description = description || undefined;
+    }
     if (tags !== undefined) {
       current.tags = tags;
       await this.tagRepo.ensureTagsExist(tags);
     }
-    if (related_tasks !== undefined) current.related_tasks = related_tasks;
-    if (related_documents !== undefined) current.related_documents = related_documents;
+    if (related_tasks !== undefined) {
+      current.related_tasks = related_tasks;
+    }
+    if (related_documents !== undefined) {
+      current.related_documents = related_documents;
+    }
     current.updated_at = new Date().toISOString();
 
     // Save to file with consistent naming
@@ -241,10 +256,10 @@ export class DocumentRepository extends BaseRepository {
     };
     const markdown = generateMarkdown(metadata, current.content);
     await fs.writeFile(filePath, markdown, 'utf-8');
-    
+
     // Sync to SQLite
     await this.syncDocumentToSQLite(current);
-    
+
     return true;
   }
 
@@ -258,7 +273,7 @@ export class DocumentRepository extends BaseRepository {
     const sequenceType = await this.normalizeSequenceType(type);
     const fileName = `${sequenceType}-${id}.md`;
     const filePath = path.join(this.documentsPath, sequenceType, fileName);
-    
+
     try {
       await fs.unlink(filePath);
       // CASCADE DELETE handles document_tags cleanup
@@ -279,36 +294,38 @@ export class DocumentRepository extends BaseRepository {
    */
   async getAllDocuments(type?: string): Promise<Document[]> {
     await this.ensureDirectories();
-    
+
     // @ai-logic: Use type registry for pattern generation
-    const patterns = type 
+    const patterns = type
       ? (() => {
-          return [`${this.documentsPath}/${type}/${type}-*.md`];
-        })()
+        return [`${this.documentsPath}/${type}/${type}-*.md`];
+      })()
       : await this.getAllDocumentPatterns();
-    
+
     const documents: Document[] = [];
-    
+
     for (const pattern of patterns) {
       const files = await glob(pattern);
-      
+
       for (const file of files) {
         const content = await fs.readFile(file, 'utf-8');
         const { metadata, content: markdownContent } = parseMarkdown(content);
-        
+
         // Extract type from filename pattern
         const filename = path.basename(file);
         const match = filename.match(/^(\w+)-(\d+)\.md$/);
-        if (!match) continue;
-        
+        if (!match) {
+          continue;
+        }
+
         const prefix = match[1];
         const id = parseInt(match[2]);
-        
+
         // Find type by prefix
         let fileType = prefix;
         // Use the prefix as the type directly
         fileType = prefix;
-        
+
         documents.push({
           type: fileType,
           id,
@@ -323,8 +340,8 @@ export class DocumentRepository extends BaseRepository {
         });
       }
     }
-    
-    return documents.sort((a, b) => 
+
+    return documents.sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   }
@@ -337,14 +354,14 @@ export class DocumentRepository extends BaseRepository {
   async getAllDocumentsSummary(type?: string): Promise<DocumentSummary[]> {
     const whereClause = type ? 'WHERE type = ?' : '';
     const params = type ? [type] : [];
-    
+
     const rows = await this.db.allAsync(
       `SELECT type, id, title, summary as description, tags, created_at, updated_at 
        FROM search_documents ${whereClause}
        ORDER BY created_at DESC`,
       params
     );
-    
+
     return rows.map((row: any) => ({
       type: row.type,
       id: row.id,
@@ -364,7 +381,7 @@ export class DocumentRepository extends BaseRepository {
   async searchDocumentsByTag(tag: string, type?: string): Promise<Document[]> {
     const typeClause = type ? 'AND d.type = ?' : '';
     const params = type ? [tag, type] : [tag];
-    
+
     const rows = await this.db.allAsync(
       `SELECT DISTINCT d.type, d.id 
        FROM search_documents d
@@ -373,13 +390,15 @@ export class DocumentRepository extends BaseRepository {
        WHERE t.name = ? ${typeClause}`,
       params
     );
-    
+
     const documents: Document[] = [];
     for (const row of rows) {
-      const doc = await this.getDocument(row.type, row.id);
-      if (doc) documents.push(doc);
+      const doc = await this.getDocument(String(row.type), Number(row.id));
+      if (doc) {
+        documents.push(doc);
+      }
     }
-    
+
     return documents;
   }
 
@@ -397,16 +416,16 @@ export class DocumentRepository extends BaseRepository {
       INSERT OR REPLACE INTO search_documents 
       (type, id, title, summary, content, tags, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        document.type,
-        document.id, 
-        document.title,
-        document.description || null,
-        document.content,
-        tagsJson,
-        document.created_at,
-        document.updated_at
-      ]
+    [
+      document.type,
+      document.id,
+      document.title,
+      document.description || null,
+      document.content,
+      tagsJson,
+      document.created_at,
+      document.updated_at
+    ]
     );
 
     // Update document_tags relationship
@@ -423,41 +442,41 @@ export class DocumentRepository extends BaseRepository {
           [document.type, document.id, tagId]
         );
 
-    // Update related tasks
-    await this.db.runAsync(
-      'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
-      [document.type, document.id]
-    );
-    
-    if (document.related_tasks && document.related_tasks.length > 0) {
-      for (const taskRef of document.related_tasks) {
-        const [targetType, targetId] = taskRef.split('-');
-        if (targetType && targetId) {
-          await this.db.runAsync(
-            'INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
-            [document.type, document.id, targetType, parseInt(targetId)]
-          );
-        }
-      }
-    }
+        // Update related tasks
+        await this.db.runAsync(
+          'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
+          [document.type, document.id]
+        );
 
-    // Update related documents
-    await this.db.runAsync(
-      'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
-      [document.type, document.id.toString()]
-    );
-    
-    if (document.related_documents && document.related_documents.length > 0) {
-      for (const docRef of document.related_documents) {
-        const [targetType, targetId] = docRef.split('-');
-        if (targetType && targetId) {
-          await this.db.runAsync(
-            'INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
-            [document.type, document.id.toString(), targetType, parseInt(targetId)]
-          );
+        if (document.related_tasks && document.related_tasks.length > 0) {
+          for (const taskRef of document.related_tasks) {
+            const [targetType, targetId] = taskRef.split('-');
+            if (targetType && targetId) {
+              await this.db.runAsync(
+                'INSERT OR IGNORE INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+                [document.type, document.id, targetType, parseInt(targetId)]
+              );
+            }
+          }
         }
-      }
-    }
+
+        // Update related documents
+        await this.db.runAsync(
+          'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
+          [document.type, document.id.toString()]
+        );
+
+        if (document.related_documents && document.related_documents.length > 0) {
+          for (const docRef of document.related_documents) {
+            const [targetType, targetId] = docRef.split('-');
+            if (targetType && targetId) {
+              await this.db.runAsync(
+                'INSERT OR IGNORE INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+                [document.type, document.id.toString(), targetType, parseInt(targetId)]
+              );
+            }
+          }
+        }
       }
     }
   }

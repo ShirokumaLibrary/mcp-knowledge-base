@@ -8,7 +8,8 @@
 
 import * as fsPromises from 'fs/promises';
 import * as path from 'path';
-import { BaseRepository, Database } from './base.js';
+import type { Database } from './base.js';
+import { BaseRepository } from './base.js';
 
 /**
  * @ai-context Base interface for all markdown-stored entities
@@ -80,21 +81,21 @@ export abstract class BaseMarkdownRepository<T extends MarkdownEntity> extends B
 
   // @ai-section Abstract methods for subclass implementation
   // @ai-pattern Template Method pattern hooks
-  
+
   /**
    * @ai-intent Parse markdown file content into entity object
    * @ai-critical Must handle invalid/corrupted files gracefully
    * @ai-return Entity object or null if parsing fails
    */
   protected abstract parseMarkdownContent(content: string): T | null;
-  
+
   /**
    * @ai-intent Generate markdown content from entity object
    * @ai-critical Must produce valid markdown with frontmatter
    * @ai-return Complete markdown file content
    */
   protected abstract generateMarkdownContent(entity: T): string;
-  
+
   /**
    * @ai-intent Sync entity data to SQLite for searching
    * @ai-side-effects Updates search tables in SQLite
@@ -168,7 +169,7 @@ export abstract class BaseMarkdownRepository<T extends MarkdownEntity> extends B
    */
   protected async readAllEntities(): Promise<T[]> {
     const files = await this.getAllFiles();
-    
+
     // @ai-performance: Parallel file reading
     const entityPromises = files.map(async (file) => {
       try {
@@ -181,7 +182,7 @@ export abstract class BaseMarkdownRepository<T extends MarkdownEntity> extends B
     });
 
     const results = await Promise.all(entityPromises);
-    
+
     // @ai-logic: Filter out nulls from failed parses
     const entities: T[] = [];
     for (const result of results) {
@@ -200,7 +201,9 @@ export abstract class BaseMarkdownRepository<T extends MarkdownEntity> extends B
    */
   async getEntity(id: number): Promise<T | null> {
     const content = await this.readFile(id);
-    if (!content) return null;  // @ai-logic: File doesn't exist
+    if (!content) {
+      return null;
+    }  // @ai-logic: File doesn't exist
     return this.parseMarkdownContent(content);
   }
 

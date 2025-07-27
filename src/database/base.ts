@@ -1,9 +1,10 @@
 import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
-import winston from 'winston';
+import type winston from 'winston';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger } from '../utils/logger.js';
+import type { DatabaseRow, QueryParameters } from './types/database-types.js';
 
 /**
  * @ai-context Promise-based wrapper for SQLite3 database operations
@@ -11,9 +12,9 @@ import { createLogger } from '../utils/logger.js';
  * @ai-why Native sqlite3 uses callbacks, but async/await is cleaner for our codebase
  */
 export interface Database extends sqlite3.Database {
-  runAsync(sql: string, params?: any[]): Promise<sqlite3.RunResult>;
-  getAsync(sql: string, params?: any[]): Promise<any>;
-  allAsync(sql: string, params?: any[]): Promise<any[]>;
+  runAsync(sql: string, params?: QueryParameters): Promise<sqlite3.RunResult>;
+  getAsync(sql: string, params?: QueryParameters): Promise<DatabaseRow | undefined>;
+  allAsync(sql: string, params?: QueryParameters): Promise<DatabaseRow[]>;
 }
 
 /**
@@ -51,7 +52,7 @@ export abstract class BaseRepository {
       'SELECT type FROM sequences WHERE type = ?',
       [sequenceName]
     ) as { type: string } | undefined;
-    
+
     return row?.type || null;
   }
 
@@ -66,19 +67,19 @@ export abstract class BaseRepository {
     try {
       // @ai-logic: Atomic increment prevents race conditions
       await this.db.runAsync(
-        `UPDATE sequences SET current_value = current_value + 1 WHERE type = ?`, 
+        'UPDATE sequences SET current_value = current_value + 1 WHERE type = ?',
         [sequenceName]
       );
-      
+
       const row = await this.db.getAsync(
-        `SELECT current_value FROM sequences WHERE type = ?`, 
+        'SELECT current_value FROM sequences WHERE type = ?',
         [sequenceName]
       ) as { current_value: number } | undefined;
-      
+
       if (!row || !row.current_value) {
         throw new Error(`Failed to get sequence value for ${sequenceName}`);
       }
-      
+
       return row.current_value;
     } catch (err) {
       this.logger.error('Error getting sequence value:', { error: err, sequenceName });
@@ -122,9 +123,9 @@ export class DatabaseConnection {
     }
     this.db = new sqlite.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE) as Database;
     this.logger.debug('Database connection created');
-    
+
     // Add Promise wrappers with custom promisification for run
-    this.db.runAsync = (sql: string, params?: any[]): Promise<sqlite3.RunResult> => {
+    this.db.runAsync = (sql: string, params?: QueryParameters): Promise<sqlite3.RunResult> => {
       return new Promise((resolve, reject) => {
         this.db.run(sql, params || [], function(this: sqlite3.RunResult, err: Error | null) {
           if (err) {
@@ -138,7 +139,7 @@ export class DatabaseConnection {
     this.db.getAsync = promisify(this.db.get.bind(this.db));
     this.db.allAsync = promisify(this.db.all.bind(this.db));
     this.logger.debug('Promise wrappers added');
-    
+
     // Initialize tables
     await this.createTables();
     this.logger.debug('Tables created');
@@ -148,7 +149,7 @@ export class DatabaseConnection {
 
   private async createTables(): Promise<void> {
     this.logger.debug('Creating tables...');
-    
+
     // Status management table
     this.logger.debug('Creating statuses table...');
     await this.db.runAsync(`
@@ -185,13 +186,13 @@ export class DatabaseConnection {
     this.logger.debug('Inserting default statuses...');
     await this.db.runAsync(`INSERT OR IGNORE INTO statuses (name, is_closed) VALUES 
       ('Open', 0), ('In Progress', 0), ('Review', 0), ('Completed', 1), ('Closed', 1), ('On Hold', 0), ('Cancelled', 1)`);
-    
+
     // Initialize sequences - reset to 0 if database is empty
     this.logger.debug('Initializing sequences...');
-    
+
     // Check if sequences already exist
-    const existingSequences = await this.db.allAsync(`SELECT type FROM sequences`);
-    
+    const existingSequences = await this.db.allAsync('SELECT type FROM sequences');
+
     if (existingSequences.length === 0) {
       // Fresh database - insert new sequences starting at 0
       // Using type registry information
@@ -202,11 +203,11 @@ export class DatabaseConnection {
         { type: 'docs', baseType: 'documents' },
         { type: 'knowledge', baseType: 'documents' }
       ];
-      
+
       for (const def of typeDefinitions) {
         sequenceValues.push(`('${def.type}', 0, '${def.baseType}')`);
       }
-      
+
       await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES ${sequenceValues.join(', ')}`);
     } else {
       // Existing database - ensure all sequences exist
@@ -221,7 +222,7 @@ export class DatabaseConnection {
     // Create relationship tables for tags
     this.logger.debug('Creating tag relationship tables...');
     await this.createTagRelationshipTables();
-    
+
     // Create indexes
     this.logger.debug('Creating indexes...');
     await this.createIndexes();
@@ -347,28 +348,28 @@ export class DatabaseConnection {
 
   private async createIndexes(): Promise<void> {
     // Text search indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)`);
-    
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)');
+
     // Tag relationship indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)`);
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)');
     // Note: doc_tags and knowledge_tags indexes are replaced by document_tags indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)`);
-    
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)');
+
     // Tag name index for quick lookups
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)`);
-    
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)');
+
     // Related tasks and documents indexes
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)`);
-    await this.db.runAsync(`CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)`);
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)');
+    await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)');
   }
 
   getDatabase(): Database {

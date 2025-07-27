@@ -1,9 +1,9 @@
 /**
  * @ai-context YAML frontmatter parser for markdown-based storage
- * @ai-pattern Simple state machine for parsing structured data  
+ * @ai-pattern Simple state machine for parsing structured data
  * @ai-critical Core utility for all file-based operations - errors here affect entire system
  * @ai-why Custom parser avoids heavy YAML dependencies while handling our specific needs
- * 
+ *
  * @ai-markdown-format
  * All content files follow this structure:
  * ```
@@ -16,25 +16,25 @@
  * created_at: 2025-01-24T10:00:00Z
  * updated_at: 2025-01-24T10:00:00Z
  * ---
- * 
- * Content goes here (markdown for docs/knowledge, 
+ *
+ * Content goes here (markdown for docs/knowledge,
  * plain text for issues/plans)
  * ```
- * 
+ *
  * @ai-type-conversion-rules
  * - Empty values -> null
  * - 'tags', 'related_issues' -> always arrays (split by comma)
  * - Fields ending with '_id' or named 'id' -> numbers
  * - 'true'/'false' strings -> booleans
  * - Everything else -> strings
- * 
+ *
  * @ai-robustness
  * - Never throws errors - returns empty metadata if malformed
  * - Handles missing frontmatter gracefully
  * - Preserves content even if metadata parsing fails
  */
 
-import { Document } from '../types/domain-types.js';
+import type { Document } from '../types/domain-types.js';
 
 export interface ParsedMarkdown {
   metadata: Record<string, any>;
@@ -53,26 +53,26 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
   const metadata: Record<string, any> = {};
   let contentStartIndex = -1;
   let inFrontMatter = false;
-  
+
   // @ai-logic: State machine starts by checking for frontmatter delimiter
   if (lines[0] === '---') {
     inFrontMatter = true;
-    
+
     // @ai-flow: Line-by-line parsing until closing delimiter
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
-      
+
       // @ai-logic: Second '---' marks end of frontmatter
       if (line === '---') {
         contentStartIndex = i + 1;
         break;
       }
-      
+
       // @ai-logic: Simple regex for 'key: value' pattern
       const match = line.match(/^(\w+):\s*(.*)$/);
       if (match) {
         const [, key, value] = match;
-        
+
         // @ai-logic: Type inference based on key names and value patterns
         if (value.trim() === '') {
           metadata[key] = null;  // @ai-edge-case: Empty values become null
@@ -110,12 +110,12 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
       }
     }
   }
-  
+
   // Extract content (everything after front matter)
-  const content = contentStartIndex >= 0 
+  const content = contentStartIndex >= 0
     ? lines.slice(contentStartIndex).join('\n').trim()
     : fileContent.trim();
-  
+
   return { metadata, content };
 }
 
@@ -128,7 +128,7 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
  */
 export function generateMarkdown(metadata: Record<string, any>, content: string): string {
   const lines: string[] = ['---'];
-  
+
   // @ai-logic: Iterate metadata preserving insertion order
   for (const [key, value] of Object.entries(metadata)) {
     if (value === null || value === undefined) {
@@ -140,9 +140,9 @@ export function generateMarkdown(metadata: Record<string, any>, content: string)
       lines.push(`${key}: ${value}`);
     }
   }
-  
+
   lines.push('---', '', content);  // @ai-logic: Empty line separates frontmatter from content
-  
+
   return lines.join('\n');
 }
 
@@ -153,7 +153,7 @@ export function generateMarkdown(metadata: Record<string, any>, content: string)
  */
 export function parseDocumentMarkdown(fileContent: string, id: number, type: string): Document {
   const { metadata, content } = parseMarkdown(fileContent);
-  
+
   return {
     id,
     type: metadata.type || type, // Use passed type parameter

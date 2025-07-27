@@ -13,6 +13,7 @@ EventEmitter.defaultMaxListeners = 100;
 // Test environment configuration
 process.env.NODE_ENV = 'test';
 process.env.MCP_LOGGING_ENABLED = 'false';
+process.env.LOG_LEVEL = 'silent';  // Suppress all logs during tests
 
 // Use test-specific paths to avoid polluting production environment
 const path = require('path');
@@ -33,3 +34,18 @@ process.env.MCP_SQLITE_PATH = path.join(testDataDir, 'test-search.db');
 if (keepTestData) {
   console.log(`\n📁 KEEP_TEST_DATA is enabled - test data will be preserved\n`);
 }
+
+// Suppress console output during tests unless explicitly enabled
+if (process.env.SHOW_TEST_LOGS !== 'true') {
+  global.console = {
+    ...console,
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  };
+}
+
+// Suppress MaxListenersExceededWarning
+process.removeAllListeners('warning');

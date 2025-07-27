@@ -6,7 +6,7 @@
  * @ai-why Human-readable format allows manual editing
  */
 
-import { WorkSession, DailySummary } from '../types/session-types.js';
+import type { WorkSession, DailySummary } from '../types/session-types.js';
 
 /**
  * @ai-context Formats work sessions and daily summaries to/from markdown
@@ -31,7 +31,9 @@ export class SessionMarkdownFormatter {
     if (session.tags && session.tags.length > 0) {
       content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`;  // @ai-pattern: JSON array format
     }
-    if (session.category) content += `category: "${session.category}"\n`;
+    if (session.category) {
+      content += `category: "${session.category}"\n`;
+    }
     if (session.related_tasks && session.related_tasks.length > 0) {
       content += `related_tasks: [${session.related_tasks.map(t => `"${t}"`).join(', ')}]\n`;
     }
@@ -40,9 +42,11 @@ export class SessionMarkdownFormatter {
     }
     content += `date: ${session.date}\n`;  // @ai-pattern: YYYY-MM-DD unquoted
     content += `createdAt: ${session.createdAt}\n`;  // @ai-pattern: ISO 8601 unquoted
-    if (session.updatedAt) content += `updatedAt: ${session.updatedAt}\n`;
+    if (session.updatedAt) {
+      content += `updatedAt: ${session.updatedAt}\n`;
+    }
     content += '---\n\n';
-    
+
     // @ai-logic: Content should be stored as-is without additional formatting
     if (session.content) {
       content += session.content;
@@ -83,7 +87,7 @@ export class SessionMarkdownFormatter {
    */
   parseSessionFromMarkdown(content: string, sessionId: string, date: string): WorkSession {
     const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);  // @ai-pattern: Frontmatter detection
-    
+
     if (frontMatterMatch) {
       return this.parseFrontMatterSession(frontMatterMatch, sessionId, date);
     } else {
@@ -101,7 +105,7 @@ export class SessionMarkdownFormatter {
   private parseFrontMatterSession(match: RegExpMatchArray, sessionId: string, date: string): WorkSession {
     const frontMatter = match[1];
     const bodyContent = match[2];
-    
+
     // @ai-logic: Extract each field with specific regex
     const titleMatch = frontMatter.match(/title: "(.+)"/);
     const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
@@ -110,10 +114,10 @@ export class SessionMarkdownFormatter {
     const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
     const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
     const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
-    
+
     // @ai-logic: Content is everything after the frontmatter
     const content = bodyContent.trim() || undefined;
-    
+
     return {
       id: sessionId,
       title: titleMatch?.[1] || 'Unknown Session',
@@ -137,17 +141,17 @@ export class SessionMarkdownFormatter {
    */
   private parseLegacySession(content: string, sessionId: string, date: string): WorkSession {
     const lines = content.split('\n');
-    
+
     const titleMatch = lines[0].match(/^# (.+)$/);  // @ai-pattern: Markdown h1
     const title = titleMatch ? titleMatch[1] : 'Unknown Session';  // @ai-fallback: Default title
-    
+
     const createdAtMatch = content.match(/\*\*Created\*\*: (.+)/);
     const updatedAtMatch = content.match(/\*\*Updated\*\*: (.+)/);
-    
+
     // Get content after title
     const contentStart = content.indexOf('\n\n', content.indexOf('\n\n') + 2);
     const bodyContent = contentStart !== -1 ? content.substring(contentStart).trim() : '';
-    
+
     return {
       id: sessionId,
       title,
@@ -179,12 +183,14 @@ export class SessionMarkdownFormatter {
       content += `related_documents: [${summary.related_documents.map(d => `"${d}"`).join(', ')}]\n`;
     }
     content += `createdAt: ${summary.createdAt}\n`;
-    if (summary.updatedAt) content += `updatedAt: ${summary.updatedAt}\n`;
+    if (summary.updatedAt) {
+      content += `updatedAt: ${summary.updatedAt}\n`;
+    }
     content += '---\n\n';
-    
+
     content += `# ${summary.title}\n\n`;  // @ai-ux: Visual title
     content += summary.content;  // @ai-logic: Main summary text
-    
+
     return content;
   }
 
@@ -197,14 +203,14 @@ export class SessionMarkdownFormatter {
    */
   parseDailySummaryFromMarkdown(content: string, date: string): DailySummary | null {
     const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    
+
     if (!frontMatterMatch) {
       return null;  // @ai-validation: No legacy format for summaries
     }
 
     const frontMatter = frontMatterMatch[1];
     const bodyContent = frontMatterMatch[2];
-    
+
     const dateMatch = frontMatter.match(/date: (.+)/);
     const titleMatch = frontMatter.match(/title: "(.+)"/);
     const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
@@ -212,7 +218,7 @@ export class SessionMarkdownFormatter {
     const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
     const createdAtMatch = frontMatter.match(/createdAt: (.+)/);
     const updatedAtMatch = frontMatter.match(/updatedAt: (.+)/);
-    
+
     return {
       date: dateMatch?.[1] || date,
       title: titleMatch?.[1] || 'Untitled',

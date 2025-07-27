@@ -47,7 +47,7 @@ export interface Config {
 export function getConfig(): Config {
   // @ai-logic: Database base directory from env or relative to CWD
   const baseDir = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
-  
+
   return {
     database: {
       path: baseDir,

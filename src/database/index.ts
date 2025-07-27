@@ -6,6 +6,8 @@ import { DocumentRepository } from './document-repository.js';
 import { SearchRepository } from './search-repository.js';
 import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
+import { ensureInitialized } from '../utils/decorators.js';
+import { WorkSession, DailySummary } from '../types/complete-domain-types.js';
 import * as path from 'path';
 
 // Re-export types
@@ -18,7 +20,7 @@ export * from '../types/domain-types.js';
  * @ai-lifecycle Lazy initialization ensures DB ready before operations
  * @ai-dependencies All repository types, manages their lifecycle
  * @ai-assumption Single database instance per process
- * 
+ *
  * @ai-repository-overview
  * This facade coordinates multiple specialized repositories:
  * - StatusRepository: Workflow states (Open, In Progress, Done, etc.)
@@ -28,18 +30,18 @@ export * from '../types/domain-types.js';
  * - KnowledgeRepository: Reference documentation (requires content)
  * - DocRepository: Technical documentation
  * - SearchRepository: Cross-type search functionality
- * 
+ *
  * @ai-storage-strategy
  * 1. Primary data in markdown files with YAML frontmatter
  * 2. SQLite for search indexes and relationships
  * 3. Each repository handles its own sync between file <-> SQLite
  * 4. Tag auto-registration happens on create/update operations
- * 
+ *
  * @ai-database-schema
- * Tables: statuses, tags, search_issues, search_plans, search_docs, 
+ * Tables: statuses, tags, search_issues, search_plans, search_docs,
  *         search_knowledge, work_sessions, daily_summaries
  * Tag relationships stored via comma-separated IDs in search tables
- * 
+ *
  * @ai-error-patterns
  * - File operations return null/false on not found
  * - Database operations throw errors on SQL failures
@@ -113,7 +115,7 @@ export class FileIssueDatabase {
     this.documentRepo = new DocumentRepository(db, path.join(this.dataDir, 'documents'));  // @ai-logic: Unified documents path
     this.searchRepo = new SearchRepository(db, this.taskRepo, this.documentRepo);
     this.typeRepo = new TypeRepository(this);  // @ai-logic: Type definitions management
-    
+
     // @ai-critical: Initialize document repository database tables
     await this.documentRepo.initializeDatabase();
     await this.typeRepo.init();
@@ -126,10 +128,9 @@ export class FileIssueDatabase {
    * @ai-why All public methods must wait for initialization
    * @ai-return Array of all workflow statuses
    */
+  @ensureInitialized
+
   async getAllStatuses() {
-    if (this.initializationPromise) {
-      await this.initializationPromise;  // @ai-critical: Must wait for DB ready
-    }
     return this.statusRepo.getAllStatuses();
   }
 
@@ -150,10 +151,9 @@ export class FileIssueDatabase {
    * @ai-validation Name uniqueness checked by repository
    * @ai-return New status object with generated ID
    */
+  @ensureInitialized
+
   async createStatus(name: string, is_closed: boolean = false) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.statusRepo.createStatus(name, is_closed);
   }
 
@@ -164,10 +164,9 @@ export class FileIssueDatabase {
    * @ai-critical Cannot update if status in use by items
    * @ai-return Updated status object or null if not found
    */
+  @ensureInitialized
+
   async updateStatus(id: number, name: string, is_closed?: boolean) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.statusRepo.updateStatus(id, name, is_closed);
   }
 
@@ -178,10 +177,9 @@ export class FileIssueDatabase {
    * @ai-critical Preserves referential integrity
    * @ai-return true if deleted, false if not found or in use
    */
+  @ensureInitialized
+
   async deleteStatus(id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.statusRepo.deleteStatus(id);
   }
 
@@ -192,10 +190,9 @@ export class FileIssueDatabase {
    * @ai-performance Counts calculated via SQL joins
    * @ai-return Array of tags with name and usage count
    */
+  @ensureInitialized
+
   async getTags() {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.tagRepo.getTags();
   }
 
@@ -206,10 +203,9 @@ export class FileIssueDatabase {
    * @ai-side-effects Creates tag in SQLite only
    * @ai-return Created tag object
    */
+  @ensureInitialized
+
   async createTag(name: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.tagRepo.createTag(name);
   }
 
@@ -221,10 +217,9 @@ export class FileIssueDatabase {
    * @ai-side-effects Removes tag associations from all items
    * @ai-return true if deleted, false if not found
    */
+  @ensureInitialized
+
   async deleteTag(id: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;  // @ai-bug: Misleading parameter name
-    }
     return this.tagRepo.deleteTag(id);
   }
 
@@ -235,10 +230,9 @@ export class FileIssueDatabase {
    * @ai-performance Uses SQL LIKE operator with % wildcards
    * @ai-return Array of matching tags with usage counts
    */
+  @ensureInitialized
+
   async searchTags(pattern: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.tagRepo.getTagsByPattern(pattern);
   }
 
@@ -256,10 +250,9 @@ export class FileIssueDatabase {
    * @ai-flow 1. Wait for init -> 2. Read document files -> 3. Parse content
    * @ai-return Array of document objects with content
    */
+  @ensureInitialized
+
   async getAllDocuments(type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.getAllDocuments(type);
   }
 
@@ -268,10 +261,9 @@ export class FileIssueDatabase {
    * @ai-flow 1. Wait for init -> 2. Read from markdown
    * @ai-return Complete document object or null
    */
+  @ensureInitialized
+
   async getDocument(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.getDocument(type, id);
   }
 
@@ -281,10 +273,9 @@ export class FileIssueDatabase {
    * @ai-side-effects Creates file and search index entry
    * @ai-return Complete document object
    */
+  @ensureInitialized
+
   async createDocument(type: string, title: string, content: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.createDocument(type, title, content, tags, description, related_tasks, related_documents);
   }
 
@@ -294,10 +285,9 @@ export class FileIssueDatabase {
    * @ai-pattern Partial updates allowed
    * @ai-return true if updated, false if not found
    */
+  @ensureInitialized
+
   async updateDocument(type: string, id: number, title?: string, content?: string, tags?: string[], description?: string, related_tasks?: string[], related_documents?: string[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.updateDocument(type, id, title, content, tags, description, related_tasks, related_documents);
   }
 
@@ -307,10 +297,9 @@ export class FileIssueDatabase {
    * @ai-critical Permanent deletion
    * @ai-return true if deleted, false if not found
    */
+  @ensureInitialized
+
   async deleteDocument(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.deleteDocument(type, id);
   }
 
@@ -320,10 +309,9 @@ export class FileIssueDatabase {
    * @ai-pattern Tag exact match in JSON array
    * @ai-return Array of matching document items
    */
+  @ensureInitialized
+
   async searchDocumentsByTag(tag: string, type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.searchDocumentsByTag(tag, type);
   }
 
@@ -333,10 +321,9 @@ export class FileIssueDatabase {
    * @ai-performance Avoids loading full content
    * @ai-return Array of summary objects
    */
+  @ensureInitialized
+
   async getAllDocumentsSummary(type?: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.documentRepo.getAllDocumentsSummary(type);
   }
 
@@ -353,20 +340,19 @@ export class FileIssueDatabase {
    * @ai-intent Get task by type and ID through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async getTask(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists in sequences table
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     return this.taskRepo.getTask(type, id);
   }
 
@@ -374,25 +360,24 @@ export class FileIssueDatabase {
    * @ai-intent Create task through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async createTask(type: string, title: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     // Tasks require content
     if (!content) {
       throw new Error(`Content is required for ${type}`);
     }
-    
+
     return this.taskRepo.createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
   }
 
@@ -400,20 +385,19 @@ export class FileIssueDatabase {
    * @ai-intent Get all tasks summary through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async getAllTasksSummary(type: string, includeClosedStatuses: boolean = false, statusIds?: number[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     return this.taskRepo.getAllTasksSummary(type, includeClosedStatuses, statusIds);
   }
 
@@ -421,20 +405,19 @@ export class FileIssueDatabase {
    * @ai-intent Update task through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async updateTask(type: string, id: number, title?: string, content?: string, priority?: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     return this.taskRepo.updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents);
   }
 
@@ -442,20 +425,19 @@ export class FileIssueDatabase {
    * @ai-intent Delete task through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async deleteTask(type: string, id: number) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     return this.taskRepo.deleteTask(type, id);
   }
 
@@ -463,20 +445,19 @@ export class FileIssueDatabase {
    * @ai-intent Search tasks by tag through unified interface
    * @ai-logic Validates type from sequences table
    */
+  @ensureInitialized
+
   async searchTasksByTag(type: string, tag: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     // Validate type exists
     const sequence = await this.connection.getDatabase().getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
-    
+
     if (!sequence || sequence.base_type !== 'tasks') {
       throw new Error(`Unknown task type: ${type}`);
     }
-    
+
     return this.taskRepo.searchTasksByTag(type, tag);
   }
 
@@ -487,10 +468,9 @@ export class FileIssueDatabase {
    * @ai-performance Uses SQLite FTS for efficiency
    * @ai-return Categorized results by type
    */
+  @ensureInitialized
+
   async searchAll(query: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.searchAll(query);
   }
 
@@ -500,10 +480,9 @@ export class FileIssueDatabase {
    * @ai-pattern Exact tag match across all repositories
    * @ai-return Categorized results by content type
    */
+  @ensureInitialized
+
   async searchAllByTag(tag: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.searchAllByTag(tag);
   }
 
@@ -513,10 +492,9 @@ export class FileIssueDatabase {
    * @ai-performance SQLite query on indexed content
    * @ai-return Array of matching sessions
    */
+  @ensureInitialized
+
   async searchSessions(query: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.searchSessions(query);
   }
 
@@ -525,10 +503,9 @@ export class FileIssueDatabase {
    * @ai-flow 1. Wait for init -> 2. Query search_daily_summaries
    * @ai-return Array of matching summaries
    */
+  @ensureInitialized
+
   async searchDailySummaries(query: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.searchDailySummaries(query);
   }
 
@@ -537,10 +514,9 @@ export class FileIssueDatabase {
    * @ai-flow 1. Wait for init -> 2. Tag search in sessions
    * @ai-return Array of matching sessions
    */
+  @ensureInitialized
+
   async searchSessionsByTag(tag: string) {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.searchSessionsByTag(tag);
   }
 
@@ -551,10 +527,9 @@ export class FileIssueDatabase {
    * @ai-side-effects Recreates all search tables
    * @ai-performance Can be slow with many files
    */
+  @ensureInitialized
+
   async rebuildSearchIndex() {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
     return this.searchRepo.rebuildSearchIndex();
   }
 
@@ -567,19 +542,18 @@ export class FileIssueDatabase {
    * @ai-assumption Session object has expected properties
    * @ai-database-schema Uses session_tags relationship table for normalized tag storage
    */
-  async syncSessionToSQLite(session: any): Promise<void> {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    
+  @ensureInitialized
+
+  async syncSessionToSQLite(session: WorkSession): Promise<void> {
+
     // @ai-logic: Tags must exist before foreign key reference
     if (session.tags && session.tags.length > 0) {
       await this.tagRepo.ensureTagsExist(session.tags);
     }
-    
+
     const db = this.connection.getDatabase();
     const tags = session.tags ? session.tags.join(',') : '';  // @ai-pattern: CSV for backward compatibility
-    
+
     await db.runAsync(
       `INSERT OR REPLACE INTO search_sessions 
        (id, title, content, category, tags, date, start_time, end_time, summary) 
@@ -596,7 +570,7 @@ export class FileIssueDatabase {
         session.summary || ''
       ]
     );
-    
+
     // Update tag relationships
     if (session.tags && session.tags.length > 0) {
       await this.tagRepo.saveEntityTags('session', session.id, session.tags);
@@ -610,7 +584,7 @@ export class FileIssueDatabase {
       'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
       ['sessions', session.id]
     );
-    
+
     if (session.related_tasks && session.related_tasks.length > 0) {
       for (const taskRef of session.related_tasks) {
         const [targetType, targetId] = taskRef.split('-');
@@ -628,7 +602,7 @@ export class FileIssueDatabase {
       'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
       ['sessions', session.id]
     );
-    
+
     if (session.related_documents && session.related_documents.length > 0) {
       for (const docRef of session.related_documents) {
         const [targetType, targetId] = docRef.split('-');
@@ -650,19 +624,18 @@ export class FileIssueDatabase {
    * @ai-assumption Summary has required date and title fields
    * @ai-database-schema Uses summary_tags relationship table for normalized tag storage
    */
-  async syncDailySummaryToSQLite(summary: any): Promise<void> {
-    if (this.initializationPromise) {
-      await this.initializationPromise;
-    }
-    
+  @ensureInitialized
+
+  async syncDailySummaryToSQLite(summary: DailySummary): Promise<void> {
+
     // @ai-logic: Create tags before referencing
     if (summary.tags && summary.tags.length > 0) {
       await this.tagRepo.ensureTagsExist(summary.tags);
     }
-    
+
     const db = this.connection.getDatabase();
     const tags = summary.tags ? summary.tags.join(',') : '';
-    
+
     await db.runAsync(
       `INSERT OR REPLACE INTO search_daily_summaries 
        (date, title, content, tags, created_at, updated_at) 
@@ -676,7 +649,7 @@ export class FileIssueDatabase {
         summary.updatedAt || ''
       ]
     );
-    
+
     // Update tag relationships
     if (summary.tags && summary.tags.length > 0) {
       await this.tagRepo.saveEntityTags('summary', summary.date, summary.tags);
@@ -690,7 +663,7 @@ export class FileIssueDatabase {
       'DELETE FROM related_tasks WHERE (source_type = ? AND source_id = ?)',
       ['summaries', summary.date]
     );
-    
+
     if (summary.related_tasks && summary.related_tasks.length > 0) {
       for (const taskRef of summary.related_tasks) {
         const [targetType, targetId] = taskRef.split('-');
@@ -708,7 +681,7 @@ export class FileIssueDatabase {
       'DELETE FROM related_documents WHERE (source_type = ? AND source_id = ?)',
       ['summaries', summary.date]
     );
-    
+
     if (summary.related_documents && summary.related_documents.length > 0) {
       for (const docRef of summary.related_documents) {
         const [targetType, targetId] = docRef.split('-');

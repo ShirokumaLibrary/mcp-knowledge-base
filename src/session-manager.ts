@@ -6,11 +6,11 @@
  * @ai-assumption Sessions organized by date (YYYY-MM-DD folders)
  */
 
-import { 
-  WorkSession, 
-  DailySummary 
+import type {
+  WorkSession,
+  DailySummary
 } from './types/session-types.js';
-import { FileIssueDatabase } from './database.js';
+import type { FileIssueDatabase } from './database.js';
 import { SessionRepository } from './repositories/session-repository.js';
 import { SessionSearchService } from './services/session-search-service.js';
 import { SessionMarkdownFormatter } from './formatters/session-markdown-formatter.js';
@@ -25,7 +25,7 @@ import { getConfig } from './config.js';
  */
 export class WorkSessionManager {
   private repository: SessionRepository;       // @ai-logic: Handles file persistence
-  private searchService: SessionSearchService;  // @ai-logic: Manages search operations  
+  private searchService: SessionSearchService;  // @ai-logic: Manages search operations
   private formatter: SessionMarkdownFormatter;  // @ai-logic: Markdown generation
 
   /**
@@ -61,7 +61,7 @@ export class WorkSessionManager {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-    
+
     return `${year}-${month}-${day}-${hours}.${minutes}.${seconds}.${milliseconds}`;
   }
 
@@ -165,7 +165,7 @@ export class WorkSessionManager {
   getLatestSession(): WorkSession | null {
     const today = new Date().toISOString().split('T')[0];
     const sessions = this.repository.getSessionsForDate(today);
-    
+
     if (sessions.length === 0) {
       return null;  // @ai-edge-case: No sessions today
     }

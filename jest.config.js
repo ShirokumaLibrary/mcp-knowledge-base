@@ -10,6 +10,7 @@ export default {
       'ts-jest',
       {
         useESM: true,
+        isolatedModules: true,
         tsconfig: {
           moduleResolution: 'node',
           allowSyntheticDefaultImports: true,
@@ -27,7 +28,8 @@ export default {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/tmp/',
-    '/dist/'
+    '/dist/',
+    '/tests/e2e/'
   ],
   collectCoverageFrom: [
     'src/**/*.ts',

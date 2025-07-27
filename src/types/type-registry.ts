@@ -5,7 +5,7 @@
  * @ai-why Eliminates hardcoding of type strings throughout codebase
  */
 
-import { Database } from '../database/base.js';
+import type { Database } from '../database/base.js';
 
 export interface TypeDefinition {
   type: string;           // Unique type identifier (e.g., 'issues', 'plans')
@@ -72,45 +72,49 @@ const BASE_TYPE_CONFIGS: BaseTypeConfig[] = [
  */
 export class StaticTypeRegistry implements TypeRegistry {
   private types: Map<string, TypeDefinition>;
-  
+
   constructor() {
     this.types = new Map();
     // @ai-critical: No hardcoded types - must be loaded from database
   }
-  
+
   getAllTypes(): TypeDefinition[] {
     return Array.from(this.types.values());
   }
-  
+
   getType(typeName: string): TypeDefinition | null {
     return this.types.get(typeName) || null;
   }
-  
+
   getTypesByBase(baseType: string): TypeDefinition[] {
     return Array.from(this.types.values()).filter(t => t.baseType === baseType);
   }
-  
+
   isValidType(typeName: string): boolean {
     return this.types.has(typeName);
   }
-  
+
   getFilePrefix(typeName: string): string {
     const type = this.types.get(typeName);
     return type ? type.pluralForm : typeName;
   }
-  
+
   getDirectoryName(typeName: string): string {
     const type = this.types.get(typeName);
-    if (!type) return typeName;
-    
+    if (!type) {
+      return typeName;
+    }
+
     // Use custom directory if specified
-    if (type.directoryName) return type.directoryName;
-    
+    if (type.directoryName) {
+      return type.directoryName;
+    }
+
     // Otherwise use base type's default directory
     const baseConfig = BASE_TYPE_CONFIGS.find(c => c.name === type.baseType);
     return baseConfig ? baseConfig.defaultDirectory : type.baseType;
   }
-  
+
   getAllBaseTypes(): string[] {
     return BASE_TYPE_CONFIGS.map(c => c.name);
   }
@@ -124,65 +128,73 @@ export class StaticTypeRegistry implements TypeRegistry {
 export class DynamicTypeRegistry implements TypeRegistry {
   private types: Map<string, TypeDefinition> = new Map();
   private loaded = false;
-  
+
   constructor(private db: Database) {}
-  
+
   async load(): Promise<void> {
-    if (this.loaded) return;
-    
+    if (this.loaded) {
+      return;
+    }
+
     // Load all types from database
     const rows = await this.db.allAsync(
       'SELECT type, base_type FROM sequences'
     );
-    
+
     for (const row of rows) {
       // Get fields based on base type
-      const fields = BASE_TYPE_FIELDS[row.base_type] || new Set(['title', 'content', 'tags', 'description']);
-      
-      this.types.set(row.type, {
-        type: row.type,
-        baseType: row.base_type,
-        pluralForm: row.type, // Use type name as-is (already plural in DB)
+      const baseType = String(row.base_type);
+      const typeName = String(row.type);
+      const fields = BASE_TYPE_FIELDS[baseType as 'tasks' | 'documents'] || new Set(['title', 'content', 'tags', 'description']);
+
+      this.types.set(typeName, {
+        type: String(row.type),
+        baseType: String(row.base_type),
+        pluralForm: String(row.type), // Use type name as-is (already plural in DB)
         supportedFields: fields
       });
     }
-    
+
     this.loaded = true;
   }
-  
+
   getAllTypes(): TypeDefinition[] {
     return Array.from(this.types.values());
   }
-  
+
   getType(typeName: string): TypeDefinition | null {
     return this.types.get(typeName) || null;
   }
-  
+
   getTypesByBase(baseType: string): TypeDefinition[] {
     return Array.from(this.types.values()).filter(t => t.baseType === baseType);
   }
-  
+
   isValidType(typeName: string): boolean {
     return this.types.has(typeName);
   }
-  
+
   getFilePrefix(typeName: string): string {
     const type = this.types.get(typeName);
     return type ? type.pluralForm : typeName;
   }
-  
+
   getDirectoryName(typeName: string): string {
     const type = this.types.get(typeName);
-    if (!type) return typeName;
-    
+    if (!type) {
+      return typeName;
+    }
+
     // Use custom directory if specified
-    if (type.directoryName) return type.directoryName;
-    
+    if (type.directoryName) {
+      return type.directoryName;
+    }
+
     // Otherwise use base type's default directory
     const baseConfig = BASE_TYPE_CONFIGS.find(c => c.name === type.baseType);
     return baseConfig ? baseConfig.defaultDirectory : type.baseType;
   }
-  
+
   getAllBaseTypes(): string[] {
     return BASE_TYPE_CONFIGS.map(c => c.name);
   }

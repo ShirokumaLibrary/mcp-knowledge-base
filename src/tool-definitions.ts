@@ -21,20 +21,20 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of items to retrieve (use get_types to see available types)',
+          description: 'Type of items to retrieve (use get_types to see available types)'
         },
         includeClosedStatuses: {
           type: 'boolean',
-          description: 'Include items with closed statuses (tasks types only, default: false)',
+          description: 'Include items with closed statuses (tasks types only, default: false)'
         },
         statusIds: {
           type: 'array',
           items: { type: 'number' },
-          description: 'Filter by specific status IDs (tasks types only)',
-        },
+          description: 'Filter by specific status IDs (tasks types only)'
+        }
       },
-      required: ['type'],
-    },
+      required: ['type']
+    }
   },
   {
     name: 'get_item_detail',
@@ -44,15 +44,15 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of item (use get_types to see available types)',
+          description: 'Type of item (use get_types to see available types)'
         },
         id: {
           type: 'number',
-          description: 'Item ID',
-        },
+          description: 'Item ID'
+        }
       },
-      required: ['type', 'id'],
-    },
+      required: ['type', 'id']
+    }
   },
   {
     name: 'create_item',
@@ -65,55 +65,55 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of item to create (use get_types to see available types)',
+          description: 'Type of item to create (use get_types to see available types)'
         },
         title: {
           type: 'string',
-          description: 'Item title (required)',
+          description: 'Item title (required)'
         },
         description: {
           type: 'string',
-          description: 'Item description (optional for all types)',
+          description: 'Item description (optional for all types)'
         },
         content: {
           type: 'string',
-          description: 'Item content (required for document types)',
+          description: 'Item content (required for document types)'
         },
         priority: {
           type: 'string',
           enum: ['high', 'medium', 'low'],
-          description: 'Priority (for tasks types)',
+          description: 'Priority (for tasks types)'
         },
         status: {
           type: 'string',
-          description: 'Status name (for tasks types)',
+          description: 'Status name (for tasks types)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Array of tag names',
+          description: 'Array of tag names'
         },
         start_date: {
           type: 'string',
-          description: 'Start date in YYYY-MM-DD format (for tasks types)',
+          description: 'Start date in YYYY-MM-DD format (for tasks types)'
         },
         end_date: {
           type: 'string',
-          description: 'End date in YYYY-MM-DD format (for tasks types)',
+          description: 'End date in YYYY-MM-DD format (for tasks types)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
+          description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['type', 'title'],
-    },
+      required: ['type', 'title']
+    }
   },
   {
     name: 'update_item',
@@ -123,59 +123,59 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of item to update (use get_types to see available types)',
+          description: 'Type of item to update (use get_types to see available types)'
         },
         id: {
           type: 'number',
-          description: 'Item ID',
+          description: 'Item ID'
         },
         title: {
           type: 'string',
-          description: 'New title',
+          description: 'New title'
         },
         description: {
           type: 'string',
-          description: 'New description',
+          description: 'New description'
         },
         content: {
           type: 'string',
-          description: 'New content (for document types)',
+          description: 'New content (for document types)'
         },
         priority: {
           type: 'string',
           enum: ['high', 'medium', 'low'],
-          description: 'New priority (for tasks types)',
+          description: 'New priority (for tasks types)'
         },
         status: {
           type: 'string',
-          description: 'New status name (for tasks types)',
+          description: 'New status name (for tasks types)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New array of tag names',
+          description: 'New array of tag names'
         },
         start_date: {
           type: 'string',
-          description: 'New start date (for tasks types)',
+          description: 'New start date (for tasks types)'
         },
         end_date: {
           type: 'string',
-          description: 'New end date (for tasks types)',
+          description: 'New end date (for tasks types)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])',
+          description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['type', 'id'],
-    },
+      required: ['type', 'id']
+    }
   },
   {
     name: 'delete_item',
@@ -185,15 +185,15 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of item to delete (use get_types to see available types)',
+          description: 'Type of item to delete (use get_types to see available types)'
         },
         id: {
           type: 'number',
-          description: 'Item ID',
-        },
+          description: 'Item ID'
+        }
       },
-      required: ['type', 'id'],
-    },
+      required: ['type', 'id']
+    }
   },
   {
     name: 'search_items_by_tag',
@@ -206,20 +206,20 @@ export const toolDefinitions = [
       properties: {
         tag: {
           type: 'string',
-          description: 'Tag name to search for',
+          description: 'Tag name to search for'
         },
         types: {
           type: 'array',
           items: {
-            type: 'string',
+            type: 'string'
           },
-          description: 'Types to search (omit to search all types, use get_types to see available types)',
-        },
+          description: 'Types to search (omit to search all types, use get_types to see available types)'
+        }
       },
-      required: ['tag'],
-    },
+      required: ['tag']
+    }
   },
-  
+
   // @ai-pattern Status workflow management tools
   // @ai-intent Manage workflow states for tasks types
   // @ai-critical Status IDs must exist before referencing in content
@@ -228,13 +228,13 @@ export const toolDefinitions = [
     description: 'Get all available statuses.',
     inputSchema: {
       type: 'object',
-      properties: {},
-    },
+      properties: {}
+    }
   },
   // Status modification tools are disabled to prevent accidental changes
   // Statuses should be stable and only managed through database initialization
   // create_status, update_status and delete_status are all disabled
-  
+
   // @ai-pattern Tag taxonomy management tools
   // @ai-intent Centralized tag operations for categorization
   // @ai-assumption Tags are auto-created when used in content
@@ -243,8 +243,8 @@ export const toolDefinitions = [
     description: 'Get all available tags.',
     inputSchema: {
       type: 'object',
-      properties: {},
-    },
+      properties: {}
+    }
   },
   {
     name: 'create_tag',
@@ -254,11 +254,11 @@ export const toolDefinitions = [
       properties: {
         name: {
           type: 'string',
-          description: 'Tag name (required)',
-        },
+          description: 'Tag name (required)'
+        }
       },
-      required: ['name'],
-    },
+      required: ['name']
+    }
   },
   {
     name: 'delete_tag',
@@ -268,11 +268,11 @@ export const toolDefinitions = [
       properties: {
         name: {
           type: 'string',
-          description: 'Name of tag to delete (required)',
-        },
+          description: 'Name of tag to delete (required)'
+        }
       },
-      required: ['name'],
-    },
+      required: ['name']
+    }
   },
   {
     name: 'search_tags',
@@ -282,13 +282,13 @@ export const toolDefinitions = [
       properties: {
         pattern: {
           type: 'string',
-          description: 'Search pattern for tag names (required)',
-        },
+          description: 'Search pattern for tag names (required)'
+        }
       },
-      required: ['pattern'],
-    },
+      required: ['pattern']
+    }
   },
-  
+
   // @ai-pattern Work session tracking tools
   // @ai-intent Track daily work activities and progress
   // @ai-why Sessions enable time-based queries and productivity analysis
@@ -300,14 +300,14 @@ export const toolDefinitions = [
       properties: {
         start_date: {
           type: 'string',
-          description: 'Start date in YYYY-MM-DD format (optional)',
+          description: 'Start date in YYYY-MM-DD format (optional)'
         },
         end_date: {
           type: 'string',
-          description: 'End date in YYYY-MM-DD format (optional)',
-        },
-      },
-    },
+          description: 'End date in YYYY-MM-DD format (optional)'
+        }
+      }
+    }
   },
   {
     name: 'get_session_detail',
@@ -317,19 +317,19 @@ export const toolDefinitions = [
       properties: {
         id: {
           type: 'string',
-          description: 'Session ID (required)',
-        },
+          description: 'Session ID (required)'
+        }
       },
-      required: ['id'],
-    },
+      required: ['id']
+    }
   },
   {
     name: 'get_latest_session',
     description: 'Get the latest work session for today.',
     inputSchema: {
       type: 'object',
-      properties: {},
-    },
+      properties: {}
+    }
   },
   {
     name: 'create_session',
@@ -339,42 +339,42 @@ export const toolDefinitions = [
       properties: {
         id: {
           type: 'string',
-          description: 'Session ID (optional, creates new if not specified)',
+          description: 'Session ID (optional, creates new if not specified)'
         },
         title: {
           type: 'string',
-          description: 'Session title (required)',
+          description: 'Session title (required)'
         },
         content: {
           type: 'string',
-          description: 'Session content (optional)',
+          description: 'Session content (optional)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Array of tag names (optional)',
+          description: 'Array of tag names (optional)'
         },
         category: {
           type: 'string',
-          description: 'Session category (optional)',
+          description: 'Session category (optional)'
         },
         datetime: {
           type: 'string',
-          description: 'ISO 8601 datetime for session creation (optional, for past data migration)',
+          description: 'ISO 8601 datetime for session creation (optional, for past data migration)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])',
+          description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['title'],
-    },
+      required: ['title']
+    }
   },
   {
     name: 'update_session',
@@ -384,38 +384,38 @@ export const toolDefinitions = [
       properties: {
         id: {
           type: 'string',
-          description: 'Session ID (required)',
+          description: 'Session ID (required)'
         },
         title: {
           type: 'string',
-          description: 'New title (optional)',
+          description: 'New title (optional)'
         },
         content: {
           type: 'string',
-          description: 'New content (optional)',
+          description: 'New content (optional)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New array of tag names (optional)',
+          description: 'New array of tag names (optional)'
         },
         category: {
           type: 'string',
-          description: 'New category (optional)',
+          description: 'New category (optional)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])',
+          description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['id'],
-    },
+      required: ['id']
+    }
   },
   {
     name: 'search_sessions_by_tag',
@@ -425,13 +425,13 @@ export const toolDefinitions = [
       properties: {
         tag: {
           type: 'string',
-          description: 'Tag name to search for (required)',
-        },
+          description: 'Tag name to search for (required)'
+        }
       },
-      required: ['tag'],
-    },
+      required: ['tag']
+    }
   },
-  
+
   // @ai-pattern Daily summary management tools
   // @ai-intent Aggregate and summarize daily activities
   // @ai-critical One summary per date - updates replace existing
@@ -443,14 +443,14 @@ export const toolDefinitions = [
       properties: {
         start_date: {
           type: 'string',
-          description: 'Start date in YYYY-MM-DD format (optional)',
+          description: 'Start date in YYYY-MM-DD format (optional)'
         },
         end_date: {
           type: 'string',
-          description: 'End date in YYYY-MM-DD format (optional)',
-        },
-      },
-    },
+          description: 'End date in YYYY-MM-DD format (optional)'
+        }
+      }
+    }
   },
   {
     name: 'get_summary_detail',
@@ -460,11 +460,11 @@ export const toolDefinitions = [
       properties: {
         date: {
           type: 'string',
-          description: 'Date in YYYY-MM-DD format (required)',
-        },
+          description: 'Date in YYYY-MM-DD format (required)'
+        }
       },
-      required: ['date'],
-    },
+      required: ['date']
+    }
   },
   {
     name: 'create_summary',
@@ -474,34 +474,34 @@ export const toolDefinitions = [
       properties: {
         date: {
           type: 'string',
-          description: 'Date in YYYY-MM-DD format (required)',
+          description: 'Date in YYYY-MM-DD format (required)'
         },
         title: {
           type: 'string',
-          description: 'Summary title (required)',
+          description: 'Summary title (required)'
         },
         content: {
           type: 'string',
-          description: 'Summary content (required)',
+          description: 'Summary content (required)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Array of tag names (optional)',
+          description: 'Array of tag names (optional)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])',
+          description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['date', 'title', 'content'],
-    },
+      required: ['date', 'title', 'content']
+    }
   },
   {
     name: 'update_summary',
@@ -511,34 +511,34 @@ export const toolDefinitions = [
       properties: {
         date: {
           type: 'string',
-          description: 'Date in YYYY-MM-DD format (required)',
+          description: 'Date in YYYY-MM-DD format (required)'
         },
         title: {
           type: 'string',
-          description: 'New summary title (optional)',
+          description: 'New summary title (optional)'
         },
         content: {
           type: 'string',
-          description: 'New summary content (optional)',
+          description: 'New summary content (optional)'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New array of tag names (optional)',
+          description: 'New array of tag names (optional)'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])',
+          description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])',
-        },
+          description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+        }
       },
-      required: ['date'],
-    },
+      required: ['date']
+    }
   },
   // Type management tools
   {
@@ -549,16 +549,16 @@ export const toolDefinitions = [
       properties: {
         name: {
           type: 'string',
-          description: 'Type name (lowercase letters, numbers, and underscores only)',
+          description: 'Type name (lowercase letters, numbers, and underscores only)'
         },
         base_type: {
           type: 'string',
           enum: ['tasks', 'documents'],
-          description: 'Base type for the new type (default: documents)',
-        },
+          description: 'Base type for the new type (default: documents)'
+        }
       },
-      required: ['name'],
-    },
+      required: ['name']
+    }
   },
   {
     name: 'get_types',
@@ -568,10 +568,10 @@ export const toolDefinitions = [
       properties: {
         include_definitions: {
           type: 'boolean',
-          description: 'Include full type definitions (default: false)',
-        },
-      },
-    },
+          description: 'Include full type definitions (default: false)'
+        }
+      }
+    }
   },
   {
     name: 'delete_type',
@@ -581,10 +581,10 @@ export const toolDefinitions = [
       properties: {
         name: {
           type: 'string',
-          description: 'Name of the type to delete',
-        },
+          description: 'Name of the type to delete'
+        }
       },
-      required: ['name'],
-    },
-  },
+      required: ['name']
+    }
+  }
 ];

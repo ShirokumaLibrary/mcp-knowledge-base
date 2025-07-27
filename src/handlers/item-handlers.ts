@@ -1,13 +1,7 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
-import { 
-  GetItemsSchema,
-  GetItemDetailSchema,
-  CreateItemSchema,
-  UpdateItemSchema,
-  DeleteItemSchema,
-  SearchItemsByTagSchema,
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
+import type {
   GetItemsArgs,
   GetItemDetailArgs,
   CreateItemArgs,
@@ -15,8 +9,16 @@ import {
   DeleteItemArgs,
   SearchItemsByTagArgs
 } from '../schemas/item-schemas.js';
+import {
+  GetItemsSchema,
+  GetItemDetailSchema,
+  CreateItemSchema,
+  UpdateItemSchema,
+  DeleteItemSchema,
+  SearchItemsByTagSchema
+} from '../schemas/item-schemas.js';
 import { Handler } from '../types/handler-types.js';
-import { Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary } from '../types/domain-types.js';
+import type { Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary } from '../types/domain-types.js';
 // Removed static type registry - now using database queries directly
 
 /**
@@ -27,7 +29,7 @@ import { Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary } fro
  * @ai-why Single handler class simplifies MCP tool registration and maintenance
  */
 export class ItemHandlers {
-  
+
   constructor(private db: FileIssueDatabase) {}
 
   /**
@@ -37,12 +39,12 @@ export class ItemHandlers {
   private async isValidType(type: string): Promise<boolean> {
     const db = this.db.getDatabase();
     const row = await db.getAsync(
-      `SELECT type FROM sequences WHERE type = ?`,
+      'SELECT type FROM sequences WHERE type = ?',
       [type]
     ) as { type: string } | undefined;
     return !!row;
   }
-  
+
   /**
    * @ai-intent Check if a type belongs to a specific base type
    * @ai-logic Query sequences table to check base_type
@@ -50,7 +52,7 @@ export class ItemHandlers {
   private async isTypeOfBase(type: string, baseType: string): Promise<boolean> {
     const db = this.db.getDatabase();
     const row = await db.getAsync(
-      `SELECT base_type FROM sequences WHERE type = ?`,
+      'SELECT base_type FROM sequences WHERE type = ?',
       [type]
     ) as { base_type: string } | undefined;
     return row ? row.base_type === baseType : false;
@@ -75,7 +77,7 @@ export class ItemHandlers {
     if (!typeExists) {
       throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
     }
-    
+
     // Check if this is a task type (issues/plans)
     if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
       // @ai-logic: Use unified task interface
@@ -93,9 +95,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: JSON.stringify({ data }, null, 2),
-        },
-      ],
+          text: JSON.stringify({ data }, null, 2)
+        }
+      ]
     };
   }
 
@@ -115,7 +117,7 @@ export class ItemHandlers {
     if (!typeExists) {
       throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
     }
-    
+
     if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
       // Use unified task interface
       item = await this.db.getTask(validatedArgs.type, validatedArgs.id);
@@ -133,9 +135,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: JSON.stringify({ data: item }, null, 2),
-        },
-      ],
+          text: JSON.stringify({ data: item }, null, 2)
+        }
+      ]
     };
   }
 
@@ -155,11 +157,11 @@ export class ItemHandlers {
     if (!typeExists) {
       throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
     }
-    
+
     if (!validatedArgs.content) {
       throw new McpError(ErrorCode.InvalidRequest, `Content is required for ${validatedArgs.type}`);
     }
-    
+
     if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
       // Use unified task interface
       item = await this.db.createTask(
@@ -192,9 +194,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: `${validatedArgs.type} created: ${JSON.stringify(item, null, 2)}`,
-        },
-      ],
+          text: `${validatedArgs.type} created: ${JSON.stringify(item, null, 2)}`
+        }
+      ]
     };
   }
 
@@ -208,7 +210,7 @@ export class ItemHandlers {
     if (!typeExists) {
       throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
     }
-    
+
     if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
       // @ai-logic: Use unified task interface
       updatedItem = await this.db.updateTask(
@@ -238,7 +240,9 @@ export class ItemHandlers {
         validatedArgs.related_tasks,
         validatedArgs.related_documents
       );
-      if (success) updatedItem = await this.db.getDocument(validatedArgs.type as any, validatedArgs.id);
+      if (success) {
+        updatedItem = await this.db.getDocument(validatedArgs.type as any, validatedArgs.id);
+      }
     }
 
     if (!success) {
@@ -249,9 +253,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: `${validatedArgs.type} updated: ${JSON.stringify(updatedItem, null, 2)}`,
-        },
-      ],
+          text: `${validatedArgs.type} updated: ${JSON.stringify(updatedItem, null, 2)}`
+        }
+      ]
     };
   }
 
@@ -264,7 +268,7 @@ export class ItemHandlers {
     if (!typeExists) {
       throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${validatedArgs.type}`);
     }
-    
+
     if (await this.isTypeOfBase(validatedArgs.type, 'tasks')) {
       // @ai-logic: Use unified task interface
       success = await this.db.deleteTask(validatedArgs.type, validatedArgs.id);
@@ -281,9 +285,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: `${validatedArgs.type} ID ${validatedArgs.id} deleted`,
-        },
-      ],
+          text: `${validatedArgs.type} ID ${validatedArgs.id} deleted`
+        }
+      ]
     };
   }
 
@@ -296,9 +300,9 @@ export class ItemHandlers {
 
     // Support searching multiple types
     const db = this.db.getDatabase();
-    const types = validatedArgs.types || 
+    const types = validatedArgs.types ||
       (await db.allAsync(
-        `SELECT type FROM sequences`,
+        'SELECT type FROM sequences',
         []
       )).map((row: any) => row.type);
 
@@ -308,18 +312,22 @@ export class ItemHandlers {
       if (!typeExists) {
         continue; // Skip invalid types
       }
-      
+
       if (await this.isTypeOfBase(type, 'tasks')) {
         // @ai-logic: Use unified task search
         const tasks = await this.db.searchTasksByTag(type, validatedArgs.tag);
         // Add all tasks to a generic results object
-        if (!results.tasks) results.tasks = {};
+        if (!results.tasks) {
+          results.tasks = {};
+        }
         results.tasks[type] = tasks;
       } else {
         // Handle document types
         const documents = await this.db.searchDocumentsByTag(validatedArgs.tag, type);
         // Add all documents to a generic results object
-        if (!results.documents) results.documents = {};
+        if (!results.documents) {
+          results.documents = {};
+        }
         results.documents[type] = documents;
       }
     }
@@ -328,9 +336,9 @@ export class ItemHandlers {
       content: [
         {
           type: 'text' as const,
-          text: JSON.stringify({ data: results }, null, 2),
-        },
-      ],
+          text: JSON.stringify({ data: results }, null, 2)
+        }
+      ]
     };
   }
 }

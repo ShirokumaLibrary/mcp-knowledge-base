@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { WorkSession, DailySummary } from '../types/session-types.js';
+import type { WorkSession, DailySummary } from '../types/session-types.js';
 import { SessionMarkdownFormatter } from '../formatters/session-markdown-formatter.js';
-import { FileIssueDatabase } from '../database.js';
+import type { FileIssueDatabase } from '../database.js';
 import { TagRepository } from '../database/tag-repository.js';
 import { DatabaseConnection } from '../database/base.js';
 
@@ -49,14 +49,14 @@ export class SessionRepository {
   saveSession(session: WorkSession): void {
     const dailyDir = this.ensureDailyDirectory(session.date);
     const filePath = path.join(dailyDir, `session-${session.id}.md`);
-    
+
     // @ai-logic: Choose format based on content richness
     const content = session.tags || session.content || session.category
       ? this.formatter.generateSessionMarkdown(session)
       : this.formatter.generateLegacySessionMarkdown(session);
-    
+
     fs.writeFileSync(filePath, content, 'utf8');
-    
+
     // @ai-async: Fire-and-forget for performance
     this.db.syncSessionToSQLite(session).catch(err => {
       // @ai-error-recovery: Test environment may have readonly DB
@@ -69,11 +69,11 @@ export class SessionRepository {
 
   loadSession(sessionId: string, date: string): WorkSession | null {
     const filePath = path.join(this.sessionsDir, date, `session-${sessionId}.md`);
-    
+
     if (!fs.existsSync(filePath)) {
       return null;
     }
-    
+
     const content = fs.readFileSync(filePath, 'utf8');
     return this.formatter.parseSessionFromMarkdown(content, sessionId, date);
   }
@@ -108,15 +108,15 @@ export class SessionRepository {
   saveDailySummary(summary: DailySummary): void {
     const dailyDir = this.ensureDailyDirectory(summary.date);
     const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
-    
+
     // @ai-critical: Check if summary already exists for this date
     if (fs.existsSync(filePath)) {
       throw new Error(`Daily summary for ${summary.date} already exists. Use update instead.`);
     }
-    
+
     const content = this.formatter.generateDailySummaryMarkdown(summary);
     fs.writeFileSync(filePath, content, 'utf8');
-    
+
     // Sync to SQLite (fire and forget for tests)
     this.db.syncDailySummaryToSQLite(summary).catch(err => {
       // Ignore SQLite errors in tests
@@ -136,10 +136,10 @@ export class SessionRepository {
   updateDailySummary(summary: DailySummary): void {
     const dailyDir = this.ensureDailyDirectory(summary.date);
     const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
-    
+
     const content = this.formatter.generateDailySummaryMarkdown(summary);
     fs.writeFileSync(filePath, content, 'utf8');
-    
+
     // Sync to SQLite (fire and forget for tests)
     this.db.syncDailySummaryToSQLite(summary).catch(err => {
       // Ignore SQLite errors in tests
@@ -152,7 +152,7 @@ export class SessionRepository {
 
   loadDailySummary(date: string): DailySummary | null {
     const filePath = path.join(this.sessionsDir, date, `daily-summary-${date}.md`);
-    
+
     if (!fs.existsSync(filePath)) {
       return null;
     }
@@ -171,7 +171,7 @@ export class SessionRepository {
    */
   searchSessionsByTag(tag: string): WorkSession[] {
     const results: WorkSession[] = [];
-    
+
     if (!fs.existsSync(this.sessionsDir)) {
       return results;  // @ai-edge-case: No sessions directory yet
     }
@@ -179,15 +179,17 @@ export class SessionRepository {
     const dateDirs = fs.readdirSync(this.sessionsDir);
     for (const dateDir of dateDirs) {
       const datePath = path.join(this.sessionsDir, dateDir);
-      if (!fs.statSync(datePath).isDirectory()) continue;  // @ai-logic: Skip non-directories
-      
+      if (!fs.statSync(datePath).isDirectory()) {
+        continue;
+      }  // @ai-logic: Skip non-directories
+
       const sessionFiles = fs.readdirSync(datePath)
         .filter(f => f.startsWith('session-') && f.endsWith('.md'));
-      
+
       for (const sessionFile of sessionFiles) {
         const sessionPath = path.join(datePath, sessionFile);
         const content = fs.readFileSync(sessionPath, 'utf8');
-        
+
         // @ai-performance: Quick regex check before full parse
         const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
         if (frontMatterMatch) {
@@ -205,13 +207,13 @@ export class SessionRepository {
         }
       }
     }
-    
+
     return results;
   }
 
   searchSessionsFullText(query: string): WorkSession[] {
     const results: WorkSession[] = [];
-    
+
     if (!fs.existsSync(this.sessionsDir)) {
       return results;
     }
@@ -219,15 +221,17 @@ export class SessionRepository {
     const dateDirs = fs.readdirSync(this.sessionsDir);
     for (const dateDir of dateDirs) {
       const datePath = path.join(this.sessionsDir, dateDir);
-      if (!fs.statSync(datePath).isDirectory()) continue;
-      
+      if (!fs.statSync(datePath).isDirectory()) {
+        continue;
+      }
+
       const sessionFiles = fs.readdirSync(datePath)
         .filter(f => f.startsWith('session-') && f.endsWith('.md'));
-      
+
       for (const sessionFile of sessionFiles) {
         const sessionPath = path.join(datePath, sessionFile);
         const content = fs.readFileSync(sessionPath, 'utf8');
-        
+
         if (content.toLowerCase().includes(query.toLowerCase())) {
           const sessionId = sessionFile.replace('.md', '').replace('session-', '');
           const session = this.formatter.parseSessionFromMarkdown(content, sessionId, dateDir);
@@ -235,13 +239,13 @@ export class SessionRepository {
         }
       }
     }
-    
+
     return results;
   }
 
   getSessions(startDate?: string, endDate?: string): WorkSession[] {
     const results: WorkSession[] = [];
-    
+
     if (!fs.existsSync(this.sessionsDir)) {
       return results;
     }
@@ -258,9 +262,13 @@ export class SessionRepository {
 
     for (const dateDir of dateDirs) {
       // Skip if before start date
-      if (startDate && dateDir < startDate) continue;
+      if (startDate && dateDir < startDate) {
+        continue;
+      }
       // Skip if after end date
-      if (endDate && dateDir > endDate) continue;
+      if (endDate && dateDir > endDate) {
+        continue;
+      }
 
       const sessions = this.getSessionsForDate(dateDir);
       results.push(...sessions);
@@ -290,7 +298,7 @@ export class SessionRepository {
 
   getDailySummaries(startDate?: string, endDate?: string): DailySummary[] {
     const results: DailySummary[] = [];
-    
+
     if (!fs.existsSync(this.sessionsDir)) {
       return results;
     }
@@ -310,9 +318,13 @@ export class SessionRepository {
 
     for (const dateDir of dateDirs) {
       // Skip if before start date
-      if (startDate && dateDir < startDate) continue;
+      if (startDate && dateDir < startDate) {
+        continue;
+      }
       // Skip if after end date
-      if (endDate && dateDir > endDate) continue;
+      if (endDate && dateDir > endDate) {
+        continue;
+      }
 
       const summary = this.loadDailySummary(dateDir);
       if (summary) {

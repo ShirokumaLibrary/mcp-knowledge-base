@@ -4,16 +4,18 @@
  */
 
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { FileIssueDatabase } from '../database.js';
-import { ToolResponse } from '../types/mcp-types.js';
+import type { FileIssueDatabase } from '../database.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 import { TypeRepository } from '../database/type-repository.js';
-import {
-  CreateTypeSchema,
-  GetTypesSchema,
-  DeleteTypeSchema,
+import type {
   CreateTypeArgs,
   GetTypesArgs,
   DeleteTypeArgs
+} from '../schemas/type-schemas.js';
+import {
+  CreateTypeSchema,
+  GetTypesSchema,
+  DeleteTypeSchema
 } from '../schemas/type-schemas.js';
 
 export class TypeHandlers {
@@ -37,7 +39,7 @@ export class TypeHandlers {
   async handleCreateType(args: unknown): Promise<ToolResponse> {
     try {
       const validatedArgs = CreateTypeSchema.parse(args) as CreateTypeArgs;
-      
+
       await this.typeRepo.createType(validatedArgs.name, validatedArgs.base_type);
 
       return {
@@ -62,7 +64,7 @@ export class TypeHandlers {
    */
   async handleGetTypes(args: unknown): Promise<ToolResponse> {
     const validatedArgs = GetTypesSchema.parse(args) as GetTypesArgs;
-    
+
     const types = await this.typeRepo.getAllTypes();
 
     // @ai-logic: Group types by base_type
@@ -76,7 +78,7 @@ export class TypeHandlers {
 
     // @ai-logic: Format response with base_type explanations
     let output = '## Available Types\n\n';
-    
+
     // Tasks types
     if (typesByBase['tasks']) {
       output += '### Tasks (タスク管理)\n';
@@ -84,14 +86,14 @@ export class TypeHandlers {
       output += '| Type | Description |\n';
       output += '|------|-------------|\n';
       for (const type of typesByBase['tasks']) {
-        const desc = type.type === 'issues' ? 'バグ・課題・タスク管理' : 
-                     type.type === 'plans' ? 'プロジェクト計画（開始・終了日付き）' : 
-                     'カスタムタスク型';
+        const desc = type.type === 'issues' ? 'バグ・課題・タスク管理' :
+          type.type === 'plans' ? 'プロジェクト計画（開始・終了日付き）' :
+            'カスタムタスク型';
         output += `| ${type.type} | ${desc} |\n`;
       }
       output += '\n';
     }
-    
+
     // Documents types
     if (typesByBase['documents']) {
       output += '### Documents (ドキュメント)\n';
@@ -99,14 +101,14 @@ export class TypeHandlers {
       output += '| Type | Description |\n';
       output += '|------|-------------|\n';
       for (const type of typesByBase['documents']) {
-        const desc = type.type === 'docs' ? '技術ドキュメント' : 
-                     type.type === 'knowledge' ? 'ナレッジベース' : 
-                     'カスタムドキュメント型';
+        const desc = type.type === 'docs' ? '技術ドキュメント' :
+          type.type === 'knowledge' ? 'ナレッジベース' :
+            'カスタムドキュメント型';
         output += `| ${type.type} | ${desc} |\n`;
       }
       output += '\n';
     }
-    
+
     // Other base types
     for (const [baseType, typeList] of Object.entries(typesByBase)) {
       if (baseType !== 'tasks' && baseType !== 'documents') {
@@ -164,7 +166,7 @@ export class TypeHandlers {
   async handleDeleteType(args: unknown): Promise<ToolResponse> {
     try {
       const validatedArgs = DeleteTypeSchema.parse(args) as DeleteTypeArgs;
-      
+
       // Deletion check is now handled inside deleteType method
       await this.typeRepo.deleteType(validatedArgs.name);
 
