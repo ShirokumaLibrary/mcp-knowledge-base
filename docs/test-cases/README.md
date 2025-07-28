@@ -7,7 +7,9 @@ This document collection is designed for AI assistants (like Claude) to systemat
 - Data directory (`.shirokuma/data/`) should be empty for a clean test
   - **Note**: If the database is already initialized/empty, no additional cleanup is needed
   - **Note**: Files use plural naming convention (e.g., `issues-1.md`, `plans-1.md`, `docs-1.md`)
-  - **Note**: Directory structure: `issues/`, `plans/`, `documents/docs/`, `documents/knowledge/`, `documents/{custom-type}/`
+  - **Note**: Directory structure: `issues/`, `plans/`, `docs/`, `knowledge/`, `{custom-type}/`
+  - **Note**: Database v0.2.0 uses unified `items` table with Single Table Inheritance
+  - **Note**: All IDs are now TEXT type (numeric IDs stored as strings)
 - You have access to all MCP tools prefixed with `mcp__shirokuma-knowledge-base__`
 
 ## Test Execution Instructions
@@ -57,9 +59,16 @@ Tests should be executed in numerical order as later tests may depend on data cr
 - Status updates via update_item work correctly using status names
 - Unicode and special characters are handled properly
 - Custom types can be created with field definitions and validation
-- Type inheritance (base, document, task) works correctly
+- Type inheritance (base_type: tasks or documents) works correctly
 - Types with existing items cannot be deleted
 - Default types can be deleted like any other type
+- All items stored in unified `items` table with composite primary key (type, id)
+- ID consistency maintained (all IDs as TEXT, numeric IDs as strings)
+- Related items stored as JSON arrays in `related` field
+- Tags stored as JSON arrays with normalized relationships in `item_tags` table
+- Title length is limited to 500 characters
+- Items cannot reference themselves in related fields
+- Zero-width and invisible characters are automatically filtered from input
 
 ## AI Testing Guidelines
 1. **Execute tests sequentially** - Later tests may depend on earlier data
@@ -80,6 +89,13 @@ Tests should be executed in numerical order as later tests may depend on data cr
 - Unicode or special characters causing issues
 - Empty arrays vs null returns
 - Partial updates affecting unspecified fields
+- ID type consistency (ensure all IDs returned as strings)
+- Related items format ("type-id" format in arrays)
+- Response format compatibility (some responses maintain backward compatibility)
+- Custom type validation via sequences table lookup
+- Title length limit (maximum 500 characters)
+- Self-referencing items (items cannot reference themselves in related fields)
+- Zero-width characters being filtered from strings
 
 ## Reporting Results
 When reporting test results, include:

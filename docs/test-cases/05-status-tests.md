@@ -12,10 +12,10 @@ This test suite verifies status functionality and filtering capabilities.
 - [ ] Attempt to create custom status (should fail): `mcp__shirokuma-knowledge-base__create_status(name: "Under Review")`  
       Expected: Error - tool not available
 
-- [ ] Attempt to update status (should fail): `mcp__shirokuma-knowledge-base__update_status(id: 1, name: "New Name")`  
+- [ ] Attempt to update status (should fail): `mcp__shirokuma-knowledge-base__update_status(id: "1", name: "New Name")`  
       Expected: Error - tool not available
 
-- [ ] Attempt to delete status (should fail): `mcp__shirokuma-knowledge-base__delete_status(id: 1)`  
+- [ ] Attempt to delete status (should fail): `mcp__shirokuma-knowledge-base__delete_status(id: "1")`  
       Expected: Error - tool not available
 
 ## 5.2 Status Usage Tests
@@ -24,7 +24,7 @@ This test suite verifies status functionality and filtering capabilities.
 ```
 mcp__shirokuma-knowledge-base__update_item(
   type: "issues",
-  id: 1,
+  id: "1",
   status: "Closed"
 )
 ```
@@ -43,7 +43,7 @@ Note: Status updates now work correctly using status names
 ```
 mcp__shirokuma-knowledge-base__update_item(
   type: "issues",
-  id: 2,
+  id: "2",
   status: "Completed"
 )
 ```
@@ -56,7 +56,7 @@ Expected: Success
 ```
 mcp__shirokuma-knowledge-base__update_item(
   type: "issues",
-  id: 3,
+  id: "3",
   status: "Cancelled"
 )
 ```

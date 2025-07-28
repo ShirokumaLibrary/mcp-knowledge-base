@@ -5,31 +5,31 @@ This test suite verifies deletion functionality and its effects on related data.
 ## 9.1 Individual Deletion
 
 ### Delete Issue
-- [ ] Delete Issue: `mcp__shirokuma-knowledge-base__delete_item(type: "issues", id: 1)`  
+- [ ] Delete Issue: `mcp__shirokuma-knowledge-base__delete_item(type: "issues", id: "1")`  
       Expected: Success
 
 - [ ] Verify list after deletion: `mcp__shirokuma-knowledge-base__get_items(type: "issues", includeClosedStatuses: true)`  
-      Expected: Array with 3 remaining issues (id: 2, 3, 4)
+      Expected: Array with 3 remaining issues (id: "2", "3", "4")
 
-- [ ] Get detail of deleted item: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 1)`  
+- [ ] Get detail of deleted item: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: "1")`  
       Expected: Error about item not found
 
-- [ ] Delete already deleted item: `mcp__shirokuma-knowledge-base__delete_item(type: "issues", id: 1)`  
+- [ ] Delete already deleted item: `mcp__shirokuma-knowledge-base__delete_item(type: "issues", id: "1")`  
       Expected: Error about item not found
 
 ### Delete Plan
-- [ ] Delete Plan: `mcp__shirokuma-knowledge-base__delete_item(type: "plans", id: 2)`  
+- [ ] Delete Plan: `mcp__shirokuma-knowledge-base__delete_item(type: "plans", id: "2")`  
       Expected: Success
 
-- [ ] Verify deletion: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: 2)`  
+- [ ] Verify deletion: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: "2")`  
       Expected: Error about item not found
 
 ### Delete Document
-- [ ] Delete Document: `mcp__shirokuma-knowledge-base__delete_item(type: "docs", id: 3)`  
+- [ ] Delete Document: `mcp__shirokuma-knowledge-base__delete_item(type: "docs", id: "3")`  
       Expected: Success
 
 ### Delete Knowledge
-- [ ] Delete Knowledge: `mcp__shirokuma-knowledge-base__delete_item(type: "knowledge", id: 2)`  
+- [ ] Delete Knowledge: `mcp__shirokuma-knowledge-base__delete_item(type: "knowledge", id: "2")`  
       Expected: Success
 
 ## 9.2 Related Data Verification

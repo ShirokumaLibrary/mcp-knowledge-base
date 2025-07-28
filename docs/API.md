@@ -14,8 +14,8 @@ The system supports the following base entity types:
 - **Plans**: Project planning and management
 - **Documents**: General documentation
 - **Knowledge**: Knowledge base articles
-- **Work Sessions**: Time-tracked work records
-- **Daily Summaries**: Daily activity summaries
+- **Work Sessions**: Time-tracked work records (accessed as 'sessions' type via unified API)
+- **Daily Summaries**: Daily activity summaries (accessed as 'dailies' type via unified API)
 
 Custom types can be created based on these base types.
 

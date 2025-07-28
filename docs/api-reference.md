@@ -2,32 +2,50 @@
 
 ## Content Management
 
-### Items (Issues, Plans, Documents, Knowledge)
+### Unified Items API (All Types: Issues, Plans, Documents, Knowledge, Sessions, Dailies)
 - `get_items`: Get items by type
-  - Type parameter accepts any value returned by `get_types`
-  - For issues/plans: Default excludes closed statuses
+  - Type parameter accepts any value returned by `get_types` (including 'sessions' and 'dailies')
+  - For tasks types: Default excludes closed statuses
   - Optional: `includeClosedStatuses` (boolean) - Include items with closed statuses
-  - Optional: `statusIds` (array) - Filter by specific status IDs
+  - Optional: `statuses` (array) - Filter by specific status names
+  - Optional: `start_date` (string) - Filter from this date (YYYY-MM-DD)
+  - Optional: `end_date` (string) - Filter until this date (YYYY-MM-DD)
+  - Optional: `limit` (number) - Maximum number of items to return
+  - **Special usage**: For sessions, use `limit: 1` to get latest session
 - `get_item_detail`: Get detailed information for specified item
 - `create_item`: Create new item of any type
+  - For sessions: Optional `datetime` (ISO 8601) for past data migration
+  - For sessions: Optional `id` (string) for custom session ID
+  - For sessions: Optional `category` (string) for categorization
+  - For dailies: Optional `date` (YYYY-MM-DD) - defaults to today
 - `update_item`: Update existing item
 - `delete_item`: Delete item
 - `search_items_by_tag`: Search items by tag (with optional type filter)
 
-### Work Sessions
-- `get_sessions`: Get work sessions (optional date range)
-- `get_session_detail`: Get detailed information for specified session
-- `get_latest_session`: Get the latest work session for today
-- `create_session`: Create new work session
-  - Optional: `datetime` (ISO 8601) - Create session with specific timestamp (for historical data migration)
-- `update_session`: Update existing work session
-- `search_sessions_by_tag`: Search work sessions by tag
+### Work Sessions (DEPRECATED - Use Unified Items API)
+- ~~`get_sessions`~~: Use `get_items` with `type: 'sessions'`
+- ~~`get_session_detail`~~: Use `get_item_detail` with `type: 'sessions'`
+- ~~`get_latest_session`~~: Use `get_items` with `type: 'sessions', limit: 1`
+- ~~`create_session`~~: Use `create_item` with `type: 'sessions'`
+- ~~`update_session`~~: Use `update_item` with `type: 'sessions'`
+- ~~`search_sessions_by_tag`~~: Use `search_items_by_tag` with `types: ['sessions']`
 
-### Daily Summaries
-- `get_summaries`: Get daily summaries (optional date range)
-- `get_summary_detail`: Get detailed information for specified date
-- `create_summary`: Create new daily summary
-- `update_summary`: Update existing daily summary
+### Daily Summaries (DEPRECATED - Use Unified Items API)
+- ~~`get_summaries`~~: Use `get_items` with `type: 'dailies'`
+- ~~`get_summary_detail`~~: Use `get_item_detail` with `type: 'dailies'`
+- ~~`create_summary`~~: Use `create_item` with `type: 'dailies'`
+- ~~`update_summary`~~: Use `update_item` with `type: 'dailies'`
+
+### Search
+- `search_items`: Full-text search across all items
+  - Required: `query` (string) - Search query text
+  - Optional: `types` (array) - Filter by specific types
+  - Optional: `limit` (number) - Maximum results (default: 20, max: 100)
+  - Optional: `offset` (number) - Pagination offset (default: 0)
+- `search_suggest`: Get search suggestions for autocomplete
+  - Required: `query` (string) - Partial search query
+  - Optional: `types` (array) - Filter suggestions by types
+  - Optional: `limit` (number) - Maximum suggestions (default: 10, max: 20)
 
 ### Tags
 - `get_tags`: Retrieve all tags
@@ -44,10 +62,10 @@
 ### Types
 - `get_types`: Retrieve all available types
   - Optional: `include_definitions` (boolean) - Include full type definitions (default: false)
-- `create_type`: Create new custom type
+- `create_type`: Create new type
   - Required: `name` (string) - Type name (lowercase letters, numbers, underscores)
   - Optional: `base_type` (string) - Base type: 'tasks' or 'documents' (default: 'documents')
-- `delete_type`: Delete custom type (only if no items exist)
+- `delete_type`: Delete type (only if no items exist)
 
 ## API Parameters
 
@@ -60,13 +78,20 @@ Default types (provided at initialization):
 - `docs` - Documentation
 - `knowledge` - Knowledge base entries
 
-Custom types:
+Special types (not in get_types):
+- `sessions` - Work sessions with timestamp-based IDs
+- `dailies` - Daily summaries with date-based IDs
+
+Additional types:
 - Any type created via `create_type` (e.g., `recipe`, `tutorial`, `blog_post`)
-- Custom types are stored under `documents/{type}/`
+- New types are stored under `documents/{type}/` or `tasks/{type}/` based on their base_type
 
 ### Common Parameters
-- `id` - Numeric identifier for items (Session IDs use format: YYYY-MM-DD-HH.MM.SS.sss)
-- `type` - Item type (use `get_types` to see available types)
+- `id` - Identifier for items:
+  - Regular items: Numeric (e.g., "1", "2", "3")
+  - Sessions: Timestamp format (YYYY-MM-DD-HH.MM.SS.sss)
+  - Dailies: Date format (YYYY-MM-DD)
+- `type` - Item type (use `get_types` for regular types, or 'sessions'/'dailies' for special types)
 - `title` - Title of the item
 - `content` - Main content (required for all item types)
 - `tags` - Array of tag names
@@ -77,8 +102,34 @@ Custom types:
 
 ### Date Parameters
 - `date` - Format: YYYY-MM-DD
-- `start_date` - Start of date range
-- `end_date` - End of date range
+- `start_date` - Start of date range (inclusive)
+- `end_date` - End of date range (inclusive, includes entire day)
+
+### Date Filtering in get_items
+The `get_items` API now supports date range filtering with different behavior based on item type:
+- **Sessions/Dailies**: Filters by the session/daily date (`start_date` field)
+- **All other types**: Filters by last update time (`updated_at` field)
+
+Examples:
+```
+# Get sessions from July 2025
+get_items(type: 'sessions', start_date: '2025-07-01', end_date: '2025-07-31')
+
+# Get latest session (replacement for get_latest_session)
+get_items(type: 'sessions', limit: 1)
+
+# Get today's sessions
+get_items(type: 'sessions', start_date: '2025-07-28', end_date: '2025-07-28')
+
+# Get recently updated documents (after July 20th)
+get_items(type: 'docs', start_date: '2025-07-20')
+
+# Get issues updated in a specific period
+get_items(type: 'issues', start_date: '2025-07-01', end_date: '2025-07-15')
+
+# Get dailies for a specific week
+get_items(type: 'dailies', start_date: '2025-07-22', end_date: '2025-07-28')
+```
 
 ### Search Parameters
 - `tag` - Tag name to search for
@@ -90,9 +141,9 @@ Custom types:
 ### Default Types (Plural)
 - Issues: `issues/issues-{id}.md`
 - Plans: `plans/plans-{id}.md`
-- Docs: `documents/docs/docs-{id}.md`
-- Knowledge: `documents/knowledge/knowledge-{id}.md`
+- Docs: `docs/docs-{id}.md`
+- Knowledge: `knowledge/knowledge-{id}.md`
 
-### Custom Types (Singular)
-- Pattern: `documents/{type}/{type}-{id}.md`
-- Example: `documents/recipe/recipe-1.md`
+### Additional Types
+- Pattern: `{type}/{type}-{id}.md`
+- Example: `recipe/recipe-1.md`, `guideline/guideline-1.md`

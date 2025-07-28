@@ -9,11 +9,11 @@ This test suite performs comprehensive checks on data integrity and error handli
       Expected: All tags from created items are present, including those added during updates
 
 ### Verify status names are correctly saved and displayed
-- [ ] Get issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 1)`  
+- [ ] Get issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: "1")`  
       Expected: Status field shows "Closed" (not status ID)
 
 ### Verify date fields are saved in correct format
-- [ ] Get plan detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: 1)`  
+- [ ] Get plan detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: "1")`  
       Expected: start_date and end_date in YYYY-MM-DD format
 
 ### Verify session IDs follow correct format
@@ -21,21 +21,21 @@ This test suite performs comprehensive checks on data integrity and error handli
       Expected: Session ID matches YYYY-MM-DD-HH.MM.SS.sss format
 
 ### Verify content fields maintain exact formatting
-- [ ] Get knowledge detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "knowledge", id: 4)`  
+- [ ] Get knowledge detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "knowledge", id: "4")`  
       Expected: Content matches exactly what was updated, including markdown formatting
 
 ### Verify description fields are preserved
-- [ ] Get doc detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "docs", id: 4)`  
+- [ ] Get doc detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "docs", id: "4")`  
       Expected: Description field contains the stored description text
 
-- [ ] Get plan detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: 4)`  
+- [ ] Get plan detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "plans", id: "4")`  
       Expected: Description field contains the updated description
 
 ### Verify related fields are preserved
-- [ ] Get issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 5)`  
+- [ ] Get issue detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: "5")`  
       Expected: related_tasks and related_documents arrays match what was created
 
-- [ ] Get doc detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "docs", id: 5)`  
+- [ ] Get doc detail: `mcp__shirokuma-knowledge-base__get_item_detail(type: "docs", id: "5")`  
       Expected: related_tasks and related_documents arrays match what was created
 
 - [ ] Get latest session: `mcp__shirokuma-knowledge-base__get_latest_session()`  
@@ -47,11 +47,11 @@ This test suite performs comprehensive checks on data integrity and error handli
 ## 8.2 Error Handling
 
 ### Detail retrieval with non-existent ID
-`mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: 9999)`  
+`mcp__shirokuma-knowledge-base__get_item_detail(type: "issues", id: "9999")`  
 Expected: Error message about item not found
 
 ### Update non-existent item
-`mcp__shirokuma-knowledge-base__update_item(type: "issues", id: 9999, title: "Test")`  
+`mcp__shirokuma-knowledge-base__update_item(type: "issues", id: "9999", title: "Test")`  
 Expected: Error message about item not found
 
 ### Invalid date format
@@ -63,7 +63,7 @@ Expected: Error about date format (must be YYYY-MM-DD)
 Expected: Error about invalid priority (must be high/medium/low)
 
 ### Invalid status name
-`mcp__shirokuma-knowledge-base__update_item(type: "issues", id: 4, status: "InvalidStatus")`  
+`mcp__shirokuma-knowledge-base__update_item(type: "issues", id: "4", status: "InvalidStatus")`  
 Expected: Error about invalid status name
 
 ### Missing required fields

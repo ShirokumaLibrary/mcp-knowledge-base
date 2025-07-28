@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-07-28
+
+### Added
+- **Unified Items API**: Sessions and daily summaries are now accessible through the standard items API
+  - `get_items` now supports 'sessions' and 'dailies' types
+  - `create_item` supports session-specific parameters (datetime, id, category)
+  - `create_item` supports dailies-specific parameter (date)
+  - Date range filtering with type-specific behavior:
+    - Sessions/dailies: Filter by start_date field
+    - Other types: Filter by updated_at field
+  - `limit` parameter for pagination and getting latest items
+- **get_latest_session replacement**: Use `get_items(type: 'sessions', limit: 1)`
+- Comprehensive integration tests for API unification
+
+### Changed
+- ItemRepository now handles sessions and dailies as special types
+- Enhanced create_item to support custom datetime and IDs for sessions
+- Updated API documentation to reflect unified approach
+
+### Deprecated
+- Session-specific APIs (get_sessions, create_session, update_session, etc.)
+- Daily summary-specific APIs (get_summaries, create_summary, update_summary, etc.)
+- Use the unified items API instead for all operations
+
+## [0.2.0] - 2025-01-27
+
+### Changed
+- **BREAKING**: Complete database unification using Single Table Inheritance pattern
+  - All content types now stored in unified `items` table
+  - Replaced separate tables (search_tasks, search_documents, search_sessions, search_daily_summaries)
+  - All IDs standardized to TEXT type for consistency
+  - Composite primary keys (type, id) for all items
+  - JSON arrays for tags and related items storage
+  - Related tables unified: item_tags and related_items
+- **BREAKING**: Changed `statusIds` parameter to `statuses` in get_items API
+  - Now accepts status names (strings) instead of IDs (numbers)
+  - Example: `statuses: ["Open", "In Progress"]` instead of `statusIds: [1, 2]`
+  - Empty array now returns no results (previously returned all results)
+
+### Added
+- ItemRepository as central data access layer for all item types
+- Support for dynamic custom types via sequences table lookup
+- Unified API for all content operations (get_items, create_item, etc.)
+- Backward compatibility in response formats where needed for tests
+
+### Fixed
+- Database column name issue: changed `last_id` to `current_value` in sequences table
+- All 409 tests now passing (359 unit tests + 45 integration tests + 5 E2E tests)
+- Response format consistency across all handlers
+- ID type consistency (all IDs now TEXT)
+- Empty status filter array now correctly returns no results
+
+### Technical Details
+- Single unified `items` table schema:
+  - Common fields: type, id, title, description, content, priority, status_id
+  - Task-specific: start_date, end_date
+  - Session-specific: start_time
+  - JSON storage: tags, related (for relationships)
+- Simplified repository architecture with ItemRepository handling all types
+- Type validation through sequences table with base_type field
+- Maintained backward compatibility for existing API consumers
+
 ## [0.1.1] - 2025-01-27
 
 ### Removed

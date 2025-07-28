@@ -17,7 +17,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["bug", "authentication", "urgent"]
 )
 ```
-Expected: Success with id: 1
+Expected: Success with id: "1" (string)
 
 ### Issue 2 - Issue without tags
 ```
@@ -29,7 +29,7 @@ mcp__shirokuma-knowledge-base__create_item(
   status: "Open"
 )
 ```
-Expected: Success with id: 2, no tags
+Expected: Success with id: "2" (string), no tags
 
 ### Issue 3 - Issue with different status
 ```
@@ -42,7 +42,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["feature", "ui", "enhancement"]
 )
 ```
-Expected: Success with id: 3
+Expected: Success with id: "3" (string)
 
 ### Issue 4 - Issue with description field
 ```
@@ -56,7 +56,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["bug", "memory", "performance"]
 )
 ```
-Expected: Success with id: 4, description field stored
+Expected: Success with id: "4" (string), description field stored
 
 ### Issue 5 - Issue with related tasks and documents
 ```
@@ -71,7 +71,7 @@ mcp__shirokuma-knowledge-base__create_item(
   related_documents: ["docs-1", "knowledge-1"]
 )
 ```
-Expected: Success with id: 5, with related_tasks and related_documents arrays
+Expected: Success with id: "5" (string), with related_tasks and related_documents arrays
 
 ### Issue creation without content - Verify error occurs
 ```
@@ -100,7 +100,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["roadmap", "q1-2025", "planning"]
 )
 ```
-Expected: Success with id: 1
+Expected: Success with id: "1" (string)
 
 ### Plan 2 - Plan without tags
 ```
@@ -114,7 +114,7 @@ mcp__shirokuma-knowledge-base__create_item(
   end_date: "2025-02-28"
 )
 ```
-Expected: Success with id: 2, no tags
+Expected: Success with id: "2" (string), no tags
 
 ### Plan 3 - Plan without dates
 ```
@@ -127,7 +127,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["technical-debt", "refactoring"]
 )
 ```
-Expected: Success with id: 3, null dates
+Expected: Success with id: "3" (string), null dates
 
 ### Plan 4 - Plan with description field
 ```
@@ -143,7 +143,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["api", "security", "infrastructure"]
 )
 ```
-Expected: Success with id: 4, description field stored
+Expected: Success with id: "4" (string), description field stored
 
 ### Plan 5 - Plan with related tasks
 ```
@@ -160,7 +160,7 @@ mcp__shirokuma-knowledge-base__create_item(
   related_documents: ["knowledge-3"]
 )
 ```
-Expected: Success with id: 5, with related_tasks and related_documents arrays
+Expected: Success with id: "5" (string), with related_tasks and related_documents arrays
 
 ## 2.3 Document Creation
 
@@ -175,7 +175,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["documentation", "api", "authentication"]
 )
 ```
-Expected: Success with id: 1
+Expected: Success with id: "1" (string)
 
 ### Doc 2 - Document without tags
 ```
@@ -185,7 +185,7 @@ mcp__shirokuma-knowledge-base__create_item(
   content: "# System Architecture\n\n## Components\n- Frontend: React + TypeScript\n- Backend: Node.js + Express\n- Database: PostgreSQL\n- Cache: Redis\n\n## Communication\n- REST API for client-server\n- WebSocket for real-time updates\n- Message Queue for background jobs"
 )
 ```
-Expected: Success with id: 2, no tags
+Expected: Success with id: "2" (string), no tags
 
 ### Doc 3 - Development guidelines
 ```
@@ -196,7 +196,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["guidelines", "development", "standards"]
 )
 ```
-Expected: Success with id: 3
+Expected: Success with id: "3" (string)
 
 ### Doc 4 - Document with description field
 ```
@@ -208,7 +208,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["ci-cd", "devops", "automation"]
 )
 ```
-Expected: Success with id: 4, description field stored
+Expected: Success with id: "4" (string), description field stored
 
 ### Doc 5 - Document with related tasks and documents
 ```
@@ -221,7 +221,7 @@ mcp__shirokuma-knowledge-base__create_item(
   related_documents: ["knowledge-3", "docs-1"]
 )
 ```
-Expected: Success with id: 5, with related_tasks and related_documents arrays
+Expected: Success with id: "5" (string), with related_tasks and related_documents arrays
 
 ## 2.4 Knowledge Creation
 
@@ -236,7 +236,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["best-practices", "error-handling", "development"]
 )
 ```
-Expected: Success with id: 1
+Expected: Success with id: "1" (string)
 
 ### Knowledge 2 - Knowledge without tags
 ```
@@ -246,7 +246,7 @@ mcp__shirokuma-knowledge-base__create_item(
   content: "## Query Optimization Techniques\n\n### Indexing Strategy\n- Create indexes on frequently queried columns\n- Use composite indexes for multi-column queries\n- Monitor index usage and remove unused ones\n\n### Query Patterns\n- Avoid SELECT *\n- Use EXPLAIN ANALYZE\n- Batch operations when possible"
 )
 ```
-Expected: Success with id: 2, no tags
+Expected: Success with id: "2" (string), no tags
 
 ### Knowledge 3 - Security practices
 ```
@@ -257,7 +257,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["security", "checklist", "best-practices"]
 )
 ```
-Expected: Success with id: 3
+Expected: Success with id: "3" (string)
 
 ### Knowledge 4 - Knowledge with description field
 ```
@@ -269,7 +269,7 @@ mcp__shirokuma-knowledge-base__create_item(
   tags: ["architecture", "microservices", "patterns"]
 )
 ```
-Expected: Success with id: 4, description field stored
+Expected: Success with id: "4" (string), description field stored
 
 ### Knowledge 5 - Knowledge with related documents
 ```
@@ -282,4 +282,4 @@ mcp__shirokuma-knowledge-base__create_item(
   related_documents: ["docs-1", "docs-5", "knowledge-3"]
 )
 ```
-Expected: Success with id: 5, with related_tasks and related_documents arrays
+Expected: Success with id: "5" (string), with related_tasks and related_documents arrays

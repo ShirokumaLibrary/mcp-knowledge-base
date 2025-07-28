@@ -1,8 +1,8 @@
-# 11. Edge Cases and Additional Tests
+# 10. Edge Cases and Additional Tests
 
 This test suite covers edge cases, boundary conditions, and special scenarios.
 
-## 11.1 Special Characters and Unicode
+## 10.1 Special Characters and Unicode
 
 ### Create item with Japanese content
 ```
@@ -26,12 +26,14 @@ mcp__shirokuma-knowledge-base__create_item(
 ```
 Expected: Success with emojis preserved
 
-## 11.2 Boundary Testing
+## 10.2 Boundary Testing
 
 - [ ] Create item with very long content (test with 100+ lines)
 - [ ] Create item with empty tags array: `tags: []`
 - [ ] Create item with single tag: `tags: ["single"]`
-- [ ] Very long title (200+ characters)
+- [ ] Title length validation (maximum 500 characters)
+  - [ ] Title with exactly 500 characters (should succeed)
+  - [ ] Title with 501 characters (should fail with error)
 
 ### Content with code blocks
 ```
@@ -44,20 +46,20 @@ mcp__shirokuma-knowledge-base__create_item(
 ```
 Expected: Success with code blocks preserved
 
-## 11.3 Concurrent Operations
+## 10.3 Concurrent Operations
 
 - [ ] Create multiple items rapidly in succession (5+ items)
 - [ ] Update the same item multiple times quickly
 - [ ] Create sessions with millisecond precision
 
-## 11.4 Date Handling
+## 10.4 Date Handling
 
 - [ ] Create plan with same start and end date
 - [ ] Create plan with past dates
 - [ ] Get sessions for wide date range: `start_date: "2020-01-01", end_date: "2030-12-31"`
 - [ ] Get summaries for future dates
 
-## 11.5 Status Filtering Edge Cases
+## 10.5 Status Filtering Edge Cases
 
 ### Create issue with "Cancelled" status
 ```
@@ -71,19 +73,64 @@ mcp__shirokuma-knowledge-base__create_item(
 Then: `mcp__shirokuma-knowledge-base__get_items(type: "issues")`  
 Expected: Issue not shown (cancelled is closed)
 
-- [ ] Test filtering with empty statusIds array: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statusIds: [])`  
-      Expected: Empty result (no status IDs match)
+- [ ] Test filtering with empty statuses array: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statuses: [])`  
+      Expected: Empty result (no statuses match)
 
-- [ ] Test filtering with invalid status ID: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statusIds: [999])`  
+- [ ] Test filtering with invalid status name: `mcp__shirokuma-knowledge-base__get_items(type: "issues", statuses: ["InvalidStatus"])`  
       Expected: Empty result
 
-## 11.6 Search Edge Cases
+## 10.6 Search Edge Cases
 
 - [ ] Search with empty pattern: `mcp__shirokuma-knowledge-base__search_tags(pattern: "")`
 - [ ] Search with special regex characters: `mcp__shirokuma-knowledge-base__search_tags(pattern: ".*")`
 - [ ] Case sensitivity test: search for "API" vs "api"
 
-## 11.7 Type Parameter Tests
+## 10.7 Self-Reference Validation
+
+### Test self-referencing item
+```
+mcp__shirokuma-knowledge-base__update_item(
+  type: "issues",
+  id: "1",
+  related_tasks: ["issues-1", "issues-2"]
+)
+```
+Expected: Error - Items cannot reference themselves
+
+### Test self-reference in related_documents
+```
+mcp__shirokuma-knowledge-base__update_item(
+  type: "docs",
+  id: "5",
+  related_documents: ["docs-5"]
+)
+```
+Expected: Error - Items cannot reference themselves
+
+## 10.8 Zero-Width Character Filtering
+
+### Test zero-width space in title
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "knowledge",
+  title: "Test​Title",  // Contains zero-width space (U+200B)
+  content: "Content"
+)
+```
+Expected: Success with title cleaned to "TestTitle"
+
+### Test zero-width characters in tags
+```
+mcp__shirokuma-knowledge-base__create_item(
+  type: "docs",
+  title: "Test",
+  content: "Content",
+  tags: ["tag​1", "tag‌2"]  // Contains zero-width space and zero-width non-joiner
+)
+```
+Expected: Success with tags cleaned to ["tag1", "tag2"]
+
+## 10.9 Type Parameter Tests
 
 ### Test invalid type parameter
 ```
@@ -116,7 +163,7 @@ Expected: Error or empty result (should use "doc" or "knowledge")
 mcp__shirokuma-knowledge-base__get_item_detail(
   type: "document",
   subtype: "docs",
-  id: 1
+  id: "1"
 )
 ```
 Expected: Document details if using unified document type
@@ -126,7 +173,7 @@ Expected: Document details if using unified document type
 mcp__shirokuma-knowledge-base__get_item_detail(
   type: "document",
   subtype: "knowledge", 
-  id: 1
+  id: "1"
 )
 ```
 Expected: Knowledge details if using unified document type

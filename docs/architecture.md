@@ -75,9 +75,43 @@ src/
 
 ## Database Architecture
 
+### Unified Database Schema (v0.2.0)
+
+As of 2025-01-27, the database has been unified using a Single Table Inheritance pattern:
+
+#### Main Tables
+
+1. **items** - Unified content table
+   - Primary Key: (type, id) 
+   - Stores all content types: issues, plans, docs, knowledge, sessions, summaries
+   - All IDs stored as TEXT for consistency
+   - JSON arrays for tags and related items
+
+2. **item_tags** - Unified tag relationships
+   - Replaces separate task_tags, document_tags, session_tags, summary_tags tables
+   - Links any item type to tags
+
+3. **related_items** - Unified relationships 
+   - Replaces related_tasks, related_documents tables
+   - Bidirectional relationships between any item types
+   - All relationships stored with TEXT IDs
+
+4. **tags** - Master tag table
+   - Auto-registration on item creation/update
+   - Usage count tracking
+
+5. **statuses** - Workflow states
+   - Used by all item types (not just tasks)
+   - is_closed flag for filtering
+
+6. **sequences** - ID generation
+   - Tracks next ID for each type
+   - Supports dynamic type creation
+
 ### Storage System
 - **Markdown Files**: Primary storage for all content (issues, plans, documents, knowledge, sessions)
-- **SQLite**: Tag management and cross-referencing system
+- **SQLite**: Unified database for search, relationships, and metadata
+- **ItemRepository**: Central data access layer handling all item types
 
 ### Directory Structure
 ```
@@ -144,15 +178,24 @@ Note:
 ## MCP Protocol Implementation
 
 ### Tool Definitions
-All tools are defined in `unified-tool-definitions.ts` with:
+All tools are defined with:
 - Input validation using Zod schemas
 - Consistent error handling
 - Type-safe responses
+- Unified API for all item types
 
 ### Handler Architecture
 ```
-MCP Client → server.ts → Handler → Database → Repository → File/SQLite
+MCP Client → server.ts → UnifiedHandlers → ItemRepository → File/SQLite
 ```
+
+### Repository Architecture (v0.2.0)
+- **ItemRepository**: Single repository handling all item types
+  - Type validation via sequences table
+  - Dynamic type support
+  - Unified CRUD operations
+  - Single Table Inheritance pattern
+- **Replaced repositories**: TaskRepository, DocumentRepository (now handled by ItemRepository)
 
 ### Error Handling
 - MCP protocol errors (McpError) for client communication

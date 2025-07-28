@@ -73,6 +73,8 @@ try {
 - `@ai-pattern`: Design pattern or architectural pattern used
 - `@ai-dependencies`: Critical dependencies and their purposes
 - `@ai-lifecycle`: Object lifecycle and state management info
+- `@ai-architecture-decision`: Marks important architectural choices
+- `@ai-redundant`: Indicates intentional data redundancy
 
 ### Behavioral Tags
 - `@ai-intent`: Primary purpose of the method/function
@@ -92,6 +94,8 @@ try {
 - `@ai-edge-case`: Boundary conditions and special cases
 - `@ai-assumption`: Assumptions made by the code
 - `@ai-validation`: Data validation and constraints
+- `@ai-trade-off`: Trade-offs between different approaches
+- `@ai-alternative`: Alternative implementations considered
 
 ### Error Tags
 - `@ai-error-type`: Types of errors that can occur
@@ -115,6 +119,8 @@ try {
 - `@ai-data-flow`: Describes how data flows through the system
 - `@ai-integration-point`: Marks where this code integrates with others
 - `@ai-database-schema`: References database table structure
+- `@ai-contrast`: Highlights differences with other implementations
+- `@ai-data-source`: Identifies primary data source (file vs database)
 
 ## Best Practices
 
