@@ -102,8 +102,9 @@ export const testScenarios: TestScenario[] = [
     steps: [
       {
         action: 'Create work session',
-        method: 'create_session',
+        method: 'create_item',
         params: {
+          type: 'sessions',
           title: 'Development Work',
           content: 'Implemented new features',
           tags: ['development'],
@@ -113,14 +114,18 @@ export const testScenarios: TestScenario[] = [
       },
       {
         action: 'Get latest session',
-        method: 'get_latest_session',
-        params: {},
+        method: 'get_items',
+        params: {
+          type: 'sessions',
+          limit: 1
+        },
         saveAs: 'latestSession'
       },
       {
         action: 'Create daily summary',
-        method: 'create_summary',
+        method: 'create_item',
         params: {
+          type: 'dailies',
           date: '{{today}}',
           title: 'Daily Progress',
           content: 'Completed multiple tasks',
@@ -475,8 +480,9 @@ export const testScenarios: TestScenario[] = [
     steps: [
       {
         action: 'Create session with specific datetime',
-        method: 'create_session',
+        method: 'create_item',
         params: {
+          type: 'sessions',
           title: 'Past Session',
           content: 'Session from yesterday',
           datetime: '{{yesterday}}T10:30:00.000Z',
@@ -486,8 +492,9 @@ export const testScenarios: TestScenario[] = [
       },
       {
         action: 'Create today session',
-        method: 'create_session',
+        method: 'create_item',
         params: {
+          type: 'sessions',
           title: 'Current Session',
           content: 'Session from today',
           tags: ['current', 'test']
@@ -496,8 +503,9 @@ export const testScenarios: TestScenario[] = [
       },
       {
         action: 'Get sessions for date range',
-        method: 'get_sessions',
+        method: 'get_items',
         params: {
+          type: 'sessions',
           start_date: '{{yesterday}}',
           end_date: '{{today}}'
         },
@@ -505,8 +513,11 @@ export const testScenarios: TestScenario[] = [
       },
       {
         action: 'Get latest session',
-        method: 'get_latest_session',
-        params: {},
+        method: 'get_items',
+        params: {
+          type: 'sessions',
+          limit: 1
+        },
         saveAs: 'latestSession'
       }
     ],

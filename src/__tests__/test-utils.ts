@@ -9,8 +9,8 @@ export function createTestDir(prefix: string): string {
   const keepData = process.env.KEEP_TEST_DATA === 'true';
   const timestamp = keepData ? new Date().toISOString().replace(/[:.]/g, '-') : process.pid.toString();
   
-  // Use environment variable or default to process.cwd()/tmp
-  const testBaseDir = process.env.TEST_DATA_DIR || path.join(process.cwd(), 'tmp');
+  // Use environment variable or default to OS temp directory
+  const testBaseDir = process.env.TEST_DATA_DIR || os.tmpdir();
   return path.join(testBaseDir, `${prefix}-${timestamp}`);
 }
 

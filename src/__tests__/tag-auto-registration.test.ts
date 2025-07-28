@@ -19,7 +19,7 @@ import { FileIssueDatabase } from '../database/index.js';
 
 describe('Tag Auto Registration', () => {
   let db: FileIssueDatabase;
-  const testDir = path.join(process.cwd(), 'tmp', 'mcp-test-tags-auto-' + process.pid);
+  const testDir = path.join(os.tmpdir(), 'mcp-test-tags-auto-' + process.pid + '-' + Date.now());
   const dbPath = path.join(testDir, 'test.db');
 
   /**
@@ -40,8 +40,8 @@ describe('Tag Auto Registration', () => {
     await db.initialize();  // @ai-critical: Creates tags table
   });
 
-  afterEach(() => {
-    db.close();
+  afterEach(async () => {
+    await db.close();
     if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true });
     } else if (process.env.KEEP_TEST_DATA === 'true') {
@@ -101,7 +101,7 @@ describe('Tag Auto Registration', () => {
       const issue = await db.createTask('issues', 'Test Issue', 'Description', 'high');
       
       // Update issue with new tags
-      await db.updateTask('issues', issue.id, undefined, undefined, undefined, undefined, ['update-tag1', 'update-tag2']);
+      await db.updateTask('issues', parseInt(issue.id), undefined, undefined, undefined, undefined, ['update-tag1', 'update-tag2']);
       
       // Verify tags were created
       const tags = await db.getTags();
@@ -141,7 +141,7 @@ describe('Tag Auto Registration', () => {
       const plan = await db.createTask('plans', 'Test Plan', 'Description', 'high');
       
       // Update plan with new tags
-      await db.updateTask('plans', plan.id, undefined, undefined, undefined, undefined, ['plan-update-tag']);
+      await db.updateTask('plans', parseInt(plan.id), undefined, undefined, undefined, undefined, ['plan-update-tag']);
       
       // Verify tag was created
       const tags = await db.getTags();
@@ -180,7 +180,7 @@ describe('Tag Auto Registration', () => {
       const knowledge = await db.createDocument('knowledge', 'Test Knowledge', 'Content', []);
       
       // Update knowledge with new tags
-      await db.updateDocument('knowledge', knowledge.id, undefined, undefined, ['knowledge-update-tag']);
+      await db.updateDocument('knowledge', parseInt(knowledge.id), undefined, undefined, ['knowledge-update-tag']);
       
       // Verify tag was created
       const tags = await db.getTags();
@@ -218,7 +218,7 @@ describe('Tag Auto Registration', () => {
       const doc = await db.createDocument('docs', 'Test Doc', 'Content', []);
       
       // Update doc with new tags
-      await db.updateDocument('docs', doc.id, undefined, undefined, ['doc-update-tag']);
+      await db.updateDocument('docs', parseInt(doc.id), undefined, undefined, ['doc-update-tag']);
       
       // Verify tag was created
       const tags = await db.getTags();
@@ -237,21 +237,16 @@ describe('Tag Auto Registration', () => {
      * @ai-database-schema work_sessions table with time fields
      */
     it('should automatically create tags when syncing session', async () => {
-      // Create a session with new tags
-      const session = {
-        id: 'test-session-1',
-        title: 'Test Session',
-        description: 'Test Description',
-        category: 'development',
-        tags: ['session-tag1', 'session-tag2'],
-        date: '2025-01-24',
-        startTime: '10:00:00',
-        endTime: '12:00:00',
-        summary: 'Test summary',
-        createdAt: new Date().toISOString()
-      };
+      // Import SessionManager
+      const { SessionManager } = await import('../session-manager.js');
+      const sessionManager = new SessionManager(testDir, db);
       
-      await db.syncSessionToSQLite(session);
+      // Create a session with new tags
+      await sessionManager.createSession(
+        'Test Session',
+        'Test content',
+        ['session-tag1', 'session-tag2']
+      );
       
       // Verify tags were created
       const tags = await db.getTags();
@@ -269,17 +264,17 @@ describe('Tag Auto Registration', () => {
      * @ai-filesystem Stored in sessions/YYYY-MM-DD/daily-summary-YYYY-MM-DD.md
      */
     it('should automatically create tags when syncing daily summary', async () => {
-      // Create a daily summary with new tags
-      const summary = {
-        date: '2025-01-24',
-        title: 'Daily Summary',
-        content: 'Test content',
-        tags: ['summary-tag1', 'summary-tag2'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Import SessionManager
+      const { SessionManager } = await import('../session-manager.js');
+      const sessionManager = new SessionManager(testDir, db);
       
-      await db.syncDailySummaryToSQLite(summary);
+      // Create a daily summary with new tags
+      await sessionManager.createDaily(
+        '2025-01-24',
+        'Daily Summary',
+        'Test content',
+        ['summary-tag1', 'summary-tag2']
+      );
       
       // Verify tags were created
       const tags = await db.getTags();

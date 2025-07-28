@@ -126,7 +126,8 @@ async function runTests() {
 
     // Test 6: セッション管理
     await test('Session management', async () => {
-      const session = await client.call('create_session', {
+      const session = await client.call('create_item', {
+        type: 'sessions',
         title: 'Test Session',
         content: 'Testing session functionality',
         tags: ['test', 'session']
@@ -137,8 +138,12 @@ async function runTests() {
       }
 
       // 最新セッションの取得
-      const latest = await client.call('get_latest_session', {});
-      if (latest.id !== session.id) {
+      const latestResults = await client.call('get_items', {
+        type: 'sessions',
+        limit: 1
+      });
+      const latest = latestResults.data?.[0] || latestResults[0];
+      if (!latest || latest.id !== session.id) {
         throw new Error('Latest session does not match created session');
       }
     });

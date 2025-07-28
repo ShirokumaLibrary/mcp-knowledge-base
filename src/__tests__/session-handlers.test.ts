@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { SessionHandlers } from '../handlers/session-handlers.js';
-import { WorkSessionManager } from '../session-manager.js';
+import { SessionManager } from '../session-manager.js';
 import { McpError } from '@modelcontextprotocol/sdk/types.js';
 
 // Mock the session manager
@@ -8,7 +8,7 @@ jest.mock('../session-manager.js');
 
 describe('SessionHandlers', () => {
   let handlers: SessionHandlers;
-  let mockSessionManager: jest.Mocked<WorkSessionManager>;
+  let mockSessionManager: jest.Mocked<SessionManager>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -117,15 +117,16 @@ describe('SessionHandlers', () => {
       expect(responseData.data).toEqual(mockSession);
     });
 
-    it('should throw error when no sessions exist today', async () => {
+    it('should return null when no sessions exist today', async () => {
       mockSessionManager.getLatestSession.mockReturnValue(null);
 
-      await expect(handlers.handleGetLatestSession({}))
-        .rejects.toThrow(McpError);
+      const result = await handlers.handleGetLatestSession({});
+      
+      expect(result.content[0].text).toContain('"data": null');
     });
   });
 
-  describe('handleCreateWorkSession', () => {
+  describe('handleCreateSession', () => {
     it('should create new session with required fields', async () => {
       const mockSession = {
         id: '2025-01-26-17.00.00.000',
@@ -135,7 +136,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.createSession.mockReturnValue(mockSession);
 
-      const result = await handlers.handleCreateWorkSession({
+      const result = await handlers.handleCreateSession({
         title: 'New Session'
       });
 
@@ -146,7 +147,8 @@ describe('SessionHandlers', () => {
         undefined,
         undefined,  // datetime parameter
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -160,7 +162,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.createSession.mockReturnValue(mockSession);
 
-      const result = await handlers.handleCreateWorkSession({
+      const result = await handlers.handleCreateSession({
         id: '2025-01-26-17.00.00.000',
         title: 'Session with ID',
         content: 'Content'
@@ -173,7 +175,8 @@ describe('SessionHandlers', () => {
         '2025-01-26-17.00.00.000',
         undefined,  // datetime parameter
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -187,7 +190,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.createSession.mockReturnValue(mockSession);
 
-      await handlers.handleCreateWorkSession({
+      await handlers.handleCreateSession({
         title: 'Tagged Session',
         tags: ['work', 'important']
       });
@@ -199,7 +202,8 @@ describe('SessionHandlers', () => {
         undefined,
         undefined,  // datetime parameter
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
     });
 
@@ -213,7 +217,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.createSession.mockReturnValue(mockSession);
 
-      const result = await handlers.handleCreateWorkSession({
+      const result = await handlers.handleCreateSession({
         title: 'Past Session',
         content: 'Historical data migration',
         datetime: customDatetime
@@ -226,14 +230,15 @@ describe('SessionHandlers', () => {
         undefined,
         customDatetime,
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
     });
   });
 
-  describe('handleUpdateWorkSession', () => {
+  describe('handleUpdateSession', () => {
     it('should update session fields', async () => {
       const mockSession = {
         id: '2025-01-26-17.00.00.000',
@@ -243,7 +248,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.updateSession.mockReturnValue(mockSession);
 
-      const result = await handlers.handleUpdateWorkSession({
+      const result = await handlers.handleUpdateSession({
         id: '2025-01-26-17.00.00.000',
         title: 'Updated Title',
         content: 'Updated content',
@@ -256,7 +261,8 @@ describe('SessionHandlers', () => {
         'Updated content',
         ['updated'],
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.data).toEqual(mockSession);
@@ -270,7 +276,7 @@ describe('SessionHandlers', () => {
       };
       mockSessionManager.updateSession.mockReturnValue(mockSession);
 
-      await handlers.handleUpdateWorkSession({
+      await handlers.handleUpdateSession({
         id: '2025-01-26-17.00.00.000',
         content: 'Updated content only'
       });
@@ -281,7 +287,8 @@ describe('SessionHandlers', () => {
         'Updated content only',
         undefined,
         undefined,
-        undefined
+        undefined,
+        undefined  // description parameter
       );
     });
 
@@ -290,7 +297,7 @@ describe('SessionHandlers', () => {
         throw new Error('Session nonexistent not found');
       });
 
-      await expect(handlers.handleUpdateWorkSession({
+      await expect(handlers.handleUpdateSession({
         id: 'nonexistent',
         title: 'Update'
       })).rejects.toThrow();
@@ -352,14 +359,14 @@ describe('SessionHandlers', () => {
         throw new Error('Database error');
       });
 
-      await expect(handlers.handleCreateWorkSession({
+      await expect(handlers.handleCreateSession({
         title: 'Session'
       })).rejects.toThrow('Database error');
     });
 
     it('should handle concurrent session operations', async () => {
       const promises = Array(5).fill(null).map((_, i) =>
-        handlers.handleCreateWorkSession({
+        handlers.handleCreateSession({
           title: `Concurrent Session ${i}`
         })
       );

@@ -12,7 +12,7 @@ import {
   FieldMappings
 } from '../transform-utils.js';
 import { Issue, Plan, Document } from '../../types/domain-types.js';
-import { WorkSession, DailySummary } from '../../types/complete-domain-types.js';
+import { Session, Daily } from '../../types/complete-domain-types.js';
 
 describe('MarkdownTransformers', () => {
   describe('formatIssue', () => {
@@ -73,9 +73,9 @@ describe('MarkdownTransformers', () => {
     });
   });
 
-  describe('formatWorkSession', () => {
+  describe('formatSession', () => {
     it('should format work session correctly', () => {
-      const session: WorkSession = {
+      const session: Session = {
         id: '2024-01-01-10.30.00.000',
         title: 'Development Session',
         date: '2024-01-01',
@@ -89,7 +89,7 @@ describe('MarkdownTransformers', () => {
         related_documents: ['docs-1']
       };
 
-      const result = MarkdownTransformers.formatWorkSession(session);
+      const result = MarkdownTransformers.formatSession(session);
       
       expect(result).toContain('# Development Session');
       expect(result).toContain('**ID:** 2024-01-01-10.30.00.000');

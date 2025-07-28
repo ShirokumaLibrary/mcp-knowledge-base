@@ -104,7 +104,12 @@ export class MCPTestClient {
       { regex: /Tag "(.+)" deleted/, handler: (m: RegExpMatchArray) => ({ deleted: true, name: m[1] }) },
       { regex: /^(\{|\[)/, handler: () => {
         try {
-          return JSON.parse(text);
+          const parsed = JSON.parse(text);
+          // Handle wrapped data format from unified handlers
+          if (parsed.data !== undefined) {
+            return parsed.data;
+          }
+          return parsed;
         } catch {
           return text;
         }
@@ -122,7 +127,12 @@ export class MCPTestClient {
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        // Handle wrapped data format from unified handlers
+        if (parsed.data !== undefined) {
+          return parsed.data;
+        }
+        return parsed;
       }
     } catch {}
 
@@ -204,7 +214,8 @@ export class TestDataBuilder {
 export class TestAssertions {
   static assertValidItem(item: any, expectedType: string) {
     expect(item).toBeDefined();
-    expect(item.id).toBeGreaterThan(0);
+    expect(item.id).toBeDefined();
+    expect(parseInt(item.id)).toBeGreaterThan(0);
     expect(item.type).toBe(expectedType);
     expect(item.title).toBeDefined();
     expect(item.created_at).toBeDefined();

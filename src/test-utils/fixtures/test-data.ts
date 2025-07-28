@@ -5,7 +5,7 @@
  */
 
 import { Issue, Plan, Document } from '../../types/domain-types.js';
-import { WorkSession, DailySummary, Status, Tag } from '../../types/complete-domain-types.js';
+import { Session, Daily, Status, Tag } from '../../types/complete-domain-types.js';
 
 /**
  * @ai-intent Test fixtures for issues
@@ -127,7 +127,7 @@ export const testDocuments: Document[] = [
  * @ai-intent Test fixtures for work sessions
  * @ai-pattern Sample session data
  */
-export const testSessions: WorkSession[] = [
+export const testSessions: Session[] = [
   {
     id: '2024-01-15-10.30.00.000',
     title: 'Morning Development Session',
@@ -158,7 +158,7 @@ export const testSessions: WorkSession[] = [
  * @ai-intent Test fixtures for daily summaries
  * @ai-pattern Sample summary data
  */
-export const testSummaries: DailySummary[] = [
+export const testSummaries: Daily[] = [
   {
     date: '2024-01-15',
     title: 'Productive Development Day',
@@ -256,7 +256,7 @@ export const TestDataFactory = {
     };
   },
   
-  createSession(overrides: Partial<WorkSession> = {}): WorkSession {
+  createSession(overrides: Partial<Session> = {}): Session {
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toTimeString().split(' ')[0];
@@ -276,7 +276,7 @@ export const TestDataFactory = {
     };
   },
   
-  createSummary(overrides: Partial<DailySummary> = {}): DailySummary {
+  createSummary(overrides: Partial<Daily> = {}): Daily {
     const date = new Date().toISOString().split('T')[0];
     
     return {

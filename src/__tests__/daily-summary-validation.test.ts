@@ -4,17 +4,18 @@
  * @ai-critical Tests duplicate prevention and date format validation
  */
 
-import { WorkSessionManager } from '../session-manager';
+import { SessionManager } from '../session-manager';
 import { FileIssueDatabase } from '../database';
 import { CreateItemSchema } from '../schemas/item-schemas';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 describe('Daily Summary Validation', () => {
-  const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-summaries-' + process.pid);
+  const testDataDir = path.join(os.tmpdir(), 'mcp-test-summaries-' + process.pid + '-' + Date.now());
   const testSessionsDir = path.join(testDataDir, 'sessions');
   const testDbPath = path.join(testDataDir, 'test.db');
-  let sessionManager: WorkSessionManager;
+  let sessionManager: SessionManager;
   let testDb: FileIssueDatabase;
 
   beforeEach(async () => {
@@ -25,7 +26,7 @@ describe('Daily Summary Validation', () => {
     
     testDb = new FileIssueDatabase(testDataDir, testDbPath);
     await testDb.initialize();
-    sessionManager = new WorkSessionManager(testSessionsDir, testDb);
+    sessionManager = new SessionManager(testSessionsDir, testDb);
   });
 
   afterEach(() => {
@@ -44,11 +45,11 @@ describe('Daily Summary Validation', () => {
      * @ai-intent Test that creating duplicate summaries for same date fails
      * @ai-critical Ensures one summary per day constraint
      */
-    it('should prevent creating duplicate summaries for the same date', () => {
+    it('should prevent creating duplicate summaries for the same date', async () => {
       const testDate = '2025-07-30';
       
       // Create first summary - should succeed
-      const summary1 = sessionManager.createDailySummary(
+      const summary1 = await sessionManager.createDaily(
         testDate,
         'First Summary',
         'This is the first summary',
@@ -58,29 +59,29 @@ describe('Daily Summary Validation', () => {
       expect(summary1.date).toBe(testDate);
 
       // Try to create duplicate - should throw
-      expect(() => {
-        sessionManager.createDailySummary(
+      await expect(
+        sessionManager.createDaily(
           testDate,
           'Second Summary',
           'This should fail',
           ['test']
-        );
-      }).toThrow('Daily summary for 2025-07-30 already exists');
+        )
+      ).rejects.toThrow('Daily summary for 2025-07-30 already exists');
     });
 
     /**
      * @ai-intent Test that summaries for different dates work correctly
      * @ai-validation Ensures date is the unique key
      */
-    it('should allow creating summaries for different dates', () => {
-      const summary1 = sessionManager.createDailySummary(
+    it('should allow creating summaries for different dates', async () => {
+      const summary1 = await sessionManager.createDaily(
         '2025-07-30',
         'July Summary',
         'Summary for July',
         []
       );
       
-      const summary2 = sessionManager.createDailySummary(
+      const summary2 = await sessionManager.createDaily(
         '2025-07-31',
         'August Summary',
         'Summary for August',

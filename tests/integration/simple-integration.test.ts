@@ -135,11 +135,12 @@ describe('Simple MCP Server Integration Test', () => {
     expect(createResult.content[0].type).toBe('text');
     
     const createText = createResult.content[0].text;
-    expect(createText).toContain('issues created:');
     
-    // Parse the created issue
-    const createdIssue = JSON.parse(createText.replace('issues created: ', ''));
-    expect(createdIssue.id).toBeGreaterThan(0);
+    // Parse the response - handle unified handler format
+    const responseData = JSON.parse(createText);
+    const createdIssue = responseData.data || responseData;
+    expect(createdIssue.id).toBeDefined();
+    expect(parseInt(createdIssue.id)).toBeGreaterThan(0);
     expect(createdIssue.title).toBe('Test Issue');
 
     // Get issues to verify
