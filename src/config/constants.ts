@@ -47,12 +47,12 @@ export const DATABASE_CONSTANTS = {
 
   // File patterns
   FILE_PATTERNS: {
-    ISSUE: 'issue-{id}.md',
-    PLAN: 'plan-{id}.md',
-    DOC: 'doc-{id}.md',
+    ISSUE: 'issues-{id}.md',
+    PLAN: 'plans-{id}.md',
+    DOC: 'docs-{id}.md',
     KNOWLEDGE: 'knowledge-{id}.md',
-    SESSION: '{date}/session-{timestamp}.md',
-    SUMMARY: '{date}/daily-summary-{date}.md'
+    SESSION: '{date}/sessions-{timestamp}.md',
+    SUMMARY: '{date}/dailies-{date}.md'
   }
 } as const;
 

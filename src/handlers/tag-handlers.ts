@@ -81,7 +81,7 @@ export class TagHandlers {
         content: [
           {
             type: 'text' as const,
-            text: `Tag created: ${tag}`  // @ai-logic: Returns tag name
+            text: `Tag created: ${tag.name}`  // @ai-logic: Returns tag name
           }
         ]
       };

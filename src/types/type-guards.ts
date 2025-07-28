@@ -11,8 +11,8 @@ import type {
   Issue,
   Plan,
   Document,
-  WorkSession,
-  DailySummary,
+  Session,
+  Daily,
   Priority,
   BaseType,
   Tag
@@ -139,11 +139,11 @@ export function isDocument(value: unknown): value is Document {
 }
 
 /**
- * @ai-intent Check if object has required WorkSession fields
+ * @ai-intent Check if object has required Session fields
  * @ai-pattern Validates session structure with ID format
  * @ai-critical Checks session ID format
  */
-export function isWorkSession(value: unknown): value is WorkSession {
+export function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
@@ -168,11 +168,11 @@ export function isWorkSession(value: unknown): value is WorkSession {
 }
 
 /**
- * @ai-intent Check if object has required DailySummary fields
+ * @ai-intent Check if object has required Daily fields
  * @ai-pattern Validates summary with date as key
  * @ai-critical Checks date format
  */
-export function isDailySummary(value: unknown): value is DailySummary {
+export function isDaily(value: unknown): value is Daily {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
@@ -310,8 +310,8 @@ export const TypeGuards = {
   isIssue,
   isPlan,
   isDocument,
-  isWorkSession,
-  isDailySummary,
+  isSession,
+  isDaily,
   isTag,
   isValidDateString,
   isValidSessionId,

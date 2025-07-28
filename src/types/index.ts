@@ -26,8 +26,8 @@ export {
   isIssue,
   isPlan,
   isDocument,
-  isWorkSession,
-  isDailySummary,
+  isSession,
+  isDaily,
   isTag,
   isValidDateString,
   isValidSessionId,
@@ -52,8 +52,8 @@ export type {
 } from './domain-types.js';
 
 export type {
-  WorkSession,
-  DailySummary
+  Session,
+  Daily
 } from './session-types.js';
 
 export type {

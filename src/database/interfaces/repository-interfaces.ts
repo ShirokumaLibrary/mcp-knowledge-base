@@ -14,8 +14,8 @@ import type {
   Tag
 } from '../../types/domain-types.js';
 import type {
-  WorkSession,
-  DailySummary,
+  Session,
+  Daily,
   TagWithCount,
   Priority,
   TypeDefinition
@@ -78,7 +78,7 @@ export interface ITaskRepository {
   getAllTasksSummary(
     type: string,
     includeClosedStatuses?: boolean,
-    statusIds?: number[]
+    statuses?: string[]
   ): Promise<Array<Issue | Plan>>;
   createTask(
     type: string,
@@ -156,20 +156,20 @@ export interface ISearchRepository {
     plans: Plan[];
     docs: Document[];
     knowledge: Document[];
-    sessions?: WorkSession[];
-    summaries?: DailySummary[];
+    sessions?: Session[];
+    summaries?: Daily[];
   }>;
   searchAllByTag(tag: string): Promise<{
     issues: Issue[];
     plans: Plan[];
     docs: Document[];
     knowledge: Document[];
-    sessions?: WorkSession[];
-    summaries?: DailySummary[];
+    sessions?: Session[];
+    summaries?: Daily[];
   }>;
-  searchSessions(query: string): Promise<WorkSession[]>;
-  searchDailySummaries(query: string): Promise<DailySummary[]>;
-  searchSessionsByTag(tag: string): Promise<WorkSession[]>;
+  searchSessions(query: string): Promise<Session[]>;
+  searchDailySummaries(query: string): Promise<Daily[]>;
+  searchSessionsByTag(tag: string): Promise<Session[]>;
   rebuildSearchIndex(): Promise<void>;
 }
 
@@ -195,13 +195,13 @@ export interface ITypeRepository {
  * @ai-critical Sessions use timestamp-based IDs
  */
 export interface ISessionRepository {
-  getSessions(startDate?: string, endDate?: string): Promise<WorkSession[]>;
-  getSession(id: string): Promise<WorkSession | null>;
-  getLatestSession(): Promise<WorkSession | null>;
-  createSession(session: Partial<WorkSession>): Promise<WorkSession>;
-  updateSession(id: string, updates: Partial<WorkSession>): Promise<WorkSession | null>;
+  getSessions(startDate?: string, endDate?: string): Promise<Session[]>;
+  getSession(id: string): Promise<Session | null>;
+  getLatestSession(): Promise<Session | null>;
+  createSession(session: Partial<Session>): Promise<Session>;
+  updateSession(id: string, updates: Partial<Session>): Promise<Session | null>;
   deleteSession(id: string): Promise<boolean>;
-  searchSessionsByTag(tag: string): Promise<WorkSession[]>;
+  searchSessionsByTag(tag: string): Promise<Session[]>;
 }
 
 /**
@@ -210,10 +210,10 @@ export interface ISessionRepository {
  * @ai-critical One summary per date maximum
  */
 export interface ISummaryRepository {
-  getSummaries(startDate?: string, endDate?: string): Promise<DailySummary[]>;
-  getSummary(date: string): Promise<DailySummary | null>;
-  createSummary(summary: Partial<DailySummary>): Promise<DailySummary>;
-  updateSummary(date: string, updates: Partial<DailySummary>): Promise<DailySummary | null>;
+  getSummaries(startDate?: string, endDate?: string): Promise<Daily[]>;
+  getSummary(date: string): Promise<Daily | null>;
+  createSummary(summary: Partial<Daily>): Promise<Daily>;
+  updateSummary(date: string, updates: Partial<Daily>): Promise<Daily | null>;
   deleteSummary(date: string): Promise<boolean>;
 }
 
@@ -244,7 +244,7 @@ export interface IDatabase {
   getAllTasksSummary(
     type: string,
     includeClosedStatuses?: boolean,
-    statusIds?: number[]
+    statuses?: string[]
   ): Promise<Array<Issue | Plan>>;
   createTask(
     type: string,
@@ -305,12 +305,12 @@ export interface IDatabase {
   // Search operations
   searchAll(query: string): Promise<any>;
   searchAllByTag(tag: string): Promise<any>;
-  searchSessions(query: string): Promise<WorkSession[]>;
-  searchDailySummaries(query: string): Promise<DailySummary[]>;
-  searchSessionsByTag(tag: string): Promise<WorkSession[]>;
+  searchSessions(query: string): Promise<Session[]>;
+  searchDailySummaries(query: string): Promise<Daily[]>;
+  searchSessionsByTag(tag: string): Promise<Session[]>;
   rebuildSearchIndex(): Promise<void>;
 
   // Session operations
-  syncSessionToSQLite(session: WorkSession): Promise<void>;
-  syncDailySummaryToSQLite(summary: DailySummary): Promise<void>;
+  syncSessionToSQLite(session: Session): Promise<void>;
+  syncDailyToSQLite(summary: Daily): Promise<void>;
 }

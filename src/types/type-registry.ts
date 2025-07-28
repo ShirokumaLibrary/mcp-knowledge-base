@@ -66,7 +66,7 @@ const BASE_TYPE_CONFIGS: BaseTypeConfig[] = [
 ];
 
 /**
- * @ai-context Static type registry (currently empty, all types from database)
+ * @ai-context Static type registry with initial types
  * @ai-pattern Singleton-like static registry
  * @ai-future Can be extended to preload types if needed
  */
@@ -75,7 +75,44 @@ export class StaticTypeRegistry implements TypeRegistry {
 
   constructor() {
     this.types = new Map();
-    // @ai-critical: No hardcoded types - must be loaded from database
+    // @ai-critical: Initialize with initial configuration types
+    this.initializeDefaultTypes();
+  }
+
+  private initializeDefaultTypes(): void {
+    // @ai-note: These are just initial configuration types, NOT special types
+    // @ai-critical: All types are treated equally - no hardcoded behavior
+    // @ai-why: Initial types exist only for convenience, not for special treatment
+    
+    // Initial task types
+    this.types.set('issues', {
+      type: 'issues',
+      baseType: 'tasks',
+      pluralForm: 'issues',
+      supportedFields: BASE_TYPE_FIELDS['tasks']
+    });
+
+    this.types.set('plans', {
+      type: 'plans',
+      baseType: 'tasks',
+      pluralForm: 'plans',
+      supportedFields: BASE_TYPE_FIELDS['tasks']
+    });
+
+    // Initial document types
+    this.types.set('docs', {
+      type: 'docs',
+      baseType: 'documents',
+      pluralForm: 'docs',
+      supportedFields: BASE_TYPE_FIELDS['documents']
+    });
+
+    this.types.set('knowledge', {
+      type: 'knowledge',
+      baseType: 'documents',
+      pluralForm: 'knowledge',
+      supportedFields: BASE_TYPE_FIELDS['documents']
+    });
   }
 
   getAllTypes(): TypeDefinition[] {
@@ -224,4 +261,20 @@ export function getTypesForBase(baseType: string): string[] {
 export function isTypeOfBase(typeName: string, baseType: string): boolean {
   const type = typeRegistry.getType(typeName);
   return type ? type.baseType === baseType : false;
+}
+
+/**
+ * @ai-context Helper to check if a type is a task type
+ * @ai-pattern Convenience function for common check
+ */
+export function isTaskType(typeName: string): boolean {
+  return isTypeOfBase(typeName, 'tasks');
+}
+
+/**
+ * @ai-context Helper to check if a type is a document type
+ * @ai-pattern Convenience function for common check
+ */
+export function isDocumentType(typeName: string): boolean {
+  return isTypeOfBase(typeName, 'documents');
 }

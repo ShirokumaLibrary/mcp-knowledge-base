@@ -6,7 +6,7 @@
  * @ai-why SQLite may be out of sync, files are source of truth
  */
 
-import type { WorkSession, DailySummary } from '../types/session-types.js';
+import type { Session, Daily } from '../types/session-types.js';
 import type { FileIssueDatabase } from '../database.js';
 import type { SessionRepository } from '../repositories/session-repository.js';
 
@@ -35,7 +35,7 @@ export class SessionSearchService {
    * @ai-performance Milliseconds for large datasets
    * @ai-caveat May miss very recent sessions
    */
-  async searchSessionsFast(query: string): Promise<WorkSession[]> {
+  async searchSessionsFast(query: string): Promise<Session[]> {
     return this.db.searchSessions(query);  // @ai-logic: Delegates to SQLite FTS
   }
 
@@ -45,7 +45,7 @@ export class SessionSearchService {
    * @ai-pattern Exact match in CSV tag column
    * @ai-performance Indexed for speed
    */
-  async searchSessionsByTagFast(tag: string): Promise<WorkSession[]> {
+  async searchSessionsByTagFast(tag: string): Promise<Session[]> {
     return this.db.searchSessionsByTag(tag);  // @ai-pattern: Exact tag match
   }
 
@@ -55,7 +55,7 @@ export class SessionSearchService {
    * @ai-pattern Full-text search on title and content
    * @ai-return Array of matching summaries
    */
-  async searchDailySummariesFast(query: string): Promise<DailySummary[]> {
+  async searchDailySummariesFast(query: string): Promise<Daily[]> {
     return this.db.searchDailySummaries(query);
   }
 
@@ -66,8 +66,8 @@ export class SessionSearchService {
    * @ai-performance O(n) file reads - slow but accurate
    * @ai-why Guaranteed to find all matches including recent
    */
-  searchSessionsDetailed(query: string): WorkSession[] {
-    return this.repository.searchSessionsFullText(query);  // @ai-logic: Scans markdown files
+  async searchSessionsDetailed(query: string): Promise<Session[]> {
+    return await this.repository.searchSessionsFullText(query);  // @ai-logic: Scans markdown files
   }
 
   /**
@@ -77,7 +77,7 @@ export class SessionSearchService {
    * @ai-performance Slower than SQLite but always current
    * @ai-return Complete session objects
    */
-  searchSessionsByTagDetailed(tag: string): WorkSession[] {
-    return this.repository.searchSessionsByTag(tag);  // @ai-logic: File-based search
+  async searchSessionsByTagDetailed(tag: string): Promise<Session[]> {
+    return await this.repository.searchSessionsByTag(tag);  // @ai-logic: File-based search
   }
 }

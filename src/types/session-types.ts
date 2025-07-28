@@ -35,9 +35,10 @@
  * @ai-relationship Multiple sessions aggregate into daily summary
  * @ai-lifecycle Created during work, may be updated
  */
-export interface WorkSession {
+export interface Session {
   id: string;           // @ai-pattern: YYYY-MM-DD-HH.MM.SS.sss format
   title: string;        // @ai-validation: Required session name
+  description?: string; // @ai-intent: One-line description for list views
   content?: string;     // @ai-logic: Work details and extended notes/logs
   related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
   related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
@@ -57,9 +58,10 @@ export interface WorkSession {
  * @ai-relationship Summarizes all sessions for a date
  * @ai-usage Created at end of day or retrospectively
  */
-export interface DailySummary {
+export interface Daily {
   date: string;         // @ai-pattern: YYYY-MM-DD, primary key
   title: string;        // @ai-validation: Required summary title
+  description?: string; // @ai-intent: One-line description for list views
   content: string;      // @ai-validation: Required summary text
   related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
   related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]

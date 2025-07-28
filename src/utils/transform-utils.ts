@@ -25,11 +25,11 @@ interface ResponseError {
   details?: unknown;
 }
 import type {
-  WorkSession,
+  Session,
   Priority
 } from '../types/complete-domain-types.js';
 import {
-  DailySummary
+  Daily
 } from '../types/complete-domain-types.js';
 
 /**
@@ -164,7 +164,7 @@ export class MarkdownTransformers {
    * @ai-intent Format work session as markdown
    * @ai-pattern Session display format
    */
-  static formatWorkSession(session: WorkSession): string {
+  static formatSession(session: Session): string {
     const lines = [
       `# ${session.title}`,
       '',

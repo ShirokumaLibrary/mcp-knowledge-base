@@ -110,4 +110,49 @@ export class StatusRepository extends BaseRepository {
     // @ai-logic: changes > 0 means row was actually deleted
     return (result as any).changes! > 0;
   }
+
+  /**
+   * @ai-intent Get status by name
+   * @ai-flow Query statuses table by name
+   * @ai-return Status object or null if not found
+   */
+  async getStatusByName(name: string): Promise<Status | null> {
+    const row = await this.db.getAsync(
+      'SELECT id, name, is_closed, created_at FROM statuses WHERE name = ?',
+      [name]
+    );
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id: Number(row.id),
+      name: String(row.name),
+      is_closed: row.is_closed === 1,
+      created_at: String(row.created_at)
+    };
+  }
+
+  /**
+   * @ai-intent Get status by ID (alias for getStatus)
+   * @ai-flow Query statuses table by ID
+   * @ai-return Status object or null if not found
+   */
+  async getStatusById(id: number): Promise<Status | null> {
+    return this.getStatus(id);
+  }
+
+  /**
+   * @ai-intent Get all closed status IDs
+   * @ai-flow Query statuses where is_closed = 1
+   * @ai-return Array of status IDs that are marked as closed
+   */
+  async getClosedStatusIds(): Promise<number[]> {
+    const rows = await this.db.allAsync(
+      'SELECT id FROM statuses WHERE is_closed = 1'
+    );
+
+    return rows.map((row: any) => Number(row.id));
+  }
 }

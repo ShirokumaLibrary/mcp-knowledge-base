@@ -1,14 +1,10 @@
 // This runs BEFORE any test files are loaded
-// Increase EventEmitter limits to prevent warnings
-
-// Set this BEFORE any modules are loaded
-const EventEmitter = require('events').EventEmitter;
-EventEmitter.defaultMaxListeners = 100;
-
-// Increase process limits
-process.setMaxListeners(100);
+// @ai-context Jest presetup file for early environment configuration
+// @ai-critical Must run before Winston logger is imported
+// @ai-why Ensures test environment is configured before any logger instances are created
 
 // Winston specific - set before winston is imported anywhere
+// @ai-fix Part of MaxListenersExceededWarning solution
 process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'silent';
 process.env.MCP_LOGGING_ENABLED = 'false';

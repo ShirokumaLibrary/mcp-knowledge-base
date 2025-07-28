@@ -42,5 +42,7 @@ export default {
   setupFiles: ['<rootDir>/jest.presetup.js'],  // Run BEFORE test environment is set up
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],  // Run AFTER test environment is set up
   maxWorkers: 1,  // 並列実行を無効化
-  maxConcurrency: 1  // 並列実行を無効化
+  maxConcurrency: 1,  // 並列実行を無効化
+  forceExit: true,  // Force Jest to exit after all tests have completed
+  detectOpenHandles: false  // Disable open handle detection for performance
 };

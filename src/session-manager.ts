@@ -7,8 +7,8 @@
  */
 
 import type {
-  WorkSession,
-  DailySummary
+  Session,
+  Daily
 } from './types/session-types.js';
 import type { FileIssueDatabase } from './database.js';
 import { SessionRepository } from './repositories/session-repository.js';
@@ -23,7 +23,7 @@ import { getConfig } from './config.js';
  * @ai-critical All session operations flow through this manager
  * @ai-why Simplifies API for handlers, encapsulates complexity
  */
-export class WorkSessionManager {
+export class SessionManager {
   private repository: SessionRepository;       // @ai-logic: Handles file persistence
   private searchService: SessionSearchService;  // @ai-logic: Manages search operations
   private formatter: SessionMarkdownFormatter;  // @ai-logic: Markdown generation
@@ -73,22 +73,24 @@ export class WorkSessionManager {
    * @ai-pattern Optional ID allows session import/migration
    * @ai-return Complete session object with generated metadata
    */
-  createSession(
+  async createSession(
     title: string,
     content?: string,
     tags?: string[],
     id?: string,  // @ai-logic: Custom ID for imports
     datetime?: string,  // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
     related_tasks?: string[],
-    related_documents?: string[]
-  ): WorkSession {
+    related_documents?: string[],
+    description?: string  // @ai-intent: One-line description for list views
+  ): Promise<Session> {
     const sessionDate = datetime ? new Date(datetime) : new Date();
     const date = sessionDate.toISOString().split('T')[0];  // @ai-pattern: YYYY-MM-DD
     const sessionId = id || this.generateSessionId(sessionDate);
 
-    const session: WorkSession = {
+    const session: Session = {
       id: sessionId,
       title,
+      description,
       content,
       tags,
       related_tasks,
@@ -97,7 +99,7 @@ export class WorkSessionManager {
       createdAt: sessionDate.toISOString()  // @ai-pattern: ISO 8601 timestamp
     };
 
-    this.repository.saveSession(session);  // @ai-critical: Synchronous save
+    await this.repository.saveSession(session);  // @ai-critical: Asynchronous save
     return session;
   }
 
@@ -109,24 +111,26 @@ export class WorkSessionManager {
    * @ai-critical Date extracted from session ID for directory lookup
    * @ai-error-handling Throws descriptive error if session not found
    */
-  updateSession(
+  async updateSession(
     id: string,
     title?: string,
     content?: string,
     tags?: string[],
     related_tasks?: string[],
-    related_documents?: string[]
-  ): WorkSession {
+    related_documents?: string[],
+    description?: string  // @ai-intent: One-line description for list views
+  ): Promise<Session> {
     // @ai-logic: Use getSessionDetail to find session in any date directory
-    const session = this.repository.getSessionDetail(id);
+    const session = await this.repository.getSessionDetail(id);
     if (!session) {
       throw new Error(`Session ${id} not found`);
     }
 
-    const updatedSession: WorkSession = {
+    const updatedSession: Session = {
       ...session,
       // @ai-pattern: Explicit undefined check for partial updates
       title: title !== undefined ? title : session.title,
+      description: description !== undefined ? description : session.description,
       content: content !== undefined ? content : session.content,
       tags: tags !== undefined ? tags : session.tags,
       related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
@@ -134,7 +138,7 @@ export class WorkSessionManager {
       updatedAt: new Date().toISOString()  // @ai-logic: Track modification time
     };
 
-    this.repository.saveSession(updatedSession);
+    await this.repository.saveSession(updatedSession);
     return updatedSession;
   }
 
@@ -145,9 +149,9 @@ export class WorkSessionManager {
    * @ai-return Session object or null if not found
    * @ai-why Date needed to locate correct directory
    */
-  getSession(sessionId: string): WorkSession | null {
+  async getSession(sessionId: string): Promise<Session | null> {
     // @ai-logic: Use getSessionDetail to find session in any date directory
-    return this.repository.getSessionDetail(sessionId);
+    return await this.repository.getSessionDetail(sessionId);
   }
 
   /**
@@ -158,9 +162,9 @@ export class WorkSessionManager {
    * @ai-return Latest session or null if none today
    * @ai-why Used for continuing work from previous session
    */
-  getLatestSession(): WorkSession | null {
+  async getLatestSession(): Promise<Session | null> {
     const today = new Date().toISOString().split('T')[0];
-    const sessions = this.repository.getSessionsForDate(today);
+    const sessions = await this.repository.getSessionsForDate(today);
 
     if (sessions.length === 0) {
       return null;  // @ai-edge-case: No sessions today
@@ -180,11 +184,12 @@ export class WorkSessionManager {
    * @ai-critical One summary per date - overwrites existing
    * @ai-return Complete summary object
    */
-  createDailySummary(date: string, title: string, content: string, tags: string[] = [], related_tasks?: string[], related_documents?: string[]): DailySummary {
+  async createDaily(date: string, title: string, content: string, tags: string[] = [], related_tasks?: string[], related_documents?: string[], description?: string): Promise<Daily> {
     const now = new Date().toISOString();
-    const summary: DailySummary = {
+    const summary: Daily = {
       date,      // @ai-critical: Primary key for summaries
       title,
+      description,
       content,   // @ai-logic: Main summary text
       tags,
       related_tasks: related_tasks || [],
@@ -192,7 +197,7 @@ export class WorkSessionManager {
       createdAt: now
     };
 
-    this.repository.saveDailySummary(summary);  // @ai-side-effect: Creates new, throws if exists
+    await this.repository.saveDaily(summary);  // @ai-side-effect: Creates new, throws if exists
     return summary;
   }
 
@@ -204,16 +209,17 @@ export class WorkSessionManager {
    * @ai-bug Empty string updates ignored due to || operator
    * @ai-return Updated summary object
    */
-  updateDailySummary(date: string, title?: string, content?: string, tags?: string[], related_tasks?: string[], related_documents?: string[]): DailySummary {
-    const existing = this.repository.loadDailySummary(date);
+  async updateDaily(date: string, title?: string, content?: string, tags?: string[], related_tasks?: string[], related_documents?: string[], description?: string): Promise<Daily> {
+    const existing = await this.repository.loadDaily(date);
     if (!existing) {
       throw new Error(`Daily summary for ${date} not found`);
     }
 
-    const updated: DailySummary = {
+    const updated: Daily = {
       ...existing,
       // @ai-fix: Use !== undefined to allow empty string updates
       title: title !== undefined ? title : existing.title,
+      description: description !== undefined ? description : existing.description,
       content: content !== undefined ? content : existing.content,
       tags: tags !== undefined ? tags : existing.tags,
       related_tasks: related_tasks !== undefined ? related_tasks : existing.related_tasks,
@@ -221,7 +227,7 @@ export class WorkSessionManager {
       updatedAt: new Date().toISOString()
     };
 
-    this.repository.updateDailySummary(updated);
+    await this.repository.updateDaily(updated);
     return updated;
   }
 
@@ -232,8 +238,8 @@ export class WorkSessionManager {
    * @ai-performance O(n) file reads - consider SQLite for scale
    * @ai-return Array of complete session objects
    */
-  searchSessionsByTag(tag: string): WorkSession[] {
-    return this.searchService.searchSessionsByTagDetailed(tag);
+  async searchSessionsByTag(tag: string): Promise<Session[]> {
+    return await this.searchService.searchSessionsByTagDetailed(tag);
   }
 
   /**
@@ -243,7 +249,7 @@ export class WorkSessionManager {
    * @ai-async Required for database operations
    * @ai-return Promise of matching sessions
    */
-  async searchSessionsFast(query: string): Promise<WorkSession[]> {
+  async searchSessionsFast(query: string): Promise<Session[]> {
     return this.searchService.searchSessionsFast(query);
   }
 
@@ -253,7 +259,7 @@ export class WorkSessionManager {
    * @ai-pattern Exact tag match in CSV format
    * @ai-return Promise of matching sessions
    */
-  async searchSessionsByTagFast(tag: string): Promise<WorkSession[]> {
+  async searchSessionsByTagFast(tag: string): Promise<Session[]> {
     return this.searchService.searchSessionsByTagFast(tag);
   }
 
@@ -262,7 +268,7 @@ export class WorkSessionManager {
    * @ai-flow Full-text search on summary content
    * @ai-return Promise of matching summaries
    */
-  async searchDailySummariesFast(query: string): Promise<DailySummary[]> {
+  async searchDailySummariesFast(query: string): Promise<Daily[]> {
     return this.searchService.searchDailySummariesFast(query);
   }
 
@@ -273,8 +279,8 @@ export class WorkSessionManager {
    * @ai-why Backup search when SQLite out of sync
    * @ai-return Array of complete sessions
    */
-  searchSessionsDetailed(query: string): WorkSession[] {
-    return this.searchService.searchSessionsDetailed(query);
+  async searchSessionsDetailed(query: string): Promise<Session[]> {
+    return await this.searchService.searchSessionsDetailed(query);
   }
 
   /**
@@ -284,8 +290,8 @@ export class WorkSessionManager {
    * @ai-pattern Dates in YYYY-MM-DD format
    * @ai-return Chronologically ordered sessions
    */
-  getSessions(startDate?: string, endDate?: string): WorkSession[] {
-    return this.repository.getSessions(startDate, endDate);
+  async getSessions(startDate?: string, endDate?: string): Promise<Session[]> {
+    return await this.repository.getSessions(startDate, endDate);
   }
 
   /**
@@ -294,8 +300,8 @@ export class WorkSessionManager {
    * @ai-performance O(n) directory scan - consider caching
    * @ai-return Session or null if not found
    */
-  getSessionDetail(sessionId: string): WorkSession | null {
-    return this.repository.getSessionDetail(sessionId);
+  async getSessionDetail(sessionId: string): Promise<Session | null> {
+    return await this.repository.getSessionDetail(sessionId);
   }
 
   /**
@@ -304,8 +310,8 @@ export class WorkSessionManager {
    * @ai-defaults No params = last 7 days
    * @ai-return Array of summaries in date order
    */
-  getDailySummaries(startDate?: string, endDate?: string): DailySummary[] {
-    return this.repository.getDailySummaries(startDate, endDate);
+  async getDailySummaries(startDate?: string, endDate?: string): Promise<Daily[]> {
+    return await this.repository.getDailySummaries(startDate, endDate);
   }
 
   /**
@@ -314,7 +320,7 @@ export class WorkSessionManager {
    * @ai-validation Date format: YYYY-MM-DD
    * @ai-return Summary or null if not found
    */
-  getDailySummaryDetail(date: string): DailySummary | null {
-    return this.repository.loadDailySummary(date);
+  async getDailyDetail(date: string): Promise<Daily | null> {
+    return await this.repository.loadDaily(date);
   }
 }

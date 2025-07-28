@@ -1,25 +1,7 @@
-// MUST be at the very top before any imports
-import { EventEmitter } from 'events';
-
-// Increase default max listeners for all EventEmitters FIRST
-EventEmitter.defaultMaxListeners = 100;
-
-// Then increase for process
-process.setMaxListeners(100);
-
-// Also increase listener limit for Console object (with type extension)
-if (typeof (console as any).setMaxListeners === 'function') {
-  (console as any).setMaxListeners(100);
-}
-
-// Suppress the warning entirely
-process.removeAllListeners('warning');
-process.on('warning', (warning) => {
-  if (warning.name === 'MaxListenersExceededWarning') {
-    return; // Ignore this warning
-  }
-  console.warn(warning);
-});
+// Jest setup file - runs after test environment is set up
+// @ai-context Test environment configuration and console mocking
+// @ai-pattern Clean setup without MaxListeners workarounds
+// @ai-why Previous MaxListeners fixes removed after solving root cause in logger.ts
 
 // Test environment configuration
 process.env.NODE_ENV = 'test';
@@ -29,18 +11,20 @@ process.env.LOG_LEVEL = 'silent';  // Suppress all logs during tests
 // Use test-specific paths to avoid polluting production environment
 const path = require('path');
 const os = require('os');
+// We'll handle closeAllTestDatabases in the tests themselves
+// const { closeAllTestDatabases } = require('./dist/test-utils/database-test-helper.js');
 
 // Check if we should keep test data
 const keepTestData = process.env.KEEP_TEST_DATA === 'true';
 
-// Set test data directory to project tmp folder
-const projectTmpDir = path.join(process.cwd(), 'tmp');
+// Set test data directory to OS temp folder for better isolation
+const projectTmpDir = os.tmpdir();
 process.env.TEST_DATA_DIR = projectTmpDir;
 
-// Don't create a global test directory here - let each test manage its own
-const testDataDir = path.join(projectTmpDir, 'mcp-unit-tests-default');
-process.env.MCP_DATABASE_PATH = testDataDir;
-process.env.MCP_SQLITE_PATH = path.join(testDataDir, 'test-search.db');
+// Don't set global paths - let each test create its own isolated environment
+// This prevents tests from interfering with each other
+// process.env.MCP_DATABASE_PATH = testDataDir;
+// process.env.MCP_SQLITE_PATH = path.join(testDataDir, 'test-search.db');
 
 if (keepTestData) {
   console.log(`\n📁 KEEP_TEST_DATA is enabled - test data will be preserved\n`);
@@ -57,4 +41,10 @@ if (process.env.SHOW_TEST_LOGS !== 'true') {
     debug: jest.fn(),
   };
 }
+
+// Global cleanup after all tests
+// afterAll(async () => {
+//   // Close any remaining database connections
+//   await closeAllTestDatabases();
+// });
 

@@ -49,15 +49,16 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { FileIssueDatabase } from './database.js';
-import { WorkSessionManager } from './session-manager.js';
+import { SessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 
-import { ItemHandlers } from './handlers/item-handlers.js';
+import { createUnifiedHandlers, handleUnifiedToolCall, unifiedTools } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
 import { TypeHandlers } from './handlers/type-handlers.js';
+import { SearchHandlers } from './handlers/search-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
 
 /**
@@ -70,31 +71,33 @@ import { toolDefinitions } from './tool-definitions.js';
 class IssueTrackerServer {
   private server: Server;
   private db: FileIssueDatabase;
-  private sessionManager: WorkSessionManager;
+  private sessionManager: SessionManager;
 
   // @ai-logic: Separate handlers for different tool categories
-  private itemHandlers: ItemHandlers;
+  private unifiedHandlers?: ReturnType<typeof createUnifiedHandlers>;
   private statusHandlers: StatusHandlers;
   private tagHandlers: TagHandlers;
   private sessionHandlers: SessionHandlers;
   private summaryHandlers: SummaryHandlers;
   private typeHandlers: TypeHandlers;
+  private searchHandlers: SearchHandlers;
 
   constructor() {
     const config = getConfig();
     this.db = new FileIssueDatabase(config.database.path);
-    this.sessionManager = new WorkSessionManager(
+    this.sessionManager = new SessionManager(
       config.database.sessionsPath,
       this.db
     );
 
     // @ai-logic: Handler initialization order doesn't matter - no dependencies
-    this.itemHandlers = new ItemHandlers(this.db);
+    // unified handlers will be initialized after database is ready
     this.statusHandlers = new StatusHandlers(this.db);
     this.tagHandlers = new TagHandlers(this.db);
     this.sessionHandlers = new SessionHandlers(this.sessionManager);
     this.summaryHandlers = new SummaryHandlers(this.sessionManager);
     this.typeHandlers = new TypeHandlers(this.db);
+    this.searchHandlers = new SearchHandlers(this.db);
     this.server = new Server(
       {
         name: 'shirokuma-ai-project-management-server',
@@ -158,13 +161,17 @@ class IssueTrackerServer {
 
   private async handleToolCall(toolName: string, args: unknown): Promise<{ content: { type: 'text'; text: string }[] }> {
     switch (toolName) {
-      // Item API handlers
-      case 'get_items': return this.itemHandlers.handleGetItems(args);
-      case 'get_item_detail': return this.itemHandlers.handleGetItemDetail(args);
-      case 'create_item': return this.itemHandlers.handleCreateItem(args);
-      case 'update_item': return this.itemHandlers.handleUpdateItem(args);
-      case 'delete_item': return this.itemHandlers.handleDeleteItem(args);
-      case 'search_items_by_tag': return this.itemHandlers.handleSearchItemsByTag(args);
+      // Unified item handlers
+      case 'get_items':
+      case 'get_item_detail':
+      case 'create_item':
+      case 'update_item':
+      case 'delete_item':
+      case 'search_items_by_tag':
+        if (!this.unifiedHandlers) {
+          throw new McpError(ErrorCode.InternalError, 'Server not fully initialized');
+        }
+        return handleUnifiedToolCall(toolName, args, this.unifiedHandlers);
 
       // Status handlers
       case 'get_statuses': return this.statusHandlers.handleGetStatuses();
@@ -178,24 +185,29 @@ class IssueTrackerServer {
       case 'delete_tag': return this.tagHandlers.handleDeleteTag(args);
       case 'search_tags': return this.tagHandlers.handleSearchTags(args);
 
-      // Session handlers
-      case 'get_sessions': return this.sessionHandlers.handleGetSessions(args);
-      case 'get_session_detail': return this.sessionHandlers.handleGetSessionDetail(args);
-      case 'get_latest_session': return this.sessionHandlers.handleGetLatestSession(args);
-      case 'create_session': return this.sessionHandlers.handleCreateWorkSession(args);
-      case 'update_session': return this.sessionHandlers.handleUpdateWorkSession(args);
-      case 'search_sessions_by_tag': return this.sessionHandlers.handleSearchSessionsByTag(args);
+      // Session handlers (DEPRECATED - use unified handlers)
+      // case 'get_sessions': return this.sessionHandlers.handleGetSessions(args);
+      // case 'get_session_detail': return this.sessionHandlers.handleGetSessionDetail(args);
+      // case 'get_latest_session': return this.sessionHandlers.handleGetLatestSession(args);
+      // case 'create_session': return this.sessionHandlers.handleCreateSession(args);
+      // case 'update_session': return this.sessionHandlers.handleUpdateSession(args);
+      // case 'search_sessions_by_tag': return this.sessionHandlers.handleSearchSessionsByTag(args);
 
-      // Summary handlers
-      case 'get_summaries': return this.summaryHandlers.handleGetDailySummaries(args);
-      case 'get_summary_detail': return this.summaryHandlers.handleGetDailySummaryDetail(args);
-      case 'create_summary': return this.summaryHandlers.handleCreateDailySummary(args);
-      case 'update_summary': return this.summaryHandlers.handleUpdateDailySummary(args);
+      // Summary handlers (DEPRECATED - use unified handlers)
+      // case 'get_summaries': return this.summaryHandlers.handleGetDailySummaries(args);
+      // case 'get_summary_detail': return this.summaryHandlers.handleGetDailyDetail(args);
+      // case 'create_summary': return this.summaryHandlers.handleCreateDaily(args);
+      // case 'update_summary': return this.summaryHandlers.handleUpdateDaily(args);
 
       // Type management handlers
       case 'create_type': return this.typeHandlers.handleCreateType(args);
       case 'get_types': return this.typeHandlers.handleGetTypes(args);
+      case 'update_type': return this.typeHandlers.handleUpdateType(args);
       case 'delete_type': return this.typeHandlers.handleDeleteType(args);
+
+      // Full-text search handlers
+      case 'search_items': return this.searchHandlers.searchItems(args);
+      case 'search_suggest': return this.searchHandlers.searchSuggest(args);
 
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
@@ -208,6 +220,9 @@ class IssueTrackerServer {
     await this.db.initialize();
     await this.typeHandlers.init();
     console.error('Database initialized');
+
+    // Initialize unified handlers after database is ready
+    this.unifiedHandlers = createUnifiedHandlers(this.db);
 
     const transport = new StdioServerTransport();
     await this.server.connect(transport);

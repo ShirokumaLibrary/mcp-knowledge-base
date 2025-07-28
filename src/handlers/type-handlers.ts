@@ -10,16 +10,23 @@ import { TypeRepository } from '../database/type-repository.js';
 import type {
   CreateTypeArgs,
   GetTypesArgs,
-  DeleteTypeArgs
+  DeleteTypeArgs,
+  UpdateTypeArgs
 } from '../schemas/type-schemas.js';
 import {
   CreateTypeSchema,
   GetTypesSchema,
-  DeleteTypeSchema
+  DeleteTypeSchema,
+  UpdateTypeSchema
 } from '../schemas/type-schemas.js';
 
 export class TypeHandlers {
   private typeRepo: TypeRepository;
+  private logger = {
+    error: (message: string, context?: any) => {
+      console.error(message, context);
+    }
+  };
 
   constructor(private db: FileIssueDatabase) {
     this.typeRepo = new TypeRepository(db);
@@ -33,14 +40,14 @@ export class TypeHandlers {
   }
 
   /**
-   * @ai-intent Create a new custom type
+   * @ai-intent Create a new additional type
    * @ai-validation Validates type definition and checks for conflicts
    */
   async handleCreateType(args: unknown): Promise<ToolResponse> {
     try {
       const validatedArgs = CreateTypeSchema.parse(args) as CreateTypeArgs;
 
-      await this.typeRepo.createType(validatedArgs.name, validatedArgs.base_type);
+      await this.typeRepo.createType(validatedArgs.name, validatedArgs.base_type, validatedArgs.description);
 
       return {
         content: [
@@ -68,7 +75,7 @@ export class TypeHandlers {
     const types = await this.typeRepo.getAllTypes();
 
     // @ai-logic: Group types by base_type
-    const typesByBase: Record<string, Array<{ type: string; base_type: string }>> = {};
+    const typesByBase: Record<string, Array<{ type: string; base_type: string; description?: string }>> = {};
     for (const type of types) {
       if (!typesByBase[type.base_type]) {
         typesByBase[type.base_type] = [];
@@ -81,14 +88,12 @@ export class TypeHandlers {
 
     // Tasks types
     if (typesByBase['tasks']) {
-      output += '### Tasks (タスク管理)\n';
-      output += 'ステータスと優先度を持つタスク型。プロジェクト管理やバグトラッキングに使用。\n\n';
+      output += '### Tasks (Task Management)\n';
+      output += 'Task types with status and priority. Used for project management and bug tracking.\n\n';
       output += '| Type | Description |\n';
       output += '|------|-------------|\n';
       for (const type of typesByBase['tasks']) {
-        const desc = type.type === 'issues' ? 'バグ・課題・タスク管理' :
-          type.type === 'plans' ? 'プロジェクト計画（開始・終了日付き）' :
-            'カスタムタスク型';
+        const desc = type.description || 'Custom Task Type';
         output += `| ${type.type} | ${desc} |\n`;
       }
       output += '\n';
@@ -96,14 +101,12 @@ export class TypeHandlers {
 
     // Documents types
     if (typesByBase['documents']) {
-      output += '### Documents (ドキュメント)\n';
-      output += 'コンテンツが必須のドキュメント型。知識ベースや技術文書に使用。\n\n';
+      output += '### Documents (Documents)\n';
+      output += 'Document types with required content. Used for knowledge base and technical documentation.\n\n';
       output += '| Type | Description |\n';
       output += '|------|-------------|\n';
       for (const type of typesByBase['documents']) {
-        const desc = type.type === 'docs' ? '技術ドキュメント' :
-          type.type === 'knowledge' ? 'ナレッジベース' :
-            'カスタムドキュメント型';
+        const desc = type.description || 'Custom Document Type';
         output += `| ${type.type} | ${desc} |\n`;
       }
       output += '\n';
@@ -121,16 +124,41 @@ export class TypeHandlers {
         output += '\n';
       }
     }
+    
+    // Special types (always available, not shown in type list)
+    output += '### Special Types\n';
+    output += 'These types have special ID formats and are always available:\n\n';
+    output += '| Type | Description | ID Format |\n';
+    output += '|------|-------------|----------|\n';
+    output += '| sessions | Work session tracking. Content is optional - can be created at session start and updated later. | YYYY-MM-DD-HH.MM.SS.sss |\n';
+    output += '| dailies | Daily summaries with required content. One entry per date. | YYYY-MM-DD |\n';
+    output += '\n';
 
     // @ai-logic: Include full type definitions if requested
     if (validatedArgs.include_definitions) {
       output += '## Type Definitions (JSON)\n\n';
       output += '```json\n';
-      const definitions = types.map(t => ({
-        type: t.type,
-        base_type: t.base_type,
-        supported_fields: this.getFieldsForBaseType(t.base_type)
-      }));
+      const definitions = [
+        ...types.map(t => ({
+          type: t.type,
+          base_type: t.base_type,
+          description: t.description,
+          supported_fields: this.getFieldsForBaseType(t.base_type)
+        })),
+        // Add special types
+        {
+          type: 'sessions',
+          base_type: 'sessions',
+          description: 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.',
+          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents', 'category']
+        },
+        {
+          type: 'dailies',
+          base_type: 'documents',
+          description: 'Daily summaries with required content. One entry per date. Uses date as ID (YYYY-MM-DD).',
+          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents']
+        }
+      ];
       output += JSON.stringify(definitions, null, 2);
       output += '\n```\n';
     }
@@ -160,7 +188,35 @@ export class TypeHandlers {
   }
 
   /**
-   * @ai-intent Delete a custom type
+   * @ai-intent Update type description
+   * @ai-validation Only description can be updated
+   * @ai-critical Type name changes are prohibited
+   */
+  async handleUpdateType(args: unknown): Promise<ToolResponse> {
+    try {
+      const validatedArgs = UpdateTypeSchema.parse(args) as UpdateTypeArgs;
+
+      await this.typeRepo.updateType(validatedArgs.name, validatedArgs.description);
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Type "${validatedArgs.name}" description updated successfully`
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error('Failed to update type', { error, args });
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to update type: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * @ai-intent Delete an additional type
    * @ai-validation Checks for existing documents before deletion
    */
   async handleDeleteType(args: unknown): Promise<ToolResponse> {

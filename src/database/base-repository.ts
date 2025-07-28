@@ -73,7 +73,7 @@ export abstract class BaseRepository<T extends BaseEntity, K extends string | nu
   protected async getNextId(type: string): Promise<number> {
     // Get next ID from sequences table
     const result = await this.db.runAsync(
-      'UPDATE sequences SET last_id = last_id + 1 WHERE type = ?',
+      'UPDATE sequences SET current_value = current_value + 1 WHERE type = ?',
       [type]
     );
 
@@ -82,11 +82,11 @@ export abstract class BaseRepository<T extends BaseEntity, K extends string | nu
     }
 
     const row = await this.db.getAsync(
-      'SELECT last_id FROM sequences WHERE type = ?',
+      'SELECT current_value FROM sequences WHERE type = ?',
       [type]
     );
 
-    return Number(row?.last_id || 0);
+    return Number(row?.current_value || 0);
   }
 
   /**

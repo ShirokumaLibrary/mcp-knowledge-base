@@ -14,8 +14,8 @@ import type {
   PlanSummary,
   DocumentSummary,
   Tag,
-  WorkSession,
-  DailySummary
+  Session,
+  Daily
 } from './complete-domain-types.js';
 
 /**
@@ -103,16 +103,16 @@ export interface ISearchRepository {
     plans: Plan[];
     docs: Document[];
     knowledge: Document[];
-    sessions?: WorkSession[];
+    sessions?: Session[];
   }>;
-  searchSessionsByTag(tag: string): Promise<WorkSession[]>;
-  searchSessionsByContent(query: string): Promise<WorkSession[]>;
+  searchSessionsByTag(tag: string): Promise<Session[]>;
+  searchSessionsByContent(query: string): Promise<Session[]>;
   searchAll(query: string): Promise<{
     issues: Issue[];
     plans: Plan[];
     knowledge: Document[];
   }>;
-  searchSessions(query: string): Promise<WorkSession[]>;
-  searchDailySummaries(query: string): Promise<DailySummary[]>;
+  searchSessions(query: string): Promise<Session[]>;
+  searchDailySummaries(query: string): Promise<Daily[]>;
   rebuildSearchIndex(): Promise<void>;
 }

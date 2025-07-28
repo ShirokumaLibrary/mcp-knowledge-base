@@ -7,13 +7,13 @@
  */
 
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import type { WorkSessionManager } from '../session-manager.js';
+import type { SessionManager } from '../session-manager.js';
 import type { ToolResponse } from '../types/mcp-types.js';
 import {
-  CreateDailySummarySchema,
-  UpdateDailySummarySchema,
+  CreateDailySchema,
+  UpdateDailySchema,
   GetDailySummariesSchema,
-  GetDailySummaryDetailSchema
+  GetDailyDetailSchema
 } from '../schemas/session-schemas.js';
 import { createLogger } from '../utils/logger.js';
 
@@ -32,7 +32,7 @@ export class SummaryHandlers {
    * @ai-pattern Dependency injection
    * @ai-assumption Manager handles all summary logic
    */
-  constructor(private sessionManager: WorkSessionManager) {}
+  constructor(private sessionManager: SessionManager) {}
 
   /**
    * @ai-intent Handle create_summary MCP tool call
@@ -42,17 +42,18 @@ export class SummaryHandlers {
    * @ai-side-effects Creates/replaces markdown file, syncs SQLite
    * @ai-return Complete summary with success message
    */
-  async handleCreateDailySummary(args: unknown): Promise<ToolResponse> {
+  async handleCreateDaily(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = CreateDailySummarySchema.parse(args);  // @ai-validation: Strict date format
+      const validatedArgs = CreateDailySchema.parse(args);  // @ai-validation: Strict date format
 
-      const summary = this.sessionManager.createDailySummary(
+      const summary = await this.sessionManager.createDaily(
         validatedArgs.date,     // @ai-critical: Primary key
         validatedArgs.title,    // @ai-validation: Required
         validatedArgs.content,  // @ai-validation: Required
         validatedArgs.tags,     // @ai-default: Empty array
         validatedArgs.related_tasks,
-        validatedArgs.related_documents
+        validatedArgs.related_documents,
+        validatedArgs.description  // @ai-intent: One-line description for list views
       );
 
       return {
@@ -87,16 +88,17 @@ export class SummaryHandlers {
    * @ai-bug Empty strings blocked by schema validation
    * @ai-return Updated summary with success message
    */
-  async handleUpdateDailySummary(args: unknown): Promise<ToolResponse> {
+  async handleUpdateDaily(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = UpdateDailySummarySchema.parse(args);
-      const summary = this.sessionManager.updateDailySummary(
+      const validatedArgs = UpdateDailySchema.parse(args);
+      const summary = await this.sessionManager.updateDaily(
         validatedArgs.date,     // @ai-critical: Identifies summary
         validatedArgs.title,    // @ai-bug: || prevents clearing
         validatedArgs.content,  // @ai-bug: || prevents clearing
         validatedArgs.tags,     // @ai-logic: Can be cleared
         validatedArgs.related_tasks,
-        validatedArgs.related_documents
+        validatedArgs.related_documents,
+        validatedArgs.description  // @ai-intent: One-line description for list views
       );
 
       return {
@@ -131,7 +133,7 @@ export class SummaryHandlers {
   async handleGetDailySummaries(args: unknown): Promise<ToolResponse> {
     try {
       const validatedArgs = GetDailySummariesSchema.parse(args);
-      const summaries = this.sessionManager.getDailySummaries(
+      const summaries = await this.sessionManager.getDailySummaries(
         validatedArgs.start_date,  // @ai-optional: Start of range
         validatedArgs.end_date     // @ai-optional: End of range
       );
@@ -164,10 +166,10 @@ export class SummaryHandlers {
    * @ai-return Complete summary object or McpError
    * @ai-why View specific day's summary
    */
-  async handleGetDailySummaryDetail(args: unknown): Promise<ToolResponse> {
+  async handleGetDailyDetail(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = GetDailySummaryDetailSchema.parse(args);
-      const summary = this.sessionManager.getDailySummaryDetail(validatedArgs.date);
+      const validatedArgs = GetDailyDetailSchema.parse(args);
+      const summary = await this.sessionManager.getDailyDetail(validatedArgs.date);
 
       if (!summary) {
         throw new McpError(

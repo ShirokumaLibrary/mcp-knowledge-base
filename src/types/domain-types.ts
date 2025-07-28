@@ -175,6 +175,7 @@ export interface IssueSummary {
   status?: string;      // @ai-logic: For display
   start_date?: string | null;
   end_date?: string | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -194,6 +195,7 @@ export interface PlanSummary {
   status?: string;
   start_date: string | null;
   end_date: string | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }

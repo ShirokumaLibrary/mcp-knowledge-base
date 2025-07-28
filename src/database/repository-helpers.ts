@@ -180,12 +180,7 @@ export class RepositoryHelpers {
     try {
       // @ai-logic: Delete existing relationships
       await db.runAsync(
-        'DELETE FROM related_tasks WHERE source_type = ? AND source_id = ?',
-        [sourceType, sourceId]
-      );
-
-      await db.runAsync(
-        'DELETE FROM related_documents WHERE source_type = ? AND source_id = ?',
+        'DELETE FROM related_items WHERE source_type = ? AND source_id = ?',
         [sourceType, sourceId]
       );
 
@@ -196,7 +191,7 @@ export class RepositoryHelpers {
         for (const [targetType, ids] of taskRefs) {
           for (const targetId of ids) {
             await db.runAsync(
-              'INSERT INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+              'INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
               [sourceType, sourceId, targetType, targetId]
             );
           }
@@ -210,7 +205,7 @@ export class RepositoryHelpers {
         for (const [targetType, ids] of docRefs) {
           for (const targetId of ids) {
             await db.runAsync(
-              'INSERT INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
+              'INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
               [sourceType, sourceId, targetType, targetId]
             );
           }
@@ -239,25 +234,25 @@ export class RepositoryHelpers {
     related_documents: string[];
   }> {
     try {
-      // @ai-logic: Load task relationships
-      const taskRows = await db.allAsync(
-        'SELECT target_type, target_id FROM related_tasks WHERE source_type = ? AND source_id = ?',
+      // @ai-logic: Load all relationships
+      const rows = await db.allAsync(
+        'SELECT target_type, target_id FROM related_items WHERE source_type = ? AND source_id = ?',
         [sourceType, sourceId]
-      ) as Array<{ target_type: string; target_id: number }>;
+      ) as Array<{ target_type: string; target_id: number | string }>;
 
-      const relatedTasks = taskRows.map(row =>
-        DataConverters.createReference(row.target_type, row.target_id)
-      );
+      // @ai-logic: Separate tasks and documents
+      const taskTypes = ['issues', 'plans']; // TODO: Get from sequences table
+      const relatedTasks: string[] = [];
+      const relatedDocuments: string[] = [];
 
-      // @ai-logic: Load document relationships
-      const docRows = await db.allAsync(
-        'SELECT target_type, target_id FROM related_documents WHERE source_type = ? AND source_id = ?',
-        [sourceType, sourceId]
-      ) as Array<{ target_type: string; target_id: number }>;
-
-      const relatedDocuments = docRows.map(row =>
-        DataConverters.createReference(row.target_type, row.target_id)
-      );
+      for (const row of rows) {
+        const ref = DataConverters.createReference(row.target_type, row.target_id);
+        if (taskTypes.includes(row.target_type)) {
+          relatedTasks.push(ref);
+        } else {
+          relatedDocuments.push(ref);
+        }
+      }
 
       return {
         related_tasks: relatedTasks,

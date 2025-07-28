@@ -10,7 +10,7 @@
 export * from './domain-types.js';
 
 // Re-export session types from existing definitions to avoid duplication
-export { WorkSession, DailySummary } from './session-types.js';
+export { Session, Daily } from './session-types.js';
 
 /**
  * @ai-intent Priority levels for tasks
@@ -85,8 +85,8 @@ export interface GlobalSearchResults {
   plans: SearchResult<import('./domain-types.js').Plan>[];
   docs: SearchResult<import('./domain-types.js').Document>[];
   knowledge: SearchResult<import('./domain-types.js').Document>[];
-  sessions?: SearchResult<import('./session-types.js').WorkSession>[];
-  summaries?: SearchResult<import('./session-types.js').DailySummary>[];
+  sessions?: SearchResult<import('./session-types.js').Session>[];
+  summaries?: SearchResult<import('./session-types.js').Daily>[];
 }
 
 /**
@@ -103,7 +103,7 @@ export interface TagWithCount {
 /**
  * @ai-intent Session creation options
  * @ai-pattern Optional fields for flexibility
- * @ai-usage WorkSessionManager.createSession() input
+ * @ai-usage SessionManager.createSession() input
  */
 export interface CreateSessionOptions {
   title: string;
@@ -119,7 +119,7 @@ export interface CreateSessionOptions {
 /**
  * @ai-intent Summary creation options
  * @ai-pattern All required fields
- * @ai-usage WorkSessionManager.createDailySummary() input
+ * @ai-usage SessionManager.createDaily() input
  */
 export interface CreateSummaryOptions {
   date: string;
