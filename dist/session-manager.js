@@ -16,7 +16,7 @@ import { getConfig } from './config.js';
  * @ai-critical All session operations flow through this manager
  * @ai-why Simplifies API for handlers, encapsulates complexity
  */
-export class WorkSessionManager {
+export class SessionManager {
     db;
     repository; // @ai-logic: Handles file persistence
     searchService; // @ai-logic: Manages search operations
@@ -61,15 +61,17 @@ export class WorkSessionManager {
      * @ai-pattern Optional ID allows session import/migration
      * @ai-return Complete session object with generated metadata
      */
-    createSession(title, content, tags, id, // @ai-logic: Custom ID for imports
+    async createSession(title, content, tags, id, // @ai-logic: Custom ID for imports
     datetime, // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
-    related_tasks, related_documents) {
+    related_tasks, related_documents, description // @ai-intent: One-line description for list views
+    ) {
         const sessionDate = datetime ? new Date(datetime) : new Date();
         const date = sessionDate.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
         const sessionId = id || this.generateSessionId(sessionDate);
         const session = {
             id: sessionId,
             title,
+            description,
             content,
             tags,
             related_tasks,
@@ -77,7 +79,7 @@ export class WorkSessionManager {
             date,
             createdAt: sessionDate.toISOString() // @ai-pattern: ISO 8601 timestamp
         };
-        this.repository.saveSession(session); // @ai-critical: Synchronous save
+        await this.repository.saveSession(session); // @ai-critical: Asynchronous save
         return session;
     }
     /**
@@ -88,9 +90,10 @@ export class WorkSessionManager {
      * @ai-critical Date extracted from session ID for directory lookup
      * @ai-error-handling Throws descriptive error if session not found
      */
-    updateSession(id, title, content, tags, related_tasks, related_documents) {
+    async updateSession(id, title, content, tags, related_tasks, related_documents, description // @ai-intent: One-line description for list views
+    ) {
         // @ai-logic: Use getSessionDetail to find session in any date directory
-        const session = this.repository.getSessionDetail(id);
+        const session = await this.repository.getSessionDetail(id);
         if (!session) {
             throw new Error(`Session ${id} not found`);
         }
@@ -98,13 +101,14 @@ export class WorkSessionManager {
             ...session,
             // @ai-pattern: Explicit undefined check for partial updates
             title: title !== undefined ? title : session.title,
+            description: description !== undefined ? description : session.description,
             content: content !== undefined ? content : session.content,
             tags: tags !== undefined ? tags : session.tags,
             related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
             related_documents: related_documents !== undefined ? related_documents : session.related_documents,
             updatedAt: new Date().toISOString() // @ai-logic: Track modification time
         };
-        this.repository.saveSession(updatedSession);
+        await this.repository.saveSession(updatedSession);
         return updatedSession;
     }
     /**
@@ -114,9 +118,9 @@ export class WorkSessionManager {
      * @ai-return Session object or null if not found
      * @ai-why Date needed to locate correct directory
      */
-    getSession(sessionId) {
+    async getSession(sessionId) {
         // @ai-logic: Use getSessionDetail to find session in any date directory
-        return this.repository.getSessionDetail(sessionId);
+        return await this.repository.getSessionDetail(sessionId);
     }
     /**
      * @ai-intent Get most recent session from today
@@ -126,9 +130,9 @@ export class WorkSessionManager {
      * @ai-return Latest session or null if none today
      * @ai-why Used for continuing work from previous session
      */
-    getLatestSession() {
+    async getLatestSession() {
         const today = new Date().toISOString().split('T')[0];
-        const sessions = this.repository.getSessionsForDate(today);
+        const sessions = await this.repository.getSessionsForDate(today);
         if (sessions.length === 0) {
             return null; // @ai-edge-case: No sessions today
         }
@@ -144,18 +148,19 @@ export class WorkSessionManager {
      * @ai-critical One summary per date - overwrites existing
      * @ai-return Complete summary object
      */
-    createDailySummary(date, title, content, tags = [], related_tasks, related_documents) {
+    async createDaily(date, title, content, tags = [], related_tasks, related_documents, description) {
         const now = new Date().toISOString();
         const summary = {
             date, // @ai-critical: Primary key for summaries
             title,
+            description,
             content, // @ai-logic: Main summary text
             tags,
             related_tasks: related_tasks || [],
             related_documents: related_documents || [],
             createdAt: now
         };
-        this.repository.saveDailySummary(summary); // @ai-side-effect: Creates new, throws if exists
+        await this.repository.saveDaily(summary); // @ai-side-effect: Creates new, throws if exists
         return summary;
     }
     /**
@@ -166,8 +171,8 @@ export class WorkSessionManager {
      * @ai-bug Empty string updates ignored due to || operator
      * @ai-return Updated summary object
      */
-    updateDailySummary(date, title, content, tags, related_tasks, related_documents) {
-        const existing = this.repository.loadDailySummary(date);
+    async updateDaily(date, title, content, tags, related_tasks, related_documents, description) {
+        const existing = await this.repository.loadDaily(date);
         if (!existing) {
             throw new Error(`Daily summary for ${date} not found`);
         }
@@ -175,13 +180,14 @@ export class WorkSessionManager {
             ...existing,
             // @ai-fix: Use !== undefined to allow empty string updates
             title: title !== undefined ? title : existing.title,
+            description: description !== undefined ? description : existing.description,
             content: content !== undefined ? content : existing.content,
             tags: tags !== undefined ? tags : existing.tags,
             related_tasks: related_tasks !== undefined ? related_tasks : existing.related_tasks,
             related_documents: related_documents !== undefined ? related_documents : existing.related_documents,
             updatedAt: new Date().toISOString()
         };
-        this.repository.updateDailySummary(updated);
+        await this.repository.updateDaily(updated);
         return updated;
     }
     /**
@@ -191,8 +197,8 @@ export class WorkSessionManager {
      * @ai-performance O(n) file reads - consider SQLite for scale
      * @ai-return Array of complete session objects
      */
-    searchSessionsByTag(tag) {
-        return this.searchService.searchSessionsByTagDetailed(tag);
+    async searchSessionsByTag(tag) {
+        return await this.searchService.searchSessionsByTagDetailed(tag);
     }
     /**
      * @ai-intent Fast full-text search using SQLite
@@ -228,8 +234,8 @@ export class WorkSessionManager {
      * @ai-why Backup search when SQLite out of sync
      * @ai-return Array of complete sessions
      */
-    searchSessionsDetailed(query) {
-        return this.searchService.searchSessionsDetailed(query);
+    async searchSessionsDetailed(query) {
+        return await this.searchService.searchSessionsDetailed(query);
     }
     /**
      * @ai-intent Get sessions within date range
@@ -238,8 +244,8 @@ export class WorkSessionManager {
      * @ai-pattern Dates in YYYY-MM-DD format
      * @ai-return Chronologically ordered sessions
      */
-    getSessions(startDate, endDate) {
-        return this.repository.getSessions(startDate, endDate);
+    async getSessions(startDate, endDate) {
+        return await this.repository.getSessions(startDate, endDate);
     }
     /**
      * @ai-intent Get session by ID (searches all dates)
@@ -247,8 +253,8 @@ export class WorkSessionManager {
      * @ai-performance O(n) directory scan - consider caching
      * @ai-return Session or null if not found
      */
-    getSessionDetail(sessionId) {
-        return this.repository.getSessionDetail(sessionId);
+    async getSessionDetail(sessionId) {
+        return await this.repository.getSessionDetail(sessionId);
     }
     /**
      * @ai-intent Get daily summaries within range
@@ -256,8 +262,8 @@ export class WorkSessionManager {
      * @ai-defaults No params = last 7 days
      * @ai-return Array of summaries in date order
      */
-    getDailySummaries(startDate, endDate) {
-        return this.repository.getDailySummaries(startDate, endDate);
+    async getDailySummaries(startDate, endDate) {
+        return await this.repository.getDailySummaries(startDate, endDate);
     }
     /**
      * @ai-intent Get specific daily summary
@@ -265,8 +271,8 @@ export class WorkSessionManager {
      * @ai-validation Date format: YYYY-MM-DD
      * @ai-return Summary or null if not found
      */
-    getDailySummaryDetail(date) {
-        return this.repository.loadDailySummary(date);
+    async getDailyDetail(date) {
+        return await this.repository.loadDaily(date);
     }
 }
 //# sourceMappingURL=session-manager.js.map

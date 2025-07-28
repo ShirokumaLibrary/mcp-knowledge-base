@@ -226,14 +226,15 @@ describe('TagHandlers', () => {
             expect(duration).toBeLessThan(100); // Should be fast
         });
         it('should handle concurrent tag operations', async () => {
+            // Set up mocks before creating operations
+            mockDb.createTag = jest.fn().mockImplementation((name) => Promise.resolve({ id: Date.now(), name }));
+            mockDb.deleteTag = jest.fn().mockResolvedValue(true);
+            mockDb.searchTags = jest.fn().mockResolvedValue([]);
             const operations = [
                 handlers.handleCreateTag({ name: 'concurrent-1' }),
                 handlers.handleCreateTag({ name: 'concurrent-2' }),
                 handlers.handleSearchTags({ pattern: 'con' })
             ];
-            mockDb.createTag = jest.fn().mockImplementation((name) => Promise.resolve({ name, created_at: new Date().toISOString() }));
-            mockDb.deleteTag = jest.fn().mockResolvedValue(true);
-            mockDb.searchTags = jest.fn().mockResolvedValue([]);
             const results = await Promise.all(operations);
             expect(results).toHaveLength(3);
         });

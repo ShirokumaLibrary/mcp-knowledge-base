@@ -115,14 +115,13 @@ export class RepositoryHelpers {
     static async saveRelatedEntities(db, sourceType, sourceId, relatedTasks, relatedDocuments, logger) {
         try {
             // @ai-logic: Delete existing relationships
-            await db.runAsync('DELETE FROM related_tasks WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
-            await db.runAsync('DELETE FROM related_documents WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
+            await db.runAsync('DELETE FROM related_items WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
             // @ai-logic: Insert task relationships
             if (relatedTasks && relatedTasks.length > 0) {
                 const taskRefs = ValidationUtils.parseReferences(relatedTasks);
                 for (const [targetType, ids] of taskRefs) {
                     for (const targetId of ids) {
-                        await db.runAsync('INSERT INTO related_tasks (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [sourceType, sourceId, targetType, targetId]);
+                        await db.runAsync('INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [sourceType, sourceId, targetType, targetId]);
                     }
                 }
             }
@@ -131,7 +130,7 @@ export class RepositoryHelpers {
                 const docRefs = ValidationUtils.parseReferences(relatedDocuments);
                 for (const [targetType, ids] of docRefs) {
                     for (const targetId of ids) {
-                        await db.runAsync('INSERT INTO related_documents (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [sourceType, sourceId, targetType, targetId]);
+                        await db.runAsync('INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [sourceType, sourceId, targetType, targetId]);
                     }
                 }
             }
@@ -148,12 +147,21 @@ export class RepositoryHelpers {
      */
     static async loadRelatedEntities(db, sourceType, sourceId, logger) {
         try {
-            // @ai-logic: Load task relationships
-            const taskRows = await db.allAsync('SELECT target_type, target_id FROM related_tasks WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
-            const relatedTasks = taskRows.map(row => DataConverters.createReference(row.target_type, row.target_id));
-            // @ai-logic: Load document relationships
-            const docRows = await db.allAsync('SELECT target_type, target_id FROM related_documents WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
-            const relatedDocuments = docRows.map(row => DataConverters.createReference(row.target_type, row.target_id));
+            // @ai-logic: Load all relationships
+            const rows = await db.allAsync('SELECT target_type, target_id FROM related_items WHERE source_type = ? AND source_id = ?', [sourceType, sourceId]);
+            // @ai-logic: Separate tasks and documents
+            const taskTypes = ['issues', 'plans']; // TODO: Get from sequences table
+            const relatedTasks = [];
+            const relatedDocuments = [];
+            for (const row of rows) {
+                const ref = DataConverters.createReference(row.target_type, row.target_id);
+                if (taskTypes.includes(row.target_type)) {
+                    relatedTasks.push(ref);
+                }
+                else {
+                    relatedDocuments.push(ref);
+                }
+            }
             return {
                 related_tasks: relatedTasks,
                 related_documents: relatedDocuments

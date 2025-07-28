@@ -9,11 +9,12 @@ import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { FileIssueDatabase } from '../database.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 describe('FileIssueDatabase Async Tests', () => {
     jest.setTimeout(10000); // Increase timeout for database operations
     let db;
     // @ai-pattern: Unique test directory per process to avoid conflicts
-    const testDataDir = path.join(process.cwd(), 'tmp', 'mcp-test-database-' + process.pid);
+    const testDataDir = path.join(os.tmpdir(), 'mcp-test-database-' + process.pid + '-' + Date.now());
     const testDbPath = path.join(testDataDir, 'test.db');
     /**
      * @ai-intent Set up fresh database for each test
@@ -35,8 +36,8 @@ describe('FileIssueDatabase Async Tests', () => {
      * @ai-flow 1. Close database -> 2. Remove test files
      * @ai-critical Must close DB before deleting files
      */
-    afterEach(() => {
-        db.close(); // @ai-logic: Release SQLite locks
+    afterEach(async () => {
+        await db.close(); // @ai-logic: Release SQLite locks
         // @ai-cleanup: Remove all test files unless KEEP_TEST_DATA is set
         if (process.env.KEEP_TEST_DATA !== 'true' && fs.existsSync(testDataDir)) {
             fs.rmSync(testDataDir, { recursive: true, force: true });
@@ -104,7 +105,7 @@ describe('FileIssueDatabase Async Tests', () => {
             expect(issue.title).toBe('Test Issue');
             expect(issue.content).toBe('This is a test issue');
             expect(issue.priority).toBe('high'); // @ai-pattern: high/medium/low
-            expect(issue.id).toBeGreaterThan(0); // @ai-validation: Sequential ID
+            expect(parseInt(issue.id)).toBeGreaterThan(0); // @ai-validation: Sequential ID
             expect(issue.created_at).toBeDefined(); // @ai-pattern: ISO timestamp
             expect(issue.updated_at).toBeDefined(); // @ai-pattern: ISO timestamp
         });
@@ -131,7 +132,7 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should get task by id', async () => {
             const created = await db.createTask('issues', 'Specific Issue', 'Details here');
-            const issue = await db.getTask('issues', created.id);
+            const issue = await db.getTask('issues', parseInt(created.id));
             expect(issue).not.toBeNull();
             expect(issue.title).toBe('Specific Issue');
             expect(issue.content).toBe('Details here');
@@ -143,7 +144,7 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should update task', async () => {
             const issue = await db.createTask('issues', 'Old Title', 'Initial content');
-            const updated = await db.updateTask('issues', issue.id, 'New Title', 'New description', 'low');
+            const updated = await db.updateTask('issues', parseInt(issue.id), 'New Title', 'New description', 'low');
             expect(updated).not.toBeNull();
             expect(updated.title).toBe('New Title');
             expect(updated.content).toBe('New description');
@@ -156,10 +157,10 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should delete task', async () => {
             const issue = await db.createTask('issues', 'To Delete', 'Content to delete');
-            const success = await db.deleteTask('issues', issue.id);
+            const success = await db.deleteTask('issues', parseInt(issue.id));
             expect(success).toBe(true);
             // @ai-validation: Verify deletion
-            const deleted = await db.getTask('issues', issue.id);
+            const deleted = await db.getTask('issues', parseInt(issue.id));
             expect(deleted).toBeNull(); // @ai-pattern: Null for deleted items
         });
         /**
@@ -173,7 +174,7 @@ describe('FileIssueDatabase Async Tests', () => {
             expect(issue.end_date).toBe('2025-07-30');
             expect(issue.related_tasks).toEqual(['plans-1', 'issues-2']);
             // @ai-validation: Verify persistence
-            const retrieved = await db.getTask('issues', issue.id);
+            const retrieved = await db.getTask('issues', parseInt(issue.id));
             expect(retrieved.start_date).toBe('2025-07-25');
             expect(retrieved.end_date).toBe('2025-07-30');
             expect(retrieved.related_tasks).toEqual(['plans-1', 'issues-2']);
@@ -184,7 +185,7 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should update issue with new fields', async () => {
             const issue = await db.createTask('issues', 'Original Task', 'Original content');
-            const updated = await db.updateTask('issues', issue.id, 'Updated Task', 'Updated content', 'low', undefined, ['updated'], 'Updated description', '2025-08-01', '2025-08-15', ['plans-3']);
+            const updated = await db.updateTask('issues', parseInt(issue.id), 'Updated Task', 'Updated content', 'low', undefined, ['updated'], 'Updated description', '2025-08-01', '2025-08-15', ['plans-3']);
             expect(updated).not.toBeNull();
             expect(updated.title).toBe('Updated Task');
             expect(updated.start_date).toBe('2025-08-01');
@@ -200,7 +201,7 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should create new tag', async () => {
             const tag = await db.createTag('feature');
-            expect(tag).toBe('feature'); // @ai-logic: Returns the tag name
+            expect(tag.name).toBe('feature'); // @ai-logic: Returns the tag object
         });
         /**
          * @ai-intent Test tag listing
@@ -248,9 +249,9 @@ describe('FileIssueDatabase Async Tests', () => {
          */
         test('should search all by tag', async () => {
             // @ai-logic: Create items with same tag across types
-            const issue = await db.createTask('issues', 'Tagged Issue', 'Issue content', 'medium', undefined, ['important']);
-            const plan = await db.createTask('plans', 'Tagged Plan', 'Plan content', 'high', undefined, ['important']);
-            const knowledge = await db.createDocument('knowledge', 'Tagged Knowledge', 'Content here', ['important']);
+            await db.createTask('issues', 'Tagged Issue', 'Issue content', 'medium', undefined, ['important']);
+            await db.createTask('plans', 'Tagged Plan', 'Plan content', 'high', undefined, ['important']);
+            await db.createDocument('knowledge', 'Tagged Knowledge', 'Content here', ['important']);
             const results = await db.searchAllByTag('important');
             expect(results.issues).toHaveLength(1); // @ai-validation: Issue found
             expect(results.plans).toHaveLength(1);

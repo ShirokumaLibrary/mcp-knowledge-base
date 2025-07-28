@@ -58,7 +58,7 @@ describe('MarkdownTransformers', () => {
             expect(result).not.toContain('## Timeline');
         });
     });
-    describe('formatWorkSession', () => {
+    describe('formatSession', () => {
         it('should format work session correctly', () => {
             const session = {
                 id: '2024-01-01-10.30.00.000',
@@ -73,7 +73,7 @@ describe('MarkdownTransformers', () => {
                 related_tasks: ['issues-1'],
                 related_documents: ['docs-1']
             };
-            const result = MarkdownTransformers.formatWorkSession(session);
+            const result = MarkdownTransformers.formatSession(session);
             expect(result).toContain('# Development Session');
             expect(result).toContain('**ID:** 2024-01-01-10.30.00.000');
             expect(result).toContain('**Date:** 2024-01-01');

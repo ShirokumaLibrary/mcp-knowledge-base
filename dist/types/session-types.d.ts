@@ -34,9 +34,10 @@
  * @ai-relationship Multiple sessions aggregate into daily summary
  * @ai-lifecycle Created during work, may be updated
  */
-export interface WorkSession {
+export interface Session {
     id: string;
     title: string;
+    description?: string;
     content?: string;
     related_tasks?: string[];
     related_documents?: string[];
@@ -55,9 +56,10 @@ export interface WorkSession {
  * @ai-relationship Summarizes all sessions for a date
  * @ai-usage Created at end of day or retrospectively
  */
-export interface DailySummary {
+export interface Daily {
     date: string;
     title: string;
+    description?: string;
     content: string;
     related_tasks?: string[];
     related_documents?: string[];

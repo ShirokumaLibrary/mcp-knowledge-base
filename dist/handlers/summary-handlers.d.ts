@@ -5,7 +5,7 @@
  * @ai-dependencies SessionManager for business logic
  * @ai-assumption One summary per date maximum
  */
-import type { WorkSessionManager } from '../session-manager.js';
+import type { SessionManager } from '../session-manager.js';
 import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for daily summaries
@@ -22,7 +22,7 @@ export declare class SummaryHandlers {
      * @ai-pattern Dependency injection
      * @ai-assumption Manager handles all summary logic
      */
-    constructor(sessionManager: WorkSessionManager);
+    constructor(sessionManager: SessionManager);
     /**
      * @ai-intent Handle create_summary MCP tool call
      * @ai-flow 1. Validate date/content -> 2. Create summary -> 3. Return
@@ -31,7 +31,7 @@ export declare class SummaryHandlers {
      * @ai-side-effects Creates/replaces markdown file, syncs SQLite
      * @ai-return Complete summary with success message
      */
-    handleCreateDailySummary(args: unknown): Promise<ToolResponse>;
+    handleCreateDaily(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle update_summary MCP tool call
      * @ai-flow 1. Validate date -> 2. Load existing -> 3. Update -> 4. Return
@@ -40,7 +40,7 @@ export declare class SummaryHandlers {
      * @ai-bug Empty strings blocked by schema validation
      * @ai-return Updated summary with success message
      */
-    handleUpdateDailySummary(args: unknown): Promise<ToolResponse>;
+    handleUpdateDaily(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_summaries MCP tool call
      * @ai-flow 1. Parse date range -> 2. Query summaries -> 3. Return list
@@ -58,5 +58,5 @@ export declare class SummaryHandlers {
      * @ai-return Complete summary object or McpError
      * @ai-why View specific day's summary
      */
-    handleGetDailySummaryDetail(args: unknown): Promise<ToolResponse>;
+    handleGetDailyDetail(args: unknown): Promise<ToolResponse>;
 }

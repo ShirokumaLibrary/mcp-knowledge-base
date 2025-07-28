@@ -59,8 +59,8 @@ export class SessionSearchService {
      * @ai-performance O(n) file reads - slow but accurate
      * @ai-why Guaranteed to find all matches including recent
      */
-    searchSessionsDetailed(query) {
-        return this.repository.searchSessionsFullText(query); // @ai-logic: Scans markdown files
+    async searchSessionsDetailed(query) {
+        return await this.repository.searchSessionsFullText(query); // @ai-logic: Scans markdown files
     }
     /**
      * @ai-intent Tag search by scanning files
@@ -69,8 +69,8 @@ export class SessionSearchService {
      * @ai-performance Slower than SQLite but always current
      * @ai-return Complete session objects
      */
-    searchSessionsByTagDetailed(tag) {
-        return this.repository.searchSessionsByTag(tag); // @ai-logic: File-based search
+    async searchSessionsByTagDetailed(tag) {
+        return await this.repository.searchSessionsByTag(tag); // @ai-logic: File-based search
     }
 }
 //# sourceMappingURL=session-search-service.js.map

@@ -9,7 +9,7 @@ export { BaseHandler } from './base-handler.js';
 // Current handlers
 export { StatusHandlers } from './status-handlers.js';
 export { TagHandlers } from './tag-handlers.js';
-export { ItemHandlers } from './item-handlers.js';
+// ItemHandlers removed - use unified-handlers instead
 export { SessionHandlers } from './session-handlers.js';
 export { SummaryHandlers } from './summary-handlers.js';
 export { TypeHandlers } from './type-handlers.js';

@@ -7,13 +7,14 @@ import type { ToolResponse } from '../types/mcp-types.js';
 export declare class TypeHandlers {
     private db;
     private typeRepo;
+    private logger;
     constructor(db: FileIssueDatabase);
     /**
      * @ai-intent Initialize type repository
      */
     init(): Promise<void>;
     /**
-     * @ai-intent Create a new custom type
+     * @ai-intent Create a new additional type
      * @ai-validation Validates type definition and checks for conflicts
      */
     handleCreateType(args: unknown): Promise<ToolResponse>;
@@ -27,7 +28,13 @@ export declare class TypeHandlers {
      */
     private getFieldsForBaseType;
     /**
-     * @ai-intent Delete a custom type
+     * @ai-intent Update type description
+     * @ai-validation Only description can be updated
+     * @ai-critical Type name changes are prohibited
+     */
+    handleUpdateType(args: unknown): Promise<ToolResponse>;
+    /**
+     * @ai-intent Delete an additional type
      * @ai-validation Checks for existing documents before deletion
      */
     handleDeleteType(args: unknown): Promise<ToolResponse>;

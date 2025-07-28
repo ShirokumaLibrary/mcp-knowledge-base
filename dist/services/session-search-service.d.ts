@@ -5,7 +5,7 @@
  * @ai-dependencies Database for SQLite search, Repository for file search
  * @ai-why SQLite may be out of sync, files are source of truth
  */
-import type { WorkSession, DailySummary } from '../types/session-types.js';
+import type { Session, Daily } from '../types/session-types.js';
 import type { FileIssueDatabase } from '../database.js';
 import type { SessionRepository } from '../repositories/session-repository.js';
 /**
@@ -31,21 +31,21 @@ export declare class SessionSearchService {
      * @ai-performance Milliseconds for large datasets
      * @ai-caveat May miss very recent sessions
      */
-    searchSessionsFast(query: string): Promise<WorkSession[]>;
+    searchSessionsFast(query: string): Promise<Session[]>;
     /**
      * @ai-intent Tag-based search via SQLite
      * @ai-flow 1. Query by exact tag match -> 2. Return sessions
      * @ai-pattern Exact match in CSV tag column
      * @ai-performance Indexed for speed
      */
-    searchSessionsByTagFast(tag: string): Promise<WorkSession[]>;
+    searchSessionsByTagFast(tag: string): Promise<Session[]>;
     /**
      * @ai-intent Search daily summaries via SQLite
      * @ai-flow 1. FTS query on summary content -> 2. Return matches
      * @ai-pattern Full-text search on title and content
      * @ai-return Array of matching summaries
      */
-    searchDailySummariesFast(query: string): Promise<DailySummary[]>;
+    searchDailySummariesFast(query: string): Promise<Daily[]>;
     /**
      * @ai-section File-based Detailed Search Methods
      * @ai-intent Full-text search by reading all files
@@ -53,7 +53,7 @@ export declare class SessionSearchService {
      * @ai-performance O(n) file reads - slow but accurate
      * @ai-why Guaranteed to find all matches including recent
      */
-    searchSessionsDetailed(query: string): WorkSession[];
+    searchSessionsDetailed(query: string): Promise<Session[]>;
     /**
      * @ai-intent Tag search by scanning files
      * @ai-flow 1. Read all files -> 2. Parse frontmatter -> 3. Match tags
@@ -61,5 +61,5 @@ export declare class SessionSearchService {
      * @ai-performance Slower than SQLite but always current
      * @ai-return Complete session objects
      */
-    searchSessionsByTagDetailed(tag: string): WorkSession[];
+    searchSessionsByTagDetailed(tag: string): Promise<Session[]>;
 }

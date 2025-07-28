@@ -13,9 +13,10 @@ import { z } from 'zod';
  * @ai-defaults tags: empty array
  * @ai-return New session with generated/provided ID
  */
-export const CreateWorkSessionSchema = z.object({
+export const CreateSessionSchema = z.object({
     id: z.string().optional(), // @ai-logic: Custom ID for imports
     title: z.string().min(1, 'Session title is required'),
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().optional(), // @ai-logic: Work details and notes
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
@@ -29,9 +30,10 @@ export const CreateWorkSessionSchema = z.object({
  * @ai-critical Session must exist for ID
  * @ai-return Updated session object
  */
-export const UpdateWorkSessionSchema = z.object({
+export const UpdateSessionSchema = z.object({
     id: z.string().min(1, 'Session ID is required'), // @ai-critical: Must exist
     title: z.string().min(1).optional(), // @ai-validation: Non-empty if provided
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().optional(), // @ai-logic: Work details and notes
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
@@ -44,9 +46,10 @@ export const UpdateWorkSessionSchema = z.object({
  * @ai-critical Date is primary key - overwrites existing
  * @ai-regex YYYY-MM-DD strict format validation
  */
-export const CreateDailySummarySchema = z.object({
+export const CreateDailySchema = z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'), // @ai-pattern: Strict date
     title: z.string().min(1, 'Title is required'),
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().min(1, 'Content is required'), // @ai-validation: Non-empty summary
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
@@ -59,9 +62,10 @@ export const CreateDailySummarySchema = z.object({
  * @ai-critical Summary must exist for date
  * @ai-bug Empty strings blocked by min(1) validation
  */
-export const UpdateDailySummarySchema = z.object({
+export const UpdateDailySchema = z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'), // @ai-critical: Identifies summary
     title: z.string().min(1).optional(), // @ai-bug: Can't clear with empty string
+    description: z.string().optional(), // @ai-intent: One-line description for list views
     content: z.string().min(1).optional(), // @ai-bug: Can't clear with empty string
     related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
     related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
@@ -114,7 +118,7 @@ export const GetDailySummariesSchema = z.object({
  * @ai-critical One summary per date maximum
  * @ai-return Daily summary or null
  */
-export const GetDailySummaryDetailSchema = z.object({
+export const GetDailyDetailSchema = z.object({
     date: z.string().min(1, 'Date is required') // @ai-pattern: YYYY-MM-DD
 }).strict();
 //# sourceMappingURL=session-schemas.js.map

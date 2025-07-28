@@ -9,11 +9,14 @@ import { z } from 'zod';
 export declare const CreateTypeSchema: z.ZodObject<{
     name: z.ZodString;
     base_type: z.ZodDefault<z.ZodOptional<z.ZodEnum<["tasks", "documents"]>>>;
+    description: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
     base_type: "tasks" | "documents";
     name: string;
+    description?: string | undefined;
 }, {
     name: string;
+    description?: string | undefined;
     base_type?: "tasks" | "documents" | undefined;
 }>;
 /**
@@ -36,6 +39,21 @@ export declare const DeleteTypeSchema: z.ZodObject<{
 }, {
     name: string;
 }>;
+/**
+ * @ai-intent Schema for update_type tool
+ * @ai-validation Only description can be updated, type name changes prohibited
+ */
+export declare const UpdateTypeSchema: z.ZodObject<{
+    name: z.ZodString;
+    description: z.ZodString;
+}, "strict", z.ZodTypeAny, {
+    description: string;
+    name: string;
+}, {
+    description: string;
+    name: string;
+}>;
 export type CreateTypeArgs = z.infer<typeof CreateTypeSchema>;
 export type GetTypesArgs = z.infer<typeof GetTypesSchema>;
 export type DeleteTypeArgs = z.infer<typeof DeleteTypeSchema>;
+export type UpdateTypeArgs = z.infer<typeof UpdateTypeSchema>;

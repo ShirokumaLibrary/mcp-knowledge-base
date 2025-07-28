@@ -12,9 +12,13 @@ export const toolDefinitions = [
     // @ai-why Reduces API surface and simplifies client implementation
     {
         name: 'get_items',
-        description: 'Retrieve list of items by type. Tasks types support status filtering. Document types return all items.',
+        description: 'Retrieve list of items by type. Tasks types support status filtering. Document types return all items. For sessions, use limit=1 to get latest session.',
         // @ai-flow Returns array of items with summary fields only
         // @ai-performance Optimized for listing - minimal data per item
+        // @ai-examples
+        //   Get latest session: type='sessions', limit=1
+        //   Get today's sessions: type='sessions', start_date='2025-07-28', end_date='2025-07-28'
+        //   Get recent documents: type='docs', start_date='2025-07-01'
         inputSchema: {
             type: 'object',
             properties: {
@@ -26,10 +30,22 @@ export const toolDefinitions = [
                     type: 'boolean',
                     description: 'Include items with closed statuses (tasks types only, default: false)'
                 },
-                statusIds: {
+                statuses: {
                     type: 'array',
-                    items: { type: 'number' },
-                    description: 'Filter by specific status IDs (tasks types only)'
+                    items: { type: 'string' },
+                    description: 'Filter by specific status names (tasks types only)'
+                },
+                start_date: {
+                    type: 'string',
+                    description: 'Filter items from this date (YYYY-MM-DD). For sessions/dailies: filters by date. For others: filters by updated_at'
+                },
+                end_date: {
+                    type: 'string',
+                    description: 'Filter items until this date (YYYY-MM-DD). For sessions/dailies: filters by date. For others: filters by updated_at'
+                },
+                limit: {
+                    type: 'number',
+                    description: 'Maximum number of items to return (useful for getting latest item)'
                 }
             },
             required: ['type']
@@ -55,10 +71,13 @@ export const toolDefinitions = [
     },
     {
         name: 'create_item',
-        description: 'Create new item.',
+        description: 'Create new item. For sessions: supports datetime for past data migration. For dailies: use date parameter.',
         // @ai-flow 1. Validate type-specific fields -> 2. Create file -> 3. Sync to DB
         // @ai-critical Different types have different required fields
         // @ai-validation Content required for document types, dates optional for task types
+        // @ai-examples
+        //   Create session: type='sessions', title='Morning work', content='...' 
+        //   Create daily: type='dailies', date='2025-07-28', title='Daily summary', content='...'
         inputSchema: {
             type: 'object',
             properties: {
@@ -109,6 +128,22 @@ export const toolDefinitions = [
                     type: 'array',
                     items: { type: 'string' },
                     description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+                },
+                datetime: {
+                    type: 'string',
+                    description: 'ISO 8601 datetime (for sessions, optional for past data migration)'
+                },
+                date: {
+                    type: 'string',
+                    description: 'Date in YYYY-MM-DD format (for dailies)'
+                },
+                id: {
+                    type: 'string',
+                    description: 'Custom ID (for sessions, optional)'
+                },
+                category: {
+                    type: 'string',
+                    description: 'Category (for sessions, optional)'
                 }
             },
             required: ['type', 'title']
@@ -285,256 +320,262 @@ export const toolDefinitions = [
             required: ['pattern']
         }
     },
-    // @ai-pattern Work session tracking tools
+    // @ai-pattern Work session tracking tools - DEPRECATED (use unified items API)
     // @ai-intent Track daily work activities and progress
     // @ai-why Sessions enable time-based queries and productivity analysis
+    /*
+    // DEPRECATED: Use get_items with type='sessions' instead
     {
-        name: 'get_sessions',
-        description: 'Get work sessions. Returns today\'s sessions by default, or sessions within specified date range.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                start_date: {
-                    type: 'string',
-                    description: 'Start date in YYYY-MM-DD format (optional)'
-                },
-                end_date: {
-                    type: 'string',
-                    description: 'End date in YYYY-MM-DD format (optional)'
-                }
-            }
+      name: 'get_sessions',
+      description: 'Get work sessions. Returns today\'s sessions by default, or sessions within specified date range.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          start_date: {
+            type: 'string',
+            description: 'Start date in YYYY-MM-DD format (optional)'
+          },
+          end_date: {
+            type: 'string',
+            description: 'End date in YYYY-MM-DD format (optional)'
+          }
         }
+      }
     },
     {
-        name: 'get_session_detail',
-        description: 'Get detailed information for a specific work session.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                id: {
-                    type: 'string',
-                    description: 'Session ID (required)'
-                }
-            },
-            required: ['id']
-        }
+      name: 'get_session_detail',
+      description: 'Get detailed information for a specific work session.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Session ID (required)'
+          }
+        },
+        required: ['id']
+      }
     },
     {
-        name: 'get_latest_session',
-        description: 'Get the latest work session for today.',
-        inputSchema: {
-            type: 'object',
-            properties: {}
-        }
+      name: 'get_latest_session',
+      description: 'Get the latest work session for today.',
+      inputSchema: {
+        type: 'object',
+        properties: {}
+      }
     },
     {
-        name: 'create_session',
-        description: 'Create new work session. Sessions are identified by YYYY-MM-DD-HH.MM.SS.sss format.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                id: {
-                    type: 'string',
-                    description: 'Session ID (optional, creates new if not specified)'
-                },
-                title: {
-                    type: 'string',
-                    description: 'Session title (required)'
-                },
-                content: {
-                    type: 'string',
-                    description: 'Session content (optional)'
-                },
-                tags: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Array of tag names (optional)'
-                },
-                category: {
-                    type: 'string',
-                    description: 'Session category (optional)'
-                },
-                datetime: {
-                    type: 'string',
-                    description: 'ISO 8601 datetime for session creation (optional, for past data migration)'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
-                }
-            },
-            required: ['title']
-        }
+      name: 'create_session',
+      description: 'Create new work session. Sessions are identified by YYYY-MM-DD-HH.MM.SS.sss format.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Session ID (optional, creates new if not specified)'
+          },
+          title: {
+            type: 'string',
+            description: 'Session title (required)'
+          },
+          content: {
+            type: 'string',
+            description: 'Session content (optional)'
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Array of tag names (optional)'
+          },
+          category: {
+            type: 'string',
+            description: 'Session category (optional)'
+          },
+          datetime: {
+            type: 'string',
+            description: 'ISO 8601 datetime for session creation (optional, for past data migration)'
+          },
+          related_tasks: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
+          },
+          related_documents: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+          }
+        },
+        required: ['title']
+      }
     },
     {
-        name: 'update_session',
-        description: 'Update existing work session.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                id: {
-                    type: 'string',
-                    description: 'Session ID (required)'
-                },
-                title: {
-                    type: 'string',
-                    description: 'New title (optional)'
-                },
-                content: {
-                    type: 'string',
-                    description: 'New content (optional)'
-                },
-                tags: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New array of tag names (optional)'
-                },
-                category: {
-                    type: 'string',
-                    description: 'New category (optional)'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
-                }
-            },
-            required: ['id']
-        }
+      name: 'update_session',
+      description: 'Update existing work session.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Session ID (required)'
+          },
+          title: {
+            type: 'string',
+            description: 'New title (optional)'
+          },
+          content: {
+            type: 'string',
+            description: 'New content (optional)'
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New array of tag names (optional)'
+          },
+          category: {
+            type: 'string',
+            description: 'New category (optional)'
+          },
+          related_tasks: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
+          },
+          related_documents: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+          }
+        },
+        required: ['id']
+      }
     },
     {
-        name: 'search_sessions_by_tag',
-        description: 'Search work sessions by tag name.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                tag: {
-                    type: 'string',
-                    description: 'Tag name to search for (required)'
-                }
-            },
-            required: ['tag']
-        }
+      name: 'search_sessions_by_tag',
+      description: 'Search work sessions by tag name.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          tag: {
+            type: 'string',
+            description: 'Tag name to search for (required)'
+          }
+        },
+        required: ['tag']
+      }
     },
-    // @ai-pattern Daily summary management tools
+    */
+    // @ai-pattern Daily summary management tools - DEPRECATED (use unified items API)
     // @ai-intent Aggregate and summarize daily activities
     // @ai-critical One summary per date - updates replace existing
+    /*
+    // DEPRECATED: Use get_items/create_item/update_item with type='dailies' instead
     {
-        name: 'get_summaries',
-        description: 'Get daily summaries. Returns last 7 days by default, or summaries within specified date range.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                start_date: {
-                    type: 'string',
-                    description: 'Start date in YYYY-MM-DD format (optional)'
-                },
-                end_date: {
-                    type: 'string',
-                    description: 'End date in YYYY-MM-DD format (optional)'
-                }
-            }
+      name: 'get_summaries',
+      description: 'Get daily summaries. Returns last 7 days by default, or summaries within specified date range.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          start_date: {
+            type: 'string',
+            description: 'Start date in YYYY-MM-DD format (optional)'
+          },
+          end_date: {
+            type: 'string',
+            description: 'End date in YYYY-MM-DD format (optional)'
+          }
         }
+      }
     },
     {
-        name: 'get_summary_detail',
-        description: 'Get detailed information for a specific daily summary.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                date: {
-                    type: 'string',
-                    description: 'Date in YYYY-MM-DD format (required)'
-                }
-            },
-            required: ['date']
-        }
+      name: 'get_summary_detail',
+      description: 'Get detailed information for a specific daily summary.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: {
+            type: 'string',
+            description: 'Date in YYYY-MM-DD format (required)'
+          }
+        },
+        required: ['date']
+      }
     },
     {
-        name: 'create_summary',
-        description: 'Create daily summary for specified date.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                date: {
-                    type: 'string',
-                    description: 'Date in YYYY-MM-DD format (required)'
-                },
-                title: {
-                    type: 'string',
-                    description: 'Summary title (required)'
-                },
-                content: {
-                    type: 'string',
-                    description: 'Summary content (required)'
-                },
-                tags: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Array of tag names (optional)'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
-                }
-            },
-            required: ['date', 'title', 'content']
-        }
+      name: 'create_summary',
+      description: 'Create daily summary for specified date.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: {
+            type: 'string',
+            description: 'Date in YYYY-MM-DD format (required)'
+          },
+          title: {
+            type: 'string',
+            description: 'Summary title (required)'
+          },
+          content: {
+            type: 'string',
+            description: 'Summary content (required)'
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Array of tag names (optional)'
+          },
+          related_tasks: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Related task references (optional, e.g. ["issues-1", "plans-2"])'
+          },
+          related_documents: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+          }
+        },
+        required: ['date', 'title', 'content']
+      }
     },
     {
-        name: 'update_summary',
-        description: 'Update existing daily summary.',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                date: {
-                    type: 'string',
-                    description: 'Date in YYYY-MM-DD format (required)'
-                },
-                title: {
-                    type: 'string',
-                    description: 'New summary title (optional)'
-                },
-                content: {
-                    type: 'string',
-                    description: 'New summary content (optional)'
-                },
-                tags: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New array of tag names (optional)'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
-                }
-            },
-            required: ['date']
-        }
+      name: 'update_summary',
+      description: 'Update existing daily summary.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: {
+            type: 'string',
+            description: 'Date in YYYY-MM-DD format (required)'
+          },
+          title: {
+            type: 'string',
+            description: 'New summary title (optional)'
+          },
+          content: {
+            type: 'string',
+            description: 'New summary content (optional)'
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New array of tag names (optional)'
+          },
+          related_tasks: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New related task references (optional, e.g. ["issues-1", "plans-2"])'
+          },
+          related_documents: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'New related document references (optional, e.g. ["docs-1", "knowledge-2"])'
+          }
+        },
+        required: ['date']
+      }
     },
+    */
     // Type management tools
     {
         name: 'create_type',
@@ -550,6 +591,10 @@ export const toolDefinitions = [
                     type: 'string',
                     enum: ['tasks', 'documents'],
                     description: 'Base type for the new type (default: documents)'
+                },
+                description: {
+                    type: 'string',
+                    description: 'Description of the type purpose and usage guidelines (optional)'
                 }
             },
             required: ['name']
@@ -569,6 +614,24 @@ export const toolDefinitions = [
         }
     },
     {
+        name: 'update_type',
+        description: 'Update type description (type name cannot be changed)',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                name: {
+                    type: 'string',
+                    description: 'Name of the type to update'
+                },
+                description: {
+                    type: 'string',
+                    description: 'New description for the type'
+                }
+            },
+            required: ['name', 'description']
+        }
+    },
+    {
         name: 'delete_type',
         description: 'Delete a custom content type',
         inputSchema: {
@@ -580,6 +643,57 @@ export const toolDefinitions = [
                 }
             },
             required: ['name']
+        }
+    },
+    // Full-text search tools
+    {
+        name: 'search_items',
+        description: 'Full-text search across all items\' title, description, and content',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                query: {
+                    type: 'string',
+                    description: 'Search query text (required)'
+                },
+                types: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Filter by specific types (optional)'
+                },
+                limit: {
+                    type: 'number',
+                    description: 'Maximum number of results (default: 20, max: 100)'
+                },
+                offset: {
+                    type: 'number',
+                    description: 'Number of results to skip for pagination (default: 0)'
+                }
+            },
+            required: ['query']
+        }
+    },
+    {
+        name: 'search_suggest',
+        description: 'Get search suggestions for autocomplete',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                query: {
+                    type: 'string',
+                    description: 'Partial search query (required)'
+                },
+                types: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Filter suggestions by specific types (optional)'
+                },
+                limit: {
+                    type: 'number',
+                    description: 'Maximum number of suggestions (default: 10, max: 20)'
+                }
+            },
+            required: ['query']
         }
     }
 ];

@@ -60,8 +60,9 @@ export declare class DatabaseConnection {
     private createTables;
     private createSearchTables;
     private createTagRelationshipTables;
+    private createTypeFieldsTable;
     private createIndexes;
     getDatabase(): Database;
+    close(): Promise<void>;
     isInitialized(): boolean;
-    close(): void;
 }

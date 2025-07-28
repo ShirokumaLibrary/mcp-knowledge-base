@@ -8,10 +8,13 @@
 import winston from 'winston';
 import path from 'path';
 import { getConfig } from '../config.js';
-// @ai-critical: Prevent EventEmitter memory leak warnings in async operations
-process.setMaxListeners(50);
+// Logger configuration is now optimized to prevent MaxListeners warnings
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 const config = getConfig();
+// @ai-critical Track if global handlers have been installed to prevent duplicates
+// @ai-why Multiple Winston loggers would add duplicate exception/rejection handlers
+// @ai-fix Prevents MaxListenersExceededWarning by installing handlers only once
+let globalHandlersInstalled = false;
 /**
  * @ai-intent Custom log format for human-readable output
  * @ai-flow 1. Format timestamp -> 2. Add service -> 3. Include metadata
@@ -54,32 +57,46 @@ const logLevel = process.env.LOG_LEVEL || (config.logging.enabled ? config.loggi
  * @ai-pattern Always log to console, conditionally to files
  * @ai-logic Format depends on NODE_ENV
  */
-const transports = [
-    // @ai-logic: Console always active, format varies by environment
-    new winston.transports.Console({
-        format: process.env.NODE_ENV === 'production' ? prodFormat : devFormat
-    })
-];
+let consoleTransport = null;
+// @ai-critical: Create console transport once to prevent MaxListeners warnings
+// @ai-why: Multiple loggers sharing the same transport instance causes listener accumulation
+// @ai-pattern: Singleton pattern for shared Winston transport
+// @ai-fix: Resolved "Possible EventEmitter memory leak detected. 31 unpipe listeners added to [Console]"
+function getConsoleTransport() {
+    if (!consoleTransport) {
+        consoleTransport = new winston.transports.Console({
+            format: process.env.NODE_ENV === 'production' ? prodFormat : devFormat
+        });
+        // @ai-critical: Increase max listeners for shared console transport
+        // @ai-edge-case: Some Winston transports may not expose setMaxListeners
+        if (typeof consoleTransport.setMaxListeners === 'function') {
+            consoleTransport.setMaxListeners(100);
+        }
+    }
+    return consoleTransport;
+}
 /**
- * @ai-intent Add file logging in production
+ * @ai-intent Add file logging in production to specific logger
  * @ai-flow Check environment -> Check enabled -> Add file transports
  * @ai-pattern Separate error and combined logs
  * @ai-critical Creates log directory if missing
  * @ai-why Persistent logs for debugging production issues
  */
-if (process.env.NODE_ENV === 'production' && config.logging.enabled) {
-    transports.push(
-    // @ai-logic: Error-only log for quick issue scanning
-    new winston.transports.File({
-        filename: path.join(config.logging.logDir, 'error.log'),
-        level: 'error',
-        format: prodFormat
-    }), 
-    // @ai-logic: Combined log for full audit trail
-    new winston.transports.File({
-        filename: path.join(config.logging.logDir, 'combined.log'),
-        format: prodFormat
-    }));
+function addFileTransports(transports) {
+    if (process.env.NODE_ENV === 'production' && config.logging.enabled) {
+        transports.push(
+        // @ai-logic: Error-only log for quick issue scanning
+        new winston.transports.File({
+            filename: path.join(config.logging.logDir, 'error.log'),
+            level: 'error',
+            format: prodFormat
+        }), 
+        // @ai-logic: Combined log for full audit trail
+        new winston.transports.File({
+            filename: path.join(config.logging.logDir, 'combined.log'),
+            format: prodFormat
+        }));
+    }
 }
 /**
  * @ai-intent Create logger instance for a specific service
@@ -91,24 +108,43 @@ if (process.env.NODE_ENV === 'production' && config.logging.enabled) {
  * @ai-why Each component gets its own logger for tracing
  */
 export function createLogger(service) {
-    return winston.createLogger({
+    // @ai-critical: Create fresh transports array for each logger to avoid shared state
+    const loggerTransports = [];
+    // @ai-logic: Skip console transport in test environment to prevent warnings
+    // @ai-why: Test environment creates 27+ loggers, each adding listeners to Console
+    // @ai-fix: Complete prevention of MaxListenersExceededWarning in Jest tests
+    if (process.env.NODE_ENV !== 'test') {
+        loggerTransports.push(getConsoleTransport());
+    }
+    const loggerOptions = {
         level: logLevel,
-        silent: logLevel === 'silent', // @ai-logic: Complete silence for tests
+        silent: logLevel === 'silent' || process.env.NODE_ENV === 'test', // @ai-logic: Complete silence for tests
+        // @ai-why: Prevents any log output and listener registration in test environment
         defaultMeta: { service }, // @ai-logic: Service tagged on all logs
-        transports,
+        transports: loggerTransports,
+    };
+    // @ai-critical: Only add exception/rejection handlers once globally
+    // @ai-why: Multiple handlers cause MaxListenersExceededWarning
+    // @ai-pattern: Guard pattern to ensure single installation
+    // @ai-fix: Prevents "MaxListenersExceededWarning: Possible EventEmitter memory leak"
+    if (!globalHandlersInstalled && process.env.NODE_ENV !== 'test') {
+        globalHandlersInstalled = true;
         // @ai-critical: Prevent process crash from uncaught errors
-        exceptionHandlers: [
+        loggerOptions.exceptionHandlers = [
             new winston.transports.Console({
                 format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), printf(info => `${info.timestamp} [UNCAUGHT EXCEPTION] ${info.message}`))
             })
-        ],
+        ];
         // @ai-critical: Handle promise rejections
-        rejectionHandlers: [
+        loggerOptions.rejectionHandlers = [
             new winston.transports.Console({
                 format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), printf(info => `${info.timestamp} [UNHANDLED REJECTION] ${info.message}`))
             })
-        ]
-    });
+        ];
+    }
+    // @ai-logic: Add file transports if needed
+    addFileTransports(loggerTransports);
+    return winston.createLogger(loggerOptions);
 }
 /**
  * @ai-intent Default logger instance for general use

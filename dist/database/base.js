@@ -134,15 +134,27 @@ export class DatabaseConnection {
       )
     `);
         // Sequence management table
+        // @ai-pattern Type registry and ID sequence management
+        // @ai-why Sessions/dailies use date-based IDs but still need registry entry
+        // @ai-critical Acts as both ID generator AND type existence validator
         this.logger.debug('Creating sequences table...');
         await this.db.runAsync(`
       CREATE TABLE IF NOT EXISTS sequences (
         type TEXT PRIMARY KEY,
-        current_value INTEGER DEFAULT 0,
+        current_value INTEGER DEFAULT 0,  -- @ai-note: 0 for sessions/dailies (unused)
         base_type TEXT NOT NULL,
+        description TEXT,              -- @ai-note: Type description and usage guidelines
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
+        // Add description column if it doesn't exist (for existing databases)
+        try {
+            await this.db.runAsync(`ALTER TABLE sequences ADD COLUMN description TEXT`);
+            this.logger.debug('Added description column to sequences table');
+        }
+        catch (err) {
+            // Column already exists, ignore error
+        }
         // Insert default statuses
         this.logger.debug('Inserting default statuses...');
         await this.db.runAsync(`INSERT OR IGNORE INTO statuses (name, is_closed) VALUES 
@@ -152,24 +164,51 @@ export class DatabaseConnection {
         // Check if sequences already exist
         const existingSequences = await this.db.allAsync('SELECT type FROM sequences');
         if (existingSequences.length === 0) {
-            // Fresh database - insert new sequences starting at 0
-            // Using type registry information
+            // @ai-critical: Initial type configuration - NOT special handling
+            // @ai-note: These types are pre-configured for convenience only
+            // @ai-pattern: Any new type can be added with same capabilities
             const sequenceValues = [];
             const typeDefinitions = [
-                { type: 'issues', baseType: 'tasks' },
-                { type: 'plans', baseType: 'tasks' },
-                { type: 'docs', baseType: 'documents' },
-                { type: 'knowledge', baseType: 'documents' }
+                {
+                    type: 'issues',
+                    baseType: 'tasks',
+                    description: 'Bug reports, feature requests, and general tasks. Includes priority, status, and timeline tracking.'
+                },
+                {
+                    type: 'plans',
+                    baseType: 'tasks',
+                    description: 'Project plans and milestones with start/end dates. Used for planning and tracking larger initiatives.'
+                },
+                {
+                    type: 'docs',
+                    baseType: 'documents',
+                    description: 'Technical documentation, API references, and user guides. Structured content with required text.'
+                },
+                {
+                    type: 'knowledge',
+                    baseType: 'documents',
+                    description: 'Knowledge base articles, best practices, and how-to guides. Searchable reference material.'
+                }
+                // Note: sessions and dailies are handled separately due to special ID format
             ];
             for (const def of typeDefinitions) {
-                sequenceValues.push(`('${def.type}', 0, '${def.baseType}')`);
+                sequenceValues.push(`('${def.type}', 0, '${def.baseType}', '${def.description.replace(/'/g, "''")}')`);
             }
-            await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type) VALUES ${sequenceValues.join(', ')}`);
+            await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type, description) VALUES ${sequenceValues.join(', ')}`);
+            // Add special types (sessions and dailies) that don't use sequential IDs
+            await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type, description) VALUES 
+        ('sessions', 0, 'sessions', 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.'),
+        ('dailies', 0, 'documents', 'Daily summaries with required content. One entry per date. Uses date as ID (YYYY-MM-DD).')`);
         }
         else {
-            // Existing database - ensure all sequences exist
-            await this.db.runAsync(`INSERT OR IGNORE INTO sequences (type, current_value, base_type) VALUES 
-        ('issues', 0, 'tasks'), ('plans', 0, 'tasks'), ('knowledge', 0, 'documents'), ('docs', 0, 'documents')`);
+            // Existing database - ensure all sequences exist with descriptions
+            await this.db.runAsync(`INSERT OR IGNORE INTO sequences (type, current_value, base_type, description) VALUES 
+        ('issues', 0, 'tasks', 'Bug reports, feature requests, and general tasks. Includes priority, status, and timeline tracking.'),
+        ('plans', 0, 'tasks', 'Project plans and milestones with start/end dates. Used for planning and tracking larger initiatives.'),
+        ('knowledge', 0, 'documents', 'Knowledge base articles, best practices, and how-to guides. Searchable reference material.'),
+        ('docs', 0, 'documents', 'Technical documentation, API references, and user guides. Structured content with required text.'),
+        ('sessions', 0, 'sessions', 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.'),
+        ('dailies', 0, 'documents', 'Daily summaries with required content. One entry per date. Uses date as ID (YYYY-MM-DD).')`);
         }
         // Search tables
         this.logger.debug('Creating search tables...');
@@ -177,138 +216,179 @@ export class DatabaseConnection {
         // Create relationship tables for tags
         this.logger.debug('Creating tag relationship tables...');
         await this.createTagRelationshipTables();
+        // Create type fields table
+        this.logger.debug('Creating type fields table...');
+        await this.createTypeFieldsTable();
         // Create indexes
         this.logger.debug('Creating indexes...');
         await this.createIndexes();
         this.logger.debug('All tables created successfully');
     }
     async createSearchTables() {
-        // Unified tasks search table (for both issues and plans)
+        // Unified items table for all types (NEW)
+        // @ai-pattern Dual storage strategy: JSON for speed, normalized for queries
+        // @ai-why Tags/related as JSON = single query reads, matches Markdown format
+        // @ai-critical JSON columns are source of truth, normalized tables are indexes
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_tasks (
-        type TEXT NOT NULL,  -- Entity type (e.g., 'issues', 'plans', etc.)
-        id INTEGER NOT NULL,
-        title TEXT,
-        summary TEXT,
-        content TEXT,
-        priority TEXT,
-        status_id INTEGER,
-        start_date TEXT,
-        end_date TEXT,
-        tags TEXT,
-        created_at TEXT,
-        updated_at TEXT,
+      CREATE TABLE IF NOT EXISTS items (
+        type TEXT NOT NULL,           -- Any type name (no hardcoded restrictions)
+        id TEXT NOT NULL,             -- INTEGER or STRING (for sessions)
+        title TEXT NOT NULL,
+        description TEXT,
+        content TEXT,                  -- Main content (required for most types, optional for sessions)
+        priority TEXT,                 -- high/medium/low (used as importance for all types)
+        status_id INTEGER,             -- Used by all types (documents use Open/Closed)
+        start_date TEXT,               -- For tasks, or date for sessions/summaries
+        end_date TEXT,                 -- For tasks
+        start_time TEXT,               -- For sessions (HH:MM:SS)
+        tags TEXT,                     -- JSON array @ai-redundant: Also in item_tags
+        related TEXT,                  -- JSON array ["type-id", ...] @ai-redundant: Also in related_items
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
         PRIMARY KEY (type, id)
       )
     `);
-        // Sessions search table
+        // Create FTS5 virtual table for full-text search
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_sessions (
-        id TEXT PRIMARY KEY,
-        title TEXT,
-        content TEXT,
-        category TEXT,
-        tags TEXT,
-        date TEXT,
-        start_time TEXT,
-        end_time TEXT,
-        summary TEXT
+      CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
+        type, title, description, content, tags
       )
     `);
-        // Daily Summaries search table
+        // Create index for date-based queries (mainly for sessions)
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS search_daily_summaries (
-        date TEXT PRIMARY KEY,
-        title TEXT,
-        content TEXT,
-        tags TEXT,
-        created_at TEXT,
-        updated_at TEXT
-      )
+      CREATE INDEX IF NOT EXISTS idx_items_date 
+      ON items(start_date) WHERE type = 'sessions'
+    `);
+        // Create index for status filtering
+        await this.db.runAsync(`
+      CREATE INDEX IF NOT EXISTS idx_items_status 
+      ON items(status_id)
+    `);
+        // Create index for priority filtering
+        await this.db.runAsync(`
+      CREATE INDEX IF NOT EXISTS idx_items_priority 
+      ON items(priority)
     `);
     }
     async createTagRelationshipTables() {
-        // Issue tags relationship
+        // Unified item tags relationship table (NEW)
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS task_tags (
-        task_type TEXT NOT NULL,
-        task_id INTEGER NOT NULL,
+      CREATE TABLE IF NOT EXISTS item_tags (
+        item_type TEXT NOT NULL,
+        item_id TEXT NOT NULL,
         tag_id INTEGER NOT NULL,
-        PRIMARY KEY (task_type, task_id, tag_id),
-        FOREIGN KEY (task_type, task_id) REFERENCES search_tasks(type, id) ON DELETE CASCADE,
+        PRIMARY KEY (item_type, item_id, tag_id),
         FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
       )
     `);
-        // Note: doc_tags and knowledge_tags are replaced by document_tags table
-        // created in DocumentRepository
-        // Session tags relationship
+        // Create index for efficient tag queries
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS session_tags (
-        session_id TEXT,
-        tag_id INTEGER,
-        PRIMARY KEY (session_id, tag_id),
-        FOREIGN KEY (session_id) REFERENCES work_sessions(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
+      CREATE INDEX IF NOT EXISTS idx_item_tags_tag 
+      ON item_tags(tag_id)
     `);
-        // Daily summary tags relationship
-        await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS summary_tags (
-        summary_date TEXT,
-        tag_id INTEGER,
-        PRIMARY KEY (summary_date, tag_id),
-        FOREIGN KEY (summary_date) REFERENCES daily_summaries(date) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
-        // Related tasks table (normalized many-to-many relationship)
-        // @ai-context Stores relationships between tasks (issues/plans)
+        // Unified related items table (normalized many-to-many relationship)
+        // @ai-context Stores relationships between all items
         // @ai-pattern Normalized junction table for many-to-many relationships
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS related_tasks (
+      CREATE TABLE IF NOT EXISTS related_items (
         source_type TEXT NOT NULL,
-        source_id INTEGER NOT NULL,
+        source_id TEXT NOT NULL,
         target_type TEXT NOT NULL,
-        target_id INTEGER NOT NULL,
+        target_id TEXT NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (source_type, source_id, target_type, target_id)
       )
     `);
-        // Related documents table (normalized many-to-many relationship)
-        // @ai-context Stores relationships between items and documents
-        // @ai-pattern Normalized junction table for many-to-many relationships
+        // Create indexes for efficient relationship queries
         await this.db.runAsync(`
-      CREATE TABLE IF NOT EXISTS related_documents (
-        source_type TEXT NOT NULL,
-        source_id TEXT NOT NULL,  -- TEXT to support both integer and string IDs
-        target_type TEXT NOT NULL,
-        target_id INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (source_type, source_id, target_type, target_id)
-      )
+      CREATE INDEX IF NOT EXISTS idx_related_source 
+      ON related_items(source_type, source_id)
+    `);
+        await this.db.runAsync(`
+      CREATE INDEX IF NOT EXISTS idx_related_target 
+      ON related_items(target_type, target_id)
     `);
     }
+    async createTypeFieldsTable() {
+        // Type fields definition table
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS type_fields (
+        type TEXT NOT NULL,
+        field_name TEXT NOT NULL,
+        field_type TEXT NOT NULL,     -- 'string', 'text', 'date', 'priority', 'status', 'tags', 'related'
+        required BOOLEAN DEFAULT 0,
+        default_value TEXT,
+        description TEXT,
+        PRIMARY KEY (type, field_name)
+      )
+    `);
+        // @ai-note: Field definitions for initial configuration types
+        // @ai-critical: These are NOT special types - just pre-configured for convenience
+        // @ai-pattern: Any type can have any fields - no hardcoded restrictions
+        const defaultFields = [
+            // Common fields for all types
+            { types: ['issues', 'plans', 'docs', 'knowledge', 'sessions', 'dailies'], fields: [
+                    { name: 'id', type: 'string', required: true, default: '', desc: 'Unique identifier' },
+                    { name: 'title', type: 'string', required: true, default: '', desc: 'Title of the item' },
+                    { name: 'description', type: 'string', required: false, default: '', desc: 'Brief description' },
+                    { name: 'tags', type: 'tags', required: false, default: '[]', desc: 'Tags for categorization' },
+                    { name: 'created_at', type: 'date', required: true, default: '', desc: 'Creation timestamp' },
+                    { name: 'updated_at', type: 'date', required: true, default: '', desc: 'Last update timestamp' }
+                ] },
+            // Task-specific fields
+            { types: ['issues', 'plans'], fields: [
+                    { name: 'content', type: 'text', required: true, default: '', desc: 'Main content' },
+                    { name: 'priority', type: 'priority', required: false, default: 'medium', desc: 'Priority level' },
+                    { name: 'status', type: 'status', required: false, default: 'Open', desc: 'Current status' },
+                    { name: 'start_date', type: 'date', required: false, default: '', desc: 'Start date' },
+                    { name: 'end_date', type: 'date', required: false, default: '', desc: 'End date' },
+                    { name: 'related_tasks', type: 'related', required: false, default: '[]', desc: 'Related tasks' },
+                    { name: 'related_documents', type: 'related', required: false, default: '[]', desc: 'Related documents' }
+                ] },
+            // Document-specific fields
+            { types: ['docs', 'knowledge'], fields: [
+                    { name: 'content', type: 'text', required: true, default: '', desc: 'Document content' },
+                    { name: 'priority', type: 'priority', required: false, default: 'medium', desc: 'Document importance' },
+                    { name: 'status', type: 'status', required: false, default: 'Open', desc: 'Document status' },
+                    { name: 'related_documents', type: 'related', required: false, default: '[]', desc: 'Related documents' }
+                ] },
+            // Session-specific fields
+            { types: ['sessions'], fields: [
+                    { name: 'content', type: 'text', required: false, default: '', desc: 'Session notes' },
+                    { name: 'related_tasks', type: 'related', required: false, default: '[]', desc: 'Related tasks' },
+                    { name: 'related_documents', type: 'related', required: false, default: '[]', desc: 'Related documents' }
+                ] },
+            // Daily-specific fields
+            { types: ['dailies'], fields: [
+                    { name: 'content', type: 'text', required: true, default: '', desc: 'Daily summary content' },
+                    { name: 'related_tasks', type: 'related', required: false, default: '[]', desc: 'Related tasks' },
+                    { name: 'related_documents', type: 'related', required: false, default: '[]', desc: 'Related documents' }
+                ] }
+        ];
+        // Insert field definitions
+        for (const group of defaultFields) {
+            for (const type of group.types) {
+                for (const field of group.fields) {
+                    await this.db.runAsync(`
+            INSERT OR IGNORE INTO type_fields (type, field_name, field_type, required, default_value, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `, [type, field.name, field.type, field.required ? 1 : 0, field.default, field.desc]);
+                }
+            }
+        }
+    }
     async createIndexes() {
-        // Text search indexes
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_text ON search_tasks(title, content)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tasks_type ON search_tasks(type)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_sessions_text ON search_sessions(title, content)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summaries_text ON search_daily_summaries(title, content)');
-        // Tag relationship indexes
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_type, task_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id)');
-        // Note: doc_tags and knowledge_tags indexes are replaced by document_tags indexes
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_session ON session_tags(session_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_session_tags_tag ON session_tags(tag_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_summary ON summary_tags(summary_date)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_summary_tags_tag ON summary_tags(tag_id)');
         // Tag name index for quick lookups
         await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)');
-        // Related tasks and documents indexes
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_source ON related_tasks(source_type, source_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_tasks_target ON related_tasks(target_type, target_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_source ON related_documents(source_type, source_id)');
-        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_related_documents_target ON related_documents(target_type, target_id)');
+        // Type index for efficient filtering
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_items_type ON items(type)');
+        // Composite indexes for common queries
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_items_type_status ON items(type, status_id)');
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_items_type_priority ON items(type, priority)');
+        // Index for tag relationships
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_item_tags_item ON item_tags(item_type, item_id)');
+        // Index for type fields
+        await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_type_fields_type ON type_fields(type)');
     }
     getDatabase() {
         if (!this.db) {
@@ -316,13 +396,30 @@ export class DatabaseConnection {
         }
         return this.db;
     }
+    async close() {
+        if (!this.db) {
+            return;
+        }
+        // Set flags first to prevent any new operations
+        this.initializationComplete = false;
+        this.initializationPromise = null;
+        return new Promise((resolve) => {
+            this.db.close((err) => {
+                if (err) {
+                    this.logger.error('Error closing database:', err);
+                    // Don't reject - resolve anyway to avoid hanging tests
+                }
+                else {
+                    this.logger.debug('Database connection closed');
+                }
+                // Clear the db reference
+                this.db = null;
+                resolve();
+            });
+        });
+    }
     isInitialized() {
         return this.initializationComplete;
-    }
-    close() {
-        if (this.db) {
-            this.db.close();
-        }
     }
 }
 //# sourceMappingURL=base.js.map

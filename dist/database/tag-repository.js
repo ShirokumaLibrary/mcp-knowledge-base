@@ -18,6 +18,10 @@ export class TagRepository extends BaseRepository {
             createdAt: row.created_at
         }));
     }
+    // Alias for backward compatibility
+    async getAllTags() {
+        return this.getTags();
+    }
     /**
      * @ai-intent Get tag by numeric ID
      * @ai-flow Query tags table by ID
@@ -34,30 +38,20 @@ export class TagRepository extends BaseRepository {
         };
     }
     /**
-     * @ai-intent Get or create tag, returning its ID
-     * @ai-flow 1. Try to get existing tag -> 2. Create if not exists -> 3. Return ID
-     * @ai-critical Used by repositories to get tag IDs for relationship tables
-     * @ai-side-effects May create new tag in database
+     * @ai-intent Get tag ID by name
+     * @ai-flow Query tags table by name
+     * @ai-return Tag ID or null if not found
      */
-    async getOrCreateTagId(name) {
-        // First try to get existing tag
-        const existing = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [name]);
-        if (existing) {
-            return Number(existing.id);
-        }
-        // Create new tag using regular INSERT since we already checked
-        try {
-            const result = await this.db.runAsync('INSERT INTO tags (name) VALUES (?)', [name]);
-            return result.lastID;
-        }
-        catch (err) {
-            // Handle race condition where another process created the tag
-            if (err.message && err.message.includes('UNIQUE constraint failed')) {
-                const existing = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [name]);
-                return Number(existing?.id || 0);
-            }
-            throw err;
-        }
+    async getTagIdByName(name) {
+        const row = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [name.trim()]);
+        return row ? Number(row.id) : null;
+    }
+    /**
+     * @ai-intent Register multiple tags (alias for ensureTagsExist)
+     * @ai-flow Ensure all tags exist in the database
+     */
+    async registerTags(tags) {
+        return this.ensureTagsExist(tags);
     }
     /**
      * @ai-intent Get tag IDs for multiple tag names
@@ -88,14 +82,20 @@ export class TagRepository extends BaseRepository {
      * @ai-why Explicit error messages help UI provide better feedback
      */
     async createTag(name) {
+        // Trim the name first
+        const trimmedName = name.trim();
+        // Validate that the tag name is not empty or whitespace only
+        if (trimmedName.length === 0) {
+            throw new Error('Tag name cannot be empty or whitespace only');
+        }
         // Use INSERT OR IGNORE to avoid AUTOINCREMENT increase
-        const result = await this.db.runAsync('INSERT OR IGNORE INTO tags (name) VALUES (?)', [name]);
+        const result = await this.db.runAsync('INSERT OR IGNORE INTO tags (name) VALUES (?)', [trimmedName]);
         // Check if the tag was actually inserted
         if (result.changes === 0) {
             // Tag already existed
-            throw new Error(`Tag "${name}" already exists`);
+            throw new Error(`Tag "${trimmedName}" already exists`);
         }
-        return name;
+        return trimmedName;
     }
     /**
      * @ai-intent Remove tag from system
@@ -109,12 +109,34 @@ export class TagRepository extends BaseRepository {
         );
         return result.changes > 0;
     }
+    /**
+     * @ai-intent Get or create tag ID by name
+     * @ai-flow 1. Try to get existing tag -> 2. Create if not exists -> 3. Return ID
+     * @ai-pattern Get-or-create pattern for idempotency
+     * @ai-critical Used during tag relationships creation
+     */
+    async getOrCreateTagId(name) {
+        const trimmedName = name.trim();
+        if (trimmedName.length === 0) {
+            throw new Error('Tag name cannot be empty or whitespace only');
+        }
+        await this.ensureTagsExist([trimmedName]);
+        const row = await this.db.getAsync('SELECT id FROM tags WHERE name = ?', [trimmedName]);
+        if (!row) {
+            throw new Error(`Failed to get or create tag: ${trimmedName}`);
+        }
+        return row.id;
+    }
     async getTagsByPattern(pattern) {
         const rows = await this.db.allAsync('SELECT id, name, created_at FROM tags WHERE name LIKE ? ORDER BY name', [`%${pattern}%`]);
         return rows.map((row) => ({
             name: row.name,
             createdAt: row.created_at
         }));
+    }
+    // Alias for backward compatibility
+    async searchTagsByPattern(pattern) {
+        return this.getTagsByPattern(pattern);
     }
     /**
      * @ai-intent Get tags for a specific entity using relationship table
@@ -174,13 +196,20 @@ export class TagRepository extends BaseRepository {
         if (!tags || tags.length === 0) {
             return;
         } // @ai-edge-case: Empty arrays handled gracefully
+        // Trim and filter out empty tags
+        const trimmedTags = tags
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
+        if (trimmedTags.length === 0) {
+            return;
+        }
         // First, check which tags already exist to minimize INSERT attempts
-        const placeholdersForSelect = tags.map(() => '?').join(',');
-        const existingRows = await this.db.allAsync(`SELECT name FROM tags WHERE name IN (${placeholdersForSelect})`, tags);
+        const placeholdersForSelect = trimmedTags.map(() => '?').join(',');
+        const existingRows = await this.db.allAsync(`SELECT name FROM tags WHERE name IN (${placeholdersForSelect})`, trimmedTags);
         const existingNames = new Set(existingRows.map((row) => row.name));
-        const newTags = tags.filter(tag => !existingNames.has(tag));
+        const newTags = trimmedTags.filter(tag => !existingNames.has(tag));
         if (newTags.length === 0) {
-            this.logger.debug(`All tags already exist: ${tags.join(', ')}`);
+            this.logger.debug(`All tags already exist: ${trimmedTags.join(', ')}`);
             return;
         }
         // Only insert tags that don't exist
@@ -188,10 +217,10 @@ export class TagRepository extends BaseRepository {
         const query = `INSERT OR IGNORE INTO tags (name) VALUES ${placeholders}`;
         try {
             await this.db.runAsync(query, newTags);
-            this.logger.debug(`Ensured tags exist: ${tags.join(', ')} (${newTags.length} new)`);
+            this.logger.debug(`Ensured tags exist: ${trimmedTags.join(', ')} (${newTags.length} new)`);
         }
         catch (error) {
-            this.logger.error('Error ensuring tags exist:', { error, tags });
+            this.logger.error('Error ensuring tags exist:', { error, tags: trimmedTags });
             // @ai-error-recovery: Tag creation failure shouldn't block content creation
             throw new Error(`Failed to ensure tags exist: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }

@@ -4,7 +4,7 @@
  * @ai-critical Prevents circular dependencies between repositories
  * @ai-why Enables testing with mock implementations
  */
-import type { Status, Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary, Tag, WorkSession, DailySummary } from './complete-domain-types.js';
+import type { Status, Issue, Plan, Document, IssueSummary, PlanSummary, DocumentSummary, Tag, Session, Daily } from './complete-domain-types.js';
 /**
  * @ai-intent Status repository contract
  * @ai-pattern CRUD operations for workflow statuses
@@ -84,16 +84,16 @@ export interface ISearchRepository {
         plans: Plan[];
         docs: Document[];
         knowledge: Document[];
-        sessions?: WorkSession[];
+        sessions?: Session[];
     }>;
-    searchSessionsByTag(tag: string): Promise<WorkSession[]>;
-    searchSessionsByContent(query: string): Promise<WorkSession[]>;
+    searchSessionsByTag(tag: string): Promise<Session[]>;
+    searchSessionsByContent(query: string): Promise<Session[]>;
     searchAll(query: string): Promise<{
         issues: Issue[];
         plans: Plan[];
         knowledge: Document[];
     }>;
-    searchSessions(query: string): Promise<WorkSession[]>;
-    searchDailySummaries(query: string): Promise<DailySummary[]>;
+    searchSessions(query: string): Promise<Session[]>;
+    searchDailySummaries(query: string): Promise<Daily[]>;
     rebuildSearchIndex(): Promise<void>;
 }

@@ -19,11 +19,23 @@ export declare const toolDefinitions: ({
                 type: string;
                 description: string;
             };
-            statusIds: {
+            statuses: {
                 type: string;
                 items: {
                     type: string;
                 };
+                description: string;
+            };
+            start_date: {
+                type: string;
+                description: string;
+            };
+            end_date: {
+                type: string;
+                description: string;
+            };
+            limit: {
+                type: string;
                 description: string;
             };
             id?: undefined;
@@ -33,19 +45,19 @@ export declare const toolDefinitions: ({
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -64,26 +76,29 @@ export declare const toolDefinitions: ({
                 description: string;
             };
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             title?: undefined;
             description?: undefined;
             content?: undefined;
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -147,18 +162,33 @@ export declare const toolDefinitions: ({
                 };
                 description: string;
             };
+            datetime: {
+                type: string;
+                description: string;
+            };
+            date: {
+                type: string;
+                description: string;
+            };
+            id: {
+                type: string;
+                description: string;
+            };
+            category: {
+                type: string;
+                description: string;
+            };
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            id?: undefined;
+            statuses?: undefined;
+            limit?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -227,16 +257,19 @@ export declare const toolDefinitions: ({
                 description: string;
             };
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            limit?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -259,7 +292,10 @@ export declare const toolDefinitions: ({
             };
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
             description?: undefined;
@@ -267,17 +303,17 @@ export declare const toolDefinitions: ({
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            category?: undefined;
             datetime?: undefined;
             date?: undefined;
+            category?: undefined;
+            name?: undefined;
+            pattern?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -289,7 +325,10 @@ export declare const toolDefinitions: ({
         properties: {
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
             description?: undefined;
@@ -297,19 +336,19 @@ export declare const toolDefinitions: ({
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required?: undefined;
     };
@@ -325,7 +364,10 @@ export declare const toolDefinitions: ({
             };
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
             description?: undefined;
@@ -333,18 +375,18 @@ export declare const toolDefinitions: ({
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -360,46 +402,10 @@ export declare const toolDefinitions: ({
             };
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            id?: undefined;
-            title?: undefined;
-            description?: undefined;
-            content?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            tags?: undefined;
+            statuses?: undefined;
             start_date?: undefined;
             end_date?: undefined;
-            related_tasks?: undefined;
-            related_documents?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            start_date: {
-                type: string;
-                description: string;
-            };
-            end_date: {
-                type: string;
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
             description?: undefined;
@@ -409,306 +415,16 @@ export declare const toolDefinitions: ({
             tags?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            category?: undefined;
             datetime?: undefined;
             date?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required?: undefined;
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            id: {
-                type: string;
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            title?: undefined;
-            description?: undefined;
-            content?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
-            related_tasks?: undefined;
-            related_documents?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
             category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            id: {
-                type: string;
-                description: string;
-            };
-            title: {
-                type: string;
-                description: string;
-            };
-            content: {
-                type: string;
-                description: string;
-            };
-            tags: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            category: {
-                type: string;
-                description: string;
-            };
-            datetime: {
-                type: string;
-                description: string;
-            };
-            related_tasks: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            related_documents: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            description?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
-            pattern?: undefined;
-            date?: undefined;
             base_type?: undefined;
             include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            id: {
-                type: string;
-                description: string;
-            };
-            title: {
-                type: string;
-                description: string;
-            };
-            content: {
-                type: string;
-                description: string;
-            };
-            tags: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            category: {
-                type: string;
-                description: string;
-            };
-            related_tasks: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            related_documents: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            description?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            datetime?: undefined;
-            date?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            tag: {
-                type: string;
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            id?: undefined;
-            title?: undefined;
-            description?: undefined;
-            content?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
-            related_tasks?: undefined;
-            related_documents?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            date: {
-                type: string;
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            id?: undefined;
-            title?: undefined;
-            description?: undefined;
-            content?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
-            related_tasks?: undefined;
-            related_documents?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
-        };
-        required: string[];
-    };
-} | {
-    name: string;
-    description: string;
-    inputSchema: {
-        type: string;
-        properties: {
-            date: {
-                type: string;
-                description: string;
-            };
-            title: {
-                type: string;
-                description: string;
-            };
-            content: {
-                type: string;
-                description: string;
-            };
-            tags: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            related_tasks: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            related_documents: {
-                type: string;
-                items: {
-                    type: string;
-                };
-                description: string;
-            };
-            type?: undefined;
-            includeClosedStatuses?: undefined;
-            statusIds?: undefined;
-            id?: undefined;
-            description?: undefined;
-            priority?: undefined;
-            status?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
-            tag?: undefined;
-            types?: undefined;
-            name?: undefined;
-            pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            base_type?: undefined;
-            include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -727,27 +443,33 @@ export declare const toolDefinitions: ({
                 enum: string[];
                 description: string;
             };
+            description: {
+                type: string;
+                description: string;
+            };
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
-            description?: undefined;
             content?: undefined;
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required: string[];
     };
@@ -763,7 +485,10 @@ export declare const toolDefinitions: ({
             };
             type?: undefined;
             includeClosedStatuses?: undefined;
-            statusIds?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
             id?: undefined;
             title?: undefined;
             description?: undefined;
@@ -771,19 +496,157 @@ export declare const toolDefinitions: ({
             priority?: undefined;
             status?: undefined;
             tags?: undefined;
-            start_date?: undefined;
-            end_date?: undefined;
             related_tasks?: undefined;
             related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
             tag?: undefined;
             types?: undefined;
             name?: undefined;
             pattern?: undefined;
-            category?: undefined;
-            datetime?: undefined;
-            date?: undefined;
             base_type?: undefined;
+            query?: undefined;
+            offset?: undefined;
         };
         required?: undefined;
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            name: {
+                type: string;
+                description: string;
+            };
+            description: {
+                type: string;
+                description: string;
+            };
+            type?: undefined;
+            includeClosedStatuses?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            limit?: undefined;
+            id?: undefined;
+            title?: undefined;
+            content?: undefined;
+            priority?: undefined;
+            status?: undefined;
+            tags?: undefined;
+            related_tasks?: undefined;
+            related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
+            tag?: undefined;
+            types?: undefined;
+            pattern?: undefined;
+            base_type?: undefined;
+            include_definitions?: undefined;
+            query?: undefined;
+            offset?: undefined;
+        };
+        required: string[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            query: {
+                type: string;
+                description: string;
+            };
+            types: {
+                type: string;
+                items: {
+                    type: string;
+                };
+                description: string;
+            };
+            limit: {
+                type: string;
+                description: string;
+            };
+            offset: {
+                type: string;
+                description: string;
+            };
+            type?: undefined;
+            includeClosedStatuses?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            id?: undefined;
+            title?: undefined;
+            description?: undefined;
+            content?: undefined;
+            priority?: undefined;
+            status?: undefined;
+            tags?: undefined;
+            related_tasks?: undefined;
+            related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
+            tag?: undefined;
+            name?: undefined;
+            pattern?: undefined;
+            base_type?: undefined;
+            include_definitions?: undefined;
+        };
+        required: string[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            query: {
+                type: string;
+                description: string;
+            };
+            types: {
+                type: string;
+                items: {
+                    type: string;
+                };
+                description: string;
+            };
+            limit: {
+                type: string;
+                description: string;
+            };
+            type?: undefined;
+            includeClosedStatuses?: undefined;
+            statuses?: undefined;
+            start_date?: undefined;
+            end_date?: undefined;
+            id?: undefined;
+            title?: undefined;
+            description?: undefined;
+            content?: undefined;
+            priority?: undefined;
+            status?: undefined;
+            tags?: undefined;
+            related_tasks?: undefined;
+            related_documents?: undefined;
+            datetime?: undefined;
+            date?: undefined;
+            category?: undefined;
+            tag?: undefined;
+            name?: undefined;
+            pattern?: undefined;
+            base_type?: undefined;
+            include_definitions?: undefined;
+            offset?: undefined;
+        };
+        required: string[];
     };
 })[];

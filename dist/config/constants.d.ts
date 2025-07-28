@@ -40,12 +40,12 @@ export declare const DATABASE_CONSTANTS: {
         readonly MAX_DESCRIPTION_LENGTH: 1000;
     };
     readonly FILE_PATTERNS: {
-        readonly ISSUE: "issue-{id}.md";
-        readonly PLAN: "plan-{id}.md";
-        readonly DOC: "doc-{id}.md";
+        readonly ISSUE: "issues-{id}.md";
+        readonly PLAN: "plans-{id}.md";
+        readonly DOC: "docs-{id}.md";
         readonly KNOWLEDGE: "knowledge-{id}.md";
-        readonly SESSION: "{date}/session-{timestamp}.md";
-        readonly SUMMARY: "{date}/daily-summary-{date}.md";
+        readonly SESSION: "{date}/sessions-{timestamp}.md";
+        readonly SUMMARY: "{date}/dailies-{date}.md";
     };
 };
 /**

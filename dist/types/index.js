@@ -11,6 +11,6 @@ export * from './complete-domain-types.js';
 // API types
 export * from './api-types.js';
 // Type guards - export specific items to avoid conflicts
-export { isPriority, isBaseType, isStatus, isIssue, isPlan, isDocument, isWorkSession, isDailySummary, isTag, isValidDateString, isValidSessionId, isISODateString, isArrayOf, isStringArray, isNumberArray, assertType, isDefined } from './type-guards.js';
+export { isPriority, isBaseType, isStatus, isIssue, isPlan, isDocument, isSession, isDaily, isTag, isValidDateString, isValidSessionId, isISODateString, isArrayOf, isStringArray, isNumberArray, assertType, isDefined } from './type-guards.js';
 // ToolResponse is already exported from api-types.js above
 //# sourceMappingURL=index.js.map

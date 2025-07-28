@@ -33,13 +33,14 @@ export interface BaseTypeConfig {
     optionalFields: Set<string>;
 }
 /**
- * @ai-context Static type registry (currently empty, all types from database)
+ * @ai-context Static type registry with initial types
  * @ai-pattern Singleton-like static registry
  * @ai-future Can be extended to preload types if needed
  */
 export declare class StaticTypeRegistry implements TypeRegistry {
     private types;
     constructor();
+    private initializeDefaultTypes;
     getAllTypes(): TypeDefinition[];
     getType(typeName: string): TypeDefinition | null;
     getTypesByBase(baseType: string): TypeDefinition[];
@@ -81,3 +82,13 @@ export declare function getTypesForBase(baseType: string): string[];
  * @ai-pattern Type safety for dynamic type checking
  */
 export declare function isTypeOfBase(typeName: string, baseType: string): boolean;
+/**
+ * @ai-context Helper to check if a type is a task type
+ * @ai-pattern Convenience function for common check
+ */
+export declare function isTaskType(typeName: string): boolean;
+/**
+ * @ai-context Helper to check if a type is a document type
+ * @ai-pattern Convenience function for common check
+ */
+export declare function isDocumentType(typeName: string): boolean;

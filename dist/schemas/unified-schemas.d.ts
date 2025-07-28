@@ -1,174 +1,190 @@
 /**
- * @ai-context Zod schemas for unified MCP tool validation
- * @ai-pattern Unified API treating all content types generically
- * @ai-critical Validates all MCP tool arguments for type safety
- * @ai-dependencies Zod for runtime validation and type inference
- * @ai-why Single API reduces complexity for MCP clients
+ * @ai-context Unified schemas for all item operations
+ * @ai-pattern Zod schemas for request validation
+ * @ai-critical Single source of truth for API contracts
  */
 import { z } from 'zod';
 /**
- * @ai-intent Valid content types for unified operations
- * @ai-pattern Enum ensures only valid types accepted
- * @ai-critical Must match handler implementations
+ * @ai-intent Get items parameters
+ * @ai-validation Type required, optional status filtering
  */
-declare const ItemTypeSchema: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
-/**
- * @ai-intent Schema for get_items tool - list by type
- * @ai-validation Type parameter is required
- * @ai-return Will return array of items for specified type
- * @ai-params
- *   - includeClosedStatuses: If true, includes items with closed statuses (default: false)
- *   - statusIds: Optional array of specific status IDs to filter by
- */
-export declare const GetItemsSchema: z.ZodObject<{
-    type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
-    includeClosedStatuses: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
-    statusIds: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+export declare const GetItemsParams: z.ZodObject<{
+    type: z.ZodString;
+    statuses: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    includeClosedStatuses: z.ZodOptional<z.ZodBoolean>;
+    start_date: z.ZodOptional<z.ZodString>;
+    end_date: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    type: "knowledge" | "issue" | "plan" | "doc";
-    includeClosedStatuses: boolean;
-    statusIds?: number[] | undefined;
-}, {
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: string;
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+    statuses?: string[] | undefined;
     includeClosedStatuses?: boolean | undefined;
-    statusIds?: number[] | undefined;
+    limit?: number | undefined;
+}, {
+    type: string;
+    start_date?: string | undefined;
+    end_date?: string | undefined;
+    statuses?: string[] | undefined;
+    includeClosedStatuses?: boolean | undefined;
+    limit?: number | undefined;
 }>;
 /**
- * @ai-intent Schema for get_item_detail tool
- * @ai-validation Type and positive integer ID required
- * @ai-critical ID must exist for given type
- * @ai-return Single item with full details
+ * @ai-intent Get item detail parameters
+ * @ai-validation Type and ID required
  */
-export declare const GetItemDetailSchema: z.ZodObject<{
-    type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
-    id: z.ZodNumber;
+export declare const GetItemDetailParams: z.ZodObject<{
+    type: z.ZodString;
+    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
 }, "strip", z.ZodTypeAny, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
 }, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
 }>;
-export declare const CreateItemSchema: z.ZodObject<{
-    type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
+/**
+ * @ai-intent Create item parameters
+ * @ai-validation Type and title required, other fields optional
+ */
+export declare const CreateItemParams: z.ZodObject<{
+    type: z.ZodString;
     title: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
-    status_id: z.ZodOptional<z.ZodNumber>;
+    status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
+    start_time: z.ZodOptional<z.ZodString>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    datetime: z.ZodOptional<z.ZodString>;
+    date: z.ZodOptional<z.ZodString>;
+    id: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     title: string;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: string;
+    id?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    date?: string | undefined;
     content?: string | undefined;
-    status_id?: number | undefined;
     priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    start_time?: string | undefined;
+    category?: string | undefined;
+    datetime?: string | undefined;
 }, {
     title: string;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    type: string;
+    id?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    date?: string | undefined;
     content?: string | undefined;
-    status_id?: number | undefined;
     priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    start_time?: string | undefined;
+    category?: string | undefined;
+    datetime?: string | undefined;
 }>;
 /**
- * @ai-intent Schema for update_item tool
+ * @ai-intent Update item parameters
  * @ai-validation Type and ID required, all fields optional
- * @ai-pattern Partial updates - unspecified fields unchanged
- * @ai-critical ID must exist for given type
- * @ai-logic Same field rules as create but all optional
  */
-export declare const UpdateItemSchema: z.ZodObject<{
-    type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
-    id: z.ZodNumber;
+export declare const UpdateItemParams: z.ZodObject<{
+    type: z.ZodString;
+    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
     title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["high", "medium", "low"]>>;
-    status_id: z.ZodOptional<z.ZodNumber>;
+    status: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-    start_date: z.ZodOptional<z.ZodString>;
-    end_date: z.ZodOptional<z.ZodString>;
+    related: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    start_date: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    end_date: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    start_time: z.ZodOptional<z.ZodString>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
+    title?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
-    title?: string | undefined;
-    status_id?: number | undefined;
     priority?: "medium" | "high" | "low" | undefined;
-    start_date?: string | undefined;
-    end_date?: string | undefined;
+    status?: string | undefined;
+    start_date?: string | null | undefined;
+    end_date?: string | null | undefined;
+    related_tasks?: string[] | undefined;
+    related?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    start_time?: string | undefined;
 }, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
+    title?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
-    title?: string | undefined;
-    status_id?: number | undefined;
     priority?: "medium" | "high" | "low" | undefined;
-    start_date?: string | undefined;
-    end_date?: string | undefined;
+    status?: string | undefined;
+    start_date?: string | null | undefined;
+    end_date?: string | null | undefined;
+    related_tasks?: string[] | undefined;
+    related?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    start_time?: string | undefined;
 }>;
 /**
- * @ai-intent Schema for delete_item tool
- * @ai-validation Type and ID both required
- * @ai-critical Permanent deletion - no soft delete
- * @ai-return Boolean success indicator
+ * @ai-intent Delete item parameters
+ * @ai-validation Type and ID required
  */
-export declare const DeleteItemSchema: z.ZodObject<{
-    type: z.ZodEnum<["issue", "plan", "doc", "knowledge"]>;
-    id: z.ZodNumber;
+export declare const DeleteItemParams: z.ZodObject<{
+    type: z.ZodString;
+    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
 }, "strip", z.ZodTypeAny, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
 }, {
-    id: number;
-    type: "knowledge" | "issue" | "plan" | "doc";
+    id: string | number;
+    type: string;
 }>;
 /**
- * @ai-intent Schema for search_items_by_tag tool
- * @ai-validation Tag name required
- * @ai-pattern Optional type filter for targeted search
- * @ai-defaults types: all types if not specified
- * @ai-return Categorized results by type
+ * @ai-intent Search items by tag parameters
+ * @ai-validation Tag required, types optional
  */
-export declare const SearchItemsByTagSchema: z.ZodObject<{
+export declare const SearchItemsByTagParams: z.ZodObject<{
     tag: z.ZodString;
-    types: z.ZodOptional<z.ZodArray<z.ZodEnum<["issue", "plan", "doc", "knowledge"]>, "many">>;
+    types: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     tag: string;
-    types?: ("knowledge" | "issue" | "plan" | "doc")[] | undefined;
+    types?: string[] | undefined;
 }, {
     tag: string;
-    types?: ("knowledge" | "issue" | "plan" | "doc")[] | undefined;
+    types?: string[] | undefined;
 }>;
 /**
- * @ai-section TypeScript Type Exports
- * @ai-intent Inferred types from Zod schemas
- * @ai-pattern Type-safe argument types for handlers
- * @ai-why Ensures compile-time type checking matches runtime validation
+ * @ai-intent Session operation schemas
  */
-export type ItemType = z.infer<typeof ItemTypeSchema>;
-export type GetItemsArgs = z.infer<typeof GetItemsSchema>;
-export type GetItemDetailArgs = z.infer<typeof GetItemDetailSchema>;
-export type CreateItemArgs = z.infer<typeof CreateItemSchema>;
-export type UpdateItemArgs = z.infer<typeof UpdateItemSchema>;
-export type DeleteItemArgs = z.infer<typeof DeleteItemSchema>;
-export type SearchItemsByTagArgs = z.infer<typeof SearchItemsByTagSchema>;
-/**
- * @ai-intent Schema for get_sessions tool
- * @ai-validation Optional date range parameters
- * @ai-pattern Date format: YYYY-MM-DD
- * @ai-defaults No params = today's sessions only
- * @ai-return Array of sessions in date range
- */
-export declare const GetSessionsSchema: z.ZodObject<{
+export declare const GetSessionsParams: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
@@ -178,27 +194,78 @@ export declare const GetSessionsSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
 }>;
-/**
- * @ai-intent Schema for get_session_detail tool
- * @ai-validation Session ID is required
- * @ai-pattern ID format: YYYYMMDD-HHMMSSsss
- * @ai-return Complete session object or error
- */
-export declare const GetSessionDetailSchema: z.ZodObject<{
+export declare const GetSessionDetailParams: z.ZodObject<{
     id: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
 }, {
     id: string;
 }>;
+export declare const GetLatestSessionParams: z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>;
+export declare const CreateSessionParams: z.ZodObject<{
+    title: z.ZodString;
+    content: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    datetime: z.ZodOptional<z.ZodString>;
+    id: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    title: string;
+    id?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    category?: string | undefined;
+    datetime?: string | undefined;
+}, {
+    title: string;
+    id?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    category?: string | undefined;
+    datetime?: string | undefined;
+}>;
+export declare const UpdateSessionParams: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodOptional<z.ZodString>;
+    content: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    title?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    category?: string | undefined;
+}, {
+    id: string;
+    title?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+    category?: string | undefined;
+}>;
+export declare const SearchSessionsByTagParams: z.ZodObject<{
+    tag: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    tag: string;
+}, {
+    tag: string;
+}>;
 /**
- * @ai-intent Schema for get_summaries tool
- * @ai-validation Optional date range
- * @ai-defaults No params = last 7 days
- * @ai-pattern Dates in YYYY-MM-DD format
- * @ai-return Array of daily summaries
+ * @ai-intent Summary operation schemas
  */
-export declare const GetDailySummariesSchema: z.ZodObject<{
+export declare const GetSummariesParams: z.ZodObject<{
     start_date: z.ZodOptional<z.ZodString>;
     end_date: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
@@ -208,18 +275,54 @@ export declare const GetDailySummariesSchema: z.ZodObject<{
     start_date?: string | undefined;
     end_date?: string | undefined;
 }>;
-/**
- * @ai-intent Schema for get_summary_detail tool
- * @ai-validation Date parameter required
- * @ai-pattern Date format: YYYY-MM-DD
- * @ai-critical One summary per date maximum
- * @ai-return Daily summary or null
- */
-export declare const GetDailySummaryDetailSchema: z.ZodObject<{
+export declare const GetSummaryDetailParams: z.ZodObject<{
     date: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     date: string;
 }, {
     date: string;
 }>;
-export {};
+export declare const CreateSummaryParams: z.ZodObject<{
+    date: z.ZodString;
+    title: z.ZodString;
+    content: z.ZodString;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    title: string;
+    date: string;
+    content: string;
+    tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+}, {
+    title: string;
+    date: string;
+    content: string;
+    tags?: string[] | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+}>;
+export declare const UpdateSummaryParams: z.ZodObject<{
+    date: z.ZodString;
+    title: z.ZodOptional<z.ZodString>;
+    content: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    date: string;
+    title?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+}, {
+    date: string;
+    title?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
+    related_documents?: string[] | undefined;
+}>;

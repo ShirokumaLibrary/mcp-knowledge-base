@@ -5,7 +5,7 @@
  * @ai-dependencies Domain types
  * @ai-assumption Guards are used at API boundaries and data parsing
  */
-import type { Status, Issue, Plan, Document, WorkSession, DailySummary, Priority, BaseType, Tag } from './complete-domain-types.js';
+import type { Status, Issue, Plan, Document, Session, Daily, Priority, BaseType, Tag } from './complete-domain-types.js';
 /**
  * @ai-intent Check if value is a valid Priority
  * @ai-pattern String literal type guard
@@ -43,17 +43,17 @@ export declare function isPlan(value: unknown): value is Plan;
  */
 export declare function isDocument(value: unknown): value is Document;
 /**
- * @ai-intent Check if object has required WorkSession fields
+ * @ai-intent Check if object has required Session fields
  * @ai-pattern Validates session structure with ID format
  * @ai-critical Checks session ID format
  */
-export declare function isWorkSession(value: unknown): value is WorkSession;
+export declare function isSession(value: unknown): value is Session;
 /**
- * @ai-intent Check if object has required DailySummary fields
+ * @ai-intent Check if object has required Daily fields
  * @ai-pattern Validates summary with date as key
  * @ai-critical Checks date format
  */
-export declare function isDailySummary(value: unknown): value is DailySummary;
+export declare function isDaily(value: unknown): value is Daily;
 /**
  * @ai-intent Check if object has required Tag fields
  * @ai-pattern Simple tag validation
@@ -120,8 +120,8 @@ export declare const TypeGuards: {
     readonly isIssue: typeof isIssue;
     readonly isPlan: typeof isPlan;
     readonly isDocument: typeof isDocument;
-    readonly isWorkSession: typeof isWorkSession;
-    readonly isDailySummary: typeof isDailySummary;
+    readonly isSession: typeof isSession;
+    readonly isDaily: typeof isDaily;
     readonly isTag: typeof isTag;
     readonly isValidDateString: typeof isValidDateString;
     readonly isValidSessionId: typeof isValidSessionId;

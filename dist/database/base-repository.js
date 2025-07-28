@@ -36,12 +36,12 @@ export class BaseRepository {
      */
     async getNextId(type) {
         // Get next ID from sequences table
-        const result = await this.db.runAsync('UPDATE sequences SET last_id = last_id + 1 WHERE type = ?', [type]);
+        const result = await this.db.runAsync('UPDATE sequences SET current_value = current_value + 1 WHERE type = ?', [type]);
         if (result.changes === 0) {
             throw new Error(`Sequence type '${type}' not found`);
         }
-        const row = await this.db.getAsync('SELECT last_id FROM sequences WHERE type = ?', [type]);
-        return Number(row?.last_id || 0);
+        const row = await this.db.getAsync('SELECT current_value FROM sequences WHERE type = ?', [type]);
+        return Number(row?.current_value || 0);
     }
     /**
      * @ai-intent Generic find by ID implementation

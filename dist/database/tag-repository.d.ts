@@ -12,6 +12,7 @@ import type { Tag } from '../types/domain-types.js';
 export declare class TagRepository extends BaseRepository {
     constructor(db: Database);
     getTags(): Promise<Tag[]>;
+    getAllTags(): Promise<Tag[]>;
     /**
      * @ai-intent Get tag by numeric ID
      * @ai-flow Query tags table by ID
@@ -19,12 +20,16 @@ export declare class TagRepository extends BaseRepository {
      */
     getTagById(id: number): Promise<Tag | null>;
     /**
-     * @ai-intent Get or create tag, returning its ID
-     * @ai-flow 1. Try to get existing tag -> 2. Create if not exists -> 3. Return ID
-     * @ai-critical Used by repositories to get tag IDs for relationship tables
-     * @ai-side-effects May create new tag in database
+     * @ai-intent Get tag ID by name
+     * @ai-flow Query tags table by name
+     * @ai-return Tag ID or null if not found
      */
-    getOrCreateTagId(name: string): Promise<number>;
+    getTagIdByName(name: string): Promise<number | null>;
+    /**
+     * @ai-intent Register multiple tags (alias for ensureTagsExist)
+     * @ai-flow Ensure all tags exist in the database
+     */
+    registerTags(tags: string[]): Promise<void>;
     /**
      * @ai-intent Get tag IDs for multiple tag names
      * @ai-flow 1. Ensure all tags exist -> 2. Query for IDs -> 3. Return mapping
@@ -48,7 +53,15 @@ export declare class TagRepository extends BaseRepository {
      * @ai-why Tags use name as primary key, not numeric ID
      */
     deleteTag(id: string): Promise<boolean>;
+    /**
+     * @ai-intent Get or create tag ID by name
+     * @ai-flow 1. Try to get existing tag -> 2. Create if not exists -> 3. Return ID
+     * @ai-pattern Get-or-create pattern for idempotency
+     * @ai-critical Used during tag relationships creation
+     */
+    getOrCreateTagId(name: string): Promise<number>;
     getTagsByPattern(pattern: string): Promise<Tag[]>;
+    searchTagsByPattern(pattern: string): Promise<Tag[]>;
     /**
      * @ai-intent Get tags for a specific entity using relationship table
      * @ai-flow JOIN tags with relationship table by entity ID

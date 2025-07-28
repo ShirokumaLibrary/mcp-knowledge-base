@@ -1,57 +1,43 @@
-import type { WorkSession, DailySummary } from '../types/session-types.js';
-import type { FileIssueDatabase } from '../database.js';
 /**
- * @ai-context Repository for work session tracking and daily summaries
- * @ai-pattern Date-based directory structure for chronological organization
- * @ai-critical Sessions are time-based records - preserve chronological order
- * @ai-dependencies Formatter for markdown generation, Database for search sync
- * @ai-assumption Sessions organized by date folders (YYYY-MM-DD)
+ * @ai-context Simplified session repository using unified storage
+ * @ai-pattern Adapter pattern wrapping UnifiedStorage
+ * @ai-critical Maintains backward compatibility while using new storage
  */
+import type { Session, Daily } from '../types/session-types.js';
+import type { FileIssueDatabase } from '../database.js';
 export declare class SessionRepository {
-    private sessionsDir;
+    private dataDir;
     private db;
+    private storage;
     private formatter;
-    constructor(sessionsDir: string, db: FileIssueDatabase);
-    private ensureSessionsDirectory;
+    private logger;
+    constructor(dataDir: string, db: FileIssueDatabase);
+    /**
+     * @ai-intent Convert Session to StorageItem
+     */
+    private sessionToStorageItem;
+    /**
+     * @ai-intent Convert StorageItem to Session
+     */
+    private storageItemToSession;
+    /**
+     * @ai-intent Convert Daily to StorageItem
+     */
+    private dailyToStorageItem;
+    /**
+     * @ai-intent Convert StorageItem to Daily
+     */
+    private storageItemToDaily;
+    saveSession(session: Session): Promise<void>;
+    loadSession(sessionId: string, date: string): Promise<Session | null>;
+    getSessionsForDate(date: string): Promise<Session[]>;
+    getSessions(startDate?: string, endDate?: string): Promise<Session[]>;
+    getSessionDetail(sessionId: string): Promise<Session | null>;
+    searchSessionsByTag(tag: string): Promise<Session[]>;
+    searchSessionsFullText(query: string): Promise<Session[]>;
+    saveDaily(summary: Daily): Promise<void>;
+    updateDaily(summary: Daily): Promise<void>;
+    loadDaily(date: string): Promise<Daily | null>;
+    getDailySummaries(startDate?: string, endDate?: string): Promise<Daily[]>;
     ensureDailyDirectory(date: string): string;
-    /**
-     * @ai-intent Save work session to markdown file and sync to database
-     * @ai-flow 1. Create date directory -> 2. Generate markdown -> 3. Write file -> 4. Sync DB
-     * @ai-side-effects Creates directory, writes file, updates SQLite
-     * @ai-critical Session IDs include timestamp for uniqueness
-     * @ai-error-handling SQLite errors ignored for test compatibility
-     * @ai-why Legacy format support for backward compatibility
-     */
-    saveSession(session: WorkSession): void;
-    loadSession(sessionId: string, date: string): WorkSession | null;
-    /**
-     * @ai-intent Retrieve all sessions for a specific date
-     * @ai-flow 1. Check directory -> 2. List session files -> 3. Parse each -> 4. Return array
-     * @ai-performance Synchronous reads OK for daily session counts
-     * @ai-assumption Session files named 'session-{id}.md'
-     * @ai-return Empty array if no sessions or directory missing
-     */
-    getSessionsForDate(date: string): WorkSession[];
-    saveDailySummary(summary: DailySummary): void;
-    /**
-     * @ai-intent Update existing daily summary by overwriting file
-     * @ai-flow 1. Ensure dir exists -> 2. Write file -> 3. Sync to SQLite
-     * @ai-side-effects Overwrites existing file, updates SQLite
-     * @ai-validation Caller must ensure summary exists
-     */
-    updateDailySummary(summary: DailySummary): void;
-    loadDailySummary(date: string): DailySummary | null;
-    /**
-     * @ai-intent Find all sessions tagged with specific tag across all dates
-     * @ai-flow 1. Scan date dirs -> 2. Read files -> 3. Quick tag check -> 4. Full parse if match
-     * @ai-performance O(n) where n is total session count - consider indexing for scale
-     * @ai-logic Regex parsing for performance vs full markdown parse
-     * @ai-assumption Tags in frontmatter follow specific format
-     * @ai-edge-case Non-directory files in sessions folder ignored
-     */
-    searchSessionsByTag(tag: string): WorkSession[];
-    searchSessionsFullText(query: string): WorkSession[];
-    getSessions(startDate?: string, endDate?: string): WorkSession[];
-    getSessionDetail(sessionId: string): WorkSession | null;
-    getDailySummaries(startDate?: string, endDate?: string): DailySummary[];
 }

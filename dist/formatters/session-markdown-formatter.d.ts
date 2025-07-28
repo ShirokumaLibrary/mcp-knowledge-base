@@ -5,7 +5,7 @@
  * @ai-assumption Sessions use complex format, summaries use simple format
  * @ai-why Human-readable format allows manual editing
  */
-import type { WorkSession, DailySummary } from '../types/session-types.js';
+import type { Session, Daily } from '../types/session-types.js';
 /**
  * @ai-context Formats work sessions and daily summaries to/from markdown
  * @ai-pattern Two-way conversion maintaining data integrity
@@ -22,7 +22,7 @@ export declare class SessionMarkdownFormatter {
      * @ai-assumption All string values quoted for safety
      * @ai-return Complete markdown file content
      */
-    generateSessionMarkdown(session: WorkSession): string;
+    generateSessionMarkdown(session: Session): string;
     /**
      * @ai-intent Generate legacy format without frontmatter
      * @ai-flow Simple markdown with inline metadata
@@ -30,15 +30,15 @@ export declare class SessionMarkdownFormatter {
      * @ai-deprecated Prefer generateSessionMarkdown for new sessions
      * @ai-why Backward compatibility with older files
      */
-    generateLegacySessionMarkdown(session: WorkSession): string;
+    generateLegacySessionMarkdown(session: Session): string;
     /**
-     * @ai-intent Parse markdown back to WorkSession object
+     * @ai-intent Parse markdown back to Session object
      * @ai-flow 1. Detect format -> 2. Route to parser -> 3. Return session
      * @ai-pattern Auto-detects frontmatter vs legacy format
      * @ai-critical Must handle both formats for compatibility
      * @ai-return Always returns valid session (no null)
      */
-    parseSessionFromMarkdown(content: string, sessionId: string, date: string): WorkSession;
+    parseSessionFromMarkdown(content: string, sessionId: string, date: string): Session;
     /**
      * @ai-intent Parse modern format with YAML frontmatter
      * @ai-flow 1. Extract metadata -> 2. Parse body -> 3. Build session
@@ -62,13 +62,13 @@ export declare class SessionMarkdownFormatter {
      * @ai-critical Date is primary key in frontmatter
      * @ai-return Complete markdown file content
      */
-    generateDailySummaryMarkdown(summary: DailySummary): string;
+    generateDailyMarkdown(summary: Daily): string;
     /**
-     * @ai-intent Parse markdown back to DailySummary
+     * @ai-intent Parse markdown back to Daily
      * @ai-flow 1. Extract frontmatter -> 2. Parse fields -> 3. Build summary
      * @ai-validation Returns null if no frontmatter
      * @ai-pattern Only supports frontmatter format
      * @ai-return Summary object or null
      */
-    parseDailySummaryFromMarkdown(content: string, date: string): DailySummary | null;
+    parseDailyFromMarkdown(content: string, date: string): Daily | null;
 }

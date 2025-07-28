@@ -159,17 +159,15 @@ describe('RepositoryHelpers', () => {
             await RepositoryHelpers.saveRelatedEntities(mockDb, 'issues', 1, ['plans-10', 'issues-2'], ['docs-3', 'knowledge-4'], mockLogger);
             // Assert
             // Should delete existing relations
-            expect(mockDb.runAsync).toHaveBeenCalledWith('DELETE FROM related_tasks WHERE source_type = ? AND source_id = ?', ['issues', 1]);
-            expect(mockDb.runAsync).toHaveBeenCalledWith('DELETE FROM related_documents WHERE source_type = ? AND source_id = ?', ['issues', 1]);
+            expect(mockDb.runAsync).toHaveBeenCalledWith('DELETE FROM related_items WHERE source_type = ? AND source_id = ?', ['issues', 1]);
             // Should insert new relations
-            expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO related_tasks'), expect.arrayContaining(['issues', 1]));
-            expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO related_documents'), expect.arrayContaining(['issues', 1]));
+            expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO related_items'), expect.arrayContaining(['issues', 1]));
         });
         it('should handle empty relations', async () => {
             // Execute
             await RepositoryHelpers.saveRelatedEntities(mockDb, 'issues', 1, [], []);
             // Assert
-            expect(mockDb.runAsync).toHaveBeenCalledTimes(2); // Only DELETEs
+            expect(mockDb.runAsync).toHaveBeenCalledTimes(1); // Only DELETE
         });
         it('should log relation saving', async () => {
             // Execute
@@ -181,12 +179,9 @@ describe('RepositoryHelpers', () => {
     describe('loadRelatedEntities', () => {
         it('should return related tasks and documents', async () => {
             // Setup
-            mockDb.allAsync
-                .mockResolvedValueOnce([
+            mockDb.allAsync.mockResolvedValueOnce([
                 { target_type: 'issues', target_id: 1 },
-                { target_type: 'plans', target_id: 2 }
-            ])
-                .mockResolvedValueOnce([
+                { target_type: 'plans', target_id: 2 },
                 { target_type: 'docs', target_id: 3 },
                 { target_type: 'knowledge', target_id: 4 }
             ]);

@@ -8,7 +8,7 @@
 // Handler imports
 import { StatusHandlers } from '../handlers/status-handlers.js';
 import { TagHandlers } from '../handlers/tag-handlers.js';
-import { ItemHandlers } from '../handlers/item-handlers.js';
+// ItemHandlers removed - use unified-handlers instead
 import { SessionHandlers } from '../handlers/session-handlers.js';
 import { SummaryHandlers } from '../handlers/summary-handlers.js';
 import { TypeHandlers } from '../handlers/type-handlers.js';
@@ -63,7 +63,7 @@ export class HandlerFactory {
         // @ai-logic: Register current handlers
         this.register(HandlerType.Status, StatusHandlers);
         this.register(HandlerType.Tag, TagHandlers);
-        this.register(HandlerType.Item, ItemHandlers);
+        // this.register(HandlerType.Item, ItemHandlers); - removed
         this.register(HandlerType.Session, SessionHandlers);
         this.register(HandlerType.Summary, SummaryHandlers);
         this.register(HandlerType.Type, TypeHandlers);

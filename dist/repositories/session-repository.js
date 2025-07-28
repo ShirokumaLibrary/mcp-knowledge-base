@@ -1,278 +1,256 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { SessionMarkdownFormatter } from '../formatters/session-markdown-formatter.js';
 /**
- * @ai-context Repository for work session tracking and daily summaries
- * @ai-pattern Date-based directory structure for chronological organization
- * @ai-critical Sessions are time-based records - preserve chronological order
- * @ai-dependencies Formatter for markdown generation, Database for search sync
- * @ai-assumption Sessions organized by date folders (YYYY-MM-DD)
+ * @ai-context Simplified session repository using unified storage
+ * @ai-pattern Adapter pattern wrapping UnifiedStorage
+ * @ai-critical Maintains backward compatibility while using new storage
  */
+import { SessionMarkdownFormatter } from '../formatters/session-markdown-formatter.js';
+import { UnifiedStorage, STORAGE_CONFIGS } from '../storage/unified-storage.js';
+import { createLogger } from '../utils/logger.js';
 export class SessionRepository {
-    sessionsDir;
+    dataDir;
     db;
+    storage;
     formatter;
-    constructor(sessionsDir, db) {
-        this.sessionsDir = sessionsDir;
+    logger = createLogger('SessionRepository');
+    constructor(dataDir, db) {
+        this.dataDir = dataDir;
         this.db = db;
+        this.storage = new UnifiedStorage(dataDir);
         this.formatter = new SessionMarkdownFormatter();
-        this.ensureSessionsDirectory(); // @ai-logic: Synchronous for simpler constructor
-    }
-    ensureSessionsDirectory() {
-        if (!fs.existsSync(this.sessionsDir)) {
-            fs.mkdirSync(this.sessionsDir, { recursive: true });
-        }
-    }
-    ensureDailyDirectory(date) {
-        const dailyDir = path.join(this.sessionsDir, date);
-        if (!fs.existsSync(dailyDir)) {
-            fs.mkdirSync(dailyDir, { recursive: true });
-        }
-        return dailyDir;
     }
     /**
-     * @ai-intent Save work session to markdown file and sync to database
-     * @ai-flow 1. Create date directory -> 2. Generate markdown -> 3. Write file -> 4. Sync DB
-     * @ai-side-effects Creates directory, writes file, updates SQLite
-     * @ai-critical Session IDs include timestamp for uniqueness
-     * @ai-error-handling SQLite errors ignored for test compatibility
-     * @ai-why Legacy format support for backward compatibility
+     * @ai-intent Convert Session to StorageItem
      */
-    saveSession(session) {
-        const dailyDir = this.ensureDailyDirectory(session.date);
-        const filePath = path.join(dailyDir, `session-${session.id}.md`);
-        // @ai-logic: Choose format based on content richness
-        const content = session.tags || session.content
-            ? this.formatter.generateSessionMarkdown(session)
-            : this.formatter.generateLegacySessionMarkdown(session);
-        fs.writeFileSync(filePath, content, 'utf8');
-        // @ai-async: Fire-and-forget for performance
-        this.db.syncSessionToSQLite(session).catch(err => {
-            // @ai-error-recovery: Test environment may have readonly DB
-            if (err.message && (err.message.includes('SQLITE_READONLY') || err.message.includes('Failed to ensure tags exist'))) {
-                return;
-            }
-            throw err;
-        });
+    sessionToStorageItem(session) {
+        const metadata = {
+            title: session.title,
+            description: session.description || '',
+            tags: session.tags || [],
+            related_tasks: session.related_tasks || [],
+            related_documents: session.related_documents || [],
+            date: session.date,
+            start_time: session.startTime || '',
+            created_at: session.createdAt,
+            updated_at: session.updatedAt || session.createdAt
+        };
+        return {
+            id: session.id,
+            metadata,
+            content: session.content || ''
+        };
     }
-    loadSession(sessionId, date) {
-        const filePath = path.join(this.sessionsDir, date, `session-${sessionId}.md`);
-        if (!fs.existsSync(filePath)) {
+    /**
+     * @ai-intent Convert StorageItem to Session
+     */
+    storageItemToSession(item, id, date) {
+        return {
+            id,
+            title: item.metadata.title,
+            description: item.metadata.description || undefined,
+            content: item.content || undefined,
+            tags: item.metadata.tags || [],
+            related_tasks: item.metadata.related_tasks || undefined,
+            related_documents: item.metadata.related_documents || undefined,
+            date,
+            startTime: item.metadata.start_time || undefined,
+            createdAt: item.metadata.created_at,
+            updatedAt: item.metadata.updated_at || undefined
+        };
+    }
+    /**
+     * @ai-intent Convert Daily to StorageItem
+     */
+    dailyToStorageItem(daily) {
+        const metadata = {
+            title: daily.title,
+            description: daily.description || '',
+            tags: daily.tags || [],
+            related_tasks: daily.related_tasks || [],
+            related_documents: daily.related_documents || [],
+            created_at: daily.createdAt,
+            updated_at: daily.updatedAt || daily.createdAt
+        };
+        return {
+            id: daily.date,
+            metadata,
+            content: daily.content
+        };
+    }
+    /**
+     * @ai-intent Convert StorageItem to Daily
+     */
+    storageItemToDaily(item, date) {
+        return {
+            date,
+            title: item.metadata.title,
+            description: item.metadata.description || undefined,
+            content: item.content,
+            tags: item.metadata.tags || [],
+            related_tasks: item.metadata.related_tasks || [],
+            related_documents: item.metadata.related_documents || [],
+            createdAt: item.metadata.created_at,
+            updatedAt: item.metadata.updated_at || undefined
+        };
+    }
+    // Session methods
+    async saveSession(session) {
+        const item = this.sessionToStorageItem(session);
+        await this.storage.save(STORAGE_CONFIGS.sessions, item);
+        // Auto-register tags
+        if (session.tags && session.tags.length > 0) {
+            await this.db.getTags(); // Initialize tags table if needed
+            for (const tag of session.tags) {
+                try {
+                    await this.db.createTag(tag);
+                }
+                catch (error) {
+                    // Tag already exists, ignore
+                }
+            }
+        }
+    }
+    async loadSession(sessionId, date) {
+        const item = await this.storage.load(STORAGE_CONFIGS.sessions, sessionId);
+        if (!item) {
             return null;
         }
-        const content = fs.readFileSync(filePath, 'utf8');
-        return this.formatter.parseSessionFromMarkdown(content, sessionId, date);
+        return this.storageItemToSession(item, sessionId, date);
     }
-    /**
-     * @ai-intent Retrieve all sessions for a specific date
-     * @ai-flow 1. Check directory -> 2. List session files -> 3. Parse each -> 4. Return array
-     * @ai-performance Synchronous reads OK for daily session counts
-     * @ai-assumption Session files named 'session-{id}.md'
-     * @ai-return Empty array if no sessions or directory missing
-     */
-    getSessionsForDate(date) {
-        const dailyDir = path.join(this.sessionsDir, date);
-        if (!fs.existsSync(dailyDir)) {
-            return []; // @ai-edge-case: No sessions for this date
-        }
-        const sessionFiles = fs.readdirSync(dailyDir)
-            .filter(file => file.startsWith('session-') && file.endsWith('.md'));
+    async getSessionsForDate(date) {
+        const ids = await this.storage.list(STORAGE_CONFIGS.sessions, date);
         const sessions = [];
-        for (const file of sessionFiles) {
-            const sessionId = file.replace('session-', '').replace('.md', '');
-            const content = fs.readFileSync(path.join(dailyDir, file), 'utf8');
-            const session = this.formatter.parseSessionFromMarkdown(content, sessionId, date);
-            sessions.push(session);
+        for (const id of ids) {
+            const item = await this.storage.load(STORAGE_CONFIGS.sessions, id);
+            if (item) {
+                sessions.push(this.storageItemToSession(item, id, date));
+            }
         }
         return sessions;
     }
-    saveDailySummary(summary) {
-        const dailyDir = this.ensureDailyDirectory(summary.date);
-        const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
-        // @ai-critical: Check if summary already exists for this date
-        if (fs.existsSync(filePath)) {
-            throw new Error(`Daily summary for ${summary.date} already exists. Use update instead.`);
-        }
-        const content = this.formatter.generateDailySummaryMarkdown(summary);
-        fs.writeFileSync(filePath, content, 'utf8');
-        // Sync to SQLite (fire and forget for tests)
-        this.db.syncDailySummaryToSQLite(summary).catch(err => {
-            // Ignore SQLite errors in tests
-            if (err.message && (err.message.includes('SQLITE_READONLY') || err.message.includes('Failed to ensure tags exist'))) {
-                return;
-            }
-            throw err;
-        });
-    }
-    /**
-     * @ai-intent Update existing daily summary by overwriting file
-     * @ai-flow 1. Ensure dir exists -> 2. Write file -> 3. Sync to SQLite
-     * @ai-side-effects Overwrites existing file, updates SQLite
-     * @ai-validation Caller must ensure summary exists
-     */
-    updateDailySummary(summary) {
-        const dailyDir = this.ensureDailyDirectory(summary.date);
-        const filePath = path.join(dailyDir, `daily-summary-${summary.date}.md`);
-        const content = this.formatter.generateDailySummaryMarkdown(summary);
-        fs.writeFileSync(filePath, content, 'utf8');
-        // Sync to SQLite (fire and forget for tests)
-        this.db.syncDailySummaryToSQLite(summary).catch(err => {
-            // Ignore SQLite errors in tests
-            if (err.message && (err.message.includes('SQLITE_READONLY') || err.message.includes('Failed to ensure tags exist'))) {
-                return;
-            }
-            throw err;
-        });
-    }
-    loadDailySummary(date) {
-        const filePath = path.join(this.sessionsDir, date, `daily-summary-${date}.md`);
-        if (!fs.existsSync(filePath)) {
-            return null;
-        }
-        const content = fs.readFileSync(filePath, 'utf8');
-        return this.formatter.parseDailySummaryFromMarkdown(content, date);
-    }
-    /**
-     * @ai-intent Find all sessions tagged with specific tag across all dates
-     * @ai-flow 1. Scan date dirs -> 2. Read files -> 3. Quick tag check -> 4. Full parse if match
-     * @ai-performance O(n) where n is total session count - consider indexing for scale
-     * @ai-logic Regex parsing for performance vs full markdown parse
-     * @ai-assumption Tags in frontmatter follow specific format
-     * @ai-edge-case Non-directory files in sessions folder ignored
-     */
-    searchSessionsByTag(tag) {
-        const results = [];
-        if (!fs.existsSync(this.sessionsDir)) {
-            return results; // @ai-edge-case: No sessions directory yet
-        }
-        const dateDirs = fs.readdirSync(this.sessionsDir);
-        for (const dateDir of dateDirs) {
-            const datePath = path.join(this.sessionsDir, dateDir);
-            if (!fs.statSync(datePath).isDirectory()) {
-                continue;
-            } // @ai-logic: Skip non-directories
-            const sessionFiles = fs.readdirSync(datePath)
-                .filter(f => f.startsWith('session-') && f.endsWith('.md'));
-            for (const sessionFile of sessionFiles) {
-                const sessionPath = path.join(datePath, sessionFile);
-                const content = fs.readFileSync(sessionPath, 'utf8');
-                // @ai-performance: Quick regex check before full parse
-                const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-                if (frontMatterMatch) {
-                    const frontMatter = frontMatterMatch[1];
-                    const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
-                    if (tagsMatch) {
-                        const tags = tagsMatch[1].split(', ').map(t => t.replace(/"/g, ''));
-                        if (tags.includes(tag)) {
-                            // @ai-logic: Only full parse if tag matches
-                            const sessionId = sessionFile.replace('.md', '').replace('session-', '');
-                            const session = this.formatter.parseSessionFromMarkdown(content, sessionId, dateDir);
-                            results.push(session);
-                        }
-                    }
-                }
-            }
-        }
-        return results;
-    }
-    searchSessionsFullText(query) {
-        const results = [];
-        if (!fs.existsSync(this.sessionsDir)) {
-            return results;
-        }
-        const dateDirs = fs.readdirSync(this.sessionsDir);
-        for (const dateDir of dateDirs) {
-            const datePath = path.join(this.sessionsDir, dateDir);
-            if (!fs.statSync(datePath).isDirectory()) {
-                continue;
-            }
-            const sessionFiles = fs.readdirSync(datePath)
-                .filter(f => f.startsWith('session-') && f.endsWith('.md'));
-            for (const sessionFile of sessionFiles) {
-                const sessionPath = path.join(datePath, sessionFile);
-                const content = fs.readFileSync(sessionPath, 'utf8');
-                if (content.toLowerCase().includes(query.toLowerCase())) {
-                    const sessionId = sessionFile.replace('.md', '').replace('session-', '');
-                    const session = this.formatter.parseSessionFromMarkdown(content, sessionId, dateDir);
-                    results.push(session);
-                }
-            }
-        }
-        return results;
-    }
-    getSessions(startDate, endDate) {
-        const results = [];
-        if (!fs.existsSync(this.sessionsDir)) {
-            return results;
-        }
-        // If no dates specified, return today's sessions
+    async getSessions(startDate, endDate) {
         if (!startDate && !endDate) {
             const today = new Date().toISOString().split('T')[0];
             return this.getSessionsForDate(today);
         }
-        const dateDirs = fs.readdirSync(this.sessionsDir)
-            .filter(dir => fs.statSync(path.join(this.sessionsDir, dir)).isDirectory())
-            .sort(); // Ensure chronological order
+        const dateDirs = await this.storage.listDateDirs(STORAGE_CONFIGS.sessions);
+        const results = [];
         for (const dateDir of dateDirs) {
-            // Skip if before start date
             if (startDate && dateDir < startDate) {
                 continue;
             }
-            // Skip if after end date
             if (endDate && dateDir > endDate) {
                 continue;
             }
-            const sessions = this.getSessionsForDate(dateDir);
+            const sessions = await this.getSessionsForDate(dateDir);
             results.push(...sessions);
         }
         return results;
     }
-    getSessionDetail(sessionId) {
-        if (!fs.existsSync(this.sessionsDir)) {
+    async getSessionDetail(sessionId) {
+        const item = await this.storage.load(STORAGE_CONFIGS.sessions, sessionId);
+        if (!item) {
             return null;
         }
-        // Search all date directories for the session
-        const dateDirs = fs.readdirSync(this.sessionsDir)
-            .filter(dir => fs.statSync(path.join(this.sessionsDir, dir)).isDirectory());
-        for (const dateDir of dateDirs) {
-            const session = this.loadSession(sessionId, dateDir);
-            if (session) {
-                return session;
+        const date = STORAGE_CONFIGS.sessions.dateExtractor(sessionId);
+        return this.storageItemToSession(item, sessionId, date);
+    }
+    async searchSessionsByTag(tag) {
+        return this.storage.search(STORAGE_CONFIGS.sessions, item => {
+            const tags = item.metadata.tags || [];
+            return tags.includes(tag);
+        }).then(items => items.map(item => {
+            const date = STORAGE_CONFIGS.sessions.dateExtractor(item.id);
+            return this.storageItemToSession(item, item.id, date);
+        }));
+    }
+    async searchSessionsFullText(query) {
+        const lowerQuery = query.toLowerCase();
+        return this.storage.search(STORAGE_CONFIGS.sessions, item => {
+            const searchable = [
+                item.metadata.title || '',
+                item.metadata.description || '',
+                item.content || '',
+                (item.metadata.tags || []).join(' ')
+            ].join(' ').toLowerCase();
+            return searchable.includes(lowerQuery);
+        }).then(items => items.map(item => {
+            const date = STORAGE_CONFIGS.sessions.dateExtractor(item.id);
+            return this.storageItemToSession(item, item.id, date);
+        }));
+    }
+    // Daily summary methods
+    async saveDaily(summary) {
+        const exists = await this.storage.exists(STORAGE_CONFIGS.dailies, summary.date);
+        if (exists) {
+            throw new Error(`Daily summary for ${summary.date} already exists. Use update instead.`);
+        }
+        const item = this.dailyToStorageItem(summary);
+        await this.storage.save(STORAGE_CONFIGS.dailies, item);
+        // Auto-register tags
+        if (summary.tags && summary.tags.length > 0) {
+            await this.db.getTags(); // Initialize tags table if needed
+            for (const tag of summary.tags) {
+                try {
+                    await this.db.createTag(tag);
+                }
+                catch (error) {
+                    // Tag already exists, ignore
+                }
             }
         }
-        return null;
     }
-    getDailySummaries(startDate, endDate) {
-        const results = [];
-        if (!fs.existsSync(this.sessionsDir)) {
-            return results;
+    async updateDaily(summary) {
+        const item = this.dailyToStorageItem(summary);
+        await this.storage.save(STORAGE_CONFIGS.dailies, item);
+        // Auto-register tags
+        if (summary.tags && summary.tags.length > 0) {
+            await this.db.getTags(); // Initialize tags table if needed
+            for (const tag of summary.tags) {
+                try {
+                    await this.db.createTag(tag);
+                }
+                catch (error) {
+                    // Tag already exists, ignore
+                }
+            }
         }
-        // If no dates specified, return last 7 days of summaries
+    }
+    async loadDaily(date) {
+        const item = await this.storage.load(STORAGE_CONFIGS.dailies, date);
+        if (!item) {
+            return null;
+        }
+        return this.storageItemToDaily(item, date);
+    }
+    async getDailySummaries(startDate, endDate) {
         if (!startDate && !endDate) {
             const today = new Date();
             endDate = today.toISOString().split('T')[0];
             const weekAgo = new Date(today);
-            weekAgo.setDate(today.getDate() - 6); // 7 days including today
+            weekAgo.setDate(today.getDate() - 6);
             startDate = weekAgo.toISOString().split('T')[0];
         }
-        const dateDirs = fs.readdirSync(this.sessionsDir)
-            .filter(dir => fs.statSync(path.join(this.sessionsDir, dir)).isDirectory())
-            .sort(); // Ensure chronological order
-        for (const dateDir of dateDirs) {
-            // Skip if before start date
-            if (startDate && dateDir < startDate) {
+        const ids = await this.storage.list(STORAGE_CONFIGS.dailies);
+        const results = [];
+        for (const id of ids) {
+            // ID is the date for dailies
+            if (startDate && id < startDate) {
                 continue;
             }
-            // Skip if after end date
-            if (endDate && dateDir > endDate) {
+            if (endDate && id > endDate) {
                 continue;
             }
-            const summary = this.loadDailySummary(dateDir);
-            if (summary) {
-                results.push(summary);
+            const item = await this.storage.load(STORAGE_CONFIGS.dailies, id);
+            if (item) {
+                results.push(this.storageItemToDaily(item, id));
             }
         }
-        return results;
+        return results.sort((a, b) => a.date.localeCompare(b.date));
+    }
+    // Legacy compatibility methods
+    ensureDailyDirectory(date) {
+        // No longer needed with new structure
+        return date;
     }
 }
 //# sourceMappingURL=session-repository.js.map

@@ -81,7 +81,7 @@ export declare class SecureHandler extends BaseHandler {
             content: (input: any) => string;
             description: (input: any) => string | undefined;
             tags: (input: any) => string[] | undefined;
-            priority: (input: any) => "high" | "medium" | "low" | undefined;
+            priority: (input: any) => "medium" | "high" | "low" | undefined;
             status: (input: any) => string | undefined;
         };
         updateItem: {

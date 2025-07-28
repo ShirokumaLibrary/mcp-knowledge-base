@@ -4,7 +4,7 @@
  * @ai-critical Consistent test data across test suites
  */
 import { Issue, Plan, Document } from '../../types/domain-types.js';
-import { WorkSession, DailySummary, Status, Tag } from '../../types/complete-domain-types.js';
+import { Session, Daily, Status, Tag } from '../../types/complete-domain-types.js';
 /**
  * @ai-intent Test fixtures for issues
  * @ai-pattern Sample issue data
@@ -24,12 +24,12 @@ export declare const testDocuments: Document[];
  * @ai-intent Test fixtures for work sessions
  * @ai-pattern Sample session data
  */
-export declare const testSessions: WorkSession[];
+export declare const testSessions: Session[];
 /**
  * @ai-intent Test fixtures for daily summaries
  * @ai-pattern Sample summary data
  */
-export declare const testSummaries: DailySummary[];
+export declare const testSummaries: Daily[];
 /**
  * @ai-intent Test fixtures for statuses
  * @ai-pattern Sample status data
@@ -48,8 +48,8 @@ export declare const TestDataFactory: {
     createIssue(overrides?: Partial<Issue>): Issue;
     createPlan(overrides?: Partial<Plan>): Plan;
     createDocument(overrides?: Partial<Document>): Document;
-    createSession(overrides?: Partial<WorkSession>): WorkSession;
-    createSummary(overrides?: Partial<DailySummary>): DailySummary;
+    createSession(overrides?: Partial<Session>): Session;
+    createSummary(overrides?: Partial<Daily>): Daily;
     createStatus(overrides?: Partial<Status>): Status;
     createTag(name?: string): Tag;
 };

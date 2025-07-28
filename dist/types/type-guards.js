@@ -106,11 +106,11 @@ export function isDocument(value) {
         (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
 }
 /**
- * @ai-intent Check if object has required WorkSession fields
+ * @ai-intent Check if object has required Session fields
  * @ai-pattern Validates session structure with ID format
  * @ai-critical Checks session ID format
  */
-export function isWorkSession(value) {
+export function isSession(value) {
     if (typeof value !== 'object' || value === null) {
         return false;
     }
@@ -130,11 +130,11 @@ export function isWorkSession(value) {
         (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
 }
 /**
- * @ai-intent Check if object has required DailySummary fields
+ * @ai-intent Check if object has required Daily fields
  * @ai-pattern Validates summary with date as key
  * @ai-critical Checks date format
  */
-export function isDailySummary(value) {
+export function isDaily(value) {
     if (typeof value !== 'object' || value === null) {
         return false;
     }
@@ -245,8 +245,8 @@ export const TypeGuards = {
     isIssue,
     isPlan,
     isDocument,
-    isWorkSession,
-    isDailySummary,
+    isSession,
+    isDaily,
     isTag,
     isValidDateString,
     isValidSessionId,

@@ -5,7 +5,7 @@
  * @ai-dependencies SessionManager for business logic, Zod for validation
  * @ai-assumption All responses follow MCP JSON format
  */
-import type { WorkSessionManager } from '../session-manager.js';
+import type { SessionManager } from '../session-manager.js';
 import type { ToolResponse } from '../types/mcp-types.js';
 /**
  * @ai-context Handles MCP tool calls for session operations
@@ -22,7 +22,7 @@ export declare class SessionHandlers {
      * @ai-pattern Dependency injection for testability
      * @ai-assumption Single manager instance per server
      */
-    constructor(sessionManager: WorkSessionManager);
+    constructor(sessionManager: SessionManager);
     /**
      * @ai-intent Handle create_session MCP tool call
      * @ai-flow 1. Validate args -> 2. Create session -> 3. Return JSON
@@ -31,7 +31,7 @@ export declare class SessionHandlers {
      * @ai-return MCP response with complete session object
      * @ai-error-handling Zod throws on validation failure
      */
-    handleCreateWorkSession(args: unknown): Promise<ToolResponse>;
+    handleCreateSession(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle update_session MCP tool call
      * @ai-flow 1. Validate with ID required -> 2. Update -> 3. Return updated
@@ -40,7 +40,7 @@ export declare class SessionHandlers {
      * @ai-error-handling Manager throws if session not found
      * @ai-return Updated session in MCP format
      */
-    handleUpdateWorkSession(args: unknown): Promise<ToolResponse>;
+    handleUpdateSession(args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle get_latest_session MCP tool call
      * @ai-flow 1. Get today's latest -> 2. Check exists -> 3. Return

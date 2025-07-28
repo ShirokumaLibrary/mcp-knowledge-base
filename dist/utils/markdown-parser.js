@@ -64,7 +64,7 @@ export function parseMarkdown(fileContent) {
                 if (value.trim() === '') {
                     metadata[key] = null; // @ai-edge-case: Empty values become null
                 }
-                else if (key === 'tags' || key === 'related_tasks' || key === 'related_documents') {
+                else if (key === 'tags' || key === 'related_tasks' || key === 'related_documents' || key === 'related') {
                     // @ai-why: These fields are always arrays for consistent API
                     // @ai-logic: Check if value is JSON array format
                     if (value.trim().startsWith('[') && value.trim().endsWith(']')) {

@@ -115,7 +115,7 @@ export class MarkdownTransformers {
      * @ai-intent Format work session as markdown
      * @ai-pattern Session display format
      */
-    static formatWorkSession(session) {
+    static formatSession(session) {
         const lines = [
             `# ${session.title}`,
             '',

@@ -29,13 +29,13 @@ export declare const GetItemsSchema: z.ZodObject<{
 }, "strict", z.ZodTypeAny, {
     type: string;
     includeClosedStatuses: boolean;
-    subtype?: string | undefined;
     statusIds?: number[] | undefined;
+    subtype?: string | undefined;
 }, {
     type: string;
-    subtype?: string | undefined;
     includeClosedStatuses?: boolean | undefined;
     statusIds?: number[] | undefined;
+    subtype?: string | undefined;
 }>;
 /**
  * @ai-intent Schema for get_item_detail tool
@@ -48,12 +48,12 @@ export declare const GetItemDetailSchema: z.ZodObject<{
     subtype: z.ZodOptional<z.ZodString>;
     id: z.ZodNumber;
 }, "strict", z.ZodTypeAny, {
-    type: string;
     id: number;
+    type: string;
     subtype?: string | undefined;
 }, {
-    type: string;
     id: number;
+    type: string;
     subtype?: string | undefined;
 }>;
 export declare const CreateItemSchema: z.ZodObject<{
@@ -72,11 +72,11 @@ export declare const CreateItemSchema: z.ZodObject<{
 }, "strict", z.ZodTypeAny, {
     title: string;
     type: string;
-    content?: string | undefined;
     description?: string | undefined;
-    priority?: "high" | "medium" | "low" | undefined;
-    status?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
+    priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
@@ -85,11 +85,11 @@ export declare const CreateItemSchema: z.ZodObject<{
 }, {
     title: string;
     type: string;
-    content?: string | undefined;
     description?: string | undefined;
-    priority?: "high" | "medium" | "low" | undefined;
-    status?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
+    priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
@@ -118,28 +118,28 @@ export declare const UpdateItemSchema: z.ZodObject<{
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
-    type: string;
     id: number;
+    type: string;
     title?: string | undefined;
-    content?: string | undefined;
     description?: string | undefined;
-    priority?: "high" | "medium" | "low" | undefined;
-    status?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
+    priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
     subtype?: string | undefined;
 }, {
-    type: string;
     id: number;
+    type: string;
     title?: string | undefined;
-    content?: string | undefined;
     description?: string | undefined;
-    priority?: "high" | "medium" | "low" | undefined;
-    status?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
+    priority?: "medium" | "high" | "low" | undefined;
+    status?: string | undefined;
     start_date?: string | undefined;
     end_date?: string | undefined;
     related_tasks?: string[] | undefined;
@@ -157,12 +157,12 @@ export declare const DeleteItemSchema: z.ZodObject<{
     subtype: z.ZodOptional<z.ZodString>;
     id: z.ZodNumber;
 }, "strict", z.ZodTypeAny, {
-    type: string;
     id: number;
+    type: string;
     subtype?: string | undefined;
 }, {
-    type: string;
     id: number;
+    type: string;
     subtype?: string | undefined;
 }>;
 /**

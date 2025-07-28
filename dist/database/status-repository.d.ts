@@ -37,4 +37,22 @@ export declare class StatusRepository extends BaseRepository {
      * @ai-return True if deleted, false if not found
      */
     deleteStatus(id: number): Promise<boolean>;
+    /**
+     * @ai-intent Get status by name
+     * @ai-flow Query statuses table by name
+     * @ai-return Status object or null if not found
+     */
+    getStatusByName(name: string): Promise<Status | null>;
+    /**
+     * @ai-intent Get status by ID (alias for getStatus)
+     * @ai-flow Query statuses table by ID
+     * @ai-return Status object or null if not found
+     */
+    getStatusById(id: number): Promise<Status | null>;
+    /**
+     * @ai-intent Get all closed status IDs
+     * @ai-flow Query statuses where is_closed = 1
+     * @ai-return Array of status IDs that are marked as closed
+     */
+    getClosedStatusIds(): Promise<number[]>;
 }

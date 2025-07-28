@@ -9,8 +9,7 @@ export { BaseRepository } from '../base-repository.js';
 // Current repositories
 export { StatusRepository } from '../status-repository.js';
 export { TagRepository } from '../tag-repository.js';
-export { TaskRepository } from '../task-repository.js';
-export { DocumentRepository } from '../document-repository.js';
+// TaskRepository and DocumentRepository removed - use ItemRepository instead
 export { SearchRepository } from '../search-repository.js';
 export { TypeRepository } from '../type-repository.js';
 // V2 repositories (when ready to switch)

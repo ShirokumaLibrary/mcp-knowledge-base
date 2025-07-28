@@ -25,6 +25,9 @@ export class SessionMarkdownFormatter {
         let content = '---\n';
         content += `id: ${session.id}\n`; // @ai-logic: ID unquoted (alphanumeric)
         content += `title: "${session.title}"\n`; // @ai-critical: Quote for special chars
+        if (session.description) {
+            content += `description: "${session.description}"\n`; // @ai-intent: One-line description
+        }
         if (session.tags && session.tags.length > 0) {
             content += `tags: [${session.tags.map(tag => `"${tag}"`).join(', ')}]\n`; // @ai-pattern: JSON array format
         }
@@ -67,7 +70,7 @@ export class SessionMarkdownFormatter {
         return markdown;
     }
     /**
-     * @ai-intent Parse markdown back to WorkSession object
+     * @ai-intent Parse markdown back to Session object
      * @ai-flow 1. Detect format -> 2. Route to parser -> 3. Return session
      * @ai-pattern Auto-detects frontmatter vs legacy format
      * @ai-critical Must handle both formats for compatibility
@@ -94,6 +97,7 @@ export class SessionMarkdownFormatter {
         const bodyContent = match[2];
         // @ai-logic: Extract each field with specific regex
         const titleMatch = frontMatter.match(/title: "(.+)"/);
+        const descriptionMatch = frontMatter.match(/description: "(.+)"/);
         const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
         const relatedTasksMatch = frontMatter.match(/related_tasks: \[(.*)\]/);
         const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
@@ -104,6 +108,7 @@ export class SessionMarkdownFormatter {
         return {
             id: sessionId,
             title: titleMatch?.[1] || 'Unknown Session',
+            description: descriptionMatch?.[1],
             content,
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : undefined,
             related_tasks: relatedTasksMatch?.[1] ? relatedTasksMatch[1].split(', ').map(t => t.replace(/"/g, '')) : undefined,
@@ -145,10 +150,13 @@ export class SessionMarkdownFormatter {
      * @ai-critical Date is primary key in frontmatter
      * @ai-return Complete markdown file content
      */
-    generateDailySummaryMarkdown(summary) {
+    generateDailyMarkdown(summary) {
         let content = '---\n';
         content += `date: ${summary.date}\n`; // @ai-critical: Primary key
         content += `title: "${summary.title}"\n`;
+        if (summary.description) {
+            content += `description: "${summary.description}"\n`; // @ai-intent: One-line description
+        }
         if (summary.tags.length > 0) {
             content += `tags: [${summary.tags.map(tag => `"${tag}"`).join(', ')}]\n`;
         }
@@ -168,13 +176,13 @@ export class SessionMarkdownFormatter {
         return content;
     }
     /**
-     * @ai-intent Parse markdown back to DailySummary
+     * @ai-intent Parse markdown back to Daily
      * @ai-flow 1. Extract frontmatter -> 2. Parse fields -> 3. Build summary
      * @ai-validation Returns null if no frontmatter
      * @ai-pattern Only supports frontmatter format
      * @ai-return Summary object or null
      */
-    parseDailySummaryFromMarkdown(content, date) {
+    parseDailyFromMarkdown(content, date) {
         const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
         if (!frontMatterMatch) {
             return null; // @ai-validation: No legacy format for summaries
@@ -183,6 +191,7 @@ export class SessionMarkdownFormatter {
         const bodyContent = frontMatterMatch[2];
         const dateMatch = frontMatter.match(/date: (.+)/);
         const titleMatch = frontMatter.match(/title: "(.+)"/);
+        const descriptionMatch = frontMatter.match(/description: "(.+)"/);
         const tagsMatch = frontMatter.match(/tags: \[(.*)\]/);
         const relatedTasksMatch = frontMatter.match(/related_tasks: \[(.*)\]/);
         const relatedDocsMatch = frontMatter.match(/related_documents: \[(.*)\]/);
@@ -191,6 +200,7 @@ export class SessionMarkdownFormatter {
         return {
             date: dateMatch?.[1] || date,
             title: titleMatch?.[1] || 'Untitled',
+            description: descriptionMatch?.[1],
             content: bodyContent.replace(/^# .+\n\n/, '').trim(),
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : [],
             related_tasks: relatedTasksMatch?.[1] ? relatedTasksMatch[1].split(', ').map(t => t.replace(/"/g, '')) : [],

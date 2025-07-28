@@ -3,8 +3,6 @@ import { DatabaseConnection } from '../database/base.js';
 describe('SearchRepository', () => {
     let searchRepo;
     let db;
-    let mockTaskRepo;
-    let mockDocRepo;
     beforeEach(async () => {
         db = new DatabaseConnection(':memory:');
         await db.initialize();
@@ -25,39 +23,7 @@ describe('SearchRepository', () => {
         PRIMARY KEY (type, id)
       )
     `);
-        // Create mock repositories
-        mockTaskRepo = {
-            getAllTasksByTag: jest.fn(),
-            getTasksByTag: jest.fn(),
-            getAllTasks: jest.fn().mockImplementation((type) => {
-                // Return mocked tasks based on the test data
-                if (type === 'issues') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Bug with API', tags: ['bug', 'api'], priority: 'high' },
-                        { id: 2, title: 'Feature request', tags: ['feature', 'ui'], priority: 'medium' }
-                    ]);
-                }
-                else if (type === 'plans') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Q1 Roadmap', tags: ['roadmap', 'planning'], priority: 'high' }
-                    ]);
-                }
-                return Promise.resolve([]);
-            })
-        };
-        mockDocRepo = {
-            getDocumentsByTag: jest.fn(),
-            searchDocumentsByTag: jest.fn().mockImplementation((tag) => {
-                // Return mocked documents based on tag
-                const allDocs = [
-                    { id: 1, type: 'docs', title: 'API Guide', tags: ['documentation', 'api'] },
-                    { id: 1, type: 'knowledge', title: 'Best Practices', tags: ['best-practices', 'development'] }
-                ];
-                return Promise.resolve(allDocs.filter(d => d.tags.includes(tag)));
-            }),
-            getAllDocuments: jest.fn().mockResolvedValue([])
-        };
-        searchRepo = new SearchRepository(db.getDatabase(), mockTaskRepo, mockDocRepo);
+        searchRepo = new SearchRepository(db.getDatabase());
         // Set up sequences table for task types
         await db.getDatabase().runAsync(`
       CREATE TABLE IF NOT EXISTS sequences (
@@ -107,22 +73,7 @@ describe('SearchRepository', () => {
         INSERT INTO items (type, id, title, tags, priority, created_at, updated_at) VALUES 
         ('issues', 3, 'Special chars', '["test-tag", "test_tag", "test.tag"]', 'low', datetime('now'), datetime('now'))
       `);
-            // Update mock to include the new item
-            mockTaskRepo.getAllTasks.mockImplementation((type) => {
-                if (type === 'issues') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Bug with API', tags: ['bug', 'api'], priority: 'high' },
-                        { id: 2, title: 'Feature request', tags: ['feature', 'ui'], priority: 'medium' },
-                        { id: 3, title: 'Special chars', tags: ['test-tag', 'test_tag', 'test.tag'], priority: 'low' }
-                    ]);
-                }
-                else if (type === 'plans') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Q1 Roadmap', tags: ['roadmap', 'planning'], priority: 'high' }
-                    ]);
-                }
-                return Promise.resolve([]);
-            });
+            // Mock removed - data is in SQLite
             const results1 = await searchRepo.searchAllByTag('test-tag');
             expect(results1.issues).toHaveLength(1);
             const results2 = await searchRepo.searchAllByTag('test_tag');
@@ -132,7 +83,8 @@ describe('SearchRepository', () => {
             const resultsLower = await searchRepo.searchAllByTag('api');
             const resultsUpper = await searchRepo.searchAllByTag('API');
             expect(resultsLower.issues).toHaveLength(1);
-            expect(resultsUpper.issues).toHaveLength(0);
+            // SQLite LIKE is case-insensitive by default
+            expect(resultsUpper.issues).toHaveLength(1);
         });
     });
     describe('Performance and edge cases', () => {
@@ -146,28 +98,7 @@ describe('SearchRepository', () => {
         `));
             }
             await Promise.all(promises);
-            // Update mock to return many items
-            const manyIssues = Array(100).fill(null).map((_, i) => ({
-                id: i + 10,
-                title: `Issue ${i}`,
-                tags: ['performance', 'test'],
-                priority: 'medium'
-            }));
-            mockTaskRepo.getAllTasks.mockImplementation((type) => {
-                if (type === 'issues') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Bug with API', tags: ['bug', 'api'], priority: 'high' },
-                        { id: 2, title: 'Feature request', tags: ['feature', 'ui'], priority: 'medium' },
-                        ...manyIssues
-                    ]);
-                }
-                else if (type === 'plans') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Q1 Roadmap', tags: ['roadmap', 'planning'], priority: 'high' }
-                    ]);
-                }
-                return Promise.resolve([]);
-            });
+            // Data is in SQLite - no mocking needed
             const start = Date.now();
             const results = await searchRepo.searchAllByTag('performance');
             const duration = Date.now() - start;
@@ -233,22 +164,7 @@ describe('SearchRepository', () => {
         INSERT INTO items (type, id, title, tags, priority, created_at, updated_at) VALUES 
         ('issues', 100, 'Multi-tag', '["api", "bug", "urgent"]', 'high', datetime('now'), datetime('now'))
       `);
-            // Update mock to include the multi-tag item
-            mockTaskRepo.getAllTasks.mockImplementation((type) => {
-                if (type === 'issues') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Bug with API', tags: ['bug', 'api'], priority: 'high' },
-                        { id: 2, title: 'Feature request', tags: ['feature', 'ui'], priority: 'medium' },
-                        { id: 100, title: 'Multi-tag', tags: ['api', 'bug', 'urgent'], priority: 'high' }
-                    ]);
-                }
-                else if (type === 'plans') {
-                    return Promise.resolve([
-                        { id: 1, title: 'Q1 Roadmap', tags: ['roadmap', 'planning'], priority: 'high' }
-                    ]);
-                }
-                return Promise.resolve([]);
-            });
+            // Mock removed - data is in SQLite
             const results1 = await searchRepo.searchAllByTag('api');
             const results2 = await searchRepo.searchAllByTag('bug');
             const results3 = await searchRepo.searchAllByTag('urgent');

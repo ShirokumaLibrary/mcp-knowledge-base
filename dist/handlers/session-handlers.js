@@ -6,7 +6,7 @@
  * @ai-assumption All responses follow MCP JSON format
  */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import { CreateWorkSessionSchema, UpdateWorkSessionSchema, SearchSessionsByTagSchema, GetSessionsSchema, GetSessionDetailSchema } from '../schemas/session-schemas.js';
+import { CreateSessionSchema, UpdateSessionSchema, SearchSessionsByTagSchema, GetSessionsSchema, GetSessionDetailSchema } from '../schemas/session-schemas.js';
 import { createLogger } from '../utils/logger.js';
 /**
  * @ai-context Handles MCP tool calls for session operations
@@ -34,12 +34,13 @@ export class SessionHandlers {
      * @ai-return MCP response with complete session object
      * @ai-error-handling Zod throws on validation failure
      */
-    async handleCreateWorkSession(args) {
+    async handleCreateSession(args) {
         try {
-            const validatedArgs = CreateWorkSessionSchema.parse(args); // @ai-critical: Validates required fields
-            const session = this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.id, // @ai-logic: Optional custom ID
+            const validatedArgs = CreateSessionSchema.parse(args); // @ai-critical: Validates required fields
+            const session = await this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.id, // @ai-logic: Optional custom ID
             validatedArgs.datetime, // @ai-logic: Optional datetime for past data migration
-            validatedArgs.related_tasks, validatedArgs.related_documents);
+            validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description // @ai-intent: One-line description for list views
+            );
             return {
                 content: [
                     {
@@ -65,11 +66,12 @@ export class SessionHandlers {
      * @ai-error-handling Manager throws if session not found
      * @ai-return Updated session in MCP format
      */
-    async handleUpdateWorkSession(args) {
+    async handleUpdateSession(args) {
         try {
-            const validatedArgs = UpdateWorkSessionSchema.parse(args);
-            const session = this.sessionManager.updateSession(validatedArgs.id, // @ai-critical: Required for lookup
-            validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related_tasks, validatedArgs.related_documents);
+            const validatedArgs = UpdateSessionSchema.parse(args);
+            const session = await this.sessionManager.updateSession(validatedArgs.id, // @ai-critical: Required for lookup
+            validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description // @ai-intent: One-line description for list views
+            );
             return {
                 content: [
                     {
@@ -97,10 +99,17 @@ export class SessionHandlers {
      */
     async handleGetLatestSession(args) {
         try {
-            const session = this.sessionManager.getLatestSession();
+            const session = await this.sessionManager.getLatestSession();
             if (!session) {
-                throw new McpError(ErrorCode.InvalidRequest, 'No session found for today' // @ai-ux: Clear user message
-                );
+                // Return empty result instead of error
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify({ data: null }, null, 2)
+                        }
+                    ]
+                };
             }
             return {
                 content: [
@@ -130,7 +139,7 @@ export class SessionHandlers {
     async handleSearchSessionsByTag(args) {
         try {
             const validatedArgs = SearchSessionsByTagSchema.parse(args);
-            const sessions = this.sessionManager.searchSessionsByTag(validatedArgs.tag); // @ai-logic: Synchronous file search
+            const sessions = await this.sessionManager.searchSessionsByTag(validatedArgs.tag); // @ai-logic: Synchronous file search
             return {
                 content: [
                     {
@@ -159,7 +168,7 @@ export class SessionHandlers {
     async handleGetSessions(args) {
         try {
             const validatedArgs = GetSessionsSchema.parse(args);
-            const sessions = this.sessionManager.getSessions(validatedArgs.start_date, // @ai-pattern: Optional start
+            const sessions = await this.sessionManager.getSessions(validatedArgs.start_date, // @ai-pattern: Optional start
             validatedArgs.end_date // @ai-pattern: Optional end
             );
             return {
@@ -190,7 +199,7 @@ export class SessionHandlers {
     async handleGetSessionDetail(args) {
         try {
             const validatedArgs = GetSessionDetailSchema.parse(args);
-            const session = this.sessionManager.getSessionDetail(validatedArgs.id);
+            const session = await this.sessionManager.getSessionDetail(validatedArgs.id);
             if (!session) {
                 throw new McpError(ErrorCode.InvalidRequest, `Session ${validatedArgs.id} not found` // @ai-ux: Include ID in error
                 );

@@ -13,9 +13,10 @@ import { z } from 'zod';
  * @ai-defaults tags: empty array
  * @ai-return New session with generated/provided ID
  */
-export declare const CreateWorkSessionSchema: z.ZodObject<{
+export declare const CreateSessionSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     title: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -24,17 +25,19 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
 }, "strict", z.ZodTypeAny, {
     title: string;
     tags: string[];
+    id?: string | undefined;
+    description?: string | undefined;
     content?: string | undefined;
     related_tasks?: string[] | undefined;
-    id?: string | undefined;
     related_documents?: string[] | undefined;
     datetime?: string | undefined;
 }, {
     title: string;
-    content?: string | undefined;
-    tags?: string[] | undefined;
-    related_tasks?: string[] | undefined;
     id?: string | undefined;
+    description?: string | undefined;
+    tags?: string[] | undefined;
+    content?: string | undefined;
+    related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
     datetime?: string | undefined;
 }>;
@@ -45,9 +48,10 @@ export declare const CreateWorkSessionSchema: z.ZodObject<{
  * @ai-critical Session must exist for ID
  * @ai-return Updated session object
  */
-export declare const UpdateWorkSessionSchema: z.ZodObject<{
+export declare const UpdateSessionSchema: z.ZodObject<{
     id: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -55,15 +59,17 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
 }, "strict", z.ZodTypeAny, {
     id: string;
     title?: string | undefined;
-    content?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
 }, {
     id: string;
     title?: string | undefined;
-    content?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
 }>;
@@ -74,24 +80,27 @@ export declare const UpdateWorkSessionSchema: z.ZodObject<{
  * @ai-critical Date is primary key - overwrites existing
  * @ai-regex YYYY-MM-DD strict format validation
  */
-export declare const CreateDailySummarySchema: z.ZodObject<{
+export declare const CreateDailySchema: z.ZodObject<{
     date: z.ZodString;
     title: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodString;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strict", z.ZodTypeAny, {
     title: string;
-    content: string;
     tags: string[];
     date: string;
+    content: string;
+    description?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
 }, {
     title: string;
-    content: string;
     date: string;
+    content: string;
+    description?: string | undefined;
     tags?: string[] | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
@@ -103,9 +112,10 @@ export declare const CreateDailySummarySchema: z.ZodObject<{
  * @ai-critical Summary must exist for date
  * @ai-bug Empty strings blocked by min(1) validation
  */
-export declare const UpdateDailySummarySchema: z.ZodObject<{
+export declare const UpdateDailySchema: z.ZodObject<{
     date: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -113,15 +123,17 @@ export declare const UpdateDailySummarySchema: z.ZodObject<{
 }, "strict", z.ZodTypeAny, {
     date: string;
     title?: string | undefined;
-    content?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
 }, {
     date: string;
     title?: string | undefined;
-    content?: string | undefined;
+    description?: string | undefined;
     tags?: string[] | undefined;
+    content?: string | undefined;
     related_tasks?: string[] | undefined;
     related_documents?: string[] | undefined;
 }>;
@@ -192,7 +204,7 @@ export declare const GetDailySummariesSchema: z.ZodObject<{
  * @ai-critical One summary per date maximum
  * @ai-return Daily summary or null
  */
-export declare const GetDailySummaryDetailSchema: z.ZodObject<{
+export declare const GetDailyDetailSchema: z.ZodObject<{
     date: z.ZodString;
 }, "strict", z.ZodTypeAny, {
     date: string;

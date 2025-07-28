@@ -10,9 +10,9 @@ describe('SummaryHandlers', () => {
         jest.clearAllMocks();
         mockSessionManager = {
             getDailySummaries: jest.fn(),
-            getDailySummaryDetail: jest.fn(),
-            createDailySummary: jest.fn(),
-            updateDailySummary: jest.fn()
+            getDailyDetail: jest.fn(),
+            createDaily: jest.fn(),
+            updateDaily: jest.fn()
         };
         handlers = new SummaryHandlers(mockSessionManager);
     });
@@ -67,24 +67,24 @@ describe('SummaryHandlers', () => {
                 content: 'Summary content',
                 tags: ['productivity', 'review']
             };
-            mockSessionManager.getDailySummaryDetail.mockReturnValue(mockSummary);
-            const result = await handlers.handleGetDailySummaryDetail({
+            mockSessionManager.getDailyDetail.mockReturnValue(mockSummary);
+            const result = await handlers.handleGetDailyDetail({
                 date: '2025-01-26'
             });
-            expect(mockSessionManager.getDailySummaryDetail).toHaveBeenCalledWith('2025-01-26');
+            expect(mockSessionManager.getDailyDetail).toHaveBeenCalledWith('2025-01-26');
             expect(JSON.parse(result.content[0].text)).toEqual({ data: mockSummary });
         });
         it('should throw error for non-existent summary', async () => {
-            mockSessionManager.getDailySummaryDetail.mockReturnValue(null);
+            mockSessionManager.getDailyDetail.mockReturnValue(null);
             // The handler DOES throw on null summary
-            await expect(handlers.handleGetDailySummaryDetail({
+            await expect(handlers.handleGetDailyDetail({
                 date: '2025-01-26'
             })).rejects.toThrow(McpError);
         });
         it('should validate date format for detail', async () => {
             // Handler throws when summary not found
-            mockSessionManager.getDailySummaryDetail.mockReturnValue(null);
-            await expect(handlers.handleGetDailySummaryDetail({
+            mockSessionManager.getDailyDetail.mockReturnValue(null);
+            await expect(handlers.handleGetDailyDetail({
                 date: 'invalid-date'
             })).rejects.toThrow(McpError);
         });
@@ -97,14 +97,15 @@ describe('SummaryHandlers', () => {
                 content: 'Summary content',
                 tags: ['work', 'done']
             };
-            mockSessionManager.createDailySummary.mockReturnValue(mockSummary);
-            const result = await handlers.handleCreateDailySummary({
+            mockSessionManager.createDaily.mockReturnValue(mockSummary);
+            const result = await handlers.handleCreateDaily({
                 date: '2025-01-26',
                 title: 'New Summary',
                 content: 'Summary content',
                 tags: ['work', 'done']
             });
-            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'New Summary', 'Summary content', ['work', 'done'], undefined, undefined);
+            expect(mockSessionManager.createDaily).toHaveBeenCalledWith('2025-01-26', 'New Summary', 'Summary content', ['work', 'done'], undefined, undefined, undefined // description parameter
+            );
             const response = JSON.parse(result.content[0].text);
             expect(response.message).toBe('Daily summary created successfully');
         });
@@ -115,19 +116,20 @@ describe('SummaryHandlers', () => {
                 content: 'Content',
                 tags: []
             };
-            mockSessionManager.createDailySummary.mockReturnValue(mockSummary);
-            await handlers.handleCreateDailySummary({
+            mockSessionManager.createDaily.mockReturnValue(mockSummary);
+            await handlers.handleCreateDaily({
                 date: '2025-01-26',
                 title: 'Simple Summary',
                 content: 'Content'
             });
-            expect(mockSessionManager.createDailySummary).toHaveBeenCalledWith('2025-01-26', 'Simple Summary', 'Content', [], undefined, undefined);
+            expect(mockSessionManager.createDaily).toHaveBeenCalledWith('2025-01-26', 'Simple Summary', 'Content', [], undefined, undefined, undefined // description parameter
+            );
         });
         it('should prevent duplicate summaries for same date', async () => {
-            mockSessionManager.createDailySummary.mockImplementation(() => {
+            mockSessionManager.createDaily.mockImplementation(() => {
                 throw new Error('Summary already exists for this date');
             });
-            await expect(handlers.handleCreateDailySummary({
+            await expect(handlers.handleCreateDaily({
                 date: '2025-01-26',
                 title: 'Duplicate',
                 content: 'Content'
@@ -135,7 +137,7 @@ describe('SummaryHandlers', () => {
         });
         it('should validate required fields', async () => {
             // Missing content
-            await expect(handlers.handleCreateDailySummary({
+            await expect(handlers.handleCreateDaily({
                 date: '2025-01-26',
                 title: 'No Content'
                 // missing content
@@ -150,14 +152,15 @@ describe('SummaryHandlers', () => {
                 content: 'Updated content',
                 tags: ['updated']
             };
-            mockSessionManager.updateDailySummary.mockReturnValue(mockSummary);
-            const result = await handlers.handleUpdateDailySummary({
+            mockSessionManager.updateDaily.mockReturnValue(mockSummary);
+            const result = await handlers.handleUpdateDaily({
                 date: '2025-01-26',
                 title: 'Updated Summary',
                 content: 'Updated content',
                 tags: ['updated']
             });
-            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', 'Updated Summary', 'Updated content', ['updated'], undefined, undefined);
+            expect(mockSessionManager.updateDaily).toHaveBeenCalledWith('2025-01-26', 'Updated Summary', 'Updated content', ['updated'], undefined, undefined, undefined // description parameter
+            );
             const response = JSON.parse(result.content[0].text);
             expect(response.message).toBe('Daily summary updated successfully');
         });
@@ -168,17 +171,18 @@ describe('SummaryHandlers', () => {
                 content: 'Updated content',
                 tags: []
             };
-            mockSessionManager.updateDailySummary.mockReturnValue(mockSummary);
-            await handlers.handleUpdateDailySummary({
+            mockSessionManager.updateDaily.mockReturnValue(mockSummary);
+            await handlers.handleUpdateDaily({
                 date: '2025-01-26',
                 content: 'Updated content'
             });
-            expect(mockSessionManager.updateDailySummary).toHaveBeenCalledWith('2025-01-26', undefined, 'Updated content', undefined, undefined, undefined);
+            expect(mockSessionManager.updateDaily).toHaveBeenCalledWith('2025-01-26', undefined, 'Updated content', undefined, undefined, undefined, undefined // description parameter
+            );
         });
         it('should throw error for non-existent summary', async () => {
-            mockSessionManager.updateDailySummary.mockReturnValue(null);
+            mockSessionManager.updateDaily.mockReturnValue(null);
             // The handler doesn't throw on null, it still returns success
-            const result = await handlers.handleUpdateDailySummary({
+            const result = await handlers.handleUpdateDaily({
                 date: '2025-01-26',
                 title: 'Update non-existent'
             });
@@ -194,8 +198,8 @@ describe('SummaryHandlers', () => {
                 title: 'Future Summary',
                 content: 'Planning ahead'
             };
-            mockSessionManager.createDailySummary.mockReturnValue(mockSummary);
-            const result = await handlers.handleCreateDailySummary({
+            mockSessionManager.createDaily.mockReturnValue(mockSummary);
+            const result = await handlers.handleCreateDaily({
                 date: futureDate,
                 title: 'Future Summary',
                 content: 'Planning ahead'
@@ -205,11 +209,11 @@ describe('SummaryHandlers', () => {
         });
         it('should handle leap year dates', async () => {
             const leapDate = '2024-02-29';
-            mockSessionManager.getDailySummaryDetail.mockReturnValue({
+            mockSessionManager.getDailyDetail.mockReturnValue({
                 date: leapDate,
                 title: 'Leap Day Summary'
             });
-            const result = await handlers.handleGetDailySummaryDetail({
+            const result = await handlers.handleGetDailyDetail({
                 date: leapDate
             });
             const response = JSON.parse(result.content[0].text);
@@ -217,7 +221,7 @@ describe('SummaryHandlers', () => {
         });
         it('should reject invalid dates', async () => {
             // The handler doesn't validate dates, it accepts any format
-            const result = await handlers.handleCreateDailySummary({
+            const result = await handlers.handleCreateDaily({
                 date: '2025-02-30', // Invalid date
                 title: 'Invalid',
                 content: 'Content'
@@ -237,11 +241,11 @@ describe('SummaryHandlers', () => {
             expect(mockSessionManager.getDailySummaries).toHaveBeenCalledTimes(5);
         });
         it('should handle concurrent summary updates', async () => {
-            const updates = Array(3).fill(null).map((_, i) => handlers.handleUpdateDailySummary({
+            const updates = Array(3).fill(null).map((_, i) => handlers.handleUpdateDaily({
                 date: `2025-01-2${i + 4}`,
                 title: `Updated ${i}`
             }));
-            mockSessionManager.updateDailySummary.mockImplementation((date, title) => Promise.resolve({ date, title }));
+            mockSessionManager.updateDaily.mockImplementation((date, title) => Promise.resolve({ date, title }));
             const results = await Promise.all(updates);
             expect(results).toHaveLength(3);
         });
@@ -250,34 +254,34 @@ describe('SummaryHandlers', () => {
         it('should handle summary workflow from creation to update', async () => {
             const date = '2025-01-26';
             // Create
-            mockSessionManager.createDailySummary.mockReturnValue({
+            mockSessionManager.createDaily.mockReturnValue({
                 date,
                 title: 'Initial',
                 content: 'Initial content'
             });
-            await handlers.handleCreateDailySummary({
+            await handlers.handleCreateDaily({
                 date,
                 title: 'Initial',
                 content: 'Initial content'
             });
             // Update
-            mockSessionManager.updateDailySummary.mockReturnValue({
+            mockSessionManager.updateDaily.mockReturnValue({
                 date,
                 title: 'Updated',
                 content: 'Updated content'
             });
-            await handlers.handleUpdateDailySummary({
+            await handlers.handleUpdateDaily({
                 date,
                 title: 'Updated',
                 content: 'Updated content'
             });
             // Retrieve
-            mockSessionManager.getDailySummaryDetail.mockReturnValue({
+            mockSessionManager.getDailyDetail.mockReturnValue({
                 date,
                 title: 'Updated',
                 content: 'Updated content'
             });
-            const result = await handlers.handleGetDailySummaryDetail({ date });
+            const result = await handlers.handleGetDailyDetail({ date });
             const response = JSON.parse(result.content[0].text);
             expect(response.data.title).toBe('Updated');
         });

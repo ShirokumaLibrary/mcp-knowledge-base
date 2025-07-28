@@ -1,64 +1,31 @@
-import { FileIssueDatabase } from '../database.js';
 import { StatusRepository } from '../database/status-repository';
-import path from 'path';
-import fs from 'fs/promises';
+import { createTestDatabase } from '../test-utils/database-test-helper.js';
 describe('Status Filtering Tests', () => {
-    let db;
+    let context;
     let statusRepo;
-    const testDbPath = ':memory:';
-    const testDataDir = path.join(process.cwd(), 'tmp', 'test-status-filtering-' + process.pid);
     beforeEach(async () => {
-        // Clean up test directory
-        try {
-            await fs.rm(testDataDir, { recursive: true });
-        }
-        catch { }
-        db = new FileIssueDatabase(testDataDir, testDbPath);
-        await db.initialize();
-        statusRepo = new StatusRepository(db.getDatabase());
-        // Create items table for search index
-        await db.getDatabase().runAsync(`
-      CREATE TABLE IF NOT EXISTS items (
-        type TEXT,
-        id INTEGER,
-        title TEXT,
-        tags TEXT,
-        priority TEXT,
-        status_id INTEGER,
-        created_at TEXT,
-        updated_at TEXT,
-        PRIMARY KEY (type, id)
-      )
-    `);
+        context = await createTestDatabase('status-filtering');
+        statusRepo = new StatusRepository(context.db.getDatabase());
     });
     afterEach(async () => {
-        await db.close();
-        if (process.env.KEEP_TEST_DATA !== 'true') {
-            try {
-                await fs.rm(testDataDir, { recursive: true });
-            }
-            catch { }
-        }
-        else {
-            console.log(`Test data kept in: ${testDataDir}`);
-        }
+        await context.cleanup();
     });
     describe('Default status filtering', () => {
         beforeEach(async () => {
             // Create tasks with different statuses
-            await db.createTask('issues', 'Open Task', 'Content', 'high', 'Open');
-            await db.createTask('issues', 'In Progress Task', 'Content', 'medium', 'In Progress');
-            await db.createTask('issues', 'Review Task', 'Content', 'low', 'Review');
-            await db.createTask('issues', 'Completed Task', 'Content', 'high', 'Completed');
-            await db.createTask('issues', 'Closed Task', 'Content', 'medium', 'Closed');
-            await db.createTask('issues', 'On Hold Task', 'Content', 'low', 'On Hold');
-            await db.createTask('issues', 'Cancelled Task', 'Content', 'high', 'Cancelled');
+            await context.db.createTask('issues', 'Open Task', 'Content', 'high', 'Open');
+            await context.db.createTask('issues', 'In Progress Task', 'Content', 'medium', 'In Progress');
+            await context.db.createTask('issues', 'Review Task', 'Content', 'low', 'Review');
+            await context.db.createTask('issues', 'Completed Task', 'Content', 'high', 'Completed');
+            await context.db.createTask('issues', 'Closed Task', 'Content', 'medium', 'Closed');
+            await context.db.createTask('issues', 'On Hold Task', 'Content', 'low', 'On Hold');
+            await context.db.createTask('issues', 'Cancelled Task', 'Content', 'high', 'Cancelled');
         });
         it('should exclude closed statuses by default', async () => {
-            const tasks = await db.getAllTasksSummary('issues');
+            const tasks = await context.db.getAllTasksSummary('issues');
             // Should only include open statuses
             expect(tasks).toHaveLength(4);
-            const statuses = tasks.map(t => t.status);
+            const statuses = tasks.map((t) => t.status);
             expect(statuses).toContain('Open');
             expect(statuses).toContain('In Progress');
             expect(statuses).toContain('Review');
@@ -69,9 +36,9 @@ describe('Status Filtering Tests', () => {
             expect(statuses).not.toContain('Cancelled');
         });
         it('should include all statuses when includeClosedStatuses is true', async () => {
-            const tasks = await db.getAllTasksSummary('issues', true);
+            const tasks = await context.db.getAllTasksSummary('issues', true);
             expect(tasks).toHaveLength(7);
-            const statuses = tasks.map(t => t.status);
+            const statuses = tasks.map((t) => t.status);
             // Should include all statuses
             expect(statuses).toContain('Open');
             expect(statuses).toContain('In Progress');
@@ -81,29 +48,25 @@ describe('Status Filtering Tests', () => {
             expect(statuses).toContain('Closed');
             expect(statuses).toContain('Cancelled');
         });
-        it('should filter by specific status IDs', async () => {
-            // Get status IDs
-            const statuses = await statusRepo.getAllStatuses();
-            const openStatus = statuses.find(s => s.name === 'Open');
-            const inProgressStatus = statuses.find(s => s.name === 'In Progress');
-            const tasks = await db.getAllTasksSummary('issues', false, [
-                openStatus.id,
-                inProgressStatus.id
+        it('should filter by specific status names', async () => {
+            const tasks = await context.db.getAllTasksSummary('issues', false, [
+                'Open',
+                'In Progress'
             ]);
             expect(tasks).toHaveLength(2);
-            const taskStatuses = tasks.map(t => t.status);
+            const taskStatuses = tasks.map((t) => t.status);
             expect(taskStatuses).toContain('Open');
             expect(taskStatuses).toContain('In Progress');
         });
-        it('should return empty array when filtering by non-existent status ID', async () => {
-            const tasks = await db.getAllTasksSummary('issues', false, [999]);
+        it('should return empty array when filtering by non-existent status name', async () => {
+            const tasks = await context.db.getAllTasksSummary('issues', false, ['NonExistentStatus']);
             expect(tasks).toHaveLength(0);
         });
-        it('should handle empty status ID array', async () => {
-            const tasks = await db.getAllTasksSummary('issues', false, []);
-            // Empty status ID array should return all open tasks (same as default)
-            expect(tasks).toHaveLength(4);
-            const statuses = tasks.map(t => t.status);
+        it('should handle empty status array', async () => {
+            const tasks = await context.db.getAllTasksSummary('issues', false, []);
+            // Empty status array should return no tasks
+            expect(tasks).toHaveLength(0);
+            const statuses = tasks.map((t) => t.status);
             expect(statuses).not.toContain('Completed');
             expect(statuses).not.toContain('Closed');
             expect(statuses).not.toContain('Cancelled');
@@ -111,44 +74,44 @@ describe('Status Filtering Tests', () => {
     });
     describe('Status filtering for different task types', () => {
         it('should apply filtering to plans', async () => {
-            await db.createTask('plans', 'Open Plan', 'Content', 'high', 'Open');
-            await db.createTask('plans', 'Completed Plan', 'Content', 'high', 'Completed');
-            const openPlans = await db.getAllTasksSummary('plans');
+            await context.db.createTask('plans', 'Open Plan', 'Content', 'high', 'Open');
+            await context.db.createTask('plans', 'Completed Plan', 'Content', 'high', 'Completed');
+            const openPlans = await context.db.getAllTasksSummary('plans');
             expect(openPlans).toHaveLength(1);
             expect(openPlans[0].title).toBe('Open Plan');
-            const allPlans = await db.getAllTasksSummary('plans', true);
+            const allPlans = await context.db.getAllTasksSummary('plans', true);
             expect(allPlans).toHaveLength(2);
         });
         it('should handle custom task types', async () => {
             // Create custom task type using the database connection directly
-            const conn = db.getDatabase();
+            const conn = context.db.getDatabase();
             await conn.runAsync('INSERT INTO sequences (type, current_value, base_type) VALUES (?, ?, ?)', ['bugs', 0, 'tasks']);
-            await db.createTask('bugs', 'Open Bug', 'Content', 'high', 'Open');
-            await db.createTask('bugs', 'Closed Bug', 'Content', 'high', 'Closed');
-            const openBugs = await db.getAllTasksSummary('bugs');
+            await context.db.createTask('bugs', 'Open Bug', 'Content', 'high', 'Open');
+            await context.db.createTask('bugs', 'Closed Bug', 'Content', 'high', 'Closed');
+            const openBugs = await context.db.getAllTasksSummary('bugs');
             expect(openBugs).toHaveLength(1);
             expect(openBugs[0].title).toBe('Open Bug');
         });
     });
     describe('Status transitions', () => {
         it('should handle status updates correctly', async () => {
-            const task = await db.createTask('issues', 'Task', 'Content', 'high', 'Open');
+            const task = await context.db.createTask('issues', 'Task', 'Content', 'high', 'Open');
             // Initially visible in default query
-            let tasks = await db.getAllTasksSummary('issues');
-            expect(tasks.find(t => t.id === task.id)).toBeTruthy();
+            let tasks = await context.db.getAllTasksSummary('issues');
+            expect(tasks.find((t) => t.id === String(task.id))).toBeTruthy();
             // Update to closed status
-            await db.updateTask('issues', task.id, undefined, undefined, undefined, 'Closed');
+            await context.db.updateTask('issues', parseInt(task.id), undefined, undefined, undefined, 'Closed');
             // Should not be visible in default query
-            tasks = await db.getAllTasksSummary('issues');
-            expect(tasks.find(t => t.id === task.id)).toBeFalsy();
+            tasks = await context.db.getAllTasksSummary('issues');
+            expect(tasks.find((t) => t.id === String(task.id))).toBeFalsy();
             // Should be visible with includeClosedStatuses
-            tasks = await db.getAllTasksSummary('issues', true);
-            expect(tasks.find(t => t.id === task.id)).toBeTruthy();
+            tasks = await context.db.getAllTasksSummary('issues', true);
+            expect(tasks.find((t) => t.id === String(task.id))).toBeTruthy();
         });
         it('should validate status names on update', async () => {
-            const task = await db.createTask('issues', 'Task', 'Content', 'high', 'Open');
+            const task = await context.db.createTask('issues', 'Task', 'Content', 'high', 'Open');
             // Try to update with invalid status
-            await expect(db.updateTask('issues', task.id, undefined, undefined, undefined, 'InvalidStatus')).rejects.toThrow('Invalid status: InvalidStatus');
+            await expect(context.db.updateTask('issues', parseInt(task.id), undefined, undefined, undefined, 'InvalidStatus')).rejects.toThrow('Invalid status: InvalidStatus');
         });
     });
     describe('Performance with many statuses', () => {
@@ -159,7 +122,7 @@ describe('Status Filtering Tests', () => {
             for (let i = 0; i < 100; i++) {
                 const status = statuses[i % statuses.length];
                 try {
-                    const task = await db.createTask('issues', `Task ${i}`, 'Content', 'medium', status);
+                    const task = await context.db.createTask('issues', `Task ${i}`, 'Content', 'medium', status);
                     createdTasks.push(task);
                 }
                 catch (err) {
@@ -168,34 +131,35 @@ describe('Status Filtering Tests', () => {
             }
             // Time the query
             const start = Date.now();
-            const openTasks = await db.getAllTasksSummary('issues');
+            const openTasks = await context.db.getAllTasksSummary('issues');
             const duration = Date.now() - start;
             // Should complete quickly
             expect(duration).toBeLessThan(100);
             // Should have correct count (50 open/in progress out of 100)
             expect(openTasks).toHaveLength(50);
             // Verify we have the right mix
-            const allTasks = await db.getAllTasksSummary('issues', true);
+            const allTasks = await context.db.getAllTasksSummary('issues', true);
             expect(allTasks).toHaveLength(100);
         });
     });
     describe('Edge cases', () => {
         it('should handle tasks with null status gracefully', async () => {
             // Directly insert a task with null status (shouldn't happen normally)
-            const conn = db.getDatabase();
-            await conn.runAsync('INSERT INTO items (type, id, title, priority, status_id) VALUES (?, ?, ?, ?, ?)', ['issues', 999, 'Null Status Task', 'medium', null]);
+            const conn = context.db.getDatabase();
+            const now = new Date().toISOString();
+            await conn.runAsync('INSERT INTO items (type, id, title, priority, status_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)', ['issues', 999, 'Null Status Task', 'medium', null, now, now]);
             // Should handle gracefully
-            const tasks = await db.getAllTasksSummary('issues');
-            const nullStatusTask = tasks.find(t => t.id === 999);
+            const tasks = await context.db.getAllTasksSummary('issues');
+            const nullStatusTask = tasks.find((t) => t.id === '999');
             expect(nullStatusTask).toBeUndefined(); // Should be excluded
         });
         it('should handle concurrent status updates', async () => {
-            const task = await db.createTask('issues', 'Task', 'Content', 'high', 'Open');
+            const task = await context.db.createTask('issues', 'Task', 'Content', 'high', 'Open');
             // Try concurrent updates
-            const updates = Array(5).fill(null).map((_, i) => db.updateTask('issues', task.id, undefined, undefined, undefined, i % 2 === 0 ? 'In Progress' : 'Review'));
+            const updates = Array(5).fill(null).map((_, i) => context.db.updateTask('issues', parseInt(task.id), undefined, undefined, undefined, i % 2 === 0 ? 'In Progress' : 'Review'));
             await Promise.all(updates);
             // Should have one of the statuses
-            const updated = await db.getTask('issues', task.id);
+            const updated = await context.db.getTask('issues', parseInt(task.id));
             expect(['In Progress', 'Review']).toContain(updated?.status);
         });
     });

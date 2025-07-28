@@ -90,7 +90,7 @@ export class StatusHandlers {
     async handleCreateStatus(args) {
         try {
             const validatedArgs = CreateStatusSchema.parse(args); // @ai-validation: Throws on invalid
-            const status = await this.db.createStatus(validatedArgs.name, validatedArgs.is_closed);
+            const status = await this.db.createStatus(validatedArgs.name);
             return {
                 content: [
                     {
@@ -119,7 +119,7 @@ export class StatusHandlers {
     async handleUpdateStatus(args) {
         try {
             const validatedArgs = UpdateStatusSchema.parse(args);
-            const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name, validatedArgs.is_closed); // @ai-fix: Added missing await
+            const success = await this.db.updateStatus(validatedArgs.id, validatedArgs.name); // @ai-fix: Added missing await
             if (!success) {
                 throw new McpError(ErrorCode.InvalidRequest, `Status ID ${validatedArgs.id} not found`);
             }

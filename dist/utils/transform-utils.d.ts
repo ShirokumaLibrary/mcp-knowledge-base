@@ -15,7 +15,7 @@ interface ResponseError {
     code?: string;
     details?: unknown;
 }
-import type { WorkSession, Priority } from '../types/complete-domain-types.js';
+import type { Session, Priority } from '../types/complete-domain-types.js';
 /**
  * @ai-intent Entity to markdown transformers
  * @ai-pattern Consistent markdown formatting
@@ -40,7 +40,7 @@ export declare class MarkdownTransformers {
      * @ai-intent Format work session as markdown
      * @ai-pattern Session display format
      */
-    static formatWorkSession(session: WorkSession): string;
+    static formatSession(session: Session): string;
     /**
      * @ai-intent Format date for display
      * @ai-pattern Consistent date formatting
