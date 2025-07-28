@@ -72,5 +72,6 @@ Thumbs.db
 # Test artifacts
 __test_data__/
 __test_data_*__/
+test-results/
 search.db
 *.db
