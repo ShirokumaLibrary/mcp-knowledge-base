@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Unified Repository System**: Complete consolidation of all repository classes
+  - New `ItemRepository` handles all item types (issues, plans, docs, knowledge, sessions, dailies)
+  - Unified handlers for consistent API across all content types
+  - Full-text search capability with dedicated `FulltextSearchRepository`
+  - String utilities for enhanced text processing
+- **Search Enhancements**: 
+  - New search handlers for improved content discovery
+  - Full-text search across all content types
+  - Better search result ranking and relevance
+
+### Changed
+- **BREAKING**: Consolidated TaskRepository and DocumentRepository into single ItemRepository
+  - All item operations now go through unified repository layer
+  - Consistent error handling and validation across all types
+  - Improved performance with optimized queries
+- **Architecture Improvements**:
+  - Simplified repository structure reduces code duplication
+  - Better separation of concerns with dedicated search repository
+  - Enhanced type safety with unified type system
+
+### Removed
+- TaskRepository and DocumentRepository classes (replaced by ItemRepository)
+- Separate item handlers (replaced by unified handlers)
+- Task repository helper functions (functionality integrated into ItemRepository)
+- Redundant test files for removed components
+
+### Fixed
+- Test result files no longer tracked in version control
+- Development scripts properly excluded from repository
+
 ## [0.3.0] - 2025-07-28
 
 ### Added

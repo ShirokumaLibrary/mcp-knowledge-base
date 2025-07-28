@@ -195,7 +195,7 @@ MCP Client → server.ts → UnifiedHandlers → ItemRepository → File/SQLite
   - Dynamic type support
   - Unified CRUD operations
   - Single Table Inheritance pattern
-- **Replaced repositories**: TaskRepository, DocumentRepository (now handled by ItemRepository)
+- **Unified approach**: All content types use the same repository pattern for consistency
 
 ### Error Handling
 - MCP protocol errors (McpError) for client communication
