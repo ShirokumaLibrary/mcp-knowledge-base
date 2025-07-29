@@ -171,7 +171,10 @@ export class BaseRepository {
             }
             // @ai-logic: Prepare update data
             const updateData = { ...data };
-            delete updateData.id; // @ai-critical: Never update ID
+            // Use proper type narrowing instead of any
+            if ('id' in updateData) {
+                delete updateData.id; // @ai-critical: Never update ID
+            }
             const row = this.mapEntityToRow(updateData);
             const updates = Object.entries(row)
                 .filter(([key]) => key !== 'id') // @ai-critical: Don't update ID

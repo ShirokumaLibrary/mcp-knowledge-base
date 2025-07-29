@@ -15,7 +15,7 @@ import type { DatabaseRow, QueryParameters } from './types/database-types.js';
  */
 export interface BaseEntity {
     id: string | number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 /**
  * @ai-intent Repository base class

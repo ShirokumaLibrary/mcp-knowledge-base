@@ -2,7 +2,20 @@ import { ItemRepository } from '../repositories/item-repository.js';
 import { FullTextSearchRepository } from './fulltext-search-repository.js';
 import { TypeRepository } from './type-repository.js';
 import { Session, Daily } from '../types/complete-domain-types.js';
+import type { Issue, Plan, Document } from '../types/domain-types.js';
 export * from '../types/domain-types.js';
+interface GroupedItems {
+    issues: Issue[];
+    plans: Plan[];
+    docs: Document[];
+    knowledge: Document[];
+    [key: string]: Issue[] | Plan[] | Document[];
+}
+interface GroupedTypes {
+    tasks: string[];
+    documents: string[];
+    [key: string]: string[];
+}
 /**
  * @ai-context Main database facade coordinating all repositories
  * @ai-pattern Facade pattern hiding repository complexity from handlers
@@ -80,8 +93,8 @@ export declare class FileIssueDatabase {
     searchTasksByTag(tag: string): Promise<import("../types/unified-types.js").UnifiedItem[]>;
     getTags(): Promise<import("./index.js").Tag[]>;
     searchTags(pattern: string): Promise<import("./index.js").Tag[]>;
-    searchAllByTag(tag: string): Promise<any>;
-    searchAll(query: string): Promise<any>;
+    searchAllByTag(tag: string): Promise<GroupedItems>;
+    searchAll(query: string): Promise<GroupedItems>;
     createIssue(title: string, content: string, priority: string, status?: string, tags?: string[], description?: string, start_date?: string | null, end_date?: string | null, related_tasks?: string[], related_documents?: string[]): Promise<{
         id: number;
         title: string;
@@ -297,7 +310,7 @@ export declare class FileIssueDatabase {
     getBaseType(name: string): Promise<string | null>;
     searchContent(query: string): Promise<any[]>;
     getItems(type: string): Promise<import("../types/unified-types.js").UnifiedItem[]>;
-    getTypes(): Promise<any>;
+    getTypes(): Promise<GroupedTypes>;
     searchSessions(query: string): Promise<Session[]>;
     searchSessionsByTag(tag: string): Promise<Session[]>;
     searchDailySummaries(query: string): Promise<Daily[]>;

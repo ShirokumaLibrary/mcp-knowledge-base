@@ -22,7 +22,7 @@ import type {
  */
 export interface BaseEntity {
   id: string | number;
-  [key: string]: any;
+  [key: string]: unknown; // Simplified to allow any property
 }
 
 /**
@@ -250,7 +250,10 @@ export abstract class BaseRepository<T extends BaseEntity, K extends string | nu
 
       // @ai-logic: Prepare update data
       const updateData = { ...data };
-      delete (updateData as any).id; // @ai-critical: Never update ID
+      // Use proper type narrowing instead of any
+      if ('id' in updateData) {
+        delete updateData.id; // @ai-critical: Never update ID
+      }
 
       const row = this.mapEntityToRow(updateData);
       const updates = Object.entries(row)

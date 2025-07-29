@@ -6,6 +6,9 @@
  * @ai-assumption All handlers follow constructor(database) pattern
  */
 
+import type { IDatabase } from '../database/interfaces/repository-interfaces.js';
+import { BaseHandler } from '../handlers/base-handler.js';
+
 
 // Handler imports
 import { StatusHandlers } from '../handlers/status-handlers.js';
@@ -36,9 +39,14 @@ export enum HandlerType {
  * @ai-intent Handler registration entry
  * @ai-pattern Maps handler type to implementation
  */
+// Handler interface - all handlers should have these methods
+interface IHandler {
+  // Basic handler contract
+}
+
 interface HandlerRegistration {
   type: HandlerType;
-  constructor: new (database: any) => any;  // @ai-todo: Fix when all handlers use IDatabase
+  constructor: new (...args: any[]) => IHandler; // Using interface instead of BaseHandler
   useV2?: boolean;  // @ai-logic: Flag to use V2 implementation
 }
 
@@ -50,7 +58,7 @@ interface HandlerRegistration {
 export class HandlerFactory {
   private static instance: HandlerFactory;
   private registrations: Map<HandlerType, HandlerRegistration> = new Map();
-  private handlers: Map<HandlerType, any> = new Map();
+  private handlers: Map<HandlerType, IHandler> = new Map();
 
   /**
    * @ai-intent Private constructor for singleton
@@ -97,7 +105,7 @@ export class HandlerFactory {
    */
   register(
     type: HandlerType,
-    handlerClass: new (database: any) => any,  // @ai-todo: Fix when all handlers use IDatabase
+    handlerClass: new (...args: any[]) => IHandler,
     useV2: boolean = false
   ): void {
     this.registrations.set(type, {
@@ -116,7 +124,7 @@ export class HandlerFactory {
    * @ai-pattern Lazy instantiation with caching
    * @ai-critical All handlers share same database instance
    */
-  getHandler<T = any>(type: HandlerType, database: any): T {  // @ai-todo: Fix when all handlers use IDatabase
+  getHandler<T extends IHandler = IHandler>(type: HandlerType, database: IDatabase): T {
     // @ai-logic: Return cached instance if available
     if (this.handlers.has(type)) {
       return this.handlers.get(type) as T;
@@ -149,8 +157,8 @@ export class HandlerFactory {
    * @ai-flow Creates all handlers with given database
    * @ai-usage For bulk operations or testing
    */
-  getAllHandlers(database: any): Map<HandlerType, any> {  // @ai-todo: Fix when all handlers use IDatabase
-    const allHandlers = new Map<HandlerType, any>();
+  getAllHandlers(database: IDatabase): Map<HandlerType, IHandler> {
+    const allHandlers = new Map<HandlerType, IHandler>();
 
     for (const type of this.registrations.keys()) {
       allHandlers.set(type, this.getHandler(type, database));

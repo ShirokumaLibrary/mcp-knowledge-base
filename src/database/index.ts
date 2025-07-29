@@ -8,10 +8,44 @@ import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
 import { ensureInitialized } from '../utils/decorators.js';
 import { Session, Daily } from '../types/complete-domain-types.js';
+import type { Issue, Plan, Document } from '../types/domain-types.js';
 // import * as path from 'path';
 
 // Re-export types
 export * from '../types/domain-types.js';
+
+// Internal type definitions
+interface GroupedItems {
+  issues: Issue[];
+  plans: Plan[];
+  docs: Document[];
+  knowledge: Document[];
+  [key: string]: Issue[] | Plan[] | Document[]; // For indexing
+}
+
+interface GroupedTypes {
+  tasks: string[];
+  documents: string[];
+  [key: string]: string[]; // For indexing
+}
+
+interface ItemRow {
+  id: string;
+  type: string;
+  title: string;
+  description?: string;
+  content?: string;
+  tags: string;
+  related: string;
+  created_at: string;
+  updated_at: string;
+  priority?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  start_time?: string;
+  date?: string;
+}
 
 /**
  * @ai-context Main database facade coordinating all repositories
@@ -274,7 +308,7 @@ export class FileIssueDatabase {
     const items = await this.itemRepo.searchItemsByTag(tag);
 
     // Group by type for backward compatibility
-    const grouped: any = {
+    const grouped: GroupedItems = {
       issues: [],
       plans: [],
       docs: [],
@@ -295,7 +329,7 @@ export class FileIssueDatabase {
     const items = await this.searchRepo.searchContent(query);
 
     // Group by type for backward compatibility
-    const grouped: any = {
+    const grouped: GroupedItems = {
       issues: [],
       plans: [],
       docs: [],
@@ -858,7 +892,7 @@ export class FileIssueDatabase {
     const types = await this.typeRepo.getAllTypes();
 
     // Group by base_type for backward compatibility
-    const grouped: any = {
+    const grouped: GroupedTypes = {
       tasks: [],
       documents: []
     };
@@ -884,7 +918,7 @@ export class FileIssueDatabase {
     );
 
     // Convert database rows to Session format
-    return results.map((row: any) => ({
+    return (results as unknown as ItemRow[]).map((row) => ({
       id: row.id,
       title: row.title,
       description: row.description || undefined,
@@ -910,7 +944,7 @@ export class FileIssueDatabase {
     );
 
     // Convert database rows to Session format
-    return results.map((row: any) => ({
+    return (results as unknown as ItemRow[]).map((row) => ({
       id: row.id,
       title: row.title,
       description: row.description || undefined,
@@ -936,7 +970,7 @@ export class FileIssueDatabase {
     );
 
     // Convert database rows to Daily format
-    return results.map((row: any) => ({
+    return (results as unknown as ItemRow[]).map((row) => ({
       date: row.id, // ID is the date for summaries
       title: row.title,
       description: row.description || undefined,
