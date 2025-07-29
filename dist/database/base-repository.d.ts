@@ -43,7 +43,9 @@ export interface QueryOptions<T> {
  * @ai-critical Subclasses must implement abstract methods
  * @ai-generic T for entity type, K for primary key type
  */
-export declare abstract class BaseRepository<T extends BaseEntity, K extends string | number = number> {
+export declare abstract class BaseRepository<T extends {
+    id: string | number;
+}, K extends string | number = number> {
     protected db: Database;
     protected tableName: string;
     protected logger: Logger;

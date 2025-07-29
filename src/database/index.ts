@@ -316,8 +316,19 @@ export class FileIssueDatabase {
     };
 
     for (const item of items) {
-      if (grouped[item.type]) {
-        grouped[item.type].push(item);
+      switch (item.type) {
+        case 'issues':
+          grouped.issues.push(item as unknown as Issue);
+          break;
+        case 'plans':
+          grouped.plans.push(item as unknown as Plan);
+          break;
+        case 'docs':
+          grouped.docs.push(item as unknown as Document);
+          break;
+        case 'knowledge':
+          grouped.knowledge.push(item as unknown as Document);
+          break;
       }
     }
 
@@ -337,8 +348,19 @@ export class FileIssueDatabase {
     };
 
     for (const item of items) {
-      if (grouped[item.type]) {
-        grouped[item.type].push(item);
+      switch (item.type) {
+        case 'issues':
+          grouped.issues.push(item as unknown as Issue);
+          break;
+        case 'plans':
+          grouped.plans.push(item as unknown as Plan);
+          break;
+        case 'docs':
+          grouped.docs.push(item as unknown as Document);
+          break;
+        case 'knowledge':
+          grouped.knowledge.push(item as unknown as Document);
+          break;
       }
     }
 

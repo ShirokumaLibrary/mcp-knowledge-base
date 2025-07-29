@@ -76,7 +76,7 @@ export class HandlerFactory {
      * @ai-flow Stores constructor for later instantiation
      * @ai-pattern Allows runtime handler swapping
      */
-    register(type, handlerClass, // Temporary fix for different constructor signatures
+    register(type, handlerClass, // Accept any handler type
     useV2 = false) {
         this.registrations.set(type, {
             type,

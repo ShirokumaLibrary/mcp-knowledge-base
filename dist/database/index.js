@@ -214,8 +214,19 @@ export class FileIssueDatabase {
             knowledge: []
         };
         for (const item of items) {
-            if (grouped[item.type]) {
-                grouped[item.type].push(item);
+            switch (item.type) {
+                case 'issues':
+                    grouped.issues.push(item);
+                    break;
+                case 'plans':
+                    grouped.plans.push(item);
+                    break;
+                case 'docs':
+                    grouped.docs.push(item);
+                    break;
+                case 'knowledge':
+                    grouped.knowledge.push(item);
+                    break;
             }
         }
         return grouped;
@@ -230,8 +241,19 @@ export class FileIssueDatabase {
             knowledge: []
         };
         for (const item of items) {
-            if (grouped[item.type]) {
-                grouped[item.type].push(item);
+            switch (item.type) {
+                case 'issues':
+                    grouped.issues.push(item);
+                    break;
+                case 'plans':
+                    grouped.plans.push(item);
+                    break;
+                case 'docs':
+                    grouped.docs.push(item);
+                    break;
+                case 'knowledge':
+                    grouped.knowledge.push(item);
+                    break;
             }
         }
         return grouped;

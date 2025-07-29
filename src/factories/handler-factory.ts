@@ -42,11 +42,12 @@ export enum HandlerType {
 // Handler interface - all handlers should have these methods
 interface IHandler {
   // Basic handler contract
+  initialize?(): Promise<void>; // Optional initialization
 }
 
 interface HandlerRegistration {
   type: HandlerType;
-  constructor: new (...args: any[]) => IHandler; // Using interface instead of BaseHandler
+  constructor: new (...args: any[]) => any; // Accept any handler type
   useV2?: boolean;  // @ai-logic: Flag to use V2 implementation
 }
 
@@ -105,7 +106,7 @@ export class HandlerFactory {
    */
   register(
     type: HandlerType,
-    handlerClass: new (...args: any[]) => IHandler,
+    handlerClass: new (...args: any[]) => any, // Accept any handler type
     useV2: boolean = false
   ): void {
     this.registrations.set(type, {

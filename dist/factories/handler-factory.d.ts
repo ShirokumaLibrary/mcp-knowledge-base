@@ -6,7 +6,6 @@
  * @ai-assumption All handlers follow constructor(database) pattern
  */
 import type { IDatabase } from '../database/interfaces/repository-interfaces.js';
-import { BaseHandler } from '../handlers/base-handler.js';
 /**
  * @ai-intent Handler type enumeration
  * @ai-pattern Type-safe handler identification
@@ -23,9 +22,12 @@ export declare enum HandlerType {
  * @ai-intent Handler registration entry
  * @ai-pattern Maps handler type to implementation
  */
+interface IHandler {
+    initialize?(): Promise<void>;
+}
 interface HandlerRegistration {
     type: HandlerType;
-    constructor: new (...args: any[]) => BaseHandler;
+    constructor: new (...args: any[]) => any;
     useV2?: boolean;
 }
 /**
@@ -58,7 +60,7 @@ export declare class HandlerFactory {
      * @ai-flow Stores constructor for later instantiation
      * @ai-pattern Allows runtime handler swapping
      */
-    register(type: HandlerType, handlerClass: new (...args: any[]) => BaseHandler, // Temporary fix for different constructor signatures
+    register(type: HandlerType, handlerClass: new (...args: any[]) => any, // Accept any handler type
     useV2?: boolean): void;
     /**
      * @ai-intent Create or get cached handler instance
@@ -66,13 +68,13 @@ export declare class HandlerFactory {
      * @ai-pattern Lazy instantiation with caching
      * @ai-critical All handlers share same database instance
      */
-    getHandler<T extends BaseHandler = BaseHandler>(type: HandlerType, database: IDatabase): T;
+    getHandler<T extends IHandler = IHandler>(type: HandlerType, database: IDatabase): T;
     /**
      * @ai-intent Get all registered handlers
      * @ai-flow Creates all handlers with given database
      * @ai-usage For bulk operations or testing
      */
-    getAllHandlers(database: IDatabase): Map<HandlerType, BaseHandler>;
+    getAllHandlers(database: IDatabase): Map<HandlerType, IHandler>;
     /**
      * @ai-intent Clear all cached handlers
      * @ai-flow Removes all cached instances
