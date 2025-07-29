@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/server.ts",
-    "build": "tsc",
+    "build": "tsc --build --clean && tsc --build --force tsconfig.prod.json",
+    "build:dev": "tsc --build --clean && tsc --build --force",
+    "build:clean": "tsc --build --clean",
+    "build:watch": "tsc --watch",
     "start": "node dist/server.js",
     "test": "jest",
     "test:keep": "KEEP_TEST_DATA=true jest",
@@ -26,6 +29,7 @@
     "rebuild-db": "tsx src/rebuild-db.ts",
     "migrate:plural": "tsx src/migrate-to-plural-filenames.ts",
     "migrate:tasks": "tsx src/migrate-to-unified-tasks.ts",
+    "clean": "rm -rf dist",
     "precommit": "npm run lint:errors && npm run build && npm run test:unit"
   },
   "keywords": [
