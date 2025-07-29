@@ -31,8 +31,16 @@ npm run test:integration
 npm run test:all
 
 # カバレッジ付き
-npm test -- --coverage
+npm run test:coverage
 ```
+
+### テストカバレッジ
+
+現在のテストカバレッジ状況：
+- **全体カバレッジ**: 79.3%
+- **関数カバレッジ**: 80.33% ✅
+- **テスト数**: 952 tests (全てパス)
+- **テストスイート**: 50 suites
 
 ### 方法2: シナリオベーステスト
 

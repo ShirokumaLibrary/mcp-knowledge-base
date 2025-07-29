@@ -96,6 +96,7 @@ try {
 - `@ai-validation`: Data validation and constraints
 - `@ai-trade-off`: Trade-offs between different approaches
 - `@ai-alternative`: Alternative implementations considered
+- `@ai-any-deliberate`: Intentional use of TypeScript `any` type with justification
 
 ### Error Tags
 - `@ai-error-type`: Types of errors that can occur
@@ -129,6 +130,9 @@ try {
 3. **Update annotations with code** - Treat as part of the code, not documentation
 4. **Focus on non-obvious aspects** - Don't annotate self-explanatory code
 5. **Link related concepts** - Reference other classes/methods when relevant
+6. **Justify any types** - Always use `@ai-any-deliberate` when intentionally using `any` type
+   - Include reason why a more specific type cannot be used
+   - Always pair with `eslint-disable-next-line` comment
 
 ### When to Use Cross-Reference Tags
 
@@ -237,6 +241,24 @@ it.skip('should handle corrupted markdown files', async () => {
 test('should handle concurrent knowledge operations', async () => {
   // test implementation
 });
+```
+
+### Intentional Any Type Usage
+```typescript
+// @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let params: any[] = [`"${escapedQuery}"`, limit, offset];
+
+// @ai-any-deliberate: YAML frontmatter can contain any valid YAML structure
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+metadata: Record<string, any>;
+
+// @ai-any-deliberate: Winston transport type doesn't include setMaxListeners in TypeScript definitions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+if (typeof (consoleTransport as any).setMaxListeners === 'function') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (consoleTransport as any).setMaxListeners(100);
+}
 ```
 
 ## Integration Guidelines

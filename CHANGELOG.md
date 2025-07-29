@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2025-07-29
+
+### Security
+- **Critical Fix**: Path traversal vulnerability in session ID handling
+  - Added comprehensive validation for file paths and IDs
+  - Prevents directory traversal attacks (e.g., `../../etc/passwd`)
+  - Multi-layer defense: Zod schemas, repository validation, and file path checks
+
+### Added
+- **Monkey Testing**: Extensive stress testing with edge cases
+  - Unicode and emoji handling verification
+  - SQL injection prevention testing
+  - Concurrent operation testing
+  - Large dataset handling (50+ tags per item)
+  - Custom type creation and usage validation
+
+### Changed
+- Enhanced input validation across all ID parameters
+- Improved error messages for invalid input formats
+
+### Fixed
+- Security vulnerability where malicious session IDs could create files outside data directory
+
+## [0.4.1] - 2025-07-29
+
+### Added
+- **Test Coverage Improvements**: Achieved 80.33% function coverage (up from 44.54%)
+  - Added 500+ new tests across the codebase
+  - Comprehensive security layer tests (input sanitizer, rate limiter, access control)
+  - Edge case handling tests for Unicode, special characters, and validation
+  - MCP protocol test suite with 12 categories and 200+ test cases
+- **Development Documentation**:
+  - Test results documentation in `/docs/test-results/`
+  - Updated test case documentation with discovered behaviors
+  - Code quality metrics in README
+
+### Changed
+- **Code Quality Improvements**:
+  - Removed all TypeScript `any` types (249 → 0)
+  - Enhanced type safety throughout the codebase
+  - Improved error messages and validation
+  - Better separation of concerns in test files
+
+### Fixed
+- Session update now correctly preserves the date field
+- Empty tags handling (returns null instead of empty array from markdown)
+- Build errors in test files (missing properties, incorrect types)
+- Markdown parser handling of numeric strings with leading zeros
+- Path traversal test expectations in security tests
+
+### Removed
+- **Code Cleanup**: Removed 11 unused files (approximately 1500 lines)
+  - Obsolete dependency container and related tests
+  - Unused error handling utilities and middleware
+  - Deprecated performance utilities
+  - Dead code in various utility modules
+
 ## [0.4.0] - 2025-07-29
 
 ### Added
