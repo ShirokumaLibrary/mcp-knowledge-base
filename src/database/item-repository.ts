@@ -545,17 +545,17 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
   private getFilePath(type: string, id: string): string {
     // Validate ID to prevent path traversal attacks
     const idStr = String(id);
-    if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') || 
+    if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') ||
         idStr.includes('\0') || idStr.includes('%') || idStr === '.' ||
         path.isAbsolute(idStr)) {
       throw new Error(`Invalid ID format: ${idStr}`);
     }
-    
+
     // Additional validation: only allow alphanumeric, dash, underscore, and dot
     if (!/^[a-zA-Z0-9\-_.]+$/.test(idStr)) {
       throw new Error(`Invalid ID format: ${idStr}`);
     }
-    
+
     if (type === 'sessions') {
       // Sessions are stored in date subdirectories
       const dateMatch = id.match(/^(\d{4}-\d{2}-\d{2})/);

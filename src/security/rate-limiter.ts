@@ -195,7 +195,7 @@ export class RateLimiter {
   private getDefaultKey(context: unknown): string {
     // Try to extract identifier from context
     const ctx = context as RateLimitContext;
-    
+
     if (ctx.ip) {
       return `ip:${ctx.ip}`;
     }

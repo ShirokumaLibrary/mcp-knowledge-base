@@ -86,21 +86,21 @@ export class SessionManager {
   ): Promise<Session> {
     const sessionDate = datetime ? new Date(datetime) : new Date();
     const date = sessionDate.toISOString().split('T')[0];  // @ai-pattern: YYYY-MM-DD
-    
+
     // Validate custom ID to prevent path traversal
     if (id) {
-      if (id.includes('..') || id.includes('/') || id.includes('\\') || 
+      if (id.includes('..') || id.includes('/') || id.includes('\\') ||
           id.includes('\0') || id.includes('%') || id === '.' ||
           path.isAbsolute(id)) {
         throw new Error(`Invalid session ID format: ${id}`);
       }
-      
+
       // Only allow alphanumeric, dash, underscore, and dot
       if (!/^[a-zA-Z0-9\-_.]+$/.test(id)) {
         throw new Error(`Invalid session ID format: ${id}`);
       }
     }
-    
+
     const sessionId = id || this.generateSessionId(sessionDate);
 
     const session: Session = {

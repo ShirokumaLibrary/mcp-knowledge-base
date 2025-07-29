@@ -9,10 +9,11 @@ interface TagRow {
   created_at?: string;
 }
 
-interface TagCountRow {
-  tag_name: string;
-  count: number;
-}
+// Currently unused but may be needed for future tag count features
+// interface TagCountRow {
+//   tag_name: string;
+//   count: number;
+// }
 
 /**
  * @ai-context Repository for tag management across all content types

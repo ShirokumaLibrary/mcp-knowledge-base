@@ -71,16 +71,16 @@ export function logExecutionTime(
       const duration = performance.now() - start;
 
       // @ai-logic: Log only if logger exists on instance
-      if ((this as {logger?: {debug: Function}}).logger) {
-        (this as {logger: {debug: Function}}).logger.debug(`${className}.${propertyKey} completed`, { duration });
+      if ((this as {logger?: {debug: (...args: unknown[]) => void}}).logger) {
+        (this as {logger: {debug: (...args: unknown[]) => void}}).logger.debug(`${className}.${propertyKey} completed`, { duration });
       }
 
       return result;
     } catch (error) {
       const duration = performance.now() - start;
 
-      if ((this as {logger?: {error: Function}}).logger) {
-        (this as {logger: {error: Function}}).logger.error(`${className}.${propertyKey} failed`, { duration, error });
+      if ((this as {logger?: {error: (...args: unknown[]) => void}}).logger) {
+        (this as {logger: {error: (...args: unknown[]) => void}}).logger.error(`${className}.${propertyKey} failed`, { duration, error });
       }
 
       throw error;
@@ -116,8 +116,8 @@ export function retry(maxAttempts: number = 3, initialDelay: number = 1000) {
           if (attempt < maxAttempts) {
             const delay = initialDelay * Math.pow(2, attempt - 1);
 
-            if ((this as {logger?: {warn: Function}}).logger) {
-              (this as {logger: {warn: Function}}).logger.warn(`${propertyKey} failed, retrying`, {
+            if ((this as {logger?: {warn: (...args: unknown[]) => void}}).logger) {
+              (this as {logger: {warn: (...args: unknown[]) => void}}).logger.warn(`${propertyKey} failed, retrying`, {
                 attempt,
                 maxAttempts,
                 delay,
