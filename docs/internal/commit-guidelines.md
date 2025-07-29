@@ -71,10 +71,15 @@ git commit -m "test: update tests for status name-based system
 **Files to include:**
 - `dist/**`
 
+**Important**: Always use production build for distribution files to minimize file count and exclude unnecessary files.
+
 **Example commands:**
 ```bash
-# Build the project first
-npm run build
+# Build the project with production settings first
+npm run build  # This runs the production build by default
+
+# Verify the build output
+ls -la dist/ | wc -l  # Should be around 70-80 files, not 300+
 
 # Stage dist files
 git add dist/
@@ -82,6 +87,13 @@ git add dist/
 # Commit
 git commit -m "build: update distribution files"
 ```
+
+**Note**: The production build (`npm run build`) excludes:
+- Test files (`*.test.js`)
+- Source maps (`*.js.map`)
+- TypeScript declaration files (`*.d.ts`)
+
+If you need development build with all files, use `npm run build:dev` instead.
 
 ### 4. Documentation Commit
 
