@@ -35,6 +35,31 @@ This MCP server provides a unified knowledge base system that manages Issues, Pl
 - **Dynamic Type System**: Create custom document types to extend the knowledge base
 - **Plural File Naming**: Consistent plural naming convention for all entity files
 
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+### 📚 For Users
+- [Quick Start Guide](docs/user/quickstart.md) - Get started quickly
+- [Installation Guide](docs/user/installation.md) - Detailed setup instructions
+- [Usage Guide](docs/user/usage.md) - How to use all features
+- [API Reference](docs/user/api-reference.md) - Complete tool reference
+- [FAQ](docs/user/faq.md) - Frequently asked questions
+
+### 🛠️ For Developers
+- [Architecture](docs/developer/architecture.md) - System design and structure
+- [Development Setup](docs/developer/setup.md) - Setting up development environment
+- [Contributing Guide](docs/developer/contributing.md) - How to contribute
+- [Testing Guide](docs/developer/testing-guide.md) - Running and writing tests
+
+### 🇯🇵 日本語ドキュメント
+- [クイックスタート](docs/ja/user/quickstart.md)
+- [インストールガイド](docs/ja/user/installation.md)
+- [使い方ガイド](docs/ja/user/usage.md)
+- [FAQ](docs/ja/user/faq.md)
+
+For complete documentation index, see [docs/README.md](docs/README.md)
+
 ## Requirements
 
 - Node.js 18+
