@@ -114,12 +114,12 @@ export class TagRepository extends BaseRepository {
   async createTag(name: string): Promise<string> {
     // Trim the name first
     const trimmedName = name.trim();
-    
+
     // Validate that the tag name is not empty or whitespace only
     if (trimmedName.length === 0) {
       throw new Error('Tag name cannot be empty or whitespace only');
     }
-    
+
     // Use INSERT OR IGNORE to avoid AUTOINCREMENT increase
     const result = await this.db.runAsync(
       'INSERT OR IGNORE INTO tags (name) VALUES (?)',
@@ -163,7 +163,7 @@ export class TagRepository extends BaseRepository {
     if (trimmedName.length === 0) {
       throw new Error('Tag name cannot be empty or whitespace only');
     }
-    
+
     await this.ensureTagsExist([trimmedName]);
     const row = await this.db.getAsync(
       'SELECT id FROM tags WHERE name = ?',
@@ -275,7 +275,7 @@ export class TagRepository extends BaseRepository {
     const trimmedTags = tags
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
-    
+
     if (trimmedTags.length === 0) {
       return;
     }

@@ -70,21 +70,21 @@ async function rebuildDatabase() {
       // @ai-critical: Determine base type from markdown header or content
       // @ai-pattern: No special treatment for initial types - treat all types equally
       let baseType = 'documents';
-      
+
       // Check markdown files for 'base' field in header
       const sampleFiles = globSync(path.join(dir, `${typeName}-*.md`)).slice(0, 3);
       for (const file of sampleFiles) {
         try {
           const content = readFileSync(file, 'utf-8');
           const parsed = parseMarkdown(content);
-          
+
           // @ai-priority: Always check for explicit 'base' field first
           // @ai-why: Explicit metadata should override any inference
           if (parsed.metadata.base) {
             baseType = parsed.metadata.base;
             break;
           }
-          
+
           // @ai-fallback: Only infer if no explicit base field
           // @ai-logic: Tasks have priority and status, documents don't
           if (parsed.metadata.priority && parsed.metadata.status) {
@@ -114,11 +114,11 @@ async function rebuildDatabase() {
 
   // Count items for all types (including sessions and dailies)
   const allTypes = await typeRepo.getAllTypes();
-  
+
   // Add special types that are not in the type repository
   allTypes.push({ type: 'sessions', base_type: 'sessions' });
   allTypes.push({ type: 'dailies', base_type: 'documents' });
-  
+
   for (const typeInfo of allTypes) {
     const type = typeInfo.type;
     console.log(`\n📂 Scanning ${type}...`);
@@ -147,7 +147,7 @@ async function rebuildDatabase() {
       const dailiesFiles = globSync(path.join(databasePath, 'sessions', 'dailies', 'dailies-*.md'));
       counts.typeCountsMap[type] = dailiesFiles.length;
       console.log(`    Found ${dailiesFiles.length} dailies files`);
-      
+
       // Collect tags and statuses from dailies
       for (const file of dailiesFiles) {
         const content = readFileSync(file, 'utf-8');

@@ -59,10 +59,10 @@ export class ItemRepository {
     const typeRepo = new TypeRepository(this.fileDb);
     await typeRepo.init();
     const fieldDefs = await typeRepo.getFieldsForType(item.type);
-    
+
     // Create metadata with all defined fields
     const metadata: Record<string, any> = {};
-    
+
     // @ai-critical: Add base field for ALL types uniformly (except special ID types)
     // @ai-why: No special treatment for initial types - all types are equal
     // @ai-note: Only sessions/dailies excluded due to their special ID format
@@ -72,16 +72,16 @@ export class ItemRepository {
         'SELECT base_type FROM sequences WHERE type = ?',
         [item.type]
       ) as { base_type: string } | undefined;
-      
+
       if (typeInfo?.base_type) {
         metadata.base = typeInfo.base_type;
       }
     }
-    
+
     for (const fieldDef of fieldDefs) {
       const fieldName = fieldDef.field_name;
       let value: any;
-      
+
       // Map UnifiedItem properties to field names
       switch (fieldName) {
         case 'id':
@@ -144,7 +144,7 @@ export class ItemRepository {
           // Use default value for unknown fields
           value = fieldDef.default_value;
       }
-      
+
       // Set the value in metadata
       metadata[fieldName] = value;
     }
@@ -166,7 +166,7 @@ export class ItemRepository {
   ): Promise<UnifiedItem> {
     const metadata = item.metadata;
     const related = metadata.related || [];
-    
+
     // Use specific related fields if available, otherwise derive from related
     const related_tasks = metadata.related_tasks || related.filter((r: string) => r.match(/^(issues|plans)-/));
     const related_documents = metadata.related_documents || related.filter((r: string) => r.match(/^(docs|knowledge)-/));
@@ -247,7 +247,7 @@ export class ItemRepository {
 
     // Validate type exists
     let typeInfo: { base_type: string } | undefined;
-    
+
     // Handle special types (sessions and dailies)
     if (type === 'sessions') {
       typeInfo = { base_type: 'sessions' };
@@ -286,8 +286,10 @@ export class ItemRepository {
 
     // Validate date formats and validity
     const validateDate = (dateStr: string | undefined, fieldName: string) => {
-      if (!dateStr) return;
-      
+      if (!dateStr) {
+        return;
+      }
+
       // Check format
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         throw new McpError(
@@ -295,13 +297,13 @@ export class ItemRepository {
           `Invalid ${fieldName} format. Date must be in YYYY-MM-DD format`
         );
       }
-      
+
       // Check if date is valid
       const [year, month, day] = dateStr.split('-').map(Number);
       const date = new Date(year, month - 1, day);
-      
-      if (date.getFullYear() !== year || 
-          date.getMonth() !== month - 1 || 
+
+      if (date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
           date.getDate() !== day) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -309,7 +311,7 @@ export class ItemRepository {
         );
       }
     };
-    
+
     validateDate(params.start_date || undefined, 'start_date');
     validateDate(params.end_date || undefined, 'end_date');
 
@@ -336,7 +338,7 @@ export class ItemRepository {
         createdAt = nowISOString;
         startDate = nowISOString.split('T')[0];
       }
-      
+
       // Use custom ID or generate from datetime
       if (params.id) {
         id = params.id;
@@ -361,20 +363,20 @@ export class ItemRepository {
             'Invalid date format. Date must be in YYYY-MM-DD format'
           );
         }
-        
+
         // Validate date is valid
         const [year, month, day] = params.date.split('-').map(Number);
         const date = new Date(year, month - 1, day);
-        
-        if (date.getFullYear() !== year || 
-            date.getMonth() !== month - 1 || 
+
+        if (date.getFullYear() !== year ||
+            date.getMonth() !== month - 1 ||
             date.getDate() !== day) {
           throw new McpError(
             ErrorCode.InvalidRequest,
             `Invalid date: ${params.date}`
           );
         }
-        
+
         id = params.date;
         startDate = params.date;
         createdAt = params.date + 'T00:00:00.000Z';
@@ -419,7 +421,7 @@ export class ItemRepository {
         );
       }
     };
-    
+
     validateRelatedArray(params.related_tasks, 'related_tasks');
     validateRelatedArray(params.related_documents, 'related_documents');
     validateRelatedArray(params.related, 'related');
@@ -486,7 +488,7 @@ export class ItemRepository {
   async getItem(type: string, id: string): Promise<UnifiedItem | null> {
     // Validate type exists
     let typeInfo: { base_type: string } | undefined;
-    
+
     // Handle special types (sessions and dailies)
     if (type === 'sessions') {
       typeInfo = { base_type: 'sessions' };
@@ -547,8 +549,10 @@ export class ItemRepository {
 
     // Validate date formats and validity
     const validateDate = (dateStr: string | undefined, fieldName: string) => {
-      if (!dateStr) return;
-      
+      if (!dateStr) {
+        return;
+      }
+
       // Check format
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         throw new McpError(
@@ -556,13 +560,13 @@ export class ItemRepository {
           `Invalid ${fieldName} format. Date must be in YYYY-MM-DD format`
         );
       }
-      
+
       // Check if date is valid
       const [year, month, day] = dateStr.split('-').map(Number);
       const date = new Date(year, month - 1, day);
-      
-      if (date.getFullYear() !== year || 
-          date.getMonth() !== month - 1 || 
+
+      if (date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
           date.getDate() !== day) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -570,7 +574,7 @@ export class ItemRepository {
         );
       }
     };
-    
+
     validateDate(params.start_date || undefined, 'start_date');
     validateDate(params.end_date || undefined, 'end_date');
 
@@ -583,7 +587,7 @@ export class ItemRepository {
         );
       }
     };
-    
+
     validateRelatedArray(params.related_tasks, 'related_tasks');
     validateRelatedArray(params.related_documents, 'related_documents');
     validateRelatedArray(params.related, 'related');
@@ -595,7 +599,7 @@ export class ItemRepository {
       ...(params.related_documents || []),
       ...(params.related || [])
     ];
-    
+
     if (allRelated.includes(currentItemRef)) {
       throw new McpError(
         ErrorCode.InvalidRequest,
@@ -604,15 +608,15 @@ export class ItemRepository {
     }
 
     // Remove duplicates from related arrays
-    const uniqueRelatedTasks = params.related_tasks !== undefined 
-      ? [...new Set(params.related_tasks)] 
+    const uniqueRelatedTasks = params.related_tasks !== undefined
+      ? [...new Set(params.related_tasks)]
       : current.related_tasks;
-    const uniqueRelatedDocuments = params.related_documents !== undefined 
-      ? [...new Set(params.related_documents)] 
+    const uniqueRelatedDocuments = params.related_documents !== undefined
+      ? [...new Set(params.related_documents)]
       : current.related_documents;
 
     // Validate and clean tags if provided
-    const cleanedTags = params.tags !== undefined 
+    const cleanedTags = params.tags !== undefined
       ? params.tags.map(tag => cleanString(tag)).filter(tag => tag.length > 0)
       : current.tags;
 
@@ -718,7 +722,7 @@ export class ItemRepository {
   ): Promise<UnifiedItem[]> {
     // Validate type exists
     let typeInfo: { base_type: string } | undefined;
-    
+
     // Handle special types (sessions and dailies)
     if (type === 'sessions') {
       typeInfo = { base_type: 'sessions' };
@@ -769,18 +773,18 @@ export class ItemRepository {
       // Use start_date for sessions/dailies, updated_at for others
       const dateField = (type === 'sessions' || type === 'dailies') ? 'i.start_date' : 'i.updated_at';
       const isDateOnly = (type === 'sessions' || type === 'dailies');
-      
+
       if (startDate) {
         query += ` AND ${dateField} >= ?`;
         params.push(isDateOnly ? startDate : startDate + 'T00:00:00.000Z');
       }
-      
+
       if (endDate) {
         // For end date, include the entire day
         query += ` AND ${dateField} <= ?`;
         params.push(isDateOnly ? endDate : endDate + 'T23:59:59.999Z');
       }
-      
+
       // Debug logging
       if (type === 'sessions') {
         console.log('Date filter query:', query);
@@ -789,7 +793,7 @@ export class ItemRepository {
     }
 
     query += ' ORDER BY i.created_at DESC';
-    
+
     // Apply limit if specified
     // @ai-validation: Only apply positive limits, ignore zero or negative values
     // @ai-logic: No limit means return all results (same as limit <= 0)

@@ -33,7 +33,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
   // Get repositories from FileIssueDatabase
   const itemRepository = fileDb.getItemRepository();
   const typeRepository = new TypeRepository(fileDb);
-  
+
   // @ai-note: TypeRepository needs to be initialized to get database connection
   (async () => {
     await typeRepository.init();
@@ -45,7 +45,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
    */
   async function handleGetItems(params: z.infer<typeof GetItemsParams>): Promise<UnifiedItem[]> {
     const { type, statuses, includeClosedStatuses, start_date, end_date, limit } = params;
-    
+
     // Special handling for get_latest_session equivalent
     if (type === 'sessions' && !start_date && !end_date && limit === 1) {
       // Get today's latest session
@@ -142,7 +142,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
         return { type, baseType: baseType || 'documents' };
       })
     );
-    
+
     // Create a map for quick lookup
     const typeToBaseType = new Map(
       typeInfos.map(info => [info.type, info.baseType])
@@ -150,7 +150,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
 
     for (const item of items) {
       const baseType = typeToBaseType.get(item.type) || 'documents';
-      
+
       // Special handling for sessions - they go under tasks for backward compatibility
       if (item.type === 'sessions') {
         if (!result.tasks[item.type]) {

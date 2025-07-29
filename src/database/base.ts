@@ -185,10 +185,10 @@ export class DatabaseConnection {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     // Add description column if it doesn't exist (for existing databases)
     try {
-      await this.db.runAsync(`ALTER TABLE sequences ADD COLUMN description TEXT`);
+      await this.db.runAsync('ALTER TABLE sequences ADD COLUMN description TEXT');
       this.logger.debug('Added description column to sequences table');
     } catch (err) {
       // Column already exists, ignore error
@@ -211,23 +211,23 @@ export class DatabaseConnection {
       // @ai-pattern: Any new type can be added with same capabilities
       const sequenceValues: string[] = [];
       const typeDefinitions = [
-        { 
-          type: 'issues', 
+        {
+          type: 'issues',
           baseType: 'tasks',
           description: 'Bug reports, feature requests, and general tasks. Includes priority, status, and timeline tracking.'
         },
-        { 
-          type: 'plans', 
+        {
+          type: 'plans',
           baseType: 'tasks',
           description: 'Project plans and milestones with start/end dates. Used for planning and tracking larger initiatives.'
         },
-        { 
-          type: 'docs', 
+        {
+          type: 'docs',
           baseType: 'documents',
           description: 'Technical documentation, API references, and user guides. Structured content with required text.'
         },
-        { 
-          type: 'knowledge', 
+        {
+          type: 'knowledge',
           baseType: 'documents',
           description: 'Knowledge base articles, best practices, and how-to guides. Searchable reference material.'
         }
@@ -239,7 +239,7 @@ export class DatabaseConnection {
       }
 
       await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type, description) VALUES ${sequenceValues.join(', ')}`);
-      
+
       // Add special types (sessions and dailies) that don't use sequential IDs
       await this.db.runAsync(`INSERT INTO sequences (type, current_value, base_type, description) VALUES 
         ('sessions', 0, 'sessions', 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.'),

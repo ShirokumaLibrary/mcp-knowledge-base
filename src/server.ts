@@ -185,19 +185,19 @@ class IssueTrackerServer {
       case 'delete_tag': return this.tagHandlers.handleDeleteTag(args);
       case 'search_tags': return this.tagHandlers.handleSearchTags(args);
 
-      // Session handlers (DEPRECATED - use unified handlers)
-      // case 'get_sessions': return this.sessionHandlers.handleGetSessions(args);
-      // case 'get_session_detail': return this.sessionHandlers.handleGetSessionDetail(args);
-      // case 'get_latest_session': return this.sessionHandlers.handleGetLatestSession(args);
-      // case 'create_session': return this.sessionHandlers.handleCreateSession(args);
-      // case 'update_session': return this.sessionHandlers.handleUpdateSession(args);
-      // case 'search_sessions_by_tag': return this.sessionHandlers.handleSearchSessionsByTag(args);
+        // Session handlers (DEPRECATED - use unified handlers)
+        // case 'get_sessions': return this.sessionHandlers.handleGetSessions(args);
+        // case 'get_session_detail': return this.sessionHandlers.handleGetSessionDetail(args);
+        // case 'get_latest_session': return this.sessionHandlers.handleGetLatestSession(args);
+        // case 'create_session': return this.sessionHandlers.handleCreateSession(args);
+        // case 'update_session': return this.sessionHandlers.handleUpdateSession(args);
+        // case 'search_sessions_by_tag': return this.sessionHandlers.handleSearchSessionsByTag(args);
 
-      // Summary handlers (DEPRECATED - use unified handlers)
-      // case 'get_summaries': return this.summaryHandlers.handleGetDailySummaries(args);
-      // case 'get_summary_detail': return this.summaryHandlers.handleGetDailyDetail(args);
-      // case 'create_summary': return this.summaryHandlers.handleCreateDaily(args);
-      // case 'update_summary': return this.summaryHandlers.handleUpdateDaily(args);
+        // Summary handlers (DEPRECATED - use unified handlers)
+        // case 'get_summaries': return this.summaryHandlers.handleGetDailySummaries(args);
+        // case 'get_summary_detail': return this.summaryHandlers.handleGetDailyDetail(args);
+        // case 'create_summary': return this.summaryHandlers.handleCreateDaily(args);
+        // case 'update_summary': return this.summaryHandlers.handleUpdateDaily(args);
 
       // Type management handlers
       case 'create_type': return this.typeHandlers.handleCreateType(args);

@@ -131,20 +131,20 @@ function addFileTransports(transports: winston.transport[]): void {
 export function createLogger(service: string): winston.Logger {
   // @ai-critical: Create fresh transports array for each logger to avoid shared state
   const loggerTransports: winston.transport[] = [];
-  
+
   // @ai-logic: Skip console transport in test environment to prevent warnings
   // @ai-why: Test environment creates 27+ loggers, each adding listeners to Console
   // @ai-fix: Complete prevention of MaxListenersExceededWarning in Jest tests
   if (process.env.NODE_ENV !== 'test') {
     loggerTransports.push(getConsoleTransport());
   }
-  
+
   const loggerOptions: winston.LoggerOptions = {
     level: logLevel,
     silent: logLevel === 'silent' || process.env.NODE_ENV === 'test',  // @ai-logic: Complete silence for tests
     // @ai-why: Prevents any log output and listener registration in test environment
     defaultMeta: { service },  // @ai-logic: Service tagged on all logs
-    transports: loggerTransports,
+    transports: loggerTransports
   };
 
   // @ai-critical: Only add exception/rejection handlers once globally
@@ -153,7 +153,7 @@ export function createLogger(service: string): winston.Logger {
   // @ai-fix: Prevents "MaxListenersExceededWarning: Possible EventEmitter memory leak"
   if (!globalHandlersInstalled && process.env.NODE_ENV !== 'test') {
     globalHandlersInstalled = true;
-    
+
     // @ai-critical: Prevent process crash from uncaught errors
     loggerOptions.exceptionHandlers = [
       new winston.transports.Console({
@@ -164,7 +164,7 @@ export function createLogger(service: string): winston.Logger {
         )
       })
     ];
-    
+
     // @ai-critical: Handle promise rejections
     loggerOptions.rejectionHandlers = [
       new winston.transports.Console({
@@ -179,7 +179,7 @@ export function createLogger(service: string): winston.Logger {
 
   // @ai-logic: Add file transports if needed
   addFileTransports(loggerTransports);
-  
+
   return winston.createLogger(loggerOptions);
 }
 

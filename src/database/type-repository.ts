@@ -102,7 +102,7 @@ export class TypeRepository {
     if (name.length > 50) {
       throw new Error('Type name must be 50 characters or less');
     }
-    
+
     // @ai-validation: Validate type name (alphanumeric and underscore only)
     if (!/^[a-z][a-z0-9_]*$/.test(name)) {
       throw new Error('Type name must start with a letter and contain only lowercase letters, numbers, and underscores');

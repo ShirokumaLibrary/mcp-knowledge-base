@@ -77,7 +77,7 @@ export const toolDefinitions = [
     // @ai-critical Different types have different required fields
     // @ai-validation Content required for document types, dates optional for task types
     // @ai-examples
-    //   Create session: type='sessions', title='Morning work', content='...' 
+    //   Create session: type='sessions', title='Morning work', content='...'
     //   Create daily: type='dailies', date='2025-07-28', title='Daily summary', content='...'
     inputSchema: {
       type: 'object',

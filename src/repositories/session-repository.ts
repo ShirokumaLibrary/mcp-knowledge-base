@@ -107,7 +107,7 @@ export class SessionRepository {
   async saveSession(session: Session): Promise<void> {
     const item = this.sessionToStorageItem(session);
     await this.storage.save(STORAGE_CONFIGS.sessions, item);
-    
+
     // Auto-register tags
     if (session.tags && session.tags.length > 0) {
       await this.db.getTags(); // Initialize tags table if needed
@@ -217,7 +217,7 @@ export class SessionRepository {
 
     const item = this.dailyToStorageItem(summary);
     await this.storage.save(STORAGE_CONFIGS.dailies, item);
-    
+
     // Auto-register tags
     if (summary.tags && summary.tags.length > 0) {
       await this.db.getTags(); // Initialize tags table if needed
@@ -234,7 +234,7 @@ export class SessionRepository {
   async updateDaily(summary: Daily): Promise<void> {
     const item = this.dailyToStorageItem(summary);
     await this.storage.save(STORAGE_CONFIGS.dailies, item);
-    
+
     // Auto-register tags
     if (summary.tags && summary.tags.length > 0) {
       await this.db.getTags(); // Initialize tags table if needed

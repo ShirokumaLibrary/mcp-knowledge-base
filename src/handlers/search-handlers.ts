@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import type { FileIssueDatabase } from '../database/index.js';
-import { FullTextSearchRepository } from '../database/fulltext-search-repository.js';
+import type { FullTextSearchRepository } from '../database/fulltext-search-repository.js';
 import { createLogger } from '../utils/logger.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
@@ -56,7 +56,7 @@ export class SearchHandlers {
   async searchItems(params: unknown) {
     try {
       const validated = searchItemsSchema.parse(params);
-      
+
       // Get search results
       const results = await this.getSearchRepo().search(validated.query, {
         types: validated.types,
@@ -133,7 +133,7 @@ export class SearchHandlers {
   async searchSuggest(params: unknown) {
     try {
       const validated = searchSuggestSchema.parse(params);
-      
+
       const suggestions = await this.getSearchRepo().suggest(validated.query, {
         types: validated.types,
         limit: validated.limit

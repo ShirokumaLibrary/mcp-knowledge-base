@@ -124,7 +124,7 @@ export class TypeHandlers {
         output += '\n';
       }
     }
-    
+
     // Special types (always available, not shown in type list)
     output += '### Special Types\n';
     output += 'These types have special ID formats and are always available:\n\n';

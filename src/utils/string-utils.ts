@@ -36,10 +36,10 @@ export function removeInvisibleCharacters(str: string): string {
     '\uFFFA', // Interlinear annotation separator
     '\uFFFB'  // Interlinear annotation terminator
   ];
-  
+
   // Create a regex pattern to match all invisible characters
   const pattern = new RegExp(`[${invisibleChars.join('')}]`, 'g');
-  
+
   return str.replace(pattern, '');
 }
 

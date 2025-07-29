@@ -41,17 +41,17 @@ export class FullTextSearchRepository {
       Math.max(1, options?.limit || defaultLimit),
       maxLimit
     );
-    
+
     // @ai-validation: Ensure offset is non-negative
     const offset = Math.max(0, options?.offset || 0);
-    
+
     // Escape special characters for FTS5
     const escapedQuery = query.replace(/['"]/g, '');
-    
+
     // Build type filter
     let typeFilter = '';
     let params: any[] = [`"${escapedQuery}"`, limit, offset];
-    
+
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
@@ -74,7 +74,7 @@ export class FullTextSearchRepository {
 
     try {
       const rows = await this.db.allAsync(sql, params) as any[];
-      
+
       return rows.map(row => ({
         type: String(row.type),
         id: String(row.id),
@@ -106,14 +106,14 @@ export class FullTextSearchRepository {
       Math.max(1, options?.limit || defaultLimit),
       maxLimit
     );
-    
+
     // Build prefix query for FTS5
     const escapedQuery = query.replace(/['"]/g, '');
-    
+
     // Build type filter
     let typeFilter = '';
     let params: any[] = [`"${escapedQuery}"*`, limit];
-    
+
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
@@ -150,11 +150,11 @@ export class FullTextSearchRepository {
   ): Promise<number> {
     // Escape special characters for FTS5
     const escapedQuery = query.replace(/['"]/g, '');
-    
+
     // Build type filter
     let typeFilter = '';
     let params: any[] = [`"${escapedQuery}"`];
-    
+
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;

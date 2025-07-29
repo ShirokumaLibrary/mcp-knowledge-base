@@ -83,7 +83,7 @@ export class StaticTypeRegistry implements TypeRegistry {
     // @ai-note: These are just initial configuration types, NOT special types
     // @ai-critical: All types are treated equally - no hardcoded behavior
     // @ai-why: Initial types exist only for convenience, not for special treatment
-    
+
     // Initial task types
     this.types.set('issues', {
       type: 'issues',
