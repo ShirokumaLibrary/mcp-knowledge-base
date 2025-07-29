@@ -28,6 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Security vulnerability where malicious session IDs could create files outside data directory
 
+### Documentation
+- **Major Documentation Reorganization**:
+  - Separated user documentation (`docs/user/`) from developer resources (`docs/developer/`)
+  - Created internal documentation directory (`docs/internal/`) for project-specific docs
+  - Consolidated release notes and migration guides under `docs/releases/`
+  - Japanese documentation now mirrors English structure under `docs/ja/`
+  - Added comprehensive navigation READMEs for each directory
+  - Created new guides: quickstart, installation, usage guides for users
+  - Added developer guides: database design, API architecture, debugging
+  - Implemented redirect files for backward compatibility
+- **Documentation Cleanup**:
+  - Removed obsolete `docs.ja/` directory
+  - Cleaned up old documentation files with appropriate redirects
+  - Improved documentation discoverability with clear structure
+
 ## [0.4.1] - 2025-07-29
 
 ### Added
