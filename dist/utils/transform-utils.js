@@ -1,19 +1,4 @@
-/**
- * @ai-context Data transformation utilities
- * @ai-pattern Common data conversion and formatting
- * @ai-critical Ensures consistent data representation
- * @ai-why Centralizes transformation logic
- * @ai-assumption Data formats are consistent across the application
- */
-/**
- * @ai-intent Entity to markdown transformers
- * @ai-pattern Consistent markdown formatting
- */
 export class MarkdownTransformers {
-    /**
-     * @ai-intent Format issue as markdown
-     * @ai-pattern Structured issue display
-     */
     static formatIssue(issue) {
         const lines = [
             `# ${issue.title}`,
@@ -50,10 +35,6 @@ export class MarkdownTransformers {
         }
         return lines.join('\n');
     }
-    /**
-     * @ai-intent Format plan as markdown
-     * @ai-pattern Similar to issue but always has dates
-     */
     static formatPlan(plan) {
         const lines = [
             `# ${plan.title}`,
@@ -82,10 +63,6 @@ export class MarkdownTransformers {
         }
         return lines.join('\n');
     }
-    /**
-     * @ai-intent Format document as markdown
-     * @ai-pattern Document display format
-     */
     static formatDocument(doc) {
         const lines = [
             `# ${doc.title}`,
@@ -111,10 +88,6 @@ export class MarkdownTransformers {
         }
         return lines.join('\n');
     }
-    /**
-     * @ai-intent Format work session as markdown
-     * @ai-pattern Session display format
-     */
     static formatSession(session) {
         const lines = [
             `# ${session.title}`,
@@ -146,23 +119,11 @@ export class MarkdownTransformers {
         }
         return lines.join('\n');
     }
-    /**
-     * @ai-intent Format date for display
-     * @ai-pattern Consistent date formatting
-     */
     static formatDate(date) {
         return new Date(date).toLocaleDateString();
     }
 }
-/**
- * @ai-intent Data converters between formats
- * @ai-pattern Type conversions and mappings
- */
 export class DataConverters {
-    /**
-     * @ai-intent Convert database row to domain entity
-     * @ai-pattern Generic row mapping
-     */
     static rowToEntity(row, fieldMap) {
         const entity = {};
         for (const [entityField, dbField] of Object.entries(fieldMap)) {
@@ -172,10 +133,6 @@ export class DataConverters {
         }
         return entity;
     }
-    /**
-     * @ai-intent Convert entity to database row
-     * @ai-pattern Inverse of rowToEntity
-     */
     static entityToRow(entity, fieldMap) {
         const row = {};
         for (const [entityField, dbField] of Object.entries(fieldMap)) {
@@ -186,10 +143,6 @@ export class DataConverters {
         }
         return row;
     }
-    /**
-     * @ai-intent Parse JSON safely
-     * @ai-pattern Returns default on error
-     */
     static parseJsonSafe(json, defaultValue) {
         try {
             return JSON.parse(json);
@@ -198,41 +151,21 @@ export class DataConverters {
             return defaultValue;
         }
     }
-    /**
-     * @ai-intent Convert tags to CSV
-     * @ai-pattern For database storage
-     */
     static tagsToCSV(tags) {
         return tags && tags.length > 0 ? tags.join(',') : '';
     }
-    /**
-     * @ai-intent Parse CSV to tags
-     * @ai-pattern From database storage
-     */
     static csvToTags(csv) {
         if (!csv || csv.trim() === '') {
             return [];
         }
         return csv.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
     }
-    /**
-     * @ai-intent Convert boolean to SQLite integer
-     * @ai-pattern SQLite boolean representation
-     */
     static booleanToInt(value) {
         return value ? 1 : 0;
     }
-    /**
-     * @ai-intent Convert SQLite integer to boolean
-     * @ai-pattern Inverse of booleanToInt
-     */
     static intToBoolean(value) {
         return value === 1;
     }
-    /**
-     * @ai-intent Normalize priority value
-     * @ai-pattern Ensure valid priority
-     */
     static normalizePriority(priority) {
         const normalized = priority?.toLowerCase();
         switch (normalized) {
@@ -244,17 +177,9 @@ export class DataConverters {
                 return 'medium';
         }
     }
-    /**
-     * @ai-intent Create reference string
-     * @ai-pattern type-id format
-     */
     static createReference(type, id) {
         return `${type}-${id}`;
     }
-    /**
-     * @ai-intent Parse reference string
-     * @ai-pattern Extract type and id
-     */
     static parseReference(ref) {
         const match = ref.match(/^([a-z][a-z0-9_]*)-(.+)$/);
         if (!match) {
@@ -266,15 +191,7 @@ export class DataConverters {
         };
     }
 }
-/**
- * @ai-intent Response formatters for API
- * @ai-pattern Consistent API responses
- */
 export class ResponseFormatters {
-    /**
-     * @ai-intent Format success response
-     * @ai-pattern Standard success format
-     */
     static success(data, message) {
         return {
             success: true,
@@ -282,10 +199,6 @@ export class ResponseFormatters {
             ...(message && { message })
         };
     }
-    /**
-     * @ai-intent Format error response
-     * @ai-pattern Standard error format
-     */
     static error(message, code, details) {
         return {
             success: false,
@@ -296,10 +209,6 @@ export class ResponseFormatters {
             }
         };
     }
-    /**
-     * @ai-intent Format list response
-     * @ai-pattern Paginated list format
-     */
     static list(items, total, page, limit) {
         return {
             items,
@@ -311,19 +220,11 @@ export class ResponseFormatters {
             }
         };
     }
-    /**
-     * @ai-intent Format summary response
-     * @ai-pattern Entity summary format
-     */
     static summary(entity) {
         const { content: _content, ...summary } = entity;
         return summary;
     }
 }
-/**
- * @ai-intent Field mappers for database operations
- * @ai-pattern Centralized field mappings
- */
 export const FieldMappings = {
     issue: {
         id: 'id',
@@ -360,4 +261,3 @@ export const FieldMappings = {
         updatedAt: 'updated_at'
     }
 };
-//# sourceMappingURL=transform-utils.js.map

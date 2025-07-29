@@ -1,44 +1,13 @@
-/**
- * @ai-context Common validation utilities
- * @ai-pattern Centralized validation logic
- * @ai-critical Ensures consistent validation across the application
- * @ai-why Eliminates duplicate validation code
- * @ai-assumption Validation rules are consistent across entities
- */
 import { z } from 'zod';
 import { ValidationError } from '../errors/custom-errors.js';
-/**
- * @ai-intent Common field validators
- * @ai-pattern Reusable Zod schemas
- */
 export const CommonValidators = {
-    /**
-     * @ai-intent Non-empty string validation
-     * @ai-pattern Trimmed, minimum length 1
-     */
     nonEmptyString: z.string().trim().min(1),
-    /**
-     * @ai-intent Optional string validation
-     * @ai-pattern Allows undefined, trims if present
-     */
     optionalString: z.string().trim().optional(),
-    /**
-     * @ai-intent Tag name validation
-     * @ai-pattern Lowercase letters and hyphens only
-     */
     tagName: z.string()
         .trim()
         .min(1, 'Tag name is required')
         .regex(/^[a-z][a-z0-9-]*$/, 'Tag name must start with a letter and contain only lowercase letters, numbers, and hyphens'),
-    /**
-     * @ai-intent Priority validation
-     * @ai-pattern Enum of high, medium, low
-     */
     priority: z.enum(['high', 'medium', 'low']),
-    /**
-     * @ai-intent Date string validation
-     * @ai-pattern YYYY-MM-DD format with valid date check
-     */
     dateString: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
         .refine((val) => {
@@ -48,97 +17,37 @@ export const CommonValidators = {
             date.getMonth() === month - 1 &&
             date.getDate() === day;
     }, 'Invalid date'),
-    /**
-     * @ai-intent Optional date string
-     * @ai-pattern YYYY-MM-DD or undefined
-     */
     optionalDateString: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
         .optional(),
-    /**
-     * @ai-intent Nullable date string
-     * @ai-pattern YYYY-MM-DD, null, or undefined
-     */
     nullableDateString: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
         .nullable()
         .optional(),
-    /**
-     * @ai-intent Time string validation
-     * @ai-pattern HH:MM:SS format
-     */
     timeString: z.string()
         .regex(/^\d{2}:\d{2}:\d{2}$/, 'Time must be in HH:MM:SS format'),
-    /**
-     * @ai-intent Session ID validation
-     * @ai-pattern YYYY-MM-DD-HH.MM.SS.sss format
-     */
     sessionId: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/, 'Session ID must be in YYYY-MM-DD-HH.MM.SS.sss format'),
-    /**
-     * @ai-intent Tag array validation
-     * @ai-pattern Array of valid tag names
-     */
     tagArray: z.array(z.string()).optional(),
-    /**
-     * @ai-intent ID array validation
-     * @ai-pattern Array of strings for references
-     */
     idArray: z.array(z.string()).optional(),
-    /**
-     * @ai-intent Positive integer validation
-     * @ai-pattern Integer greater than 0
-     */
     positiveInt: z.number().int().positive(),
-    /**
-     * @ai-intent Boolean with default
-     * @ai-pattern Defaults to false if not provided
-     */
     booleanDefault: (defaultValue = false) => z.boolean().optional().default(defaultValue),
-    /**
-     * @ai-intent Content type validation
-     * @ai-pattern Dynamic type validation
-     */
     contentType: z.string()
         .regex(/^[a-z][a-z0-9_]*$/, 'Type must start with a letter and contain only lowercase letters, numbers, and underscores'),
-    /**
-     * @ai-intent Reference string validation
-     * @ai-pattern Format: type-id
-     */
     reference: z.string()
         .regex(/^[a-z][a-z0-9_]*-\d+$/, 'Reference must be in format: type-id'),
-    /**
-     * @ai-intent Reference array validation
-     * @ai-pattern Array of type-id references
-     */
     referenceArray: z.array(z.string().regex(/^[a-z][a-z0-9_]*-\d+$/, 'Reference must be in format: type-id')).optional()
 };
-/**
- * @ai-intent Validation helper functions
- * @ai-pattern Common validation operations
- */
 export class ValidationUtils {
-    /**
-     * @ai-intent Validate and clean tags
-     * @ai-flow 1. Filter empty -> 2. Trim -> 3. Deduplicate -> 4. Sort
-     * @ai-pattern Consistent tag processing
-     */
     static cleanTags(tags) {
         if (!tags || tags.length === 0) {
             return [];
         }
-        // @ai-logic: Clean and deduplicate
         const cleaned = tags
             .map(tag => tag.trim())
             .filter(tag => tag.length > 0);
-        // @ai-logic: Remove duplicates and sort
         return Array.from(new Set(cleaned)).sort();
     }
-    /**
-     * @ai-intent Validate date range
-     * @ai-flow Check start is before or equal to end
-     * @ai-pattern Common date range validation
-     */
     static validateDateRange(startDate, endDate) {
         if (startDate && endDate) {
             const start = new Date(startDate);
@@ -152,11 +61,6 @@ export class ValidationUtils {
             }
         }
     }
-    /**
-     * @ai-intent Parse and validate references
-     * @ai-flow 1. Validate format -> 2. Group by type -> 3. Return map
-     * @ai-pattern Reference parsing and grouping
-     */
     static parseReferences(references) {
         const grouped = new Map();
         if (!references || references.length === 0) {
@@ -180,11 +84,6 @@ export class ValidationUtils {
         }
         return grouped;
     }
-    /**
-     * @ai-intent Validate required fields
-     * @ai-flow Check all required fields are present
-     * @ai-pattern Generic required field validation
-     */
     static validateRequired(data, requiredFields) {
         const errors = [];
         for (const field of requiredFields) {
@@ -201,24 +100,14 @@ export class ValidationUtils {
             throw new ValidationError('Missing required fields', errors);
         }
     }
-    /**
-     * @ai-intent Sanitize string input
-     * @ai-flow Trim and normalize whitespace
-     * @ai-pattern Consistent string cleaning
-     */
     static sanitizeString(input) {
         if (!input) {
             return '';
         }
         return input
             .trim()
-            .replace(/\s+/g, ' '); // Normalize whitespace
+            .replace(/\s+/g, ' ');
     }
-    /**
-     * @ai-intent Validate enum value
-     * @ai-flow Check if value is in allowed list
-     * @ai-pattern Generic enum validation
-     */
     static validateEnum(value, allowedValues, fieldName) {
         if (!allowedValues.includes(value)) {
             throw new ValidationError(`Invalid ${fieldName}`, [{
@@ -229,11 +118,6 @@ export class ValidationUtils {
         }
         return value;
     }
-    /**
-     * @ai-intent Create pagination parameters
-     * @ai-flow Validate and set defaults
-     * @ai-pattern Consistent pagination
-     */
     static getPaginationParams(page, limit) {
         const validPage = Math.max(1, page || 1);
         const validLimit = Math.min(100, Math.max(1, limit || 20));
@@ -242,11 +126,6 @@ export class ValidationUtils {
             limit: validLimit
         };
     }
-    /**
-     * @ai-intent Validate ID format
-     * @ai-flow Check if valid positive integer
-     * @ai-pattern Common ID validation
-     */
     static validateId(id, fieldName = 'id') {
         const parsed = Number(id);
         if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -259,15 +138,7 @@ export class ValidationUtils {
         return parsed;
     }
 }
-/**
- * @ai-intent Create reusable schema builders
- * @ai-pattern Schema composition
- */
 export class SchemaBuilders {
-    /**
-     * @ai-intent Build entity creation schema
-     * @ai-pattern Common create operation fields
-     */
     static createSchema(additionalFields = {}) {
         return z.object({
             title: CommonValidators.nonEmptyString,
@@ -276,10 +147,6 @@ export class SchemaBuilders {
             ...additionalFields
         });
     }
-    /**
-     * @ai-intent Build entity update schema
-     * @ai-pattern All fields optional for partial updates
-     */
     static updateSchema(additionalFields = {}) {
         return z.object({
             title: CommonValidators.optionalString,
@@ -288,10 +155,6 @@ export class SchemaBuilders {
             ...additionalFields
         }).partial();
     }
-    /**
-     * @ai-intent Build search schema
-     * @ai-pattern Common search parameters
-     */
     static searchSchema(additionalFields = {}) {
         return z.object({
             query: CommonValidators.optionalString,
@@ -301,10 +164,6 @@ export class SchemaBuilders {
             ...additionalFields
         });
     }
-    /**
-     * @ai-intent Build date range schema
-     * @ai-pattern Common date filtering
-     */
     static dateRangeSchema(additionalFields = {}) {
         return z.object({
             start_date: CommonValidators.optionalDateString,
@@ -321,4 +180,3 @@ export class SchemaBuilders {
         });
     }
 }
-//# sourceMappingURL=validation-utils.js.map

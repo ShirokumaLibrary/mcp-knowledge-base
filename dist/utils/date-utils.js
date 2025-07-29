@@ -1,14 +1,3 @@
-/**
- * @ai-context Date utility functions
- * @ai-pattern Common date operations
- * @ai-critical Handles date formatting and parsing
- * @ai-why Centralizes date logic
- */
-/**
- * @ai-intent Format date as relative time
- * @ai-pattern Human-readable time differences
- * @ai-usage For displaying "2 hours ago" style dates
- */
 export function formatRelativeDate(date) {
     const now = new Date();
     const then = typeof date === 'string' ? new Date(date) : date;
@@ -33,26 +22,14 @@ export function formatRelativeDate(date) {
         return then.toLocaleDateString();
     }
 }
-/**
- * @ai-intent Format date as YYYY-MM-DD
- * @ai-pattern Standard date format
- */
 export function formatDate(date) {
     const d = typeof date === 'string' ? new Date(date) : date;
     return d.toISOString().split('T')[0];
 }
-/**
- * @ai-intent Format time as HH:MM:SS
- * @ai-pattern Standard time format
- */
 export function formatTime(date) {
     const d = typeof date === 'string' ? new Date(date) : date;
     return d.toTimeString().split(' ')[0];
 }
-/**
- * @ai-intent Get date range for queries
- * @ai-pattern Date range utilities
- */
 export function getDateRange(days) {
     const end = new Date();
     const start = new Date();
@@ -62,10 +39,6 @@ export function getDateRange(days) {
         end: formatDate(end)
     };
 }
-/**
- * @ai-intent Check if date is today
- * @ai-pattern Date comparison
- */
 export function isToday(date) {
     const d = typeof date === 'string' ? new Date(date) : date;
     const today = new Date();
@@ -73,4 +46,3 @@ export function isToday(date) {
         d.getMonth() === today.getMonth() &&
         d.getDate() === today.getDate();
 }
-//# sourceMappingURL=date-utils.js.map

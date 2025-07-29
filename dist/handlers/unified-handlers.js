@@ -1,45 +1,21 @@
-/**
- * @ai-context Unified handlers for all item types using single ItemRepository
- * @ai-pattern Handler layer with unified API
- * @ai-critical Replaces separate task/document handlers
- * @ai-dependencies ItemRepository for data access, schemas for validation
- */
 import { TypeRepository } from '../database/type-repository.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-// Import schemas
 import { GetItemsParams, GetItemDetailParams, CreateItemParams, UpdateItemParams, DeleteItemParams, SearchItemsByTagParams } from '../schemas/unified-schemas.js';
-/**
- * @ai-intent Create unified handlers for item operations
- * @ai-pattern Factory function returns handler map
- * @ai-flow Initialize repository -> Create handlers -> Return tool definitions
- */
 export function createUnifiedHandlers(fileDb) {
-    // Get repositories from FileIssueDatabase
     const itemRepository = fileDb.getItemRepository();
     const typeRepository = new TypeRepository(fileDb);
-    // @ai-note: TypeRepository needs to be initialized to get database connection
     (async () => {
         await typeRepository.init();
     })();
-    /**
-     * @ai-intent Get items by type with optional filtering
-     * @ai-flow 1. Validate params -> 2. Check type -> 3. Search with filters -> 4. Return items
-     */
     async function handleGetItems(params) {
         const { type, statuses, includeClosedStatuses, start_date, end_date, limit } = params;
-        // Special handling for get_latest_session equivalent
         if (type === 'sessions' && !start_date && !end_date && limit === 1) {
-            // Get today's latest session
             const today = new Date().toISOString().split('T')[0];
             const sessions = await itemRepository.getItems(type, includeClosedStatuses, statuses, today, today, limit);
             return sessions;
         }
         return itemRepository.getItems(type, includeClosedStatuses, statuses, start_date, end_date, limit);
     }
-    /**
-     * @ai-intent Get single item by type and ID
-     * @ai-flow 1. Validate params -> 2. Get item -> 3. Return or throw
-     */
     async function handleGetItemDetail(params) {
         const { type, id } = params;
         const item = await itemRepository.getItem(type, String(id));
@@ -48,17 +24,9 @@ export function createUnifiedHandlers(fileDb) {
         }
         return item;
     }
-    /**
-     * @ai-intent Create new item of any type
-     * @ai-flow 1. Validate params -> 2. Create item -> 3. Return created item
-     */
     async function handleCreateItem(params) {
         return itemRepository.createItem(params);
     }
-    /**
-     * @ai-intent Update existing item
-     * @ai-flow 1. Validate params -> 2. Update item -> 3. Return updated or throw
-     */
     async function handleUpdateItem(params) {
         const { type, id, ...updateData } = params;
         const updated = await itemRepository.updateItem({ type, id: String(id), ...updateData });
@@ -67,10 +35,6 @@ export function createUnifiedHandlers(fileDb) {
         }
         return updated;
     }
-    /**
-     * @ai-intent Delete item by type and ID
-     * @ai-flow 1. Validate params -> 2. Delete item -> 3. Return success
-     */
     async function handleDeleteItem(params) {
         const { type, id } = params;
         const deleted = await itemRepository.deleteItem(type, String(id));
@@ -79,10 +43,6 @@ export function createUnifiedHandlers(fileDb) {
         }
         return `${type} ID ${id} deleted`;
     }
-    /**
-     * @ai-intent Search items by tag across types
-     * @ai-flow 1. Validate params -> 2. Search with tag filter -> 3. Return items
-     */
     async function handleSearchItemsByTag(params) {
         const { tag, types } = params;
         const items = await itemRepository.searchItemsByTag(tag, types);
@@ -90,17 +50,14 @@ export function createUnifiedHandlers(fileDb) {
             tasks: {},
             documents: {}
         };
-        // Get all base_types at once for efficiency
         const uniqueTypes = [...new Set(items.map(item => item.type))];
         const typeInfos = await Promise.all(uniqueTypes.map(async (type) => {
             const baseType = await typeRepository.getBaseType(type);
             return { type, baseType: baseType || 'documents' };
         }));
-        // Create a map for quick lookup
         const typeToBaseType = new Map(typeInfos.map(info => [info.type, info.baseType]));
         for (const item of items) {
             const baseType = typeToBaseType.get(item.type) || 'documents';
-            // Special handling for sessions - they go under tasks for backward compatibility
             if (item.type === 'sessions') {
                 if (!result.tasks[item.type]) {
                     result.tasks[item.type] = [];
@@ -114,7 +71,6 @@ export function createUnifiedHandlers(fileDb) {
                 result.tasks[item.type].push(item);
             }
             else {
-                // documents or any other base_type (including dailies)
                 if (!result.documents[item.type]) {
                     result.documents[item.type] = [];
                 }
@@ -123,7 +79,6 @@ export function createUnifiedHandlers(fileDb) {
         }
         return result;
     }
-    // Return handler map
     return {
         get_items: handleGetItems,
         get_item_detail: handleGetItemDetail,
@@ -133,10 +88,6 @@ export function createUnifiedHandlers(fileDb) {
         search_items_by_tag: handleSearchItemsByTag
     };
 }
-/**
- * @ai-intent Define unified tools for MCP
- * @ai-pattern Tool definitions with JSON schemas
- */
 export const unifiedTools = [
     {
         name: 'get_items',
@@ -366,13 +317,8 @@ export const unifiedTools = [
         }
     }
 ];
-/**
- * @ai-intent Main handler function for MCP tool calls
- * @ai-flow 1. Parse request -> 2. Validate -> 3. Route to handler -> 4. Return result
- */
 export async function handleUnifiedToolCall(name, args, handlers) {
     let result;
-    // Route to appropriate handler
     switch (name) {
         case 'get_items':
             result = await handlers.get_items(GetItemsParams.parse(args));
@@ -395,8 +341,6 @@ export async function handleUnifiedToolCall(name, args, handlers) {
         default:
             throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
-    // Format response for MCP protocol with backward compatibility
-    // Wrap in { data: ... } for consistency with old handlers
     return {
         content: [
             {
@@ -406,4 +350,3 @@ export async function handleUnifiedToolCall(name, args, handlers) {
         ]
     };
 }
-//# sourceMappingURL=unified-handlers.js.map

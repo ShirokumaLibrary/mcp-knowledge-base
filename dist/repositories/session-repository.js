@@ -1,8 +1,3 @@
-/**
- * @ai-context Simplified session repository using unified storage
- * @ai-pattern Adapter pattern wrapping UnifiedStorage
- * @ai-critical Maintains backward compatibility while using new storage
- */
 import { SessionMarkdownFormatter } from '../formatters/session-markdown-formatter.js';
 import { UnifiedStorage, STORAGE_CONFIGS } from '../storage/unified-storage.js';
 import { createLogger } from '../utils/logger.js';
@@ -18,9 +13,6 @@ export class SessionRepository {
         this.storage = new UnifiedStorage(dataDir);
         this.formatter = new SessionMarkdownFormatter();
     }
-    /**
-     * @ai-intent Convert Session to StorageItem
-     */
     sessionToStorageItem(session) {
         const metadata = {
             title: session.title,
@@ -39,9 +31,6 @@ export class SessionRepository {
             content: session.content || ''
         };
     }
-    /**
-     * @ai-intent Convert StorageItem to Session
-     */
     storageItemToSession(item, id, date) {
         const metadata = item.metadata;
         return {
@@ -58,9 +47,6 @@ export class SessionRepository {
             updatedAt: metadata.updated_at ? String(metadata.updated_at) : undefined
         };
     }
-    /**
-     * @ai-intent Convert Daily to StorageItem
-     */
     dailyToStorageItem(daily) {
         const metadata = {
             title: daily.title,
@@ -77,9 +63,6 @@ export class SessionRepository {
             content: daily.content
         };
     }
-    /**
-     * @ai-intent Convert StorageItem to Daily
-     */
     storageItemToDaily(item, date) {
         const metadata = item.metadata;
         return {
@@ -94,19 +77,16 @@ export class SessionRepository {
             updatedAt: metadata.updated_at ? String(metadata.updated_at) : undefined
         };
     }
-    // Session methods
     async saveSession(session) {
         const item = this.sessionToStorageItem(session);
         await this.storage.save(STORAGE_CONFIGS.sessions, item);
-        // Auto-register tags
         if (session.tags && session.tags.length > 0) {
-            await this.db.getTags(); // Initialize tags table if needed
+            await this.db.getTags();
             for (const tag of session.tags) {
                 try {
                     await this.db.createTag(tag);
                 }
                 catch {
-                    // Tag already exists, ignore
                 }
             }
         }
@@ -180,7 +160,6 @@ export class SessionRepository {
             return this.storageItemToSession(item, item.id, date);
         }));
     }
-    // Daily summary methods
     async saveDaily(summary) {
         const exists = await this.storage.exists(STORAGE_CONFIGS.dailies, summary.date);
         if (exists) {
@@ -188,15 +167,13 @@ export class SessionRepository {
         }
         const item = this.dailyToStorageItem(summary);
         await this.storage.save(STORAGE_CONFIGS.dailies, item);
-        // Auto-register tags
         if (summary.tags && summary.tags.length > 0) {
-            await this.db.getTags(); // Initialize tags table if needed
+            await this.db.getTags();
             for (const tag of summary.tags) {
                 try {
                     await this.db.createTag(tag);
                 }
                 catch {
-                    // Tag already exists, ignore
                 }
             }
         }
@@ -204,15 +181,13 @@ export class SessionRepository {
     async updateDaily(summary) {
         const item = this.dailyToStorageItem(summary);
         await this.storage.save(STORAGE_CONFIGS.dailies, item);
-        // Auto-register tags
         if (summary.tags && summary.tags.length > 0) {
-            await this.db.getTags(); // Initialize tags table if needed
+            await this.db.getTags();
             for (const tag of summary.tags) {
                 try {
                     await this.db.createTag(tag);
                 }
                 catch {
-                    // Tag already exists, ignore
                 }
             }
         }
@@ -235,7 +210,6 @@ export class SessionRepository {
         const ids = await this.storage.list(STORAGE_CONFIGS.dailies);
         const results = [];
         for (const id of ids) {
-            // ID is the date for dailies
             if (startDate && id < startDate) {
                 continue;
             }
@@ -249,10 +223,7 @@ export class SessionRepository {
         }
         return results.sort((a, b) => a.date.localeCompare(b.date));
     }
-    // Legacy compatibility methods
     ensureDailyDirectory(date) {
-        // No longer needed with new structure
         return date;
     }
 }
-//# sourceMappingURL=session-repository.js.map
