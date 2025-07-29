@@ -100,14 +100,14 @@ Retrieve items by type with optional filtering.
 
 **Parameters:**
 - `type` (string, required): Entity type
-- `statusIds` (number[]): Filter by status IDs
+- `statuses` (string[]): Filter by status names
 - `includeClosedStatuses` (boolean): Include closed items
 
 **Example:**
 ```json
 {
   "type": "issues",
-  "statusIds": [1, 2],
+  "statuses": ["Open", "In Progress"],
   "includeClosedStatuses": false
 }
 ```
@@ -177,16 +177,37 @@ Search items by tag across types.
 }
 ```
 
-#### search_all
-Full-text search across all content.
+#### search_items
+Full-text search across all items' title, description, and content.
 
 **Parameters:**
-- `query` (string, required): Search query
+- `query` (string, required): Search query text
+- `types` (string[]): Filter by specific types (optional)
+- `limit` (number): Maximum number of results (default: 20, max: 100)
+- `offset` (number): Number of results to skip for pagination (default: 0)
 
 **Example:**
 ```json
 {
-  "query": "authentication error"
+  "query": "authentication error",
+  "types": ["issues", "docs"],
+  "limit": 10
+}
+```
+
+#### search_suggest
+Get search suggestions for autocomplete.
+
+**Parameters:**
+- `query` (string, required): Partial search query
+- `types` (string[]): Filter suggestions by specific types (optional)
+- `limit` (number): Maximum number of suggestions (default: 10, max: 20)
+
+**Example:**
+```json
+{
+  "query": "auth",
+  "limit": 5
 }
 ```
 
@@ -244,6 +265,11 @@ Get all available statuses.
 **Returns:** Array of status objects with ID, name, description, and is_closed flag.
 
 ### Work Sessions
+
+> **Note**: Sessions can also be accessed through the unified API using `type: "sessions"`. For example:
+> - `get_items(type: "sessions", limit: 1)` - Get latest session
+> - `create_item(type: "sessions", ...)` - Create new session with datetime support
+> - `update_item(type: "sessions", id: "...", ...)` - Update session
 
 #### get_sessions
 Get work sessions within date range.
@@ -306,6 +332,11 @@ Update an existing session.
 - Other parameters same as create_session (all optional)
 
 ### Daily Summaries
+
+> **Note**: Daily summaries can also be accessed through the unified API using `type: "dailies"`. For example:
+> - `get_items(type: "dailies", start_date: "2024-01-01", end_date: "2024-01-31")` - Get summaries in date range
+> - `create_item(type: "dailies", date: "2024-01-15", ...)` - Create daily summary
+> - `update_item(type: "dailies", id: "2024-01-15", ...)` - Update summary
 
 #### get_summaries
 Get daily summaries within date range.

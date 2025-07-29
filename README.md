@@ -101,9 +101,18 @@ npm run test:e2e
 # Run all tests including E2E
 npm run test:all
 
+# Check test coverage
+npm run test:coverage
+
 # Debug with MCP Inspector (opens browser)
 npm run inspect
 ```
+
+### Test Coverage Status
+- **Overall Coverage**: 79.3%
+- **Functions Coverage**: 80.33% ✅
+- **Total Tests**: 952 (all passing)
+- **Test Suites**: 50
 
 See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing documentation.
 

@@ -79,6 +79,12 @@ Tests should be executed in numerical order as later tests may depend on data cr
 6. **Validate relationships** - Tags, statuses, and cross-references work correctly
 7. **Document any issues** - Note unexpected behaviors for debugging
 
+## Code Quality Status
+- **Test Coverage**: 79.3% overall (Functions: 80.33%)
+- **Total Tests**: 952 tests across 50 test suites
+- **TypeScript**: No `any` types in production code
+- **All tests passing**: ✅
+
 ## Common Issues to Watch For
 - Content field being modified or formatted unexpectedly
 - Tags not being auto-registered
@@ -87,7 +93,7 @@ Tests should be executed in numerical order as later tests may depend on data cr
 - Search results missing expected items
 - Error messages not being descriptive enough
 - Unicode or special characters causing issues
-- Empty arrays vs null returns
+- Empty arrays vs null returns (empty tags in markdown returns null, not [])
 - Partial updates affecting unspecified fields
 - ID type consistency (ensure all IDs returned as strings)
 - Related items format ("type-id" format in arrays)
@@ -96,6 +102,8 @@ Tests should be executed in numerical order as later tests may depend on data cr
 - Title length limit (maximum 500 characters)
 - Self-referencing items (items cannot reference themselves in related fields)
 - Zero-width characters being filtered from strings
+- Session file path format: `{date}/sessions-{timestamp}.md` (NOT `session-{timestamp}.md`)
+- Daily summary file path format: `{date}/dailies-{date}.md` (NOT `summary-{date}.md`)
 
 ## Reporting Results
 When reporting test results, include:
