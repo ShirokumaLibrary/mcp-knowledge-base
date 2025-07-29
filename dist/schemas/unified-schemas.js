@@ -37,7 +37,7 @@ export const CreateItemParams = z.object({
         }
         return /^[a-zA-Z0-9\-_.]+$/.test(val);
     }, {
-        message: "Invalid ID format: must not contain path traversal patterns"
+        message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional(),
     category: z.string().optional()
@@ -90,7 +90,7 @@ export const CreateSessionParams = z.object({
         }
         return /^[a-zA-Z0-9\-_.]+$/.test(val);
     }, {
-        message: "Invalid ID format: must not contain path traversal patterns"
+        message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional()
 });
