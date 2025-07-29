@@ -2,6 +2,14 @@ import type { Database } from './base.js';
 import { BaseRepository } from './base.js';
 import type { Status } from '../types/domain-types.js';
 
+// Type definitions for database rows
+interface StatusRow {
+  id: number;
+  name: string;
+  is_closed: number;
+  created_at?: string;
+}
+
 /**
  * @ai-context Repository for workflow status management
  * @ai-pattern Simple CRUD repository for status definitions
@@ -27,12 +35,15 @@ export class StatusRepository extends BaseRepository {
     );
 
     // @ai-logic: Type safety through explicit mapping
-    return rows.map((row: any) => ({
-      id: Number(row.id),
-      name: String(row.name),
-      is_closed: row.is_closed === 1,
-      created_at: String(row.created_at)
-    }));
+    return rows.map((row: unknown) => {
+      const statusRow = row as StatusRow;
+      return {
+        id: Number(statusRow.id),
+        name: String(statusRow.name),
+        is_closed: statusRow.is_closed === 1,
+        created_at: String(statusRow.created_at)
+      };
+    });
   }
 
   async getAllStatusesAsync(): Promise<Status[]> {
@@ -79,7 +90,7 @@ export class StatusRepository extends BaseRepository {
 
   async updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean> {
     let sql = 'UPDATE statuses SET name = ?';
-    const params: any[] = [name];
+    const params: (string | number)[] = [name];
 
     if (is_closed !== undefined) {
       sql += ', is_closed = ?';
@@ -153,6 +164,6 @@ export class StatusRepository extends BaseRepository {
       'SELECT id FROM statuses WHERE is_closed = 1'
     );
 
-    return rows.map((row: any) => Number(row.id));
+    return rows.map((row: unknown) => Number((row as StatusRow).id));
   }
 }

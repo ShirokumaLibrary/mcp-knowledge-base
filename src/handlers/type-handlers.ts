@@ -19,14 +19,12 @@ import {
   DeleteTypeSchema,
   UpdateTypeSchema
 } from '../schemas/type-schemas.js';
+import { createLogger } from '../utils/logger.js';
 
 export class TypeHandlers {
   private typeRepo: TypeRepository;
-  private logger = {
-    error: (message: string, context?: any) => {
-      console.error(message, context);
-    }
-  };
+  private logger = createLogger('TypeHandlers');
+  public readonly handlerName = 'TypeHandlers';
 
   constructor(private db: FileIssueDatabase) {
     this.typeRepo = new TypeRepository(db);

@@ -29,7 +29,8 @@ const EmptySchema = z.object({});
  */
 export class TagHandlersV2 extends BaseHandler {
   constructor(database: FileIssueDatabase) {
-    super('TagHandlers', database);
+    // @ai-any-deliberate: V2 handlers use FileIssueDatabase which doesn't fully implement IDatabase
+    super('TagHandlers', database as any);
   }
 
   /**
@@ -51,7 +52,7 @@ export class TagHandlersV2 extends BaseHandler {
     EmptySchema,
     async () => {
       this.ensureDatabase();
-      const tags = await this.database.getTags();
+      const tags = await this.database!.getTags();
 
       if (tags.length === 0) {
         return this.createResponse(
@@ -60,13 +61,13 @@ export class TagHandlersV2 extends BaseHandler {
       }
 
       // @ai-pattern: Sort alphabetically for easy scanning
-      const sortedTags = tags.sort((a: any, b: any) => a.name.localeCompare(b.name));
+      const sortedTags = tags.sort((a: { name: string; count?: number }, b: { name: string; count?: number }) => a.name.localeCompare(b.name));
 
       // @ai-pattern: Markdown list with usage counts
       const markdown = [
         '## Available Tags',
         '',
-        ...sortedTags.map((tag: any) => `- ${tag.name} (used ${tag.count} times)`)
+        ...sortedTags.map((tag: { name: string; count?: number }) => `- ${tag.name} (used ${tag.count} times)`)
       ].join('\n');
 
       return this.createResponse(markdown);
@@ -87,7 +88,7 @@ export class TagHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Attempt to create tag
-      const tag = await this.database.createTag(args.name);
+      const tag = await this.database!.createTag(args.name);
 
       return this.createResponse(
         `## Tag Created\n\nTag "${tag.name}" has been created successfully.`
@@ -109,7 +110,7 @@ export class TagHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Attempt to delete tag
-      const deleted = await this.database.deleteTag(args.name);
+      const deleted = await this.database!.deleteTag(args.name);
 
       if (!deleted) {
         return this.createErrorResponse(`Tag "${args.name}" not found`);
@@ -134,7 +135,7 @@ export class TagHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Search for matching tags
-      const tags = await this.database.searchTags(args.pattern);
+      const tags = await this.database!.searchTags(args.pattern);
 
       if (tags.length === 0) {
         return this.createResponse(
@@ -146,7 +147,7 @@ export class TagHandlersV2 extends BaseHandler {
       const markdown = [
         `## Tags Matching "${args.pattern}"`,
         '',
-        ...tags.map((tag: any) => `- ${tag.name} (used ${tag.count} times)`)
+        ...tags.map((tag: { name: string; count?: number }) => `- ${tag.name} (used ${tag.count} times)`)
       ].join('\n');
 
       return this.createResponse(markdown);

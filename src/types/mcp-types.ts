@@ -47,5 +47,6 @@ export interface ToolResponse {
  * @ai-assumption Args already validated by Zod schema
  */
 export interface ToolHandler {
+  // @ai-any-deliberate: MCP tool handlers receive various arg types validated by their schemas
   (args: any): Promise<ToolResponse>;  // @ai-async: All handlers are async
 }

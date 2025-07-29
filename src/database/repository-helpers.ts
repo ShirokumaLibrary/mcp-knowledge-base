@@ -7,6 +7,7 @@
  */
 
 import type { Database } from './base.js';
+import type { QueryParameter } from './types/database-types.js';
 import { ValidationUtils } from '../utils/validation-utils.js';
 import { DataConverters } from '../utils/transform-utils.js';
 import { DatabaseError } from '../errors/custom-errors.js';
@@ -272,8 +273,12 @@ export class RepositoryHelpers {
    * @ai-pattern Dynamic query building
    */
   static buildWhereClause(
+    // @ai-any-deliberate: Generic filter object - accepts various field types (string, number, boolean, Date)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filters: Record<string, any>,
-    paramValues: any[]
+    // @ai-any-deliberate: SQLite parameter array - mixed types for prepared statement
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    paramValues: unknown[]
   ): string {
     const conditions: string[] = [];
 
@@ -310,11 +315,15 @@ export class RepositoryHelpers {
     tableName: string,
     searchFields: string[],
     query: string,
+    // @ai-any-deliberate: Generic filter object - flexible search conditions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalFilters?: Record<string, any>,
     logger?: Logger
   ): Promise<T[]> {
     try {
-      const params: any[] = [];
+      // @ai-any-deliberate: SQLite parameter array - mixed types for query
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const params: (string | number | boolean | null)[] = [];
       const conditions: string[] = [];
 
       // @ai-logic: Build search condition
@@ -345,7 +354,7 @@ export class RepositoryHelpers {
 
       logger?.debug('Executing search query', { sql, params });
 
-      return await db.allAsync(sql, params) as T[];
+      return await db.allAsync(sql, params as QueryParameter[]) as T[];
 
     } catch (error) {
       logger?.error('Search query failed', { error, tableName, query });
@@ -378,16 +387,16 @@ export class RepositoryHelpers {
   static async getCount(
     db: Database,
     tableName: string,
-    filters?: Record<string, any>
+    filters?: Record<string, unknown>
   ): Promise<number> {
-    const params: any[] = [];
+    const params: (string | number | boolean | null)[] = [];
     const whereClause = filters
       ? this.buildWhereClause(filters, params)
       : '';
 
     const row = await db.getAsync(
       `SELECT COUNT(*) as count FROM ${tableName} ${whereClause}`,
-      params
+      params as QueryParameter[]
     ) as { count: number };
 
     return row.count;

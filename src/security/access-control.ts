@@ -79,7 +79,7 @@ export interface UserContext {
 export interface AccessRule {
   resource: ResourceType;
   permission: Permission;
-  condition?: (user: UserContext, resource?: any) => boolean;
+  condition?: (user: UserContext, resource?: unknown) => boolean;
 }
 
 /**
@@ -211,7 +211,7 @@ export class AccessControlManager {
     user: UserContext,
     resource: ResourceType,
     permission: Permission,
-    _resourceData?: any
+    _resourceData?: unknown
   ): boolean {
     const requiredPerm = `${resource}:${permission}`;
 
@@ -256,7 +256,7 @@ export class AccessControlManager {
     user: UserContext,
     resource: ResourceType,
     permission: Permission,
-    resourceData?: any
+    resourceData?: unknown
   ): void {
     if (!this.hasPermission(user, resource, permission, resourceData)) {
       logger.warn('Access denied', {
@@ -379,9 +379,9 @@ export function requiresPermission(
   resource: ResourceType,
   permission: Permission
 ) {
-  return (handler: (...args: any[]) => any) => {
-    return async (params: any, context?: any) => {
-      const userContext = context?.user || createUserContext();
+  return (handler: (...args: unknown[]) => any) => {
+    return async (params: unknown, context?: unknown) => {
+      const userContext = (context as {user?: UserContext} | undefined)?.user || createUserContext();
 
       // Check permission
       const acm = new AccessControlManager();
@@ -399,13 +399,14 @@ export function requiresPermission(
  */
 export function isResourceOwner(
   user: UserContext,
-  resource: any
+  resource: unknown
 ): boolean {
-  if (!user.userId || !resource.createdBy) {
+  const res = resource as {createdBy?: string} | null | undefined;
+  if (!user.userId || !res?.createdBy) {
     return false;
   }
 
-  return user.userId === resource.createdBy;
+  return user.userId === res.createdBy;
 }
 
 /**
@@ -414,7 +415,7 @@ export function isResourceOwner(
  */
 export function canAccessResource(
   user: UserContext,
-  resource: any,
+  resource: unknown,
   resourceType: ResourceType,
   permission: Permission,
   acm: AccessControlManager

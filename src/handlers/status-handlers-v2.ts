@@ -29,7 +29,8 @@ const EmptySchema = z.object({});
  */
 export class StatusHandlersV2 extends BaseHandler {
   constructor(database: FileIssueDatabase) {
-    super('StatusHandlers', database);
+    // @ai-any-deliberate: V2 handlers use FileIssueDatabase which doesn't fully implement IDatabase
+    super('StatusHandlers', database as any);
   }
 
   /**
@@ -51,7 +52,7 @@ export class StatusHandlersV2 extends BaseHandler {
     EmptySchema,
     async () => {
       this.ensureDatabase();
-      const statuses = await this.database.getAllStatuses();
+      const statuses = await this.database!.getAllStatuses();
 
       if (statuses.length === 0) {
         return this.createResponse(
@@ -65,7 +66,7 @@ export class StatusHandlersV2 extends BaseHandler {
         '',
         '| Name | Is Closed |',
         '|------|-----------|',
-        ...statuses.map((status: any) => `| ${status.name} | ${status.is_closed ? 'Yes' : 'No'} |`)
+        ...statuses.map((status) => `| ${status.name} | ${status.is_closed ? 'Yes' : 'No'} |`)
       ].join('\n');
 
       return this.createResponse(markdown);
@@ -85,7 +86,7 @@ export class StatusHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Create new status
-      const newStatus = await this.database.createStatus(
+      const newStatus = await this.database!.createStatus(
         args.name,
         args.is_closed || false
       );
@@ -110,7 +111,7 @@ export class StatusHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Update existing status
-      const updated = await this.database.updateStatus(
+      const updated = await this.database!.updateStatus(
         args.id,
         args.name,
         args.is_closed
@@ -139,7 +140,7 @@ export class StatusHandlersV2 extends BaseHandler {
       this.ensureDatabase();
 
       // @ai-logic: Attempt to delete status
-      const deleted = await this.database.deleteStatus(args.id);
+      const deleted = await this.database!.deleteStatus(args.id);
 
       if (!deleted) {
         return this.createErrorResponse(

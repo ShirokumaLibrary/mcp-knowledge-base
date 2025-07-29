@@ -32,6 +32,7 @@ import { createLogger } from '../utils/logger.js';
  */
 export class StatusHandlers {
   private logger = createLogger('StatusHandlers');
+  public readonly handlerName = 'StatusHandlers';
 
   /**
    * @ai-intent Initialize with database dependency

@@ -26,6 +26,7 @@ import { createLogger } from '../utils/logger.js';
  */
 export class SummaryHandlers {
   private logger = createLogger('SummaryHandlers');
+  public readonly handlerName = 'SummaryHandlers';
 
   /**
    * @ai-intent Initialize with session manager

@@ -2,6 +2,18 @@ import type { Database } from './base.js';
 import { BaseRepository } from './base.js';
 import type { Tag } from '../types/domain-types.js';
 
+// Type definitions for database rows
+interface TagRow {
+  id: number;
+  name: string;
+  created_at?: string;
+}
+
+interface TagCountRow {
+  tag_name: string;
+  count: number;
+}
+
 /**
  * @ai-context Repository for tag management across all content types
  * @ai-pattern Shared tagging system with auto-registration and ID-based relationships
@@ -20,10 +32,13 @@ export class TagRepository extends BaseRepository {
       'SELECT id, name, created_at FROM tags ORDER BY name'
     );
 
-    return rows.map((row: any) => ({
-      name: row.name,
-      createdAt: row.created_at
-    }));
+    return rows.map((row: unknown) => {
+      const tagRow = row as TagRow;
+      return {
+        name: tagRow.name,
+        createdAt: tagRow.created_at
+      };
+    });
   }
 
   // Alias for backward compatibility
@@ -97,8 +112,9 @@ export class TagRepository extends BaseRepository {
     );
 
     const idMap = new Map<string, number>();
-    rows.forEach((row: any) => {
-      idMap.set(row.name, row.id);
+    rows.forEach((row: unknown) => {
+      const tagRow = row as TagRow;
+      idMap.set(tagRow.name, tagRow.id);
     });
 
     return idMap;
@@ -183,10 +199,13 @@ export class TagRepository extends BaseRepository {
       [`%${pattern}%`]
     );
 
-    return rows.map((row: any) => ({
-      name: row.name,
-      createdAt: row.created_at
-    }));
+    return rows.map((row: unknown) => {
+      const tagRow = row as TagRow;
+      return {
+        name: tagRow.name,
+        createdAt: tagRow.created_at
+      };
+    });
   }
 
   // Alias for backward compatibility
@@ -215,7 +234,7 @@ export class TagRepository extends BaseRepository {
       [entityId]
     );
 
-    return rows.map((row: any) => row.name);
+    return rows.map((row: unknown) => (row as TagRow).name);
   }
 
   /**
@@ -245,7 +264,7 @@ export class TagRepository extends BaseRepository {
 
     // Insert new relationships
     const values = Array.from(tagIdMap.values()).map(() => '(?, ?)').join(',');
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     tagIdMap.forEach(tagId => {
       params.push(entityId, tagId);
     });
@@ -287,7 +306,7 @@ export class TagRepository extends BaseRepository {
       trimmedTags
     );
 
-    const existingNames = new Set(existingRows.map((row: any) => row.name));
+    const existingNames = new Set(existingRows.map((row: unknown) => (row as TagRow).name));
     const newTags = trimmedTags.filter(tag => !existingNames.has(tag));
 
     if (newTags.length === 0) {

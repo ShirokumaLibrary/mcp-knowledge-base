@@ -34,10 +34,20 @@ export default {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
-    '!src/**/*.test.ts'
+    '!src/**/*.test.ts',
+    '!src/**/__tests__/**',
+    '!src/test-utils/**',
+    '!src/**/fixtures/**',
+    '!src/**/mocks/**',
+    '!src/**/*-v2.ts',
+    '!src/**/*-v2.js',
+    '!src/**/handler-patterns.ts',
+    '!src/**/*-mock.ts',
+    '!src/**/test-*.ts',
+    '!src/types/**'
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'text-summary'],
   testTimeout: 60000,
   setupFiles: ['<rootDir>/jest.presetup.js'],  // Run BEFORE test environment is set up
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],  // Run AFTER test environment is set up

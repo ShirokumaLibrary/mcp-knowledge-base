@@ -49,7 +49,9 @@ export class FullTextSearchRepository {
 
     // Build type filter
     let typeFilter = '';
-    let params: any[] = [`"${escapedQuery}"`, limit, offset];
+    // @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let params: (string | number)[] = [`"${escapedQuery}"`, limit, offset];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
@@ -72,6 +74,10 @@ export class FullTextSearchRepository {
     `;
 
     try {
+      // @ai-any-deliberate: Database query result - dynamic row structure from SQLite
+
+      // @ai-any-deliberate: Database query result - dynamic row structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rows = await this.db.allAsync(sql, params) as any[];
 
       return rows.map(row => ({
@@ -111,7 +117,9 @@ export class FullTextSearchRepository {
 
     // Build type filter
     let typeFilter = '';
-    let params: any[] = [`"${escapedQuery}"*`, limit];
+    // @ai-any-deliberate: SQLite params array - mixed types for query parameters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let params: (string | number)[] = [`"${escapedQuery}"*`, limit];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
@@ -152,7 +160,7 @@ export class FullTextSearchRepository {
 
     // Build type filter
     let typeFilter = '';
-    let params: any[] = [`"${escapedQuery}"`];
+    let params: (string | number)[] = [`"${escapedQuery}"`];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');

@@ -50,18 +50,31 @@ export class SessionRepository {
    * @ai-intent Convert StorageItem to Session
    */
   private storageItemToSession(item: StorageItem, id: string, date: string): Session {
+    // Type assertion for metadata fields
+    interface SessionMetadata {
+      title?: unknown;
+      description?: unknown;
+      tags?: unknown;
+      related_tasks?: unknown;
+      related_documents?: unknown;
+      start_time?: unknown;
+      created_at?: unknown;
+      updated_at?: unknown;
+    }
+    const metadata = item.metadata as SessionMetadata;
+
     return {
       id,
-      title: item.metadata.title,
-      description: item.metadata.description || undefined,
+      title: String(metadata.title || ''),
+      description: metadata.description ? String(metadata.description) : undefined,
       content: item.content || undefined,
-      tags: item.metadata.tags || [],
-      related_tasks: item.metadata.related_tasks || undefined,
-      related_documents: item.metadata.related_documents || undefined,
+      tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
+      related_tasks: Array.isArray(metadata.related_tasks) ? metadata.related_tasks.map(t => String(t)) : undefined,
+      related_documents: Array.isArray(metadata.related_documents) ? metadata.related_documents.map(t => String(t)) : undefined,
       date,
-      startTime: item.metadata.start_time || undefined,
-      createdAt: item.metadata.created_at,
-      updatedAt: item.metadata.updated_at || undefined
+      startTime: metadata.start_time ? String(metadata.start_time) : undefined,
+      createdAt: String(metadata.created_at || new Date().toISOString()),
+      updatedAt: metadata.updated_at ? String(metadata.updated_at) : undefined
     };
   }
 
@@ -90,16 +103,28 @@ export class SessionRepository {
    * @ai-intent Convert StorageItem to Daily
    */
   private storageItemToDaily(item: StorageItem, date: string): Daily {
+    // Type assertion for metadata fields
+    interface DailyMetadata {
+      title?: unknown;
+      description?: unknown;
+      tags?: unknown;
+      related_tasks?: unknown;
+      related_documents?: unknown;
+      created_at?: unknown;
+      updated_at?: unknown;
+    }
+    const metadata = item.metadata as DailyMetadata;
+
     return {
       date,
-      title: item.metadata.title,
-      description: item.metadata.description || undefined,
+      title: String(metadata.title || ''),
+      description: metadata.description ? String(metadata.description) : undefined,
       content: item.content,
-      tags: item.metadata.tags || [],
-      related_tasks: item.metadata.related_tasks || [],
-      related_documents: item.metadata.related_documents || [],
-      createdAt: item.metadata.created_at,
-      updatedAt: item.metadata.updated_at || undefined
+      tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
+      related_tasks: Array.isArray(metadata.related_tasks) ? metadata.related_tasks.map(t => String(t)) : [],
+      related_documents: Array.isArray(metadata.related_documents) ? metadata.related_documents.map(t => String(t)) : [],
+      createdAt: String(metadata.created_at || new Date().toISOString()),
+      updatedAt: metadata.updated_at ? String(metadata.updated_at) : undefined
     };
   }
 
@@ -179,8 +204,8 @@ export class SessionRepository {
 
   async searchSessionsByTag(tag: string): Promise<Session[]> {
     return this.storage.search(STORAGE_CONFIGS.sessions, item => {
-      const tags = item.metadata.tags || [];
-      return tags.includes(tag);
+      const tags = Array.isArray(item.metadata.tags) ? item.metadata.tags : [];
+      return tags.some(t => String(t) === tag);
     }).then(items =>
       items.map(item => {
         const date = STORAGE_CONFIGS.sessions.dateExtractor!(item.id);
@@ -196,7 +221,7 @@ export class SessionRepository {
         item.metadata.title || '',
         item.metadata.description || '',
         item.content || '',
-        (item.metadata.tags || []).join(' ')
+        (Array.isArray(item.metadata.tags) ? item.metadata.tags.map(t => String(t)).join(' ') : '')
       ].join(' ').toLowerCase();
 
       return searchable.includes(lowerQuery);

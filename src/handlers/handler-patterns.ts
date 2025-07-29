@@ -24,8 +24,8 @@ export class HandlerPatterns {
     operations: {
       getAll: () => Promise<T[]>;
       getById: (id: number | string) => Promise<T | null>;
-      create: (data: any) => Promise<T>;
-      update: (id: number | string, data: any) => Promise<T | null>;
+      create: (data: unknown) => Promise<T>;
+      update: (id: number | string, data: unknown) => Promise<T | null>;
       delete: (id: number | string) => Promise<boolean>;
     },
     schemas: {
@@ -173,7 +173,7 @@ export class HandlerPatterns {
   static createSearchHandler<T extends { id: number | string; title: string }>(
     handler: BaseHandler,
     entityName: string,
-    searchOperation: (query: string, filters?: any) => Promise<T[]>,
+    searchOperation: (query: string, filters?: unknown) => Promise<T[]>,
     schema: z.ZodSchema<any>,
     formatter?: (items: T[]) => string
   ) {
@@ -336,7 +336,7 @@ export class ResponsePatterns {
     columns: Array<{
       key: keyof T;
       header: string;
-      formatter?: (value: any) => string;
+      formatter?: (value: unknown) => string;
     }>,
     title?: string
   ): string {

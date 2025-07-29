@@ -61,7 +61,9 @@ export class ItemRepository {
     const fieldDefs = await typeRepo.getFieldsForType(item.type);
 
     // Create metadata with all defined fields
-    const metadata: Record<string, any> = {};
+    // Define proper metadata value types
+    type MetadataValue = string | number | boolean | null | string[];
+    const metadata: Record<string, MetadataValue> = {};
 
     // @ai-critical: Add base field for ALL types uniformly (except special ID types)
     // @ai-why: No special treatment for initial types - all types are equal
@@ -80,7 +82,7 @@ export class ItemRepository {
 
     for (const fieldDef of fieldDefs) {
       const fieldName = fieldDef.field_name;
-      let value: any;
+      let value: MetadataValue;
 
       // Map UnifiedItem properties to field names
       switch (fieldName) {
@@ -134,7 +136,8 @@ export class ItemRepository {
           break;
         case 'category':
           // Special handling for sessions category field
-          if (item.type === 'sessions' && (item as any).category) {
+          // Special handling for sessions category field
+          if (item.type === 'sessions' && 'category' in item && (item as any).category) {
             value = (item as any).category;
           } else {
             value = fieldDef.default_value;
@@ -164,59 +167,76 @@ export class ItemRepository {
     type: string,
     statusName?: string
   ): Promise<UnifiedItem> {
-    const metadata = item.metadata;
-    const related = metadata.related || [];
+    // Type assertion for metadata fields
+    interface ItemMetadata {
+      title?: unknown;
+      description?: unknown;
+      priority?: unknown;
+      status?: unknown;
+      status_id?: unknown;
+      start_date?: unknown;
+      end_date?: unknown;
+      start_time?: unknown;
+      tags?: unknown;
+      related?: unknown;
+      related_tasks?: unknown;
+      related_documents?: unknown;
+      created_at?: unknown;
+      updated_at?: unknown;
+    }
+    const metadata = item.metadata as ItemMetadata;
+    const related = (Array.isArray(metadata.related) ? metadata.related : []) as string[];
 
     // Use specific related fields if available, otherwise derive from related
-    const related_tasks = metadata.related_tasks || related.filter((r: string) => r.match(/^(issues|plans)-/));
-    const related_documents = metadata.related_documents || related.filter((r: string) => r.match(/^(docs|knowledge)-/));
+    const related_tasks = (Array.isArray(metadata.related_tasks) ? metadata.related_tasks : related.filter((r: string) => r.match(/^(issues|plans)-/))) as string[];
+    const related_documents = (Array.isArray(metadata.related_documents) ? metadata.related_documents : related.filter((r: string) => r.match(/^(docs|knowledge)-/))) as string[];
 
     // Get status info
     const statuses = await this.statusRepo.getAllStatuses();
-    let statusId = metadata.status_id || 1;
+    let statusId = Number(metadata.status_id || 1);
 
     if (!statusName) {
       if (metadata.status_id) {
         // Get status name from ID
-        const status = statuses.find(s => s.id === metadata.status_id);
+        const status = statuses.find(s => s.id === Number(metadata.status_id));
         statusName = status?.name || 'Open';
       } else if (metadata.status) {
         // Get status ID from name
-        const status = statuses.find(s => s.name === metadata.status);
+        const status = statuses.find(s => s.name === String(metadata.status));
         if (status) {
           statusName = status.name;
           statusId = status.id;
         } else {
-          statusName = metadata.status;
+          statusName = String(metadata.status);
         }
       } else {
         statusName = 'Open';
       }
     }
 
-    const unifiedItem: any = {
+    const unifiedItem: UnifiedItem = {
       id: item.id,
       type,
-      title: metadata.title,
-      description: metadata.description || undefined,
+      title: String(metadata.title || ''),
+      description: metadata.description ? String(metadata.description) : undefined,
       content: item.content,
-      priority: metadata.priority || 'medium',
+      priority: (metadata.priority === 'high' || metadata.priority === 'medium' || metadata.priority === 'low' ? metadata.priority : 'medium') as 'high' | 'medium' | 'low',
       status: statusName,
-      status_id: statusId,
-      start_date: metadata.start_date || null,
-      end_date: metadata.end_date || null,
-      start_time: metadata.start_time || null,
-      tags: metadata.tags || [],
+      status_id: Number(statusId),
+      start_date: metadata.start_date ? String(metadata.start_date) : null,
+      end_date: metadata.end_date ? String(metadata.end_date) : null,
+      start_time: metadata.start_time ? String(metadata.start_time) : null,
+      tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
       related,
       related_tasks,
       related_documents,
-      created_at: metadata.created_at || new Date().toISOString(),
-      updated_at: metadata.updated_at || metadata.created_at || new Date().toISOString()
+      created_at: String(metadata.created_at || new Date().toISOString()),
+      updated_at: String(metadata.updated_at || metadata.created_at || new Date().toISOString())
     };
 
     // Add date field for sessions and dailies
     if (type === 'sessions' || type === 'dailies') {
-      unifiedItem.date = metadata.start_date || null;
+      (unifiedItem as any).date = metadata.start_date || null;
     }
 
     return unifiedItem;
@@ -437,7 +457,7 @@ export class ItemRepository {
       .filter(tag => tag.length > 0);
 
     // Create unified item
-    const item: any = {
+    const item: UnifiedItem = {
       id: id,
       type,
       title: cleanedTitle,
@@ -459,7 +479,7 @@ export class ItemRepository {
 
     // Add date field for sessions and dailies
     if (type === 'sessions' || type === 'dailies') {
-      item.date = item.start_date;
+      (item as any).date = item.start_date;
     }
 
     // Save to storage
@@ -753,7 +773,7 @@ export class ItemRepository {
       LEFT JOIN statuses s ON i.status_id = s.id
       WHERE i.type = ?
     `;
-    const params: any[] = [type];
+    const params: (string | number)[] = [type];
 
     if (!includeClosedStatuses) {
       query += ' AND s.is_closed = 0';
@@ -820,7 +840,7 @@ export class ItemRepository {
       LEFT JOIN statuses s ON i.status_id = s.id
       WHERE t.name = ?
     `;
-    const params: any[] = [tag];
+    const params: (string | number)[] = [tag];
 
     if (types && types.length > 0) {
       query += ` AND i.type IN (${types.map(() => '?').join(',')})`;
@@ -909,8 +929,8 @@ export class ItemRepository {
             'INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)',
             [item.type, item.id, relatedType, relatedId]
           );
-        } catch (error: any) {
-          if (error.message?.includes('UNIQUE constraint failed')) {
+        } catch (error) {
+          if (error instanceof Error && error.message?.includes('UNIQUE constraint failed')) {
             // Skip duplicate - this is OK since we're ensuring uniqueness
             this.logger.debug(`Skipping duplicate related item: ${item.type}-${item.id} -> ${relatedRef}`);
           } else {
@@ -930,7 +950,7 @@ export class ItemRepository {
     const related_tasks = related.filter((r: string) => r.match(/^(issues|plans)-/));
     const related_documents = related.filter((r: string) => r.match(/^(docs|knowledge)-/));
 
-    const item: any = {
+    const item: UnifiedItem = {
       id: row.id,
       type: row.type,
       title: row.title,
@@ -952,7 +972,7 @@ export class ItemRepository {
 
     // Add date field for sessions and dailies
     if (row.type === 'sessions' || row.type === 'dailies') {
-      item.date = row.start_date;
+      (item as any).date = row.start_date;
     }
 
     return item;

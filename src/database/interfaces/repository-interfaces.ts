@@ -303,7 +303,11 @@ export interface IDatabase {
   searchDocumentsByTag(tag: string, type?: string): Promise<Document[]>;
 
   // Search operations
+  // @ai-any-deliberate: Generic search result - returns mixed item types (Issue, Plan, Doc, Knowledge)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   searchAll(query: string): Promise<any>;
+  // @ai-any-deliberate: Generic tag search result - returns mixed item types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   searchAllByTag(tag: string): Promise<any>;
   searchSessions(query: string): Promise<Session[]>;
   searchDailySummaries(query: string): Promise<Daily[]>;

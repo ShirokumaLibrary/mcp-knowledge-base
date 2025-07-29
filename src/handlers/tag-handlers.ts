@@ -26,6 +26,7 @@ import { createLogger } from '../utils/logger.js';
  */
 export class TagHandlers {
   private logger = createLogger('TagHandlers');
+  public readonly handlerName = 'TagHandlers';
 
   /**
    * @ai-intent Initialize with database dependency

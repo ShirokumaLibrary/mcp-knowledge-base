@@ -255,7 +255,7 @@ export function getConfigValue<T>(
   defaultValue: T
 ): T {
   const parts = path.split('.');
-  let value: any = {
+  let value: unknown = {
     DATABASE: DATABASE_CONSTANTS,
     ENTITY: ENTITY_CONSTANTS,
     VALIDATION: VALIDATION_CONSTANTS,
@@ -267,7 +267,7 @@ export function getConfigValue<T>(
 
   for (const part of parts) {
     if (value && typeof value === 'object' && part in value) {
-      value = value[part];
+      value = (value as Record<string, unknown>)[part];
     } else {
       return defaultValue;
     }

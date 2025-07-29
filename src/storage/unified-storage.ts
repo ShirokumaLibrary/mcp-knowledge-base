@@ -19,7 +19,7 @@ export interface StorageConfig {
 
 export interface StorageItem {
   id: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   content: string;
 }
 
@@ -89,8 +89,8 @@ export class UnifiedStorage {
         metadata: parsed.metadata,
         content: parsed.content
       };
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         this.logger.debug(`File not found: ${filePath}`);
         return null;
       }
@@ -109,8 +109,8 @@ export class UnifiedStorage {
       await fs.unlink(filePath);
       this.logger.debug(`Deleted ${filePath}`);
       return true;
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         return false;
       }
       throw error;
@@ -150,8 +150,8 @@ export class UnifiedStorage {
       return files
         .filter(file => file.startsWith(prefix) && file.endsWith(suffix))
         .map(file => file.slice(prefix.length, -suffix.length));
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         return [];
       }
       throw error;
@@ -175,8 +175,8 @@ export class UnifiedStorage {
         .filter(entry => entry.isDirectory() && /^\d{4}-\d{2}-\d{2}$/.test(entry.name))
         .map(entry => entry.name)
         .sort();
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         return [];
       }
       throw error;

@@ -7,6 +7,7 @@
 
 import { BaseRepository } from './base-repository.js';
 import type { Database } from './base.js';
+import type { DatabaseRow } from './types/database-types.js';
 import {
   type UnifiedItem,
   // type ItemRow,
@@ -91,9 +92,9 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
    * @ai-intent Map database row to entity
    * @ai-pattern Required by BaseRepository
    */
-  protected mapRowToEntity(row: any): UnifiedItem {
-    const tags = row.tags ? JSON.parse(row.tags) : [];
-    const related = row.related ? JSON.parse(row.related) : [];
+  protected mapRowToEntity(row: DatabaseRow): UnifiedItem {
+    const tags = row.tags ? JSON.parse(String(row.tags)) : [];
+    const related = row.related ? JSON.parse(String(row.related)) : [];
 
     const item: UnifiedItem = {
       id: String(row.id),
@@ -119,7 +120,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
    * @ai-intent Map entity to database row
    * @ai-pattern Required by BaseRepository
    */
-  protected mapEntityToRow(entity: UnifiedItem): any {
+  protected mapEntityToRow(entity: UnifiedItem): DatabaseRow {
     return {
       type: entity.type,
       id: entity.id,
@@ -155,7 +156,8 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     // Generate ID based on type
     let id: string;
     if (type === 'sessions') {
-      id = this.generateSessionId();
+      // Use custom ID if provided (already validated by Zod schema)
+      id = data.id || this.generateSessionId();
     } else if (type === 'dailies') {
       id = data.start_date || new Date().toISOString().split('T')[0];
       // Check if summary already exists for this date
@@ -390,7 +392,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     let query = 'SELECT DISTINCT i.* FROM items i';
     const joins: string[] = [];
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | null)[] = [];
 
     // Type filtering
     if (params.type) {
@@ -541,16 +543,29 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
   }
 
   private getFilePath(type: string, id: string): string {
+    // Validate ID to prevent path traversal attacks
+    const idStr = String(id);
+    if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') || 
+        idStr.includes('\0') || idStr.includes('%') || idStr === '.' ||
+        path.isAbsolute(idStr)) {
+      throw new Error(`Invalid ID format: ${idStr}`);
+    }
+    
+    // Additional validation: only allow alphanumeric, dash, underscore, and dot
+    if (!/^[a-zA-Z0-9\-_.]+$/.test(idStr)) {
+      throw new Error(`Invalid ID format: ${idStr}`);
+    }
+    
     if (type === 'sessions') {
       // Sessions are stored in date subdirectories
       const dateMatch = id.match(/^(\d{4}-\d{2}-\d{2})/);
       if (dateMatch) {
         const date = dateMatch[1];
-        return path.join(this.dataDir, 'sessions', date, `session-${id}.md`);
+        return path.join(this.dataDir, 'sessions', date, `sessions-${id}.md`);
       }
     } else if (type === 'dailies') {
       // Summaries are stored in sessions directory with date subdirectories
-      return path.join(this.dataDir, 'sessions', id, `daily-summary-${id}.md`);
+      return path.join(this.dataDir, 'sessions', id, `dailies-${id}.md`);
     }
 
     // Regular items
@@ -570,7 +585,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     const statusName = status?.name || 'Open';
 
     // Prepare metadata
-    const metadata: any = {
+    const metadata: Record<string, string | number | null | string[]> = {
       id: item.type === 'sessions' || item.type === 'dailies' ? item.id : parseInt(item.id),
       title: item.title,
       priority: item.priority,
@@ -600,6 +615,31 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
 
     // Write to file
     await fs.writeFile(filePath, markdown, 'utf8');
+  }
+
+  /**
+   * @ai-intent Search items by tag
+   * @ai-flow 1. Get tag ID -> 2. Find items with tag -> 3. Load each item
+   */
+  async searchByTag(tag: string): Promise<UnifiedItem[]> {
+    const sql = `
+      SELECT DISTINCT item_type as type, item_id as id
+      FROM item_tags it
+      JOIN tags t ON t.id = it.tag_id
+      WHERE t.name = ?
+    `;
+
+    const rows = await this.db.allAsync(sql, [tag]);
+    const items: UnifiedItem[] = [];
+
+    for (const row of rows) {
+      const item = await this.getById(String(row.type), String(row.id));
+      if (item) {
+        items.push(item);
+      }
+    }
+
+    return items;
   }
 
   private async syncToDatabase(item: UnifiedItem): Promise<void> {

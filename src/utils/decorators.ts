@@ -6,6 +6,11 @@
  * @ai-assumption TypeScript decorators are enabled in tsconfig.json
  */
 
+// Interface for objects with initializationPromise
+interface InitializableObject {
+  initializationPromise?: Promise<void>;
+}
+
 /**
  * @ai-intent Ensures async initialization is complete before method execution
  * @ai-pattern Decorator that wraps async methods with initialization check
@@ -31,7 +36,7 @@ export function ensureInitialized(
 ): PropertyDescriptor {
   const originalMethod = descriptor.value;
 
-  descriptor.value = async function (this: any, ...args: unknown[]) {
+  descriptor.value = async function (this: InitializableObject, ...args: unknown[]) {
     // @ai-logic: Check for initializationPromise property
     if (this.initializationPromise) {
       await this.initializationPromise;
@@ -51,31 +56,31 @@ export function ensureInitialized(
  * @ai-why Helps identify performance bottlenecks
  */
 export function logExecutionTime(
-  target: any,
+  target: unknown,
   propertyKey: string,
   descriptor: PropertyDescriptor
 ): PropertyDescriptor {
   const originalMethod = descriptor.value;
 
-  descriptor.value = async function (this: any, ...args: any[]) {
+  descriptor.value = async function (this: unknown, ...args: unknown[]) {
     const start = performance.now();
-    const className = target.constructor.name;
+    const className = (target as {constructor: {name: string}}).constructor.name;
 
     try {
       const result = await originalMethod.apply(this, args);
       const duration = performance.now() - start;
 
       // @ai-logic: Log only if logger exists on instance
-      if (this.logger) {
-        this.logger.debug(`${className}.${propertyKey} completed`, { duration });
+      if ((this as {logger?: {debug: Function}}).logger) {
+        (this as {logger: {debug: Function}}).logger.debug(`${className}.${propertyKey} completed`, { duration });
       }
 
       return result;
     } catch (error) {
       const duration = performance.now() - start;
 
-      if (this.logger) {
-        this.logger.error(`${className}.${propertyKey} failed`, { duration, error });
+      if ((this as {logger?: {error: Function}}).logger) {
+        (this as {logger: {error: Function}}).logger.error(`${className}.${propertyKey} failed`, { duration, error });
       }
 
       throw error;
@@ -93,14 +98,14 @@ export function logExecutionTime(
  */
 export function retry(maxAttempts: number = 3, initialDelay: number = 1000) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ): PropertyDescriptor {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (this: any, ...args: any[]) {
-      let lastError: any;
+    descriptor.value = async function (this: unknown, ...args: unknown[]) {
+      let lastError: unknown;
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
@@ -111,8 +116,8 @@ export function retry(maxAttempts: number = 3, initialDelay: number = 1000) {
           if (attempt < maxAttempts) {
             const delay = initialDelay * Math.pow(2, attempt - 1);
 
-            if (this.logger) {
-              this.logger.warn(`${propertyKey} failed, retrying`, {
+            if ((this as {logger?: {warn: Function}}).logger) {
+              (this as {logger: {warn: Function}}).logger.warn(`${propertyKey} failed, retrying`, {
                 attempt,
                 maxAttempts,
                 delay,

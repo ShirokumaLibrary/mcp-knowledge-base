@@ -127,7 +127,13 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
     const items = await itemRepository.searchItemsByTag(tag, types);
 
     // Transform to nested format for backward compatibility
-    const result: any = {
+    // Define proper type for the result
+    interface GroupedItems {
+      tasks: Record<string, UnifiedItem[]>;
+      documents: Record<string, UnifiedItem[]>;
+    }
+    
+    const result: GroupedItems = {
       tasks: {},
       documents: {}
     };
@@ -305,7 +311,8 @@ export const unifiedTools: Tool[] = [
         },
         id: {
           type: 'string',
-          description: 'Custom ID (for sessions, optional)'
+          description: 'Custom ID (for sessions, optional)',
+          pattern: '^[a-zA-Z0-9\\-_.]+$'
         },
         category: {
           type: 'string',
@@ -422,11 +429,11 @@ export const unifiedTools: Tool[] = [
  */
 export async function handleUnifiedToolCall(
   name: string,
-  args: any,
+  args: unknown,
   handlers: ReturnType<typeof createUnifiedHandlers>
 ): Promise<{ content: { type: 'text'; text: string }[] }> {
 
-  let result: any;
+  let result: unknown;
 
   // Route to appropriate handler
   switch (name) {

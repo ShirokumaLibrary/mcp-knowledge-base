@@ -11,9 +11,6 @@ export { createLogger } from './logger.js';
 // Decorator utilities
 export { ensureInitialized } from './decorators.js';
 
-// File utilities
-export { ensureDirectoryExists } from './file-utils.js';
-
 // Date utilities
 export { formatRelativeDate } from './date-utils.js';
 

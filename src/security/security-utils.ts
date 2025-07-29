@@ -366,23 +366,25 @@ export function generateCsrfToken(): string {
  * @ai-usage Log sanitization
  */
 export function redactSensitiveFields(
-  obj: any,
+  obj: unknown,
   sensitiveFields = ['password', 'token', 'secret', 'key', 'auth', 'credential']
-): any {
+): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
   }
 
-  const redacted = Array.isArray(obj) ? [...obj] : { ...obj };
+  const redacted = Array.isArray(obj) ? [...obj] : { ...(obj as Record<string, unknown>) };
 
-  for (const key in redacted) {
-    const lowerKey = key.toLowerCase();
+  if (!Array.isArray(redacted)) {
+    for (const key in redacted) {
+      const lowerKey = key.toLowerCase();
 
-    // Check if field name contains sensitive keywords
-    if (sensitiveFields.some(field => lowerKey.includes(field))) {
-      redacted[key] = '[REDACTED]';
-    } else if (typeof redacted[key] === 'object') {
-      redacted[key] = redactSensitiveFields(redacted[key], sensitiveFields);
+      // Check if field name contains sensitive keywords
+      if (sensitiveFields.some(field => lowerKey.includes(field))) {
+        (redacted as Record<string, unknown>)[key] = '[REDACTED]';
+      } else if (typeof (redacted as Record<string, unknown>)[key] === 'object') {
+        (redacted as Record<string, unknown>)[key] = redactSensitiveFields((redacted as Record<string, unknown>)[key], sensitiveFields);
+      }
     }
   }
 

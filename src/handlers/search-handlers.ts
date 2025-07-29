@@ -28,7 +28,7 @@ const searchSuggestSchema = z.object({
 
 export class SearchHandlers {
   private searchRepo?: FullTextSearchRepository;
-  private itemRepo?: any;
+  private itemRepo?: ReturnType<FileIssueDatabase['getItemRepository']>;
 
   constructor(private db: FileIssueDatabase) {
     // Initialize repositories lazily to avoid database initialization issues
@@ -41,7 +41,7 @@ export class SearchHandlers {
     return this.searchRepo;
   }
 
-  private getItemRepo(): any {
+  private getItemRepo(): ReturnType<FileIssueDatabase['getItemRepository']> {
     if (!this.itemRepo) {
       this.itemRepo = this.db.getItemRepository();
     }

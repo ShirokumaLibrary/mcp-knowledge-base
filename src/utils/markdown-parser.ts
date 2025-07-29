@@ -37,6 +37,8 @@
 import type { Document } from '../types/domain-types.js';
 
 export interface ParsedMarkdown {
+  // @ai-any-deliberate: YAML frontmatter can contain any valid YAML structure
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
   content: string;
 }

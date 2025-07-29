@@ -10,6 +10,14 @@ import { RateLimitError } from '../errors/custom-errors.js';
 
 const logger = createLogger('RateLimiter');
 
+// Type for rate limit context
+interface RateLimitContext {
+  ip?: string;
+  userId?: string;
+  sessionId?: string;
+  [key: string]: unknown;
+}
+
 /**
  * @ai-intent Rate limit configuration
  * @ai-pattern Different limits for different operations
@@ -19,7 +27,7 @@ export interface RateLimitConfig {
   maxRequests: number;   // Max requests per window
   skipSuccessfulRequests?: boolean; // Don't count successful requests
   skipFailedRequests?: boolean;     // Don't count failed requests
-  keyGenerator?: (context: any) => string; // Custom key generation
+  keyGenerator?: (context: unknown) => string; // Custom key generation
 }
 
 /**
@@ -127,7 +135,7 @@ export class RateLimiter {
    * @ai-flow 1. Generate key -> 2. Get bucket -> 3. Try consume -> 4. Handle result
    * @ai-throws RateLimitError if limit exceeded
    */
-  async checkLimit(context: any = {}): Promise<void> {
+  async checkLimit(context: unknown = {}): Promise<void> {
     // Periodic cleanup
     this.cleanupStale();
 
@@ -165,7 +173,7 @@ export class RateLimiter {
    * @ai-intent Record request result
    * @ai-pattern Optionally don't count successful/failed requests
    */
-  recordResult(context: any, success: boolean): void {
+  recordResult(context: unknown, success: boolean): void {
     if (success && this.config.skipSuccessfulRequests) {
       // Refund the token
       const key = this.config.keyGenerator
@@ -184,18 +192,20 @@ export class RateLimiter {
    * @ai-intent Generate default key
    * @ai-pattern IP-based or global rate limiting
    */
-  private getDefaultKey(context: any): string {
+  private getDefaultKey(context: unknown): string {
     // Try to extract identifier from context
-    if (context.ip) {
-      return `ip:${context.ip}`;
+    const ctx = context as RateLimitContext;
+    
+    if (ctx.ip) {
+      return `ip:${ctx.ip}`;
     }
 
-    if (context.userId) {
-      return `user:${context.userId}`;
+    if (ctx.userId) {
+      return `user:${ctx.userId}`;
     }
 
-    if (context.sessionId) {
-      return `session:${context.sessionId}`;
+    if (ctx.sessionId) {
+      return `session:${ctx.sessionId}`;
     }
 
     // Global rate limit
@@ -231,7 +241,7 @@ export class RateLimiter {
    * @ai-intent Get current limit status
    * @ai-usage For monitoring and headers
    */
-  getStatus(context: any): {
+  getStatus(context: unknown): {
     limit: number;
     remaining: number;
     reset: Date;
@@ -261,7 +271,7 @@ export class RateLimiter {
    * @ai-intent Reset limits for a specific key
    * @ai-usage For admin operations
    */
-  reset(context: any): void {
+  reset(context: unknown): void {
     const key = this.config.keyGenerator
       ? this.config.keyGenerator(context)
       : this.getDefaultKey(context);
@@ -294,7 +304,7 @@ export class CompositeRateLimiter {
    * @ai-intent Check all rate limits
    * @ai-throws First rate limit error encountered
    */
-  async checkLimits(context: any): Promise<void> {
+  async checkLimits(context: unknown): Promise<void> {
     for (const limiter of this.limiters) {
       await limiter.checkLimit(context);
     }
@@ -303,7 +313,7 @@ export class CompositeRateLimiter {
   /**
    * @ai-intent Record result for all limiters
    */
-  recordResult(context: any, success: boolean): void {
+  recordResult(context: unknown, success: boolean): void {
     for (const limiter of this.limiters) {
       limiter.recordResult(context, success);
     }
@@ -318,8 +328,8 @@ export class CompositeRateLimiter {
 export function createRateLimitMiddleware(config: RateLimitConfig) {
   const limiter = new RateLimiter(config);
 
-  return async (handler: (...args: any[]) => any) => {
-    return async (params: any, context?: any) => {
+  return async (handler: (...args: unknown[]) => any) => {
+    return async (params: unknown, context?: unknown) => {
       // Check rate limit
       await limiter.checkLimit(context);
 

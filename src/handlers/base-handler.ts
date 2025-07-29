@@ -11,6 +11,7 @@ import { createLogger } from '../utils/logger.js';
 import { McpError } from '@modelcontextprotocol/sdk/types.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import type { IDatabase } from '../database/interfaces/repository-interfaces.js';
 
 /**
  * @ai-intent Standard tool response structure
@@ -27,7 +28,7 @@ export interface ToolResponse {
  * @ai-intent Handler method signature
  * @ai-pattern Type-safe handler with validation
  */
-export type HandlerMethod<T = unknown, R = any> = (args: T) => Promise<R>;
+export type HandlerMethod<T = unknown, R = unknown> = (args: T) => Promise<R>;
 
 /**
  * @ai-intent Abstract base handler with common functionality
@@ -39,7 +40,7 @@ export abstract class BaseHandler {
 
   constructor(
     protected handlerName: string,
-    protected database?: any  // @ai-todo: Replace with IDatabase interface
+    protected database?: IDatabase  // Now properly typed
   ) {
     this.logger = createLogger(handlerName);
   }
@@ -169,7 +170,7 @@ export abstract class BaseHandler {
    * @ai-pattern Pretty-printed JSON
    * @ai-usage For complex objects in responses
    */
-  public formatJson(obj: any): string {
+  public formatJson(obj: unknown): string {
     return JSON.stringify(obj, null, 2);
   }
 
