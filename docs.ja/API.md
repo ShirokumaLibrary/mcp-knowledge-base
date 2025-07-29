@@ -100,7 +100,7 @@ interface DocumentEntity extends BaseEntity {
 
 **パラメータ:**
 - `type` (string, 必須): エンティティタイプ
-- `statusIds` (number[]): ステータスIDでフィルタ
+- `statuses` (string[]): ステータス名でフィルタ
 - `includeClosedStatuses` (boolean): クローズドアイテムを含む
 
 #### get_item_detail
@@ -134,11 +134,39 @@ interface DocumentEntity extends BaseEntity {
 - `tag` (string, 必須): 検索するタグ
 - `types` (string[]): 検索するタイプ（省略時は全て）
 
-#### search_all
-全コンテンツに対する全文検索。
+#### search_items
+全アイテムのタイトル、説明、コンテンツに対する全文検索。
 
 **パラメータ:**
-- `query` (string, 必須): 検索クエリ
+- `query` (string, 必須): 検索クエリテキスト
+- `types` (string[]): 特定のタイプでフィルタ（オプション）
+- `limit` (number): 最大結果数（デフォルト: 20、最大: 100）
+- `offset` (number): ページネーション用のスキップ数（デフォルト: 0）
+
+**例:**
+```json
+{
+  "query": "認証エラー",
+  "types": ["issues", "docs"],
+  "limit": 10
+}
+```
+
+#### search_suggest
+オートコンプリート用の検索候補を取得。
+
+**パラメータ:**
+- `query` (string, 必須): 部分的な検索クエリ
+- `types` (string[]): 特定のタイプで候補をフィルタ（オプション）
+- `limit` (number): 最大候補数（デフォルト: 10、最大: 20）
+
+**例:**
+```json
+{
+  "query": "認証",
+  "limit": 5
+}
+```
 
 ### タグ管理
 
