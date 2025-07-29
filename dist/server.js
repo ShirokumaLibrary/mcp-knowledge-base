@@ -1,42 +1,4 @@
 #!/usr/bin/env node
-/**
- * @ai-context MCP server entry point for knowledge base management
- * @ai-pattern MCP server with handler delegation pattern
- * @ai-critical Main process - handles all client connections and requests
- * @ai-lifecycle Initialize -> Setup handlers -> Listen -> Handle requests -> Cleanup
- * @ai-assumption Single server instance per process, stdio transport only
- *
- * @ai-architecture-overview
- * This is the main entry point for the Shirokuma MCP Knowledge Base server.
- * The system uses a dual-storage architecture:
- * 1. Primary storage: Markdown files in directories (issues/, plans/, docs/, knowledge/, sessions/)
- * 2. Search index: SQLite database (search.db) for fast queries
- *
- * @ai-data-flow
- * 1. MCP Client (Claude) -> stdio -> server.ts -> handlers/* -> database/* -> repositories/*
- * 2. Repositories write markdown files and sync to SQLite for search
- * 3. All data modifications go through repositories to maintain consistency
- *
- * @ai-filesystem-structure
- * database/
- *   ├── issues/         # issue-{id}.md files
- *   ├── plans/          # plan-{id}.md files
- *   ├── docs/           # doc-{id}.md files
- *   ├── knowledge/      # knowledge-{id}.md files
- *   ├── sessions/       # YYYY-MM-DD/ directories containing:
- *   │                    #   - session-{timestamp}.md files
- *   │                    #   - daily-summary-YYYY-MM-DD.md (one per day)
- *   └── search.db       # SQLite database (search index + sequences table)
- *
- * @ai-error-handling
- * - All errors are caught and converted to MCP protocol errors
- * - Database initialization failures are fatal
- * - Handler errors return appropriate MCP error responses
- *
- * @ai-configuration
- * - Data directory: Configured via DATA_DIR env var or default './database'
- * - No other configuration needed - all state in filesystem
- */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError } from '@modelcontextprotocol/sdk/types.js';
@@ -51,18 +13,10 @@ import { SummaryHandlers } from './handlers/summary-handlers.js';
 import { TypeHandlers } from './handlers/type-handlers.js';
 import { SearchHandlers } from './handlers/search-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
-/**
- * @ai-context Main server class orchestrating all MCP operations
- * @ai-pattern Facade pattern with specialized handlers for each domain
- * @ai-critical Central coordination point - errors here affect all functionality
- * @ai-dependencies Database for persistence, handlers for business logic
- * @ai-lifecycle Constructor initializes all dependencies synchronously
- */
 export class IssueTrackerServer {
     server;
     db;
     sessionManager;
-    // @ai-logic: Separate handlers for different tool categories
     unifiedHandlers;
     statusHandlers;
     tagHandlers;
@@ -74,8 +28,6 @@ export class IssueTrackerServer {
         const config = getConfig();
         this.db = new FileIssueDatabase(config.database.path);
         this.sessionManager = new SessionManager(config.database.sessionsPath, this.db);
-        // @ai-logic: Handler initialization order doesn't matter - no dependencies
-        // unified handlers will be initialized after database is ready
         this.statusHandlers = new StatusHandlers(this.db);
         this.tagHandlers = new TagHandlers(this.db);
         this.sessionHandlers = new SessionHandlers(this.sessionManager);
@@ -91,17 +43,14 @@ export class IssueTrackerServer {
             }
         });
         this.setupToolHandlers();
-        // @ai-critical: Global error handler prevents server crashes
         this.server.onerror = (error) => console.error('[MCP Error]', error);
-        // @ai-lifecycle: Graceful shutdown on SIGINT (Ctrl+C)
         process.on('SIGINT', async () => {
             await this.server.close();
-            this.db.close(); // @ai-logic: Close DB connection to flush writes
+            this.db.close();
             process.exit(0);
         });
     }
     setupToolHandlers() {
-        // Set up tool listing and request handlers
         this.setupToolList();
         this.setupCallHandlers();
     }
@@ -110,24 +59,15 @@ export class IssueTrackerServer {
             return { tools: toolDefinitions };
         });
     }
-    /**
-     * @ai-intent Register handler for tool execution requests
-     * @ai-flow 1. Receive request -> 2. Route to handler -> 3. Catch errors -> 4. Return response
-     * @ai-error-handling Preserves McpError, wraps others as InternalError
-     * @ai-critical All tool calls go through here - must be bulletproof
-     * @ai-why Centralized error handling ensures consistent error responses
-     */
     setupCallHandlers() {
         this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
             try {
                 return await this.handleToolCall(request.params.name, request.params.arguments);
             }
             catch (error) {
-                // @ai-logic: McpErrors are already properly formatted
                 if (error instanceof McpError) {
                     throw error;
                 }
-                // @ai-error-recovery: Convert unknown errors to MCP format
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 throw new McpError(ErrorCode.InternalError, errorMessage);
             }
@@ -135,7 +75,6 @@ export class IssueTrackerServer {
     }
     async handleToolCall(toolName, args) {
         switch (toolName) {
-            // Unified item handlers
             case 'get_items':
             case 'get_item_detail':
             case 'create_item':
@@ -146,34 +85,15 @@ export class IssueTrackerServer {
                     throw new McpError(ErrorCode.InternalError, 'Server not fully initialized');
                 }
                 return handleUnifiedToolCall(toolName, args, this.unifiedHandlers);
-            // Status handlers
             case 'get_statuses': return this.statusHandlers.handleGetStatuses();
-            // case 'create_status': return this.statusHandlers.handleCreateStatus(args);  // Disabled
-            // case 'update_status': return this.statusHandlers.handleUpdateStatus(args);  // Disabled
-            // case 'delete_status': return this.statusHandlers.handleDeleteStatus(args);  // Disabled
-            // Tag handlers
             case 'get_tags': return this.tagHandlers.handleGetTags();
             case 'create_tag': return this.tagHandlers.handleCreateTag(args);
             case 'delete_tag': return this.tagHandlers.handleDeleteTag(args);
             case 'search_tags': return this.tagHandlers.handleSearchTags(args);
-            // Session handlers (DEPRECATED - use unified handlers)
-            // case 'get_sessions': return this.sessionHandlers.handleGetSessions(args);
-            // case 'get_session_detail': return this.sessionHandlers.handleGetSessionDetail(args);
-            // case 'get_latest_session': return this.sessionHandlers.handleGetLatestSession(args);
-            // case 'create_session': return this.sessionHandlers.handleCreateSession(args);
-            // case 'update_session': return this.sessionHandlers.handleUpdateSession(args);
-            // case 'search_sessions_by_tag': return this.sessionHandlers.handleSearchSessionsByTag(args);
-            // Summary handlers (DEPRECATED - use unified handlers)
-            // case 'get_summaries': return this.summaryHandlers.handleGetDailySummaries(args);
-            // case 'get_summary_detail': return this.summaryHandlers.handleGetDailyDetail(args);
-            // case 'create_summary': return this.summaryHandlers.handleCreateDaily(args);
-            // case 'update_summary': return this.summaryHandlers.handleUpdateDaily(args);
-            // Type management handlers
             case 'create_type': return this.typeHandlers.handleCreateType(args);
             case 'get_types': return this.typeHandlers.handleGetTypes(args);
             case 'update_type': return this.typeHandlers.handleUpdateType(args);
             case 'delete_type': return this.typeHandlers.handleDeleteType(args);
-            // Full-text search handlers
             case 'search_items': return this.searchHandlers.searchItems(args);
             case 'search_suggest': return this.searchHandlers.searchSuggest(args);
             default:
@@ -186,17 +106,13 @@ export class IssueTrackerServer {
         await this.db.initialize();
         await this.typeHandlers.init();
         console.error('Database initialized');
-        // Initialize unified handlers after database is ready
         this.unifiedHandlers = createUnifiedHandlers(this.db);
         const transport = new StdioServerTransport();
         await this.server.connect(transport);
         console.error('Issue Tracker MCP Server running on stdio');
     }
 }
-// Only run if this is the main module (not imported for testing)
-// Check if module is being run directly or imported
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     const server = new IssueTrackerServer();
     server.run().catch(console.error);
 }
-//# sourceMappingURL=server.js.map

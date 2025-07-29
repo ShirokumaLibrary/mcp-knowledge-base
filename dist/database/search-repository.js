@@ -1,19 +1,8 @@
 import { BaseRepository } from './base.js';
-/**
- * @ai-context Centralized search functionality across all content types
- * @ai-pattern Simple full-text search using SQLite FTS5
- * @ai-critical Performance-critical - searches must be fast for good UX
- * @ai-assumption SQLite items table is kept in sync with markdown files
- */
 export class SearchRepository extends BaseRepository {
     constructor(db) {
         super(db, 'SearchRepository');
     }
-    /**
-     * @ai-intent Full-text search across all content
-     * @ai-flow Query items table with LIKE for simple text matching
-     * @ai-performance Uses indexes on title/content columns
-     */
     async searchContent(query) {
         const results = await this.db.allAsync(`SELECT type, id, title, description, content, tags, created_at, updated_at 
        FROM items 
@@ -28,17 +17,11 @@ export class SearchRepository extends BaseRepository {
             };
         });
     }
-    /**
-     * @ai-intent Search all items by tag (legacy method)
-     * @ai-flow Query items table for tag match
-     * @ai-return Grouped results by type
-     */
     async searchAllByTag(tag) {
         const results = await this.db.allAsync(`SELECT type, id, title, description, content, tags, priority, created_at, updated_at 
        FROM items 
        WHERE tags LIKE ?
        ORDER BY type, created_at DESC`, [`%"${tag}"%`]);
-        // Group results by type
         const grouped = {
             issues: [],
             plans: [],
@@ -61,4 +44,3 @@ export class SearchRepository extends BaseRepository {
         return grouped;
     }
 }
-//# sourceMappingURL=search-repository.js.map

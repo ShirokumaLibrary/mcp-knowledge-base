@@ -1,50 +1,34 @@
-/**
- * @ai-context String utility functions for sanitizing user input
- * @ai-pattern Common text processing utilities
- */
-/**
- * @ai-intent Remove zero-width and invisible Unicode characters
- * @ai-why These characters can cause display issues and confusion
- */
 export function removeInvisibleCharacters(str) {
-    // List of invisible characters to remove
     const invisibleChars = [
-        '\u200B', // Zero-width space
-        '\u200C', // Zero-width non-joiner
-        '\u200D', // Zero-width joiner
-        '\u200E', // Left-to-right mark
-        '\u200F', // Right-to-left mark
-        '\u202A', // Left-to-right embedding
-        '\u202B', // Right-to-left embedding
-        '\u202C', // Pop directional formatting
-        '\u202D', // Left-to-right override
-        '\u202E', // Right-to-left override
-        '\u2060', // Word joiner
-        '\u2061', // Function application
-        '\u2062', // Invisible times
-        '\u2063', // Invisible separator
-        '\u2064', // Invisible plus
-        '\u206A', // Inhibit symmetric swapping
-        '\u206B', // Activate symmetric swapping
-        '\u206C', // Inhibit Arabic form shaping
-        '\u206D', // Activate Arabic form shaping
-        '\u206E', // National digit shapes
-        '\u206F', // Nominal digit shapes
-        '\uFEFF', // Zero-width no-break space (BOM)
-        '\uFFF9', // Interlinear annotation anchor
-        '\uFFFA', // Interlinear annotation separator
-        '\uFFFB' // Interlinear annotation terminator
+        '\u200B',
+        '\u200C',
+        '\u200D',
+        '\u200E',
+        '\u200F',
+        '\u202A',
+        '\u202B',
+        '\u202C',
+        '\u202D',
+        '\u202E',
+        '\u2060',
+        '\u2061',
+        '\u2062',
+        '\u2063',
+        '\u2064',
+        '\u206A',
+        '\u206B',
+        '\u206C',
+        '\u206D',
+        '\u206E',
+        '\u206F',
+        '\uFEFF',
+        '\uFFF9',
+        '\uFFFA',
+        '\uFFFB'
     ];
-    // Create a regex pattern to match all invisible characters
-    // Use individual character matching to avoid character class issues
     const pattern = new RegExp(invisibleChars.map(char => char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
     return str.replace(pattern, '');
 }
-/**
- * @ai-intent Clean and validate a string for use in the system
- * @ai-flow 1. Remove invisible chars -> 2. Trim whitespace
- */
 export function cleanString(str) {
     return removeInvisibleCharacters(str).trim();
 }
-//# sourceMappingURL=string-utils.js.map

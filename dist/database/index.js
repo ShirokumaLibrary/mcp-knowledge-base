@@ -16,17 +16,7 @@ import { FullTextSearchRepository } from './fulltext-search-repository.js';
 import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
 import { ensureInitialized } from '../utils/decorators.js';
-// import * as path from 'path';
-// Re-export types
 export * from '../types/domain-types.js';
-/**
- * @ai-context Main database facade coordinating all repositories
- * @ai-pattern Facade pattern hiding repository complexity from handlers
- * @ai-critical Central data access layer - all data operations go through here
- * @ai-lifecycle Lazy initialization ensures DB ready before operations
- * @ai-dependencies ItemRepository for all content, Status/Tag for metadata
- * @ai-assumption Single database instance per process
- */
 export class FileIssueDatabase {
     dataDir;
     dbPath;
@@ -43,47 +33,21 @@ export class FileIssueDatabase {
         this.dbPath = dbPath;
         this.connection = new DatabaseConnection(this.dbPath);
     }
-    /**
-     * @ai-intent Get data directory for external access
-     * @ai-why TypeHandlers need this to create TypeRepository
-     */
     get dataDirectory() {
         return this.dataDir;
     }
-    /**
-     * @ai-intent Expose database connection
-     * @ai-why TypeRepository needs direct database access
-     */
     getDatabase() {
         return this.connection.getDatabase();
     }
-    /**
-     * @ai-intent Get ItemRepository for direct access
-     * @ai-why UnifiedHandlers need direct access to ItemRepository
-     */
     getItemRepository() {
         return this.itemRepo;
     }
-    /**
-     * @ai-intent Get TypeRepository for direct access
-     * @ai-why Type management tests need direct access
-     */
     getTypeRepository() {
         return this.typeRepo;
     }
-    /**
-     * @ai-intent Get FullTextSearchRepository for search operations
-     * @ai-why Search handlers need direct access
-     */
     getFullTextSearchRepository() {
         return this.fullTextSearchRepo;
     }
-    /**
-     * @ai-intent Initialize database and all repositories
-     * @ai-flow 1. Check if initializing -> 2. Start init -> 3. Cache promise
-     * @ai-pattern Singleton initialization pattern
-     * @ai-critical Must complete before any operations
-     */
     async initialize() {
         if (this.initializationPromise) {
             return this.initializationPromise;
@@ -91,13 +55,9 @@ export class FileIssueDatabase {
         this.initializationPromise = this.initializeAsync();
         return this.initializationPromise;
     }
-    /**
-     * @ai-intent Actual initialization logic
-     */
     async initializeAsync() {
         await this.connection.initialize();
         const db = this.connection.getDatabase();
-        // Initialize in dependency order
         this.statusRepo = new StatusRepository(db);
         this.tagRepo = new TagRepository(db);
         this.itemRepo = new ItemRepository(db, this.dataDir, this.statusRepo, this.tagRepo, this);
@@ -106,14 +66,12 @@ export class FileIssueDatabase {
         this.typeRepo = new TypeRepository(this);
         await this.typeRepo.init();
     }
-    // Status methods
     async getAllStatuses() {
         return this.statusRepo.getAllStatuses();
     }
     async getAllStatusesAsync() {
         return this.getAllStatuses();
     }
-    // Legacy status methods for tests
     async createStatus(name) {
         console.warn('createStatus is deprecated');
         const statuses = await this.statusRepo.getAllStatuses();
@@ -132,7 +90,6 @@ export class FileIssueDatabase {
         console.warn('deleteStatus is deprecated');
         return true;
     }
-    // Tag methods
     async getAllTags() {
         return this.tagRepo.getAllTags();
     }
@@ -154,7 +111,6 @@ export class FileIssueDatabase {
     async searchTagsByPattern(pattern) {
         return this.tagRepo.searchTagsByPattern(pattern);
     }
-    // Legacy task methods for tests
     async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         return this.itemRepo.createItem({
             type,
@@ -206,7 +162,6 @@ export class FileIssueDatabase {
     }
     async searchAllByTag(tag) {
         const items = await this.itemRepo.searchItemsByTag(tag);
-        // Group by type for backward compatibility
         const grouped = {
             issues: [],
             plans: [],
@@ -233,7 +188,6 @@ export class FileIssueDatabase {
     }
     async searchAll(query) {
         const items = await this.searchRepo.searchContent(query);
-        // Group by type for backward compatibility
         const grouped = {
             issues: [],
             plans: [],
@@ -258,7 +212,6 @@ export class FileIssueDatabase {
         }
         return grouped;
     }
-    // Issue methods (delegate to ItemRepository)
     async createIssue(title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         const item = await this.itemRepo.createItem({
             type: 'issues',
@@ -273,7 +226,6 @@ export class FileIssueDatabase {
             related_tasks,
             related_documents
         });
-        // Convert to Issue format for backward compatibility
         return {
             id: parseInt(item.id),
             title: item.title,
@@ -349,7 +301,6 @@ export class FileIssueDatabase {
         return this.itemRepo.deleteItem('issues', String(id));
     }
     async getAllIssuesSummary(includeClosedStatuses, statusIds) {
-        // Convert status IDs to names for backward compatibility
         let statuses;
         if (statusIds && statusIds.length > 0) {
             const allStatuses = await this.statusRepo.getAllStatuses();
@@ -389,7 +340,6 @@ export class FileIssueDatabase {
             updated_at: item.updated_at
         }));
     }
-    // Plan methods (delegate to ItemRepository)
     async createPlan(title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         const item = await this.itemRepo.createItem({
             type: 'plans',
@@ -479,7 +429,6 @@ export class FileIssueDatabase {
         return this.itemRepo.deleteItem('plans', String(id));
     }
     async getAllPlansSummary(includeClosedStatuses, statusIds) {
-        // Convert status IDs to names for backward compatibility
         let statuses;
         if (statusIds && statusIds.length > 0) {
             const allStatuses = await this.statusRepo.getAllStatuses();
@@ -519,10 +468,8 @@ export class FileIssueDatabase {
             updated_at: item.updated_at
         }));
     }
-    // Document methods (delegate to ItemRepository)
     async getAllDocuments(type) {
         if (!type) {
-            // Get both docs and knowledge
             const docs = await this.itemRepo.getItems('docs');
             const knowledge = await this.itemRepo.getItems('knowledge');
             return [...docs, ...knowledge].map(item => ({
@@ -653,7 +600,6 @@ export class FileIssueDatabase {
             updated_at: item.updated_at
         }));
     }
-    // Type methods
     async getAllTypes() {
         return this.typeRepo.getAllTypes();
     }
@@ -666,17 +612,14 @@ export class FileIssueDatabase {
     async getBaseType(name) {
         return this.typeRepo.getBaseType(name);
     }
-    // Search methods
     async searchContent(query) {
         return this.searchRepo.searchContent(query);
     }
-    // Legacy item methods
     async getItems(type) {
         return this.itemRepo.getItems(type);
     }
     async getTypes() {
         const types = await this.typeRepo.getAllTypes();
-        // Group by base_type for backward compatibility
         const grouped = {
             tasks: [],
             documents: []
@@ -688,13 +631,10 @@ export class FileIssueDatabase {
         }
         return grouped;
     }
-    // Session search methods (placeholder - actual implementation pending)
     async searchSessions(query) {
-        // Search for sessions in the items table
         const results = await this.connection.getDatabase().allAsync(`SELECT * FROM items 
        WHERE type = 'sessions' AND (title LIKE ? OR content LIKE ? OR description LIKE ?)
        ORDER BY created_at DESC`, [`%${query}%`, `%${query}%`, `%${query}%`]);
-        // Convert database rows to Session format
         return results.map((row) => ({
             id: row.id,
             title: row.title,
@@ -710,11 +650,9 @@ export class FileIssueDatabase {
         }));
     }
     async searchSessionsByTag(tag) {
-        // Search for sessions with the specific tag
         const results = await this.connection.getDatabase().allAsync(`SELECT * FROM items 
        WHERE type = 'sessions' AND tags LIKE ?
        ORDER BY created_at DESC`, [`%"${tag}"%`]);
-        // Convert database rows to Session format
         return results.map((row) => ({
             id: row.id,
             title: row.title,
@@ -730,13 +668,11 @@ export class FileIssueDatabase {
         }));
     }
     async searchDailySummaries(query) {
-        // Search for summaries in the items table
         const results = await this.connection.getDatabase().allAsync(`SELECT * FROM items 
        WHERE type = 'dailies' AND (title LIKE ? OR content LIKE ? OR description LIKE ?)
        ORDER BY created_at DESC`, [`%${query}%`, `%${query}%`, `%${query}%`]);
-        // Convert database rows to Daily format
         return results.map((row) => ({
-            date: row.id, // ID is the date for summaries
+            date: row.id,
             title: row.title,
             description: row.description || undefined,
             content: row.content || '',
@@ -747,15 +683,11 @@ export class FileIssueDatabase {
             updatedAt: row.updated_at || undefined
         }));
     }
-    /**
-     * @ai-intent Clean up resources
-     */
     async close() {
         try {
             await this.connection.close();
         }
         catch (error) {
-            // Log but don't throw - tests need cleanup to complete
             console.error('Error closing database connection:', error);
         }
     }
@@ -1048,4 +980,3 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "searchDailySummaries", null);
-//# sourceMappingURL=index.js.map

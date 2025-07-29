@@ -1,16 +1,4 @@
-/**
- * @ai-context Custom error classes for application-specific errors
- * @ai-pattern Error hierarchy for precise error handling
- * @ai-critical All custom errors extend BaseError
- * @ai-why Enables specific error handling strategies
- * @ai-assumption Error codes align with MCP protocol where applicable
- */
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-/**
- * @ai-intent Base error class with common functionality
- * @ai-pattern All custom errors extend this class
- * @ai-critical Captures stack trace and error context
- */
 export class BaseError extends Error {
     code;
     timestamp;
@@ -21,14 +9,8 @@ export class BaseError extends Error {
         this.name = this.constructor.name;
         this.timestamp = new Date();
         this.context = context;
-        // @ai-critical: Maintain proper stack trace
         Error.captureStackTrace(this, this.constructor);
     }
-    /**
-     * @ai-intent Convert error to JSON representation
-     * @ai-pattern Serializable error format
-     * @ai-usage For logging and API responses
-     */
     toJSON() {
         return {
             name: this.name,
@@ -40,21 +22,11 @@ export class BaseError extends Error {
         };
     }
 }
-/**
- * @ai-intent Database-related errors
- * @ai-pattern Specific to data access layer
- * @ai-usage Thrown by repositories
- */
 export class DatabaseError extends BaseError {
     constructor(message, context) {
         super(message, 'DATABASE_ERROR', context);
     }
 }
-/**
- * @ai-intent Entity not found errors
- * @ai-pattern Common CRUD operation error
- * @ai-usage When requested entity doesn't exist
- */
 export class NotFoundError extends BaseError {
     entityType;
     entityId;
@@ -64,21 +36,12 @@ export class NotFoundError extends BaseError {
         this.entityId = entityId;
     }
 }
-/**
- * @ai-intent Validation errors
- * @ai-pattern Input validation failures
- * @ai-usage For schema validation failures
- */
 export class ValidationError extends BaseError {
     errors;
     constructor(message, errors, context) {
         super(message, 'VALIDATION_ERROR', { ...context, errors });
         this.errors = errors;
     }
-    /**
-     * @ai-intent Create from Zod error
-     * @ai-pattern Zod integration helper
-     */
     static fromZodError(error) {
         const errors = error.errors.map((e) => ({
             field: e.path.join('.'),
@@ -88,11 +51,6 @@ export class ValidationError extends BaseError {
         return new ValidationError('Validation failed', errors, { zodError: error });
     }
 }
-/**
- * @ai-intent File system errors
- * @ai-pattern File operation failures
- * @ai-usage For markdown file operations
- */
 export class FileSystemError extends BaseError {
     operation;
     path;
@@ -102,11 +60,6 @@ export class FileSystemError extends BaseError {
         this.path = path;
     }
 }
-/**
- * @ai-intent Configuration errors
- * @ai-pattern Invalid or missing configuration
- * @ai-usage During application startup
- */
 export class ConfigurationError extends BaseError {
     configKey;
     constructor(message, configKey, context) {
@@ -114,11 +67,6 @@ export class ConfigurationError extends BaseError {
         this.configKey = configKey;
     }
 }
-/**
- * @ai-intent Concurrency errors
- * @ai-pattern Race conditions or conflicts
- * @ai-usage For optimistic locking failures
- */
 export class ConcurrencyError extends BaseError {
     entityType;
     entityId;
@@ -128,11 +76,6 @@ export class ConcurrencyError extends BaseError {
         this.entityId = entityId;
     }
 }
-/**
- * @ai-intent Business rule violations
- * @ai-pattern Domain logic constraints
- * @ai-usage When business rules are violated
- */
 export class BusinessRuleError extends BaseError {
     rule;
     constructor(message, rule, context) {
@@ -140,11 +83,6 @@ export class BusinessRuleError extends BaseError {
         this.rule = rule;
     }
 }
-/**
- * @ai-intent Integration errors
- * @ai-pattern External service failures
- * @ai-usage For MCP protocol errors
- */
 export class IntegrationError extends BaseError {
     service;
     constructor(message, service, context) {
@@ -152,11 +90,6 @@ export class IntegrationError extends BaseError {
         this.service = service;
     }
 }
-/**
- * @ai-intent Rate limiting errors
- * @ai-pattern Too many requests
- * @ai-usage For API rate limits
- */
 export class RateLimitError extends BaseError {
     retryAfter;
     constructor(message, retryAfter, context) {
@@ -164,23 +97,12 @@ export class RateLimitError extends BaseError {
         this.retryAfter = retryAfter;
     }
 }
-/**
- * @ai-intent Error factory for creating appropriate errors
- * @ai-pattern Factory pattern for error creation
- * @ai-usage Centralized error creation logic
- */
 export class ErrorFactory {
-    /**
-     * @ai-intent Create error from unknown type
-     * @ai-pattern Safe error creation
-     * @ai-usage In catch blocks
-     */
     static fromUnknown(error, defaultMessage = 'An error occurred') {
         if (error instanceof BaseError) {
             return error;
         }
         if (error instanceof Error) {
-            // Create a concrete error class for unknown errors
             return new class extends BaseError {
                 constructor() {
                     super(error.message || defaultMessage, 'UNKNOWN_ERROR', {
@@ -190,7 +112,6 @@ export class ErrorFactory {
                 }
             }();
         }
-        // Create a concrete error class for non-Error types
         return new class extends BaseError {
             constructor() {
                 super(defaultMessage, 'UNKNOWN_ERROR', {
@@ -199,11 +120,6 @@ export class ErrorFactory {
             }
         }();
     }
-    /**
-     * @ai-intent Check if error is retryable
-     * @ai-pattern Retry logic helper
-     * @ai-usage For resilient operations
-     */
     static isRetryable(error) {
         const retryableCodes = [
             'DATABASE_ERROR',
@@ -213,11 +129,6 @@ export class ErrorFactory {
         ];
         return retryableCodes.includes(error.code);
     }
-    /**
-     * @ai-intent Convert to MCP error code
-     * @ai-pattern MCP protocol compatibility
-     * @ai-usage For handler responses
-     */
     static toMcpErrorCode(error) {
         const mapping = {
             'VALIDATION_ERROR': ErrorCode.InvalidParams,
@@ -234,11 +145,6 @@ export class ErrorFactory {
         return mapping[error.code] || ErrorCode.InternalError;
     }
 }
-/**
- * @ai-intent Type guards for error checking
- * @ai-pattern Runtime type checking
- * @ai-usage In error handling logic
- */
 export const ErrorGuards = {
     isBaseError(error) {
         return error instanceof BaseError;
@@ -259,4 +165,3 @@ export const ErrorGuards = {
         return error instanceof BusinessRuleError;
     }
 };
-//# sourceMappingURL=custom-errors.js.map

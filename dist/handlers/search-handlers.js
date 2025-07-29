@@ -1,13 +1,7 @@
-/**
- * @ai-context Full-text search handlers for MCP API
- * @ai-pattern Handler pattern for search operations
- * @ai-dependencies FullTextSearchRepository, ItemRepository
- */
 import { z } from 'zod';
 import { createLogger } from '../utils/logger.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 const logger = createLogger('SearchHandlers');
-// Schemas
 const searchItemsSchema = z.object({
     query: z.string().min(1, 'Query is required'),
     types: z.array(z.string()).optional(),
@@ -25,7 +19,6 @@ export class SearchHandlers {
     itemRepo;
     constructor(db) {
         this.db = db;
-        // Initialize repositories lazily to avoid database initialization issues
     }
     getSearchRepo() {
         if (!this.searchRepo) {
@@ -39,25 +32,17 @@ export class SearchHandlers {
         }
         return this.itemRepo;
     }
-    /**
-     * @ai-intent Search items using full-text search
-     * @ai-flow 1. Validate params -> 2. Execute search -> 3. Hydrate results
-     * @ai-error-handling Returns empty array on search failure
-     */
     async searchItems(params) {
         try {
             const validated = searchItemsSchema.parse(params);
-            // Get search results
             const results = await this.getSearchRepo().search(validated.query, {
                 types: validated.types,
                 limit: validated.limit,
                 offset: validated.offset
             });
-            // Get total count for pagination
             const totalCount = await this.getSearchRepo().count(validated.query, {
                 types: validated.types
             });
-            // Hydrate full items
             const items = await Promise.all(results.map(async (result) => {
                 try {
                     const item = await this.getItemRepo().getItem(result.type, result.id);
@@ -78,7 +63,6 @@ export class SearchHandlers {
                     return null;
                 }
             }));
-            // Filter out failed items
             const validItems = items.filter(item => item !== null);
             const result = {
                 items: validItems,
@@ -104,10 +88,6 @@ export class SearchHandlers {
             throw new McpError(ErrorCode.InternalError, 'Search operation failed');
         }
     }
-    /**
-     * @ai-intent Get search suggestions for autocomplete
-     * @ai-flow 1. Validate params -> 2. Get suggestions
-     */
     async searchSuggest(params) {
         try {
             const validated = searchSuggestSchema.parse(params);
@@ -131,4 +111,3 @@ export class SearchHandlers {
         }
     }
 }
-//# sourceMappingURL=search-handlers.js.map

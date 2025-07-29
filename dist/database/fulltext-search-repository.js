@@ -1,8 +1,3 @@
-/**
- * @ai-context Full-text search repository using FTS5
- * @ai-pattern Repository pattern for search functionality
- * @ai-dependencies Database, ItemRepository for result hydration
- */
 import { createLogger } from '../utils/logger.js';
 export class FullTextSearchRepository {
     db;
@@ -10,24 +5,13 @@ export class FullTextSearchRepository {
     constructor(db) {
         this.db = db;
     }
-    /**
-     * @ai-intent Search items by query across title, description, and content
-     * @ai-flow 1. Build FTS5 query -> 2. Execute search -> 3. Format results
-     * @ai-performance Uses FTS5 index for fast searching
-     */
     async search(query, options) {
-        // @ai-validation: Ensure limit is positive and within reasonable bounds
         const defaultLimit = 20;
         const maxLimit = 1000;
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
-        // @ai-validation: Ensure offset is non-negative
         const offset = Math.max(0, options?.offset || 0);
-        // Escape special characters for FTS5
         const escapedQuery = query.replace(/['"]/g, '');
-        // Build type filter
         let typeFilter = '';
-        // @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let params = [`"${escapedQuery}"`, limit, offset];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
@@ -48,16 +32,13 @@ export class FullTextSearchRepository {
       LIMIT ? OFFSET ?
     `;
         try {
-            // @ai-any-deliberate: Database query result - dynamic row structure from SQLite
-            // @ai-any-deliberate: Database query result - dynamic row structure
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rows = await this.db.allAsync(sql, params);
             return rows.map(row => ({
                 type: String(row.type),
                 id: String(row.id),
                 title: String(row.title),
                 snippet: String(row.snippet),
-                score: Math.abs(Number(row.score) || 0) // BM25 returns negative scores
+                score: Math.abs(Number(row.score) || 0)
             }));
         }
         catch (error) {
@@ -65,21 +46,12 @@ export class FullTextSearchRepository {
             throw error;
         }
     }
-    /**
-     * @ai-intent Get search suggestions based on partial query
-     * @ai-flow 1. Build prefix query -> 2. Get unique titles -> 3. Return suggestions
-     */
     async suggest(query, options) {
-        // @ai-validation: Ensure limit is positive and within reasonable bounds
         const defaultLimit = 10;
-        const maxLimit = 100; // Smaller max for suggestions
+        const maxLimit = 100;
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
-        // Build prefix query for FTS5
         const escapedQuery = query.replace(/['"]/g, '');
-        // Build type filter
         let typeFilter = '';
-        // @ai-any-deliberate: SQLite params array - mixed types for query parameters
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let params = [`"${escapedQuery}"*`, limit];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
@@ -103,14 +75,8 @@ export class FullTextSearchRepository {
             return [];
         }
     }
-    /**
-     * @ai-intent Count total search results
-     * @ai-flow 1. Build count query -> 2. Execute -> 3. Return count
-     */
     async count(query, options) {
-        // Escape special characters for FTS5
         const escapedQuery = query.replace(/['"]/g, '');
-        // Build type filter
         let typeFilter = '';
         let params = [`"${escapedQuery}"`];
         if (options?.types && options.types.length > 0) {
@@ -134,4 +100,3 @@ export class FullTextSearchRepository {
         }
     }
 }
-//# sourceMappingURL=fulltext-search-repository.js.map

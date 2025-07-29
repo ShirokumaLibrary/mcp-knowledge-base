@@ -1,7 +1,3 @@
-/**
- * @ai-context MCP handlers for type management operations
- * @ai-pattern Handler pattern for dynamic type system
- */
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { TypeRepository } from '../database/type-repository.js';
 import { CreateTypeSchema, GetTypesSchema, DeleteTypeSchema, UpdateTypeSchema } from '../schemas/type-schemas.js';
@@ -15,16 +11,9 @@ export class TypeHandlers {
         this.db = db;
         this.typeRepo = new TypeRepository(db);
     }
-    /**
-     * @ai-intent Initialize type repository
-     */
     async init() {
         await this.typeRepo.init();
     }
-    /**
-     * @ai-intent Create a new additional type
-     * @ai-validation Validates type definition and checks for conflicts
-     */
     async handleCreateType(args) {
         try {
             const validatedArgs = CreateTypeSchema.parse(args);
@@ -45,14 +34,9 @@ export class TypeHandlers {
             throw error;
         }
     }
-    /**
-     * @ai-intent Get all available types
-     * @ai-return List of types grouped by base_type with descriptions
-     */
     async handleGetTypes(args) {
         const validatedArgs = GetTypesSchema.parse(args);
         const types = await this.typeRepo.getAllTypes();
-        // @ai-logic: Group types by base_type
         const typesByBase = {};
         for (const type of types) {
             if (!typesByBase[type.base_type]) {
@@ -60,9 +44,7 @@ export class TypeHandlers {
             }
             typesByBase[type.base_type].push(type);
         }
-        // @ai-logic: Format response with base_type explanations
         let output = '## Available Types\n\n';
-        // Tasks types
         if (typesByBase['tasks']) {
             output += '### Tasks (Task Management)\n';
             output += 'Task types with status and priority. Used for project management and bug tracking.\n\n';
@@ -74,7 +56,6 @@ export class TypeHandlers {
             }
             output += '\n';
         }
-        // Documents types
         if (typesByBase['documents']) {
             output += '### Documents (Documents)\n';
             output += 'Document types with required content. Used for knowledge base and technical documentation.\n\n';
@@ -86,7 +67,6 @@ export class TypeHandlers {
             }
             output += '\n';
         }
-        // Other base types
         for (const [baseType, typeList] of Object.entries(typesByBase)) {
             if (baseType !== 'tasks' && baseType !== 'documents') {
                 output += `### ${baseType}\n\n`;
@@ -98,7 +78,6 @@ export class TypeHandlers {
                 output += '\n';
             }
         }
-        // Special types (always available, not shown in type list)
         output += '### Special Types\n';
         output += 'These types have special ID formats and are always available:\n\n';
         output += '| Type | Description | ID Format |\n';
@@ -106,7 +85,6 @@ export class TypeHandlers {
         output += '| sessions | Work session tracking. Content is optional - can be created at session start and updated later. | YYYY-MM-DD-HH.MM.SS.sss |\n';
         output += '| dailies | Daily summaries with required content. One entry per date. | YYYY-MM-DD |\n';
         output += '\n';
-        // @ai-logic: Include full type definitions if requested
         if (validatedArgs.include_definitions) {
             output += '## Type Definitions (JSON)\n\n';
             output += '```json\n';
@@ -117,7 +95,6 @@ export class TypeHandlers {
                     description: t.description,
                     supported_fields: this.getFieldsForBaseType(t.base_type)
                 })),
-                // Add special types
                 {
                     type: 'sessions',
                     base_type: 'sessions',
@@ -143,9 +120,6 @@ export class TypeHandlers {
             ]
         };
     }
-    /**
-     * @ai-intent Get supported fields for a base type
-     */
     getFieldsForBaseType(baseType) {
         switch (baseType) {
             case 'tasks':
@@ -156,11 +130,6 @@ export class TypeHandlers {
                 return ['title', 'content', 'tags'];
         }
     }
-    /**
-     * @ai-intent Update type description
-     * @ai-validation Only description can be updated
-     * @ai-critical Type name changes are prohibited
-     */
     async handleUpdateType(args) {
         try {
             const validatedArgs = UpdateTypeSchema.parse(args);
@@ -179,14 +148,9 @@ export class TypeHandlers {
             throw new McpError(ErrorCode.InternalError, `Failed to update type: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
-    /**
-     * @ai-intent Delete an additional type
-     * @ai-validation Checks for existing documents before deletion
-     */
     async handleDeleteType(args) {
         try {
             const validatedArgs = DeleteTypeSchema.parse(args);
-            // Deletion check is now handled inside deleteType method
             await this.typeRepo.deleteType(validatedArgs.name);
             return {
                 content: [
@@ -208,4 +172,3 @@ export class TypeHandlers {
         }
     }
 }
-//# sourceMappingURL=type-handlers.js.map

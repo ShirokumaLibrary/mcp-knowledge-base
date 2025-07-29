@@ -1,46 +1,13 @@
-/**
- * @ai-context TypeScript decorators for cross-cutting concerns
- * @ai-pattern Method decorators to reduce code duplication
- * @ai-critical Used to enforce initialization and other preconditions
- * @ai-dependencies None - pure TypeScript decorators
- * @ai-assumption TypeScript decorators are enabled in tsconfig.json
- */
-/**
- * @ai-intent Ensures async initialization is complete before method execution
- * @ai-pattern Decorator that wraps async methods with initialization check
- * @ai-critical Prevents race conditions in database operations
- * @ai-usage @ensureInitialized on any method requiring initialized state
- * @ai-why Eliminates repetitive initialization checks in every method
- * @ai-example
- * ```typescript
- * class Database {
- *   private initializationPromise?: Promise<void>;
- *
- *   @ensureInitialized
- *   async query() {
- *     // Method body executes after initialization
- *   }
- * }
- * ```
- */
 export function ensureInitialized(target, propertyKey, descriptor) {
     const originalMethod = descriptor.value;
     descriptor.value = async function (...args) {
-        // @ai-logic: Check for initializationPromise property
         if (this.initializationPromise) {
             await this.initializationPromise;
         }
-        // @ai-logic: Call original method with preserved context
         return originalMethod.apply(this, args);
     };
     return descriptor;
 }
-/**
- * @ai-intent Logs method execution time for performance monitoring
- * @ai-pattern Decorator that measures async method duration
- * @ai-usage @logExecutionTime on methods to monitor
- * @ai-why Helps identify performance bottlenecks
- */
 export function logExecutionTime(target, propertyKey, descriptor) {
     const originalMethod = descriptor.value;
     descriptor.value = async function (...args) {
@@ -49,7 +16,6 @@ export function logExecutionTime(target, propertyKey, descriptor) {
         try {
             const result = await originalMethod.apply(this, args);
             const duration = performance.now() - start;
-            // @ai-logic: Log only if logger exists on instance
             if (this.logger) {
                 this.logger.debug(`${className}.${propertyKey} completed`, { duration });
             }
@@ -65,12 +31,6 @@ export function logExecutionTime(target, propertyKey, descriptor) {
     };
     return descriptor;
 }
-/**
- * @ai-intent Retries failed operations with exponential backoff
- * @ai-pattern Decorator for handling transient failures
- * @ai-usage @retry(3, 1000) for 3 retries with 1s initial delay
- * @ai-why Improves reliability for network/filesystem operations
- */
 export function retry(maxAttempts = 3, initialDelay = 1000) {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
@@ -101,4 +61,3 @@ export function retry(maxAttempts = 3, initialDelay = 1000) {
         return descriptor;
     };
 }
-//# sourceMappingURL=decorators.js.map
