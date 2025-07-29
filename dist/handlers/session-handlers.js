@@ -97,7 +97,7 @@ export class SessionHandlers {
      * @ai-return Most recent session from today
      * @ai-why Quick access to continue current work
      */
-    async handleGetLatestSession(args) {
+    async handleGetLatestSession(_args) {
         try {
             const session = await this.sessionManager.getLatestSession();
             if (!session) {

@@ -33,7 +33,7 @@ export declare class TagRepositoryV2 extends BaseRepository<TagEntity, string> {
      * @ai-pattern Tags use name as ID
      * @ai-critical Should not be called
      */
-    protected getNextId(type: string): Promise<number>;
+    protected getNextId(_type: string): Promise<number>;
     /**
      * @ai-intent Map database row to Tag entity
      * @ai-pattern Simple mapping as fields match

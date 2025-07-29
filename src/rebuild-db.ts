@@ -90,7 +90,7 @@ async function rebuildDatabase() {
             baseType = 'tasks';
             break;
           }
-        } catch (error) {
+        } catch {
           // Skip file if parsing fails
         }
       }

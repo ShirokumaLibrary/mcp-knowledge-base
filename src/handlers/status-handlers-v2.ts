@@ -6,7 +6,7 @@
  * @ai-assumption Status names should be unique
  */
 
-import { BaseHandler, ToolResponse } from './base-handler.js';
+import { BaseHandler } from './base-handler.js';
 import type { FileIssueDatabase } from '../database/index.js';
 import {
   CreateStatusSchema,

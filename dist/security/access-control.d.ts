@@ -97,7 +97,7 @@ export declare class AccessControlManager {
      * @ai-flow 1. Get user permissions -> 2. Check specific permission -> 3. Check wildcards
      * @ai-return true if permitted, false otherwise
      */
-    hasPermission(user: UserContext, resource: ResourceType, permission: Permission, resourceData?: any): boolean;
+    hasPermission(user: UserContext, resource: ResourceType, permission: Permission, _resourceData?: any): boolean;
     /**
      * @ai-intent Enforce permission requirement
      * @ai-throws BusinessRuleError if not permitted
@@ -155,7 +155,7 @@ export declare function createUserContext(options?: Partial<UserContext>): UserC
  * @ai-intent Access control middleware factory
  * @ai-pattern Wraps handlers with permission checks
  */
-export declare function requiresPermission(resource: ResourceType, permission: Permission): (handler: Function) => (params: any, context?: any) => Promise<any>;
+export declare function requiresPermission(resource: ResourceType, permission: Permission): (handler: (...args: any[]) => any) => (params: any, context?: any) => Promise<any>;
 /**
  * @ai-intent Resource owner check
  * @ai-pattern Allow users to modify their own resources

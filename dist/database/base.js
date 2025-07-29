@@ -149,10 +149,10 @@ export class DatabaseConnection {
     `);
         // Add description column if it doesn't exist (for existing databases)
         try {
-            await this.db.runAsync(`ALTER TABLE sequences ADD COLUMN description TEXT`);
+            await this.db.runAsync('ALTER TABLE sequences ADD COLUMN description TEXT');
             this.logger.debug('Added description column to sequences table');
         }
-        catch (err) {
+        catch {
             // Column already exists, ignore error
         }
         // Insert default statuses

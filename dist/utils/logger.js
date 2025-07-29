@@ -121,7 +121,7 @@ export function createLogger(service) {
         silent: logLevel === 'silent' || process.env.NODE_ENV === 'test', // @ai-logic: Complete silence for tests
         // @ai-why: Prevents any log output and listener registration in test environment
         defaultMeta: { service }, // @ai-logic: Service tagged on all logs
-        transports: loggerTransports,
+        transports: loggerTransports
     };
     // @ai-critical: Only add exception/rejection handlers once globally
     // @ai-why: Multiple handlers cause MaxListenersExceededWarning

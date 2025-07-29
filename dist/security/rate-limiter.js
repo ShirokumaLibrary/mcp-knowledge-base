@@ -174,8 +174,8 @@ export class RateLimiter {
             return;
         }
         // Remove buckets that haven't been used recently
-        const staleThreshold = now - this.config.windowMs * 2;
-        for (const [key, bucket] of this.buckets.entries()) {
+        // const staleThreshold = now - this.config.windowMs * 2;
+        for (const [key] of this.buckets.entries()) {
             // Check if bucket is stale (would need to track last access)
             // For now, just limit total size
             if (this.buckets.size > 10000) {

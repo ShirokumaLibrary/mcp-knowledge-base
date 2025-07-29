@@ -75,7 +75,7 @@ async function rebuildDatabase() {
                         break;
                     }
                 }
-                catch (error) {
+                catch {
                     // Skip file if parsing fails
                 }
             }

@@ -212,7 +212,7 @@ export class InputSanitizer {
             "'": '&#39;',
             '/': '&#x2F;'
         };
-        return text.replace(/[&<>"'\/]/g, char => htmlEscapes[char]);
+        return text.replace(/[&<>"'/]/g, char => htmlEscapes[char]);
     }
     /**
      * @ai-intent Sanitize search query

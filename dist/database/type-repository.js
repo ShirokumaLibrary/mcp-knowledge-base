@@ -152,7 +152,7 @@ export class TypeRepository {
             // Check for any markdown files
             return files.some(file => file.endsWith('.md'));
         }
-        catch (error) {
+        catch {
             // Directory doesn't exist, which is fine
             return false;
         }

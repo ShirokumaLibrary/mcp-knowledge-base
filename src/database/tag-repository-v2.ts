@@ -40,7 +40,7 @@ export class TagRepositoryV2 extends BaseRepository<TagEntity, string> {
    * @ai-pattern Tags use name as ID
    * @ai-critical Should not be called
    */
-  protected async getNextId(type: string): Promise<number> {
+  protected async getNextId(_type: string): Promise<number> {
     // Tags don't use numeric IDs, but satisfy base class contract
     throw new Error('Tags do not use generated IDs - name is the ID');
   }

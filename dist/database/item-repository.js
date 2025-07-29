@@ -243,7 +243,7 @@ export class ItemRepository extends BaseRepository {
             }
             return item;
         }
-        catch (error) {
+        catch {
             return null;
         }
     }
@@ -305,7 +305,7 @@ export class ItemRepository extends BaseRepository {
             await this.db.runAsync('DELETE FROM item_tags WHERE item_type = ? AND item_id = ?', [type, id]);
             return true;
         }
-        catch (error) {
+        catch {
             return false;
         }
     }

@@ -6,7 +6,7 @@
  * @ai-assumption Tag names are case-sensitive
  */
 
-import { BaseHandler, ToolResponse } from './base-handler.js';
+import { BaseHandler } from './base-handler.js';
 import type { FileIssueDatabase } from '../database/index.js';
 import {
   CreateTagSchema,

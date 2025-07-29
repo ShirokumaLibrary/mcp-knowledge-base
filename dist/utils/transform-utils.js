@@ -316,7 +316,7 @@ export class ResponseFormatters {
      * @ai-pattern Entity summary format
      */
     static summary(entity) {
-        const { content, ...summary } = entity;
+        const { content: _content, ...summary } = entity;
         return summary;
     }
 }

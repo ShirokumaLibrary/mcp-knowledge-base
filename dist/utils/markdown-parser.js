@@ -44,10 +44,8 @@ export function parseMarkdown(fileContent) {
     const lines = fileContent.split('\n');
     const metadata = {};
     let contentStartIndex = -1;
-    let inFrontMatter = false;
     // @ai-logic: State machine starts by checking for frontmatter delimiter
     if (lines[0] === '---') {
-        inFrontMatter = true;
         // @ai-flow: Line-by-line parsing until closing delimiter
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];

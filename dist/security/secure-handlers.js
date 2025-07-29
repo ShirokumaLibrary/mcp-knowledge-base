@@ -102,7 +102,7 @@ export class SecureHandler extends BaseHandler {
      * @ai-intent Validate request size and structure
      * @ai-pattern Prevent DoS through large requests
      */
-    validateRequest(params, methodName) {
+    validateRequest(params, _methodName) {
         // Size check
         const maxSize = this.securityConfig.validation?.maxRequestSize || 1048576; // 1MB default
         const size = JSON.stringify(params).length;

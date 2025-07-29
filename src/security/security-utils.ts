@@ -229,7 +229,7 @@ export function generateSessionId(): string {
  */
 export function sanitizeFilename(filename: string): string {
   // Remove path traversal attempts
-  let sanitized = filename.replace(/[\/\\]/g, '');
+  let sanitized = filename.replace(/[/\\]/g, '');
 
   // Remove special characters except dots, dashes, underscores
   sanitized = sanitized.replace(/[^a-zA-Z0-9._-]/g, '_');

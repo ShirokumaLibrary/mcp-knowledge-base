@@ -116,4 +116,4 @@ export declare class CompositeRateLimiter {
  * @ai-pattern Creates handler wrapper
  * @ai-usage For MCP handler protection
  */
-export declare function createRateLimitMiddleware(config: RateLimitConfig): (handler: Function) => Promise<(params: any, context?: any) => Promise<any>>;
+export declare function createRateLimitMiddleware(config: RateLimitConfig): (handler: (...args: any[]) => any) => Promise<(params: any, context?: any) => Promise<any>>;

@@ -214,9 +214,9 @@ export class RateLimiter {
     }
 
     // Remove buckets that haven't been used recently
-    const staleThreshold = now - this.config.windowMs * 2;
+    // const staleThreshold = now - this.config.windowMs * 2;
 
-    for (const [key, bucket] of this.buckets.entries()) {
+    for (const [key] of this.buckets.entries()) {
       // Check if bucket is stale (would need to track last access)
       // For now, just limit total size
       if (this.buckets.size > 10000) {
@@ -318,7 +318,7 @@ export class CompositeRateLimiter {
 export function createRateLimitMiddleware(config: RateLimitConfig) {
   const limiter = new RateLimiter(config);
 
-  return async (handler: Function) => {
+  return async (handler: (...args: any[]) => any) => {
     return async (params: any, context?: any) => {
       // Check rate limit
       await limiter.checkLimit(context);

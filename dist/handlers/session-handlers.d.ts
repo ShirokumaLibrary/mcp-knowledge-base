@@ -49,7 +49,7 @@ export declare class SessionHandlers {
      * @ai-return Most recent session from today
      * @ai-why Quick access to continue current work
      */
-    handleGetLatestSession(args: unknown): Promise<ToolResponse>;
+    handleGetLatestSession(_args: unknown): Promise<ToolResponse>;
     /**
      * @ai-intent Handle search_sessions_by_tag MCP tool call
      * @ai-flow 1. Validate tag -> 2. Search files -> 3. Return matches

@@ -52,7 +52,7 @@ import { FileIssueDatabase } from './database.js';
 import { SessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 
-import { createUnifiedHandlers, handleUnifiedToolCall, unifiedTools } from './handlers/unified-handlers.js';
+import { createUnifiedHandlers, handleUnifiedToolCall } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';

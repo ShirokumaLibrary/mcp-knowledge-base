@@ -15,7 +15,7 @@ export class TagRepositoryV2 extends BaseRepository {
      * @ai-pattern Tags use name as ID
      * @ai-critical Should not be called
      */
-    async getNextId(type) {
+    async getNextId(_type) {
         // Tags don't use numeric IDs, but satisfy base class contract
         throw new Error('Tags do not use generated IDs - name is the ID');
     }

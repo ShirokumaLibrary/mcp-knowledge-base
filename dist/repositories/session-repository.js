@@ -103,7 +103,7 @@ export class SessionRepository {
                 try {
                     await this.db.createTag(tag);
                 }
-                catch (error) {
+                catch {
                     // Tag already exists, ignore
                 }
             }
@@ -193,7 +193,7 @@ export class SessionRepository {
                 try {
                     await this.db.createTag(tag);
                 }
-                catch (error) {
+                catch {
                     // Tag already exists, ignore
                 }
             }
@@ -209,7 +209,7 @@ export class SessionRepository {
                 try {
                     await this.db.createTag(tag);
                 }
-                catch (error) {
+                catch {
                     // Tag already exists, ignore
                 }
             }

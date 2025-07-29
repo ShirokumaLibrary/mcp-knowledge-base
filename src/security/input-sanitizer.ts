@@ -309,7 +309,7 @@ export class InputSanitizer {
       '/': '&#x2F;'
     };
 
-    return text.replace(/[&<>"'\/]/g, char => htmlEscapes[char]);
+    return text.replace(/[&<>"'/]/g, char => htmlEscapes[char]);
   }
 
   /**

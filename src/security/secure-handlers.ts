@@ -7,7 +7,7 @@
 
 import { BaseHandler } from '../handlers/base-handler.js';
 import { InputSanitizer, createSanitizationMiddleware } from './input-sanitizer.js';
-import { RateLimiter, createRateLimitMiddleware } from './rate-limiter.js';
+import { RateLimiter } from './rate-limiter.js';
 import type { Permission} from './access-control.js';
 import { AccessControlManager, ResourceType, createUserContext } from './access-control.js';
 import { createLogger } from '../utils/logger.js';
@@ -165,7 +165,7 @@ export class SecureHandler extends BaseHandler {
    * @ai-intent Validate request size and structure
    * @ai-pattern Prevent DoS through large requests
    */
-  private validateRequest(params: any, methodName: string): void {
+  private validateRequest(params: any, _methodName: string): void {
     // Size check
     const maxSize = this.securityConfig.validation?.maxRequestSize || 1048576; // 1MB default
     const size = JSON.stringify(params).length;

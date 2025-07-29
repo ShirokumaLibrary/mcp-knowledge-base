@@ -211,7 +211,7 @@ export class AccessControlManager {
     user: UserContext,
     resource: ResourceType,
     permission: Permission,
-    resourceData?: any
+    _resourceData?: any
   ): boolean {
     const requiredPerm = `${resource}:${permission}`;
 
@@ -379,7 +379,7 @@ export function requiresPermission(
   resource: ResourceType,
   permission: Permission
 ) {
-  return (handler: Function) => {
+  return (handler: (...args: any[]) => any) => {
     return async (params: any, context?: any) => {
       const userContext = context?.user || createUserContext();
 

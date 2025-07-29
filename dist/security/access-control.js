@@ -156,7 +156,7 @@ export class AccessControlManager {
      * @ai-flow 1. Get user permissions -> 2. Check specific permission -> 3. Check wildcards
      * @ai-return true if permitted, false otherwise
      */
-    hasPermission(user, resource, permission, resourceData) {
+    hasPermission(user, resource, permission, _resourceData) {
         const requiredPerm = `${resource}:${permission}`;
         // Check each user role
         for (const roleName of user.roles) {

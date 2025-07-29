@@ -141,7 +141,7 @@ export class FileSystemRecoveryHandler extends RecoveryHandler {
         return context.error instanceof FileSystemError;
     }
     async recover(context) {
-        const { error, operation } = context;
+        const { error } = context;
         const fsError = error;
         // @ai-logic: Handle missing file with defaults
         if (fsError.operation === 'read' && error.message.includes('ENOENT')) {

@@ -6,7 +6,9 @@
  * @ai-assumption All optional fields use undefined, not null (except dates)
  */
 export * from './domain-types.js';
+import type { Issue, Plan, Document as Doc } from './domain-types.js';
 export { Session, Daily } from './session-types.js';
+import type { Session, Daily } from './session-types.js';
 /**
  * @ai-intent Priority levels for tasks
  * @ai-pattern Strict enum to replace string type
@@ -25,11 +27,11 @@ export type BaseType = 'tasks' | 'documents';
  * @ai-usage For generic type resolution
  */
 export interface TypeToEntity {
-    'issues': import('./domain-types.js').Issue;
-    'plans': import('./domain-types.js').Plan;
-    'docs': import('./domain-types.js').Document;
-    'knowledge': import('./domain-types.js').Document;
-    [key: string]: import('./domain-types.js').Issue | import('./domain-types.js').Plan | import('./domain-types.js').Document;
+    'issues': Issue;
+    'plans': Plan;
+    'docs': Doc;
+    'knowledge': Doc;
+    [key: string]: Issue | Plan | Doc;
 }
 /**
  * @ai-intent All valid content types
@@ -63,12 +65,12 @@ export interface SearchResult<T> {
  * @ai-usage searchAll() return type
  */
 export interface GlobalSearchResults {
-    issues: SearchResult<import('./domain-types.js').Issue>[];
-    plans: SearchResult<import('./domain-types.js').Plan>[];
-    docs: SearchResult<import('./domain-types.js').Document>[];
-    knowledge: SearchResult<import('./domain-types.js').Document>[];
-    sessions?: SearchResult<import('./session-types.js').Session>[];
-    summaries?: SearchResult<import('./session-types.js').Daily>[];
+    issues: SearchResult<Issue>[];
+    plans: SearchResult<Plan>[];
+    docs: SearchResult<Doc>[];
+    knowledge: SearchResult<Doc>[];
+    sessions?: SearchResult<Session>[];
+    summaries?: SearchResult<Daily>[];
 }
 /**
  * @ai-intent Tag with usage statistics

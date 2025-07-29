@@ -6,7 +6,6 @@
  * @ai-assumption All handlers follow similar patterns
  */
 import type { BaseHandler } from './base-handler.js';
-import { ToolResponse } from './base-handler.js';
 import { z } from 'zod';
 /**
  * @ai-intent Common handler response patterns
@@ -38,27 +37,27 @@ export declare class HandlerPatterns {
          * @ai-intent Handle list operation
          * @ai-pattern Standard list response
          */
-        handleList: import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+        handleList: import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
         /**
          * @ai-intent Handle get by ID operation
          * @ai-pattern Standard detail response
          */
-        handleGetById: import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+        handleGetById: import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
         /**
          * @ai-intent Handle create operation
          * @ai-pattern Standard creation response
          */
-        handleCreate: import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+        handleCreate: import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
         /**
          * @ai-intent Handle update operation
          * @ai-pattern Standard update response
          */
-        handleUpdate: import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+        handleUpdate: import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
         /**
          * @ai-intent Handle delete operation
          * @ai-pattern Standard deletion response
          */
-        handleDelete: import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+        handleDelete: import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     };
     /**
      * @ai-intent Create search handler
@@ -67,24 +66,24 @@ export declare class HandlerPatterns {
     static createSearchHandler<T extends {
         id: number | string;
         title: string;
-    }>(handler: BaseHandler, entityName: string, searchOperation: (query: string, filters?: any) => Promise<T[]>, schema: z.ZodSchema<any>, formatter?: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+    }>(handler: BaseHandler, entityName: string, searchOperation: (query: string, filters?: any) => Promise<T[]>, schema: z.ZodSchema<any>, formatter?: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     /**
      * @ai-intent Create tag-based search handler
      * @ai-pattern Standard tag search
      */
-    static createTagSearchHandler<T>(handler: BaseHandler, entityName: string, searchByTag: (tag: string) => Promise<T[]>, formatter: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+    static createTagSearchHandler<T>(handler: BaseHandler, entityName: string, searchByTag: (tag: string) => Promise<T[]>, formatter: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     /**
      * @ai-intent Create batch operation handler
      * @ai-pattern Standard batch processing
      */
     static createBatchHandler<T, R>(handler: BaseHandler, operationName: string, batchOperation: (items: T[]) => Promise<R[]>, schema: z.ZodSchema<{
         items: T[];
-    }>, formatter: (results: R[]) => string): import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+    }>, formatter: (results: R[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     /**
      * @ai-intent Create date range handler
      * @ai-pattern Standard date filtering
      */
-    static createDateRangeHandler<T>(handler: BaseHandler, entityName: string, operation: (startDate?: string, endDate?: string) => Promise<T[]>, formatter: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, ToolResponse>;
+    static createDateRangeHandler<T>(handler: BaseHandler, entityName: string, operation: (startDate?: string, endDate?: string) => Promise<T[]>, formatter: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     /**
      * @ai-intent Format date range for display
      * @ai-pattern Consistent date range formatting

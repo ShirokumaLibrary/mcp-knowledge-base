@@ -50,7 +50,7 @@ export class ErrorMiddleware {
      * @ai-flow 1. Check error type -> 2. Convert if needed -> 3. Enhance with context
      * @ai-pattern Error normalization
      */
-    static processError(error, context) {
+    static processError(error, _context) {
         // @ai-logic: Already a BaseError
         if (ErrorGuards.isBaseError(error)) {
             return error;
@@ -193,7 +193,7 @@ export class ErrorMiddleware {
             // @ai-critical: Give time to flush logs
             setTimeout(() => process.exit(1), 1000);
         });
-        process.on('unhandledRejection', (reason, promise) => {
+        process.on('unhandledRejection', (reason, _promise) => {
             this.logger.error('Unhandled rejection', {
                 reason: reason instanceof Error ? reason.message : String(reason),
                 stack: reason instanceof Error ? reason.stack : undefined

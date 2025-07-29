@@ -36,7 +36,8 @@ export function removeInvisibleCharacters(str) {
         '\uFFFB' // Interlinear annotation terminator
     ];
     // Create a regex pattern to match all invisible characters
-    const pattern = new RegExp(`[${invisibleChars.join('')}]`, 'g');
+    // Use individual character matching to avoid character class issues
+    const pattern = new RegExp(invisibleChars.map(char => char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
     return str.replace(pattern, '');
 }
 /**

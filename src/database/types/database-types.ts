@@ -4,7 +4,6 @@
  * @ai-critical Eliminates any types in database layer
  */
 
-import { sqlite3 } from 'sqlite3';
 
 /**
  * @ai-intent SQLite row result type

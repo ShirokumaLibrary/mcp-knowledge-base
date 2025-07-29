@@ -198,7 +198,7 @@ export class FileSystemRecoveryHandler extends RecoveryHandler<any> {
   }
 
   async recover(context: RecoveryContext): Promise<RecoveryResult<any>> {
-    const { error, operation } = context;
+    const { error } = context;
     const fsError = error as FileSystemError;
 
     // @ai-logic: Handle missing file with defaults
