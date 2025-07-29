@@ -12,7 +12,6 @@ import path from 'path';
 import { globSync } from 'glob';
 import { existsSync, statSync, unlinkSync, readFileSync } from 'fs';
 import { FileIssueDatabase } from './database/index.js';
-import { ItemRepository } from './repositories/item-repository.js';
 import { parseMarkdown } from './utils/markdown-parser.js';
 
 async function rebuildDatabase() {

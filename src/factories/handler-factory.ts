@@ -6,8 +6,6 @@
  * @ai-assumption All handlers follow constructor(database) pattern
  */
 
-import { IDatabase } from '../database/interfaces/repository-interfaces.js';
-import { BaseHandler } from '../handlers/base-handler.js';
 
 // Handler imports
 import { StatusHandlers } from '../handlers/status-handlers.js';

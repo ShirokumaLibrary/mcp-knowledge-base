@@ -190,7 +190,7 @@ export class DatabaseConnection {
     try {
       await this.db.runAsync('ALTER TABLE sequences ADD COLUMN description TEXT');
       this.logger.debug('Added description column to sequences table');
-    } catch (err) {
+    } catch {
       // Column already exists, ignore error
     }
 

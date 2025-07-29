@@ -114,7 +114,7 @@ export class SessionRepository {
       for (const tag of session.tags) {
         try {
           await this.db.createTag(tag);
-        } catch (error) {
+        } catch {
           // Tag already exists, ignore
         }
       }
@@ -224,7 +224,7 @@ export class SessionRepository {
       for (const tag of summary.tags) {
         try {
           await this.db.createTag(tag);
-        } catch (error) {
+        } catch {
           // Tag already exists, ignore
         }
       }
@@ -241,7 +241,7 @@ export class SessionRepository {
       for (const tag of summary.tags) {
         try {
           await this.db.createTag(tag);
-        } catch (error) {
+        } catch {
           // Tag already exists, ignore
         }
       }

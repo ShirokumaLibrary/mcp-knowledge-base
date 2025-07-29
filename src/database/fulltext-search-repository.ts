@@ -5,7 +5,6 @@
  */
 
 import type { Database } from './base.js';
-import type { UnifiedItem } from '../types/unified-types.js';
 import { createLogger } from '../utils/logger.js';
 
 export interface SearchResult {

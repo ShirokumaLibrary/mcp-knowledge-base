@@ -52,11 +52,9 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
   const lines = fileContent.split('\n');
   const metadata: Record<string, any> = {};
   let contentStartIndex = -1;
-  let inFrontMatter = false;
 
   // @ai-logic: State machine starts by checking for frontmatter delimiter
   if (lines[0] === '---') {
-    inFrontMatter = true;
 
     // @ai-flow: Line-by-line parsing until closing delimiter
     for (let i = 1; i < lines.length; i++) {

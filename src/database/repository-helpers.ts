@@ -7,7 +7,6 @@
  */
 
 import type { Database } from './base.js';
-import { Tag } from '../types/domain-types.js';
 import { ValidationUtils } from '../utils/validation-utils.js';
 import { DataConverters } from '../utils/transform-utils.js';
 import { DatabaseError } from '../errors/custom-errors.js';

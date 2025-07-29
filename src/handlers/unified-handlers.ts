@@ -6,9 +6,7 @@
  */
 
 import type { z } from 'zod';
-import type { CallToolRequest, Tool } from '@modelcontextprotocol/sdk/types.js';
-import { ItemRepository } from '../repositories/item-repository.js';
-import { StatusRepository } from '../database/status-repository.js';
+import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { TypeRepository } from '../database/type-repository.js';
 import type { FileIssueDatabase } from '../database.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';

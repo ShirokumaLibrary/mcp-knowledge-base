@@ -294,7 +294,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       }
 
       return item;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -377,7 +377,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       );
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

@@ -10,10 +10,6 @@ import type {
   Issue,
   Plan,
   Document} from '../types/domain-types.js';
-import {
-  Status,
-  Tag
-} from '../types/domain-types.js';
 
 /**
  * @ai-intent Response error type
@@ -27,9 +23,6 @@ interface ResponseError {
 import type {
   Session,
   Priority
-} from '../types/complete-domain-types.js';
-import {
-  Daily
 } from '../types/complete-domain-types.js';
 
 /**
@@ -406,7 +399,7 @@ export class ResponseFormatters {
    * @ai-pattern Entity summary format
    */
   static summary<T extends Record<string, unknown>>(entity: T): Omit<T, 'content'> {
-    const { content, ...summary } = entity;
+    const { content: _content, ...summary } = entity;
     return summary;
   }
 }

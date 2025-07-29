@@ -8,9 +8,11 @@
 
 // Re-export existing domain types
 export * from './domain-types.js';
+import type { Issue, Plan, Document as Doc } from './domain-types.js';
 
 // Re-export session types from existing definitions to avoid duplication
 export { Session, Daily } from './session-types.js';
+import type { Session, Daily } from './session-types.js';
 
 /**
  * @ai-intent Priority levels for tasks
@@ -33,17 +35,15 @@ export type BaseType = 'tasks' | 'documents';
  */
 export interface TypeToEntity {
   // Task types
-  'issues': import('./domain-types.js').Issue;
-  'plans': import('./domain-types.js').Plan;
+  'issues': Issue;
+  'plans': Plan;
 
   // Document types
-  'docs': import('./domain-types.js').Document;
-  'knowledge': import('./domain-types.js').Document;
+  'docs': Doc;
+  'knowledge': Doc;
 
   // Dynamic types are also Document
-  [key: string]: import('./domain-types.js').Issue |
-                 import('./domain-types.js').Plan |
-                 import('./domain-types.js').Document;
+  [key: string]: Issue | Plan | Doc;
 }
 
 /**
@@ -81,12 +81,12 @@ export interface SearchResult<T> {
  * @ai-usage searchAll() return type
  */
 export interface GlobalSearchResults {
-  issues: SearchResult<import('./domain-types.js').Issue>[];
-  plans: SearchResult<import('./domain-types.js').Plan>[];
-  docs: SearchResult<import('./domain-types.js').Document>[];
-  knowledge: SearchResult<import('./domain-types.js').Document>[];
-  sessions?: SearchResult<import('./session-types.js').Session>[];
-  summaries?: SearchResult<import('./session-types.js').Daily>[];
+  issues: SearchResult<Issue>[];
+  plans: SearchResult<Plan>[];
+  docs: SearchResult<Doc>[];
+  knowledge: SearchResult<Doc>[];
+  sessions?: SearchResult<Session>[];
+  summaries?: SearchResult<Daily>[];
 }
 
 /**
