@@ -20,10 +20,23 @@ export class BaseRepository {
      * @ai-intent Generate consistent file names for entity storage
      * @ai-pattern Uses sequence type as file prefix directly
      * @ai-why Sequence types are already properly pluralized in the database
+     * @ai-security Validates ID to prevent path traversal attacks
      */
     getEntityFileName(sequenceType, id) {
+        // Validate ID to prevent path traversal attacks
+        const idStr = String(id);
+        // Check for path traversal patterns
+        if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') ||
+            idStr.includes('\0') || idStr.includes('%') || idStr === '.' ||
+            path.isAbsolute(idStr)) {
+            throw new Error(`Invalid ID format: ${idStr}`);
+        }
+        // Additional validation: only allow alphanumeric, dash, underscore, and dot
+        if (!/^[a-zA-Z0-9\-_.]+$/.test(idStr)) {
+            throw new Error(`Invalid ID format: ${idStr}`);
+        }
         // Use sequence type directly as it's already properly formatted
-        return `${sequenceType}-${id}.md`;
+        return `${sequenceType}-${idStr}.md`;
     }
     /**
      * @ai-intent Get sequence type information from database
@@ -413,6 +426,8 @@ export class DatabaseConnection {
                     this.logger.debug('Database connection closed');
                 }
                 // Clear the db reference
+                // @ai-any-deliberate: Type assertion needed to clear nullable database reference
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 this.db = null;
                 resolve();
             });

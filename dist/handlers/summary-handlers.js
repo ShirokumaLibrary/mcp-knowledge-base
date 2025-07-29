@@ -18,6 +18,7 @@ import { createLogger } from '../utils/logger.js';
 export class SummaryHandlers {
     sessionManager;
     logger = createLogger('SummaryHandlers');
+    handlerName = 'SummaryHandlers';
     /**
      * @ai-intent Initialize with session manager
      * @ai-pattern Dependency injection

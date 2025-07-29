@@ -9,6 +9,7 @@ import { SessionRepository } from './repositories/session-repository.js';
 import { SessionSearchService } from './services/session-search-service.js';
 import { SessionMarkdownFormatter } from './formatters/session-markdown-formatter.js';
 import { getConfig } from './config.js';
+import * as path from 'path';
 /**
  * @ai-context Central manager for work tracking and daily summaries
  * @ai-pattern Service layer coordinating multiple subsystems
@@ -67,6 +68,18 @@ export class SessionManager {
     ) {
         const sessionDate = datetime ? new Date(datetime) : new Date();
         const date = sessionDate.toISOString().split('T')[0]; // @ai-pattern: YYYY-MM-DD
+        // Validate custom ID to prevent path traversal
+        if (id) {
+            if (id.includes('..') || id.includes('/') || id.includes('\\') ||
+                id.includes('\0') || id.includes('%') || id === '.' ||
+                path.isAbsolute(id)) {
+                throw new Error(`Invalid session ID format: ${id}`);
+            }
+            // Only allow alphanumeric, dash, underscore, and dot
+            if (!/^[a-zA-Z0-9\-_.]+$/.test(id)) {
+                throw new Error(`Invalid session ID format: ${id}`);
+            }
+        }
         const sessionId = id || this.generateSessionId(sessionDate);
         const session = {
             id: sessionId,

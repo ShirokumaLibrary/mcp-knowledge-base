@@ -12,7 +12,7 @@ export interface StorageConfig {
 }
 export interface StorageItem {
     id: string;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
     content: string;
 }
 /**

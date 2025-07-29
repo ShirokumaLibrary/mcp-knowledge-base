@@ -291,14 +291,16 @@ export function redactSensitiveFields(obj, sensitiveFields = ['password', 'token
         return obj;
     }
     const redacted = Array.isArray(obj) ? [...obj] : { ...obj };
-    for (const key in redacted) {
-        const lowerKey = key.toLowerCase();
-        // Check if field name contains sensitive keywords
-        if (sensitiveFields.some(field => lowerKey.includes(field))) {
-            redacted[key] = '[REDACTED]';
-        }
-        else if (typeof redacted[key] === 'object') {
-            redacted[key] = redactSensitiveFields(redacted[key], sensitiveFields);
+    if (!Array.isArray(redacted)) {
+        for (const key in redacted) {
+            const lowerKey = key.toLowerCase();
+            // Check if field name contains sensitive keywords
+            if (sensitiveFields.some(field => lowerKey.includes(field))) {
+                redacted[key] = '[REDACTED]';
+            }
+            else if (typeof redacted[key] === 'object') {
+                redacted[key] = redactSensitiveFields(redacted[key], sensitiveFields);
+            }
         }
     }
     return redacted;

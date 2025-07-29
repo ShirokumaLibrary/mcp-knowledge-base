@@ -110,4 +110,4 @@ export declare function generateCsrfToken(): string;
  * @ai-pattern Remove sensitive data before logging
  * @ai-usage Log sanitization
  */
-export declare function redactSensitiveFields(obj: any, sensitiveFields?: string[]): any;
+export declare function redactSensitiveFields(obj: unknown, sensitiveFields?: string[]): unknown;

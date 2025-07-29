@@ -69,7 +69,10 @@ function getConsoleTransport() {
         });
         // @ai-critical: Increase max listeners for shared console transport
         // @ai-edge-case: Some Winston transports may not expose setMaxListeners
+        // @ai-any-deliberate: Winston transport type doesn't include setMaxListeners in TypeScript definitions
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (typeof consoleTransport.setMaxListeners === 'function') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             consoleTransport.setMaxListeners(100);
         }
     }

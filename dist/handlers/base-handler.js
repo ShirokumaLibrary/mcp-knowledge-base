@@ -18,7 +18,7 @@ export class BaseHandler {
     handlerName;
     database;
     logger;
-    constructor(handlerName, database // @ai-todo: Replace with IDatabase interface
+    constructor(handlerName, database // Now properly typed
     ) {
         this.handlerName = handlerName;
         this.database = database;

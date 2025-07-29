@@ -37,4 +37,35 @@
  * - Data directory: Configured via DATA_DIR env var or default './database'
  * - No other configuration needed - all state in filesystem
  */
-export {};
+/**
+ * @ai-context Main server class orchestrating all MCP operations
+ * @ai-pattern Facade pattern with specialized handlers for each domain
+ * @ai-critical Central coordination point - errors here affect all functionality
+ * @ai-dependencies Database for persistence, handlers for business logic
+ * @ai-lifecycle Constructor initializes all dependencies synchronously
+ */
+export declare class IssueTrackerServer {
+    private server;
+    private db;
+    private sessionManager;
+    private unifiedHandlers?;
+    private statusHandlers;
+    private tagHandlers;
+    private sessionHandlers;
+    private summaryHandlers;
+    private typeHandlers;
+    private searchHandlers;
+    constructor();
+    private setupToolHandlers;
+    private setupToolList;
+    /**
+     * @ai-intent Register handler for tool execution requests
+     * @ai-flow 1. Receive request -> 2. Route to handler -> 3. Catch errors -> 4. Return response
+     * @ai-error-handling Preserves McpError, wraps others as InternalError
+     * @ai-critical All tool calls go through here - must be bulletproof
+     * @ai-why Centralized error handling ensures consistent error responses
+     */
+    private setupCallHandlers;
+    private handleToolCall;
+    run(): Promise<void>;
+}

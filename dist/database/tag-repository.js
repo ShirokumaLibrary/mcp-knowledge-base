@@ -13,10 +13,13 @@ export class TagRepository extends BaseRepository {
     }
     async getTags() {
         const rows = await this.db.allAsync('SELECT id, name, created_at FROM tags ORDER BY name');
-        return rows.map((row) => ({
-            name: row.name,
-            createdAt: row.created_at
-        }));
+        return rows.map((row) => {
+            const tagRow = row;
+            return {
+                name: tagRow.name,
+                createdAt: tagRow.created_at
+            };
+        });
     }
     // Alias for backward compatibility
     async getAllTags() {
@@ -70,7 +73,8 @@ export class TagRepository extends BaseRepository {
         const rows = await this.db.allAsync(`SELECT id, name FROM tags WHERE name IN (${placeholders})`, names);
         const idMap = new Map();
         rows.forEach((row) => {
-            idMap.set(row.name, row.id);
+            const tagRow = row;
+            idMap.set(tagRow.name, tagRow.id);
         });
         return idMap;
     }
@@ -129,10 +133,13 @@ export class TagRepository extends BaseRepository {
     }
     async getTagsByPattern(pattern) {
         const rows = await this.db.allAsync('SELECT id, name, created_at FROM tags WHERE name LIKE ? ORDER BY name', [`%${pattern}%`]);
-        return rows.map((row) => ({
-            name: row.name,
-            createdAt: row.created_at
-        }));
+        return rows.map((row) => {
+            const tagRow = row;
+            return {
+                name: tagRow.name,
+                createdAt: tagRow.created_at
+            };
+        });
     }
     // Alias for backward compatibility
     async searchTagsByPattern(pattern) {

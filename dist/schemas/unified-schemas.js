@@ -49,7 +49,19 @@ export const CreateItemParams = z.object({
     related_tasks: z.array(z.string()).optional(),
     datetime: z.string().optional(), // For sessions: ISO datetime for past data migration
     date: z.string().optional(), // For dailies: YYYY-MM-DD format
-    id: z.string().optional(), // For sessions: custom ID
+    id: z.string()
+        .refine((val) => {
+        // Path traversal and security validation
+        if (val.includes('..') || val.includes('/') || val.includes('\\') ||
+            val.includes('\0') || val.includes('%') || val === '.') {
+            return false;
+        }
+        // Only allow alphanumeric, dash, underscore, and dot
+        return /^[a-zA-Z0-9\-_.]+$/.test(val);
+    }, {
+        message: "Invalid ID format: must not contain path traversal patterns"
+    })
+        .optional(), // For sessions: custom ID
     category: z.string().optional() // For sessions: category field
 });
 /**
@@ -107,7 +119,19 @@ export const CreateSessionParams = z.object({
     related_documents: z.array(z.string()).optional(),
     related_tasks: z.array(z.string()).optional(),
     datetime: z.string().optional(),
-    id: z.string().optional()
+    id: z.string()
+        .refine((val) => {
+        // Path traversal and security validation
+        if (val.includes('..') || val.includes('/') || val.includes('\\') ||
+            val.includes('\0') || val.includes('%') || val === '.') {
+            return false;
+        }
+        // Only allow alphanumeric, dash, underscore, and dot
+        return /^[a-zA-Z0-9\-_.]+$/.test(val);
+    }, {
+        message: "Invalid ID format: must not contain path traversal patterns"
+    })
+        .optional()
 });
 export const UpdateSessionParams = z.object({
     id: z.string(),

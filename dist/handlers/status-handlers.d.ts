@@ -24,6 +24,7 @@ import type { ToolResponse } from '../types/mcp-types.js';
 export declare class StatusHandlers {
     private db;
     private logger;
+    readonly handlerName = "StatusHandlers";
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection for testability

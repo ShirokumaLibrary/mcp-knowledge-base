@@ -308,7 +308,7 @@ export declare class FileIssueDatabase {
     createType(name: string, baseType?: 'tasks' | 'documents'): Promise<void>;
     deleteType(name: string): Promise<void>;
     getBaseType(name: string): Promise<string | null>;
-    searchContent(query: string): Promise<any[]>;
+    searchContent(query: string): Promise<import("./search-repository.js").SearchRow[]>;
     getItems(type: string): Promise<import("../types/unified-types.js").UnifiedItem[]>;
     getTypes(): Promise<GroupedTypes>;
     searchSessions(query: string): Promise<Session[]>;

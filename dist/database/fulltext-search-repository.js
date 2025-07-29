@@ -26,6 +26,8 @@ export class FullTextSearchRepository {
         const escapedQuery = query.replace(/['"]/g, '');
         // Build type filter
         let typeFilter = '';
+        // @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let params = [`"${escapedQuery}"`, limit, offset];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
@@ -46,6 +48,9 @@ export class FullTextSearchRepository {
       LIMIT ? OFFSET ?
     `;
         try {
+            // @ai-any-deliberate: Database query result - dynamic row structure from SQLite
+            // @ai-any-deliberate: Database query result - dynamic row structure
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rows = await this.db.allAsync(sql, params);
             return rows.map(row => ({
                 type: String(row.type),
@@ -73,6 +78,8 @@ export class FullTextSearchRepository {
         const escapedQuery = query.replace(/['"]/g, '');
         // Build type filter
         let typeFilter = '';
+        // @ai-any-deliberate: SQLite params array - mixed types for query parameters
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let params = [`"${escapedQuery}"*`, limit];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');

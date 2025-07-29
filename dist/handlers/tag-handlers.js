@@ -18,6 +18,7 @@ import { createLogger } from '../utils/logger.js';
 export class TagHandlers {
     db;
     logger = createLogger('TagHandlers');
+    handlerName = 'TagHandlers';
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection

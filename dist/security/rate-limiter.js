@@ -152,14 +152,15 @@ export class RateLimiter {
      */
     getDefaultKey(context) {
         // Try to extract identifier from context
-        if (context.ip) {
-            return `ip:${context.ip}`;
+        const ctx = context;
+        if (ctx.ip) {
+            return `ip:${ctx.ip}`;
         }
-        if (context.userId) {
-            return `user:${context.userId}`;
+        if (ctx.userId) {
+            return `user:${ctx.userId}`;
         }
-        if (context.sessionId) {
-            return `session:${context.sessionId}`;
+        if (ctx.sessionId) {
+            return `session:${ctx.sessionId}`;
         }
         // Global rate limit
         return 'global';

@@ -7,6 +7,7 @@
  */
 import type { Logger } from 'winston';
 import { z } from 'zod';
+import type { IDatabase } from '../database/interfaces/repository-interfaces.js';
 /**
  * @ai-intent Standard tool response structure
  * @ai-pattern MCP protocol response format
@@ -21,7 +22,7 @@ export interface ToolResponse {
  * @ai-intent Handler method signature
  * @ai-pattern Type-safe handler with validation
  */
-export type HandlerMethod<T = unknown, R = any> = (args: T) => Promise<R>;
+export type HandlerMethod<T = unknown, R = unknown> = (args: T) => Promise<R>;
 /**
  * @ai-intent Abstract base handler with common functionality
  * @ai-pattern Template method for consistent error handling
@@ -29,9 +30,9 @@ export type HandlerMethod<T = unknown, R = any> = (args: T) => Promise<R>;
  */
 export declare abstract class BaseHandler {
     protected handlerName: string;
-    protected database?: any | undefined;
+    protected database?: IDatabase | undefined;
     protected logger: Logger;
-    constructor(handlerName: string, database?: any | undefined);
+    constructor(handlerName: string, database?: IDatabase | undefined);
     /**
      * @ai-intent Create standard text response
      * @ai-pattern Consistent response format
@@ -80,7 +81,7 @@ export declare abstract class BaseHandler {
      * @ai-pattern Pretty-printed JSON
      * @ai-usage For complex objects in responses
      */
-    formatJson(obj: any): string;
+    formatJson(obj: unknown): string;
     /**
      * @ai-intent Ensure database is initialized
      * @ai-pattern Guard clause for database operations

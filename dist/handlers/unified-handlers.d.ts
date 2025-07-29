@@ -31,7 +31,7 @@ export declare const unifiedTools: Tool[];
  * @ai-intent Main handler function for MCP tool calls
  * @ai-flow 1. Parse request -> 2. Validate -> 3. Route to handler -> 4. Return result
  */
-export declare function handleUnifiedToolCall(name: string, args: any, handlers: ReturnType<typeof createUnifiedHandlers>): Promise<{
+export declare function handleUnifiedToolCall(name: string, args: unknown, handlers: ReturnType<typeof createUnifiedHandlers>): Promise<{
     content: {
         type: 'text';
         text: string;

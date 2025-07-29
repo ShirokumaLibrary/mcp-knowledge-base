@@ -17,6 +17,7 @@ import type { ToolResponse } from '../types/mcp-types.js';
 export declare class SessionHandlers {
     private sessionManager;
     private logger;
+    readonly handlerName = "SessionHandlers";
     /**
      * @ai-intent Initialize with session manager dependency
      * @ai-pattern Dependency injection for testability

@@ -45,7 +45,6 @@ export class ItemRepository {
         const typeRepo = new TypeRepository(this.fileDb);
         await typeRepo.init();
         const fieldDefs = await typeRepo.getFieldsForType(item.type);
-        // Create metadata with all defined fields
         const metadata = {};
         // @ai-critical: Add base field for ALL types uniformly (except special ID types)
         // @ai-why: No special treatment for initial types - all types are equal
@@ -112,7 +111,8 @@ export class ItemRepository {
                     break;
                 case 'category':
                     // Special handling for sessions category field
-                    if (item.type === 'sessions' && item.category) {
+                    // Special handling for sessions category field
+                    if (item.type === 'sessions' && 'category' in item && item.category) {
                         value = item.category;
                     }
                     else {
@@ -137,28 +137,28 @@ export class ItemRepository {
      */
     async storageItemToUnifiedItem(item, type, statusName) {
         const metadata = item.metadata;
-        const related = metadata.related || [];
+        const related = (Array.isArray(metadata.related) ? metadata.related : []);
         // Use specific related fields if available, otherwise derive from related
-        const related_tasks = metadata.related_tasks || related.filter((r) => r.match(/^(issues|plans)-/));
-        const related_documents = metadata.related_documents || related.filter((r) => r.match(/^(docs|knowledge)-/));
+        const related_tasks = (Array.isArray(metadata.related_tasks) ? metadata.related_tasks : related.filter((r) => r.match(/^(issues|plans)-/)));
+        const related_documents = (Array.isArray(metadata.related_documents) ? metadata.related_documents : related.filter((r) => r.match(/^(docs|knowledge)-/)));
         // Get status info
         const statuses = await this.statusRepo.getAllStatuses();
-        let statusId = metadata.status_id || 1;
+        let statusId = Number(metadata.status_id || 1);
         if (!statusName) {
             if (metadata.status_id) {
                 // Get status name from ID
-                const status = statuses.find(s => s.id === metadata.status_id);
+                const status = statuses.find(s => s.id === Number(metadata.status_id));
                 statusName = status?.name || 'Open';
             }
             else if (metadata.status) {
                 // Get status ID from name
-                const status = statuses.find(s => s.name === metadata.status);
+                const status = statuses.find(s => s.name === String(metadata.status));
                 if (status) {
                     statusName = status.name;
                     statusId = status.id;
                 }
                 else {
-                    statusName = metadata.status;
+                    statusName = String(metadata.status);
                 }
             }
             else {
@@ -168,21 +168,21 @@ export class ItemRepository {
         const unifiedItem = {
             id: item.id,
             type,
-            title: metadata.title,
-            description: metadata.description || undefined,
+            title: String(metadata.title || ''),
+            description: metadata.description ? String(metadata.description) : undefined,
             content: item.content,
-            priority: metadata.priority || 'medium',
+            priority: (metadata.priority === 'high' || metadata.priority === 'medium' || metadata.priority === 'low' ? metadata.priority : 'medium'),
             status: statusName,
-            status_id: statusId,
-            start_date: metadata.start_date || null,
-            end_date: metadata.end_date || null,
-            start_time: metadata.start_time || null,
-            tags: metadata.tags || [],
+            status_id: Number(statusId),
+            start_date: metadata.start_date ? String(metadata.start_date) : null,
+            end_date: metadata.end_date ? String(metadata.end_date) : null,
+            start_time: metadata.start_time ? String(metadata.start_time) : null,
+            tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
             related,
             related_tasks,
             related_documents,
-            created_at: metadata.created_at || new Date().toISOString(),
-            updated_at: metadata.updated_at || metadata.created_at || new Date().toISOString()
+            created_at: String(metadata.created_at || new Date().toISOString()),
+            updated_at: String(metadata.updated_at || metadata.created_at || new Date().toISOString())
         };
         // Add date field for sessions and dailies
         if (type === 'sessions' || type === 'dailies') {
@@ -699,7 +699,7 @@ export class ItemRepository {
                     await this.db.runAsync('INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [item.type, item.id, relatedType, relatedId]);
                 }
                 catch (error) {
-                    if (error.message?.includes('UNIQUE constraint failed')) {
+                    if (error instanceof Error && error.message?.includes('UNIQUE constraint failed')) {
                         // Skip duplicate - this is OK since we're ensuring uniqueness
                         this.logger.debug(`Skipping duplicate related item: ${item.type}-${item.id} -> ${relatedRef}`);
                     }

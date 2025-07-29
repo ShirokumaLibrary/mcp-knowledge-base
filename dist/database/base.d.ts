@@ -25,6 +25,7 @@ export declare abstract class BaseRepository {
      * @ai-intent Generate consistent file names for entity storage
      * @ai-pattern Uses sequence type as file prefix directly
      * @ai-why Sequence types are already properly pluralized in the database
+     * @ai-security Validates ID to prevent path traversal attacks
      */
     protected getEntityFileName(sequenceType: string, id: number | string): string;
     /**

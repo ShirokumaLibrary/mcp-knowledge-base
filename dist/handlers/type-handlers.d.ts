@@ -8,6 +8,7 @@ export declare class TypeHandlers {
     private db;
     private typeRepo;
     private logger;
+    readonly handlerName = "TypeHandlers";
     constructor(db: FileIssueDatabase);
     /**
      * @ai-intent Initialize type repository

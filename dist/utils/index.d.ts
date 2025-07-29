@@ -6,7 +6,6 @@
  */
 export { createLogger } from './logger.js';
 export { ensureInitialized } from './decorators.js';
-export { ensureDirectoryExists } from './file-utils.js';
 export { formatRelativeDate } from './date-utils.js';
 /**
  * @ai-intent Common utility functions

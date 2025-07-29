@@ -52,7 +52,7 @@ export declare class RepositoryHelpers {
      * @ai-intent Build WHERE clause from filters
      * @ai-pattern Dynamic query building
      */
-    static buildWhereClause(filters: Record<string, any>, paramValues: any[]): string;
+    static buildWhereClause(filters: Record<string, any>, paramValues: unknown[]): string;
     /**
      * @ai-intent Execute search query
      * @ai-pattern Common search implementation
@@ -67,5 +67,5 @@ export declare class RepositoryHelpers {
      * @ai-intent Get count with filters
      * @ai-pattern Count query helper
      */
-    static getCount(db: Database, tableName: string, filters?: Record<string, any>): Promise<number>;
+    static getCount(db: Database, tableName: string, filters?: Record<string, unknown>): Promise<number>;
 }

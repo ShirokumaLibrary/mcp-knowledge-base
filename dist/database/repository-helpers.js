@@ -179,7 +179,13 @@ export class RepositoryHelpers {
      * @ai-intent Build WHERE clause from filters
      * @ai-pattern Dynamic query building
      */
-    static buildWhereClause(filters, paramValues) {
+    static buildWhereClause(
+    // @ai-any-deliberate: Generic filter object - accepts various field types (string, number, boolean, Date)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters, 
+    // @ai-any-deliberate: SQLite parameter array - mixed types for prepared statement
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    paramValues) {
         const conditions = [];
         for (const [field, value] of Object.entries(filters)) {
             if (value === undefined || value === null) {
@@ -208,8 +214,13 @@ export class RepositoryHelpers {
      * @ai-intent Execute search query
      * @ai-pattern Common search implementation
      */
-    static async executeSearch(db, tableName, searchFields, query, additionalFilters, logger) {
+    static async executeSearch(db, tableName, searchFields, query, 
+    // @ai-any-deliberate: Generic filter object - flexible search conditions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    additionalFilters, logger) {
         try {
+            // @ai-any-deliberate: SQLite parameter array - mixed types for query
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const params = [];
             const conditions = [];
             // @ai-logic: Build search condition

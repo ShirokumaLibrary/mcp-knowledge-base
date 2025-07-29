@@ -21,6 +21,7 @@ const EmptySchema = z.object({});
  */
 export class StatusHandlersV2 extends BaseHandler {
     constructor(database) {
+        // @ai-any-deliberate: V2 handlers use FileIssueDatabase which doesn't fully implement IDatabase
         super('StatusHandlers', database);
     }
     /**

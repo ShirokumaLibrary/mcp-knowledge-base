@@ -25,6 +25,7 @@ import { createLogger } from '../utils/logger.js';
 export class StatusHandlers {
     db;
     logger = createLogger('StatusHandlers');
+    handlerName = 'StatusHandlers';
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection for testability

@@ -292,10 +292,11 @@ export function requiresPermission(resource, permission) {
  * @ai-pattern Allow users to modify their own resources
  */
 export function isResourceOwner(user, resource) {
-    if (!user.userId || !resource.createdBy) {
+    const res = resource;
+    if (!user.userId || !res?.createdBy) {
         return false;
     }
-    return user.userId === resource.createdBy;
+    return user.userId === res.createdBy;
 }
 /**
  * @ai-intent Combine with ownership check

@@ -20,12 +20,15 @@ export class StatusRepository extends BaseRepository {
     async getAllStatuses() {
         const rows = await this.db.allAsync('SELECT id, name, is_closed, created_at FROM statuses ORDER BY id');
         // @ai-logic: Type safety through explicit mapping
-        return rows.map((row) => ({
-            id: Number(row.id),
-            name: String(row.name),
-            is_closed: row.is_closed === 1,
-            created_at: String(row.created_at)
-        }));
+        return rows.map((row) => {
+            const statusRow = row;
+            return {
+                id: Number(statusRow.id),
+                name: String(statusRow.name),
+                is_closed: statusRow.is_closed === 1,
+                created_at: String(statusRow.created_at)
+            };
+        });
     }
     async getAllStatusesAsync() {
         return this.getAllStatuses();

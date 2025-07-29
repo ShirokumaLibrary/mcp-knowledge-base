@@ -58,7 +58,7 @@ import { toolDefinitions } from './tool-definitions.js';
  * @ai-dependencies Database for persistence, handlers for business logic
  * @ai-lifecycle Constructor initializes all dependencies synchronously
  */
-class IssueTrackerServer {
+export class IssueTrackerServer {
     server;
     db;
     sessionManager;
@@ -193,6 +193,10 @@ class IssueTrackerServer {
         console.error('Issue Tracker MCP Server running on stdio');
     }
 }
-const server = new IssueTrackerServer();
-server.run().catch(console.error);
+// Only run if this is the main module (not imported for testing)
+// Check if module is being run directly or imported
+if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+    const server = new IssueTrackerServer();
+    server.run().catch(console.error);
+}
 //# sourceMappingURL=server.js.map

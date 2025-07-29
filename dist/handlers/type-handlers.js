@@ -5,14 +5,12 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { TypeRepository } from '../database/type-repository.js';
 import { CreateTypeSchema, GetTypesSchema, DeleteTypeSchema, UpdateTypeSchema } from '../schemas/type-schemas.js';
+import { createLogger } from '../utils/logger.js';
 export class TypeHandlers {
     db;
     typeRepo;
-    logger = {
-        error: (message, context) => {
-            console.error(message, context);
-        }
-    };
+    logger = createLogger('TypeHandlers');
+    handlerName = 'TypeHandlers';
     constructor(db) {
         this.db = db;
         this.typeRepo = new TypeRepository(db);

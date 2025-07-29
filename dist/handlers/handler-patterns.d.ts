@@ -22,8 +22,8 @@ export declare class HandlerPatterns {
     }>(handler: BaseHandler, entityName: string, operations: {
         getAll: () => Promise<T[]>;
         getById: (id: number | string) => Promise<T | null>;
-        create: (data: any) => Promise<T>;
-        update: (id: number | string, data: any) => Promise<T | null>;
+        create: (data: unknown) => Promise<T>;
+        update: (id: number | string, data: unknown) => Promise<T | null>;
         delete: (id: number | string) => Promise<boolean>;
     }, schemas: {
         create: z.ZodSchema<any>;
@@ -66,7 +66,7 @@ export declare class HandlerPatterns {
     static createSearchHandler<T extends {
         id: number | string;
         title: string;
-    }>(handler: BaseHandler, entityName: string, searchOperation: (query: string, filters?: any) => Promise<T[]>, schema: z.ZodSchema<any>, formatter?: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
+    }>(handler: BaseHandler, entityName: string, searchOperation: (query: string, filters?: unknown) => Promise<T[]>, schema: z.ZodSchema<any>, formatter?: (items: T[]) => string): import("./base-handler.js").HandlerMethod<unknown, import("./base-handler.js").ToolResponse>;
     /**
      * @ai-intent Create tag-based search handler
      * @ai-pattern Standard tag search
@@ -102,7 +102,7 @@ export declare class ResponsePatterns {
     static formatAsTable<T extends Record<string, any>>(items: T[], columns: Array<{
         key: keyof T;
         header: string;
-        formatter?: (value: any) => string;
+        formatter?: (value: unknown) => string;
     }>, title?: string): string;
     /**
      * @ai-intent Format items as grouped list

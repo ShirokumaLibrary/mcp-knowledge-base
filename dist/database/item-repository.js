@@ -59,8 +59,8 @@ export class ItemRepository extends BaseRepository {
      * @ai-pattern Required by BaseRepository
      */
     mapRowToEntity(row) {
-        const tags = row.tags ? JSON.parse(row.tags) : [];
-        const related = row.related ? JSON.parse(row.related) : [];
+        const tags = row.tags ? JSON.parse(String(row.tags)) : [];
+        const related = row.related ? JSON.parse(String(row.related)) : [];
         const item = {
             id: String(row.id),
             type: row.type,
@@ -116,7 +116,8 @@ export class ItemRepository extends BaseRepository {
         // Generate ID based on type
         let id;
         if (type === 'sessions') {
-            id = this.generateSessionId();
+            // Use custom ID if provided (already validated by Zod schema)
+            id = data.id || this.generateSessionId();
         }
         else if (type === 'dailies') {
             id = data.start_date || new Date().toISOString().split('T')[0];
@@ -449,17 +450,28 @@ export class ItemRepository extends BaseRepository {
         return path.join(this.dataDir, type);
     }
     getFilePath(type, id) {
+        // Validate ID to prevent path traversal attacks
+        const idStr = String(id);
+        if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') ||
+            idStr.includes('\0') || idStr.includes('%') || idStr === '.' ||
+            path.isAbsolute(idStr)) {
+            throw new Error(`Invalid ID format: ${idStr}`);
+        }
+        // Additional validation: only allow alphanumeric, dash, underscore, and dot
+        if (!/^[a-zA-Z0-9\-_.]+$/.test(idStr)) {
+            throw new Error(`Invalid ID format: ${idStr}`);
+        }
         if (type === 'sessions') {
             // Sessions are stored in date subdirectories
             const dateMatch = id.match(/^(\d{4}-\d{2}-\d{2})/);
             if (dateMatch) {
                 const date = dateMatch[1];
-                return path.join(this.dataDir, 'sessions', date, `session-${id}.md`);
+                return path.join(this.dataDir, 'sessions', date, `sessions-${id}.md`);
             }
         }
         else if (type === 'dailies') {
             // Summaries are stored in sessions directory with date subdirectories
-            return path.join(this.dataDir, 'sessions', id, `daily-summary-${id}.md`);
+            return path.join(this.dataDir, 'sessions', id, `dailies-${id}.md`);
         }
         // Regular items
         const dir = this.getTypeDirectory(type);
@@ -501,6 +513,27 @@ export class ItemRepository extends BaseRepository {
         const markdown = generateMarkdown(metadata, item.content);
         // Write to file
         await fs.writeFile(filePath, markdown, 'utf8');
+    }
+    /**
+     * @ai-intent Search items by tag
+     * @ai-flow 1. Get tag ID -> 2. Find items with tag -> 3. Load each item
+     */
+    async searchByTag(tag) {
+        const sql = `
+      SELECT DISTINCT item_type as type, item_id as id
+      FROM item_tags it
+      JOIN tags t ON t.id = it.tag_id
+      WHERE t.name = ?
+    `;
+        const rows = await this.db.allAsync(sql, [tag]);
+        const items = [];
+        for (const row of rows) {
+            const item = await this.getById(String(row.type), String(row.id));
+            if (item) {
+                items.push(item);
+            }
+        }
+        return items;
     }
     async syncToDatabase(item) {
         const tagsJson = JSON.stringify(item.tags);

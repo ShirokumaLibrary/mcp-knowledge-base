@@ -19,16 +19,14 @@ export class SearchRepository extends BaseRepository {
        FROM items 
        WHERE title LIKE ? OR content LIKE ? OR description LIKE ?
        ORDER BY created_at DESC`, [`%${query}%`, `%${query}%`, `%${query}%`]);
-        return results.map((row) => ({
-            type: row.type,
-            id: row.id,
-            title: row.title,
-            description: row.description,
-            content: row.content ? row.content.substring(0, 200) + '...' : '',
-            tags: row.tags ? JSON.parse(row.tags) : [],
-            created_at: row.created_at,
-            updated_at: row.updated_at
-        }));
+        return results.map((row) => {
+            const searchRow = row;
+            return {
+                ...searchRow,
+                content: searchRow.content ? searchRow.content.substring(0, 200) + '...' : '',
+                tags: searchRow.tags ? JSON.parse(searchRow.tags) : []
+            };
+        });
     }
     /**
      * @ai-intent Search all items by tag (legacy method)
@@ -48,18 +46,15 @@ export class SearchRepository extends BaseRepository {
             knowledge: []
         };
         for (const row of results) {
+            const searchRow = row;
             const item = {
-                id: parseInt(String(row.id)),
-                title: String(row.title),
-                description: row.description,
-                content: row.content,
-                priority: row.priority,
-                tags: row.tags ? JSON.parse(String(row.tags)) : [],
-                created_at: row.created_at,
-                updated_at: row.updated_at
+                ...searchRow,
+                id: parseInt(String(searchRow.id)),
+                title: String(searchRow.title),
+                tags: searchRow.tags ? JSON.parse(String(searchRow.tags)) : []
             };
-            const type = String(row.type);
-            if (grouped[type]) {
+            const type = String(searchRow.type);
+            if (type in grouped) {
                 grouped[type].push(item);
             }
         }

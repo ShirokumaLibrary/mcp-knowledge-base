@@ -17,6 +17,7 @@ import type { ToolResponse } from '../types/mcp-types.js';
 export declare class TagHandlers {
     private db;
     private logger;
+    readonly handlerName = "TagHandlers";
     /**
      * @ai-intent Initialize with database dependency
      * @ai-pattern Dependency injection

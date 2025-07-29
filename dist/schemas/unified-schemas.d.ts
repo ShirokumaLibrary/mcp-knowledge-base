@@ -64,7 +64,7 @@ export declare const CreateItemParams: z.ZodObject<{
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     datetime: z.ZodOptional<z.ZodString>;
     date: z.ZodOptional<z.ZodString>;
-    id: z.ZodOptional<z.ZodString>;
+    id: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
     category: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     title: string;
@@ -210,7 +210,7 @@ export declare const CreateSessionParams: z.ZodObject<{
     related_documents: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     related_tasks: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     datetime: z.ZodOptional<z.ZodString>;
-    id: z.ZodOptional<z.ZodString>;
+    id: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
 }, "strip", z.ZodTypeAny, {
     title: string;
     id?: string | undefined;

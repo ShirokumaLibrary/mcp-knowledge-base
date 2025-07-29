@@ -17,6 +17,7 @@ import type { ToolResponse } from '../types/mcp-types.js';
 export declare class SummaryHandlers {
     private sessionManager;
     private logger;
+    readonly handlerName = "SummaryHandlers";
     /**
      * @ai-intent Initialize with session manager
      * @ai-pattern Dependency injection

@@ -13,7 +13,7 @@ export interface RateLimitConfig {
     maxRequests: number;
     skipSuccessfulRequests?: boolean;
     skipFailedRequests?: boolean;
-    keyGenerator?: (context: any) => string;
+    keyGenerator?: (context: unknown) => string;
 }
 /**
  * @ai-intent Rate limiter implementation
@@ -57,12 +57,12 @@ export declare class RateLimiter {
      * @ai-flow 1. Generate key -> 2. Get bucket -> 3. Try consume -> 4. Handle result
      * @ai-throws RateLimitError if limit exceeded
      */
-    checkLimit(context?: any): Promise<void>;
+    checkLimit(context?: unknown): Promise<void>;
     /**
      * @ai-intent Record request result
      * @ai-pattern Optionally don't count successful/failed requests
      */
-    recordResult(context: any, success: boolean): void;
+    recordResult(context: unknown, success: boolean): void;
     /**
      * @ai-intent Generate default key
      * @ai-pattern IP-based or global rate limiting
@@ -77,7 +77,7 @@ export declare class RateLimiter {
      * @ai-intent Get current limit status
      * @ai-usage For monitoring and headers
      */
-    getStatus(context: any): {
+    getStatus(context: unknown): {
         limit: number;
         remaining: number;
         reset: Date;
@@ -86,7 +86,7 @@ export declare class RateLimiter {
      * @ai-intent Reset limits for a specific key
      * @ai-usage For admin operations
      */
-    reset(context: any): void;
+    reset(context: unknown): void;
     /**
      * @ai-intent Clear all rate limit data
      * @ai-usage For testing or emergency reset
@@ -105,15 +105,15 @@ export declare class CompositeRateLimiter {
      * @ai-intent Check all rate limits
      * @ai-throws First rate limit error encountered
      */
-    checkLimits(context: any): Promise<void>;
+    checkLimits(context: unknown): Promise<void>;
     /**
      * @ai-intent Record result for all limiters
      */
-    recordResult(context: any, success: boolean): void;
+    recordResult(context: unknown, success: boolean): void;
 }
 /**
  * @ai-intent Rate limiting middleware factory
  * @ai-pattern Creates handler wrapper
  * @ai-usage For MCP handler protection
  */
-export declare function createRateLimitMiddleware(config: RateLimitConfig): (handler: (...args: any[]) => any) => Promise<(params: any, context?: any) => Promise<any>>;
+export declare function createRateLimitMiddleware(config: RateLimitConfig): (handler: (...args: unknown[]) => any) => Promise<(params: unknown, context?: unknown) => Promise<any>>;

@@ -64,7 +64,7 @@ export interface UserContext {
 export interface AccessRule {
     resource: ResourceType;
     permission: Permission;
-    condition?: (user: UserContext, resource?: any) => boolean;
+    condition?: (user: UserContext, resource?: unknown) => boolean;
 }
 /**
  * @ai-intent Default role definitions
@@ -97,12 +97,12 @@ export declare class AccessControlManager {
      * @ai-flow 1. Get user permissions -> 2. Check specific permission -> 3. Check wildcards
      * @ai-return true if permitted, false otherwise
      */
-    hasPermission(user: UserContext, resource: ResourceType, permission: Permission, _resourceData?: any): boolean;
+    hasPermission(user: UserContext, resource: ResourceType, permission: Permission, _resourceData?: unknown): boolean;
     /**
      * @ai-intent Enforce permission requirement
      * @ai-throws BusinessRuleError if not permitted
      */
-    requirePermission(user: UserContext, resource: ResourceType, permission: Permission, resourceData?: any): void;
+    requirePermission(user: UserContext, resource: ResourceType, permission: Permission, resourceData?: unknown): void;
     /**
      * @ai-intent Check multiple permissions (ANY)
      * @ai-pattern User needs at least one permission
@@ -155,14 +155,14 @@ export declare function createUserContext(options?: Partial<UserContext>): UserC
  * @ai-intent Access control middleware factory
  * @ai-pattern Wraps handlers with permission checks
  */
-export declare function requiresPermission(resource: ResourceType, permission: Permission): (handler: (...args: any[]) => any) => (params: any, context?: any) => Promise<any>;
+export declare function requiresPermission(resource: ResourceType, permission: Permission): (handler: (...args: unknown[]) => any) => (params: unknown, context?: unknown) => Promise<any>;
 /**
  * @ai-intent Resource owner check
  * @ai-pattern Allow users to modify their own resources
  */
-export declare function isResourceOwner(user: UserContext, resource: any): boolean;
+export declare function isResourceOwner(user: UserContext, resource: unknown): boolean;
 /**
  * @ai-intent Combine with ownership check
  * @ai-pattern Permission OR ownership
  */
-export declare function canAccessResource(user: UserContext, resource: any, resourceType: ResourceType, permission: Permission, acm: AccessControlManager): boolean;
+export declare function canAccessResource(user: UserContext, resource: unknown, resourceType: ResourceType, permission: Permission, acm: AccessControlManager): boolean;

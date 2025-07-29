@@ -86,7 +86,6 @@ export function createUnifiedHandlers(fileDb) {
     async function handleSearchItemsByTag(params) {
         const { tag, types } = params;
         const items = await itemRepository.searchItemsByTag(tag, types);
-        // Transform to nested format for backward compatibility
         const result = {
             tasks: {},
             documents: {}
@@ -256,7 +255,8 @@ export const unifiedTools = [
                 },
                 id: {
                     type: 'string',
-                    description: 'Custom ID (for sessions, optional)'
+                    description: 'Custom ID (for sessions, optional)',
+                    pattern: '^[a-zA-Z0-9\\-_.]+$'
                 },
                 category: {
                     type: 'string',

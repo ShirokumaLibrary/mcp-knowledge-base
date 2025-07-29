@@ -30,11 +30,11 @@ export declare function ensureInitialized(target: unknown, propertyKey: string, 
  * @ai-usage @logExecutionTime on methods to monitor
  * @ai-why Helps identify performance bottlenecks
  */
-export declare function logExecutionTime(target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor;
+export declare function logExecutionTime(target: unknown, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor;
 /**
  * @ai-intent Retries failed operations with exponential backoff
  * @ai-pattern Decorator for handling transient failures
  * @ai-usage @retry(3, 1000) for 3 retries with 1s initial delay
  * @ai-why Improves reliability for network/filesystem operations
  */
-export declare function retry(maxAttempts?: number, initialDelay?: number): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => PropertyDescriptor;
+export declare function retry(maxAttempts?: number, initialDelay?: number): (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => PropertyDescriptor;

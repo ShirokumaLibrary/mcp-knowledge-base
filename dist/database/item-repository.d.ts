@@ -6,6 +6,7 @@
  */
 import { BaseRepository } from './base-repository.js';
 import type { Database } from './base.js';
+import type { DatabaseRow } from './types/database-types.js';
 import { type UnifiedItem, type CreateItemParams, type UpdateItemParams, type SearchItemParams } from '../types/unified-types.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
@@ -20,12 +21,12 @@ export declare class ItemRepository extends BaseRepository<UnifiedItem, string> 
      * @ai-intent Map database row to entity
      * @ai-pattern Required by BaseRepository
      */
-    protected mapRowToEntity(row: any): UnifiedItem;
+    protected mapRowToEntity(row: DatabaseRow): UnifiedItem;
     /**
      * @ai-intent Map entity to database row
      * @ai-pattern Required by BaseRepository
      */
-    protected mapEntityToRow(entity: UnifiedItem): any;
+    protected mapEntityToRow(entity: UnifiedItem): DatabaseRow;
     /**
      * @ai-intent Create a new item of any type
      * @ai-flow 1. Validate type -> 2. Generate ID -> 3. Save to markdown -> 4. Sync to DB
@@ -64,5 +65,10 @@ export declare class ItemRepository extends BaseRepository<UnifiedItem, string> 
     private getTypeDirectory;
     private getFilePath;
     private saveToMarkdown;
+    /**
+     * @ai-intent Search items by tag
+     * @ai-flow 1. Get tag ID -> 2. Find items with tag -> 3. Load each item
+     */
+    searchByTag(tag: string): Promise<UnifiedItem[]>;
     private syncToDatabase;
 }
