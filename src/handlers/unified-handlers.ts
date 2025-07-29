@@ -132,7 +132,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
       tasks: Record<string, UnifiedItem[]>;
       documents: Record<string, UnifiedItem[]>;
     }
-    
+
     const result: GroupedItems = {
       tasks: {},
       documents: {}

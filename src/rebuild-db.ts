@@ -218,6 +218,12 @@ async function rebuildDatabase() {
   ) as { type: string }[];
 
   for (const { type } of allSequences) {
+    // Skip sessions and dailies as they don't use numeric IDs
+    if (type === 'sessions' || type === 'dailies') {
+      console.log(`  ⏭️  Skipped sequence '${type}' (uses timestamp/date IDs)`);
+      continue;
+    }
+
     // Get max ID from items table
     const result = await db.getAsync(
       'SELECT MAX(CAST(id AS INTEGER)) as max_id FROM items WHERE type = ?',

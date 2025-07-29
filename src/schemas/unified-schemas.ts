@@ -57,14 +57,14 @@ export const CreateItemParams = z.object({
   id: z.string()
     .refine((val) => {
       // Path traversal and security validation
-      if (val.includes('..') || val.includes('/') || val.includes('\\') || 
+      if (val.includes('..') || val.includes('/') || val.includes('\\') ||
           val.includes('\0') || val.includes('%') || val === '.') {
         return false;
       }
       // Only allow alphanumeric, dash, underscore, and dot
       return /^[a-zA-Z0-9\-_.]+$/.test(val);
     }, {
-      message: "Invalid ID format: must not contain path traversal patterns"
+      message: 'Invalid ID format: must not contain path traversal patterns'
     })
     .optional(), // For sessions: custom ID
   category: z.string().optional() // For sessions: category field
@@ -134,14 +134,14 @@ export const CreateSessionParams = z.object({
   id: z.string()
     .refine((val) => {
       // Path traversal and security validation
-      if (val.includes('..') || val.includes('/') || val.includes('\\') || 
+      if (val.includes('..') || val.includes('/') || val.includes('\\') ||
           val.includes('\0') || val.includes('%') || val === '.') {
         return false;
       }
       // Only allow alphanumeric, dash, underscore, and dot
       return /^[a-zA-Z0-9\-_.]+$/.test(val);
     }, {
-      message: "Invalid ID format: must not contain path traversal patterns"
+      message: 'Invalid ID format: must not contain path traversal patterns'
     })
     .optional()
 });

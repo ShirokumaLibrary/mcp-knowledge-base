@@ -277,7 +277,7 @@ export class RepositoryHelpers {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filters: Record<string, any>,
     // @ai-any-deliberate: SQLite parameter array - mixed types for prepared statement
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     paramValues: unknown[]
   ): string {
     const conditions: string[] = [];
@@ -322,7 +322,7 @@ export class RepositoryHelpers {
   ): Promise<T[]> {
     try {
       // @ai-any-deliberate: SQLite parameter array - mixed types for query
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const params: (string | number | boolean | null)[] = [];
       const conditions: string[] = [];
 

@@ -41,19 +41,19 @@ export abstract class BaseRepository {
   protected getEntityFileName(sequenceType: string, id: number | string): string {
     // Validate ID to prevent path traversal attacks
     const idStr = String(id);
-    
+
     // Check for path traversal patterns
-    if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') || 
+    if (idStr.includes('..') || idStr.includes('/') || idStr.includes('\\') ||
         idStr.includes('\0') || idStr.includes('%') || idStr === '.' ||
         path.isAbsolute(idStr)) {
       throw new Error(`Invalid ID format: ${idStr}`);
     }
-    
+
     // Additional validation: only allow alphanumeric, dash, underscore, and dot
     if (!/^[a-zA-Z0-9\-_.]+$/.test(idStr)) {
       throw new Error(`Invalid ID format: ${idStr}`);
     }
-    
+
     // Use sequence type directly as it's already properly formatted
     return `${sequenceType}-${idStr}.md`;
   }

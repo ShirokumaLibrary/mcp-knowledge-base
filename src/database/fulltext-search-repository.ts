@@ -50,7 +50,7 @@ export class FullTextSearchRepository {
     // Build type filter
     let typeFilter = '';
     // @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let params: (string | number)[] = [`"${escapedQuery}"`, limit, offset];
 
     if (options?.types && options.types.length > 0) {
@@ -118,7 +118,7 @@ export class FullTextSearchRepository {
     // Build type filter
     let typeFilter = '';
     // @ai-any-deliberate: SQLite params array - mixed types for query parameters
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let params: (string | number)[] = [`"${escapedQuery}"*`, limit];
 
     if (options?.types && options.types.length > 0) {
