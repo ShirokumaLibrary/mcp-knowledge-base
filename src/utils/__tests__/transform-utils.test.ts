@@ -303,3 +303,266 @@ describe('FieldMappings', () => {
     expect(FieldMappings.session.startTime).toBe('start_time');
   });
 });
+
+describe('MarkdownTransformers - Additional Coverage', () => {
+  describe('formatPlan', () => {
+    it('should format plan with all fields', () => {
+      const plan: Plan = {
+        id: 1,
+        title: 'Project Plan',
+        content: 'Plan details',
+        priority: 'high',
+        status: 'In Progress',
+        start_date: '2024-01-01',
+        end_date: '2024-12-31',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+        tags: ['project', 'roadmap'],
+        description: 'Annual project plan',
+        related_tasks: ['issues-1', 'issues-2'],
+        related_documents: ['docs-1']
+      };
+
+      const result = MarkdownTransformers.formatPlan(plan);
+      
+      expect(result).toContain('# Project Plan');
+      expect(result).toContain('**Priority:** high');
+      expect(result).toContain('**Status:** In Progress');
+      expect(result).toContain('**Start:** 2024-01-01');
+      expect(result).toContain('**End:** 2024-12-31');
+      expect(result).toContain('## Description');
+      expect(result).toContain('Annual project plan');
+      expect(result).toContain('## Related Tasks');
+      expect(result).toContain('- issues-1');
+      expect(result).toContain('- issues-2');
+    });
+
+    it('should handle plan without optional fields', () => {
+      const plan: Plan = {
+        id: 1,
+        title: 'Simple Plan',
+        content: 'Content',
+        priority: 'medium',
+        start_date: null,
+        end_date: null,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z'
+      };
+
+      const result = MarkdownTransformers.formatPlan(plan);
+      
+      expect(result).toContain('**Status:** No status');
+      expect(result).toContain('**Start:** Not set');
+      expect(result).toContain('**End:** Not set');
+      expect(result).not.toContain('## Description');
+      expect(result).not.toContain('## Tags');
+    });
+  });
+
+  describe('formatDocument', () => {
+    it('should format document with all fields', () => {
+      const doc: Document = {
+        id: 1,
+        type: 'docs',
+        title: 'API Documentation',
+        content: 'Documentation content',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+        tags: ['api', 'reference'],
+        description: 'API reference guide',
+        related_tasks: ['issues-1'],
+        related_documents: ['docs-2', 'docs-3']
+      };
+
+      const result = MarkdownTransformers.formatDocument(doc);
+      
+      expect(result).toContain('# API Documentation');
+      expect(result).toContain('**Type:** docs');
+      expect(result).toContain('## Description');
+      expect(result).toContain('API reference guide');
+      expect(result).toContain('## Related Documents');
+      expect(result).toContain('- docs-2');
+      expect(result).toContain('- docs-3');
+    });
+  });
+
+
+  describe('formatSession with minimal fields', () => {
+    it('should format session with only start time', () => {
+      const session: Session = {
+        id: '2024-01-01-10.30.00.000',
+        title: 'Quick Session',
+        date: '2024-01-01',
+        startTime: '10:30:00',
+        content: 'Brief work',
+        createdAt: '2024-01-01T10:30:00Z'
+      };
+
+      const result = MarkdownTransformers.formatSession(session);
+      
+      expect(result).toContain('**Started:** 10:30:00');
+      expect(result).not.toContain('**Time:**');
+    });
+
+    it('should format session without content', () => {
+      const session: Session = {
+        id: '2024-01-01-10.30.00.000',
+        title: 'Empty Session',
+        date: '2024-01-01',
+        createdAt: '2024-01-01T10:30:00Z'
+      };
+
+      const result = MarkdownTransformers.formatSession(session);
+      
+      expect(result).not.toContain('## Details');
+    });
+  });
+});
+
+describe('DataConverters - Additional Coverage', () => {
+  describe('rowToEntity with missing fields', () => {
+    it('should handle missing fields in row', () => {
+      const row = { id: 1 };
+      const fieldMap = {
+        id: 'id',
+        name: 'name',
+        email: 'email'
+      };
+
+      const result = DataConverters.rowToEntity<any>(row, fieldMap);
+      
+      expect(result).toEqual({
+        id: 1,
+        name: undefined,
+        email: undefined
+      });
+    });
+  });
+
+  describe('entityToRow with null values', () => {
+    it('should preserve null values', () => {
+      const entity = {
+        id: 1,
+        name: null,
+        active: false
+      };
+
+      const fieldMap = {
+        id: 'id',
+        name: 'user_name',
+        active: 'is_active'
+      };
+
+      const result = DataConverters.entityToRow(entity, fieldMap);
+      
+      expect(result).toEqual({
+        id: 1,
+        user_name: null,
+        is_active: false
+      });
+    });
+  });
+
+  describe('parseJsonSafe edge cases', () => {
+    it('should handle invalid JSON strings', () => {
+      expect(DataConverters.parseJsonSafe('null', [])).toEqual(null);
+      expect(DataConverters.parseJsonSafe('undefined', {})).toEqual({});
+    });
+
+    it('should handle empty string', () => {
+      expect(DataConverters.parseJsonSafe('', { default: true })).toEqual({ default: true });
+    });
+  });
+
+  describe('csvToTags with spaces', () => {
+    it('should trim spaces from tags', () => {
+      const result = DataConverters.csvToTags(' tag1 , tag2 , tag3 ');
+      expect(result).toEqual(['tag1', 'tag2', 'tag3']);
+    });
+
+    it('should filter out empty tags', () => {
+      const result = DataConverters.csvToTags('tag1,,tag2,,,tag3,');
+      expect(result).toEqual(['tag1', 'tag2', 'tag3']);
+    });
+  });
+
+  describe('normalizePriority edge cases', () => {
+    it('should handle invalid input', () => {
+      expect(DataConverters.normalizePriority('')).toBe('medium');
+      expect(DataConverters.normalizePriority('invalid')).toBe('medium');
+    });
+  });
+
+  describe('createReference with string id', () => {
+    it('should handle string ids', () => {
+      const ref = DataConverters.createReference('docs', 'abc-123');
+      expect(ref).toBe('docs-abc-123');
+    });
+  });
+
+  describe('parseReference edge cases', () => {
+    it('should handle references with multiple hyphens', () => {
+      const parsed = DataConverters.parseReference('docs-abc-123-xyz');
+      expect(parsed).toEqual({ type: 'docs', id: 'abc-123-xyz' });
+    });
+
+    it('should handle empty string', () => {
+      expect(DataConverters.parseReference('')).toBeNull();
+    });
+  });
+});
+
+describe('ResponseFormatters - Additional Coverage', () => {
+  describe('error without optional fields', () => {
+    it('should format error with message only', () => {
+      const result = ResponseFormatters.error('Error occurred');
+      expect(result).toEqual({
+        success: false,
+        error: {
+          message: 'Error occurred'
+        }
+      });
+    });
+  });
+
+  describe('list with edge cases', () => {
+    it('should handle empty list', () => {
+      const result = ResponseFormatters.list([], 0, 1, 10);
+      expect(result).toEqual({
+        items: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          pages: 0
+        }
+      });
+    });
+
+    it('should calculate pages correctly', () => {
+      const result = ResponseFormatters.list([1, 2, 3], 25, 2, 10);
+      expect(result.pagination.pages).toBe(3);
+    });
+  });
+
+  describe('summary with nested objects', () => {
+    it('should preserve all non-content fields', () => {
+      const entity = {
+        id: 1,
+        title: 'Test',
+        content: 'Should be removed',
+        metadata: { key: 'value' },
+        nested: { deep: { value: true } }
+      };
+      
+      const result = ResponseFormatters.summary(entity);
+      expect(result).toEqual({
+        id: 1,
+        title: 'Test',
+        metadata: { key: 'value' },
+        nested: { deep: { value: true } }
+      });
+    });
+  });
+
+});

@@ -1,10 +1,20 @@
 // @ts-nocheck
 import { TagHandlers } from '../handlers/tag-handlers.js';
 import { FileIssueDatabase } from '../database.js';
-import { McpError } from '@modelcontextprotocol/sdk/types.js';
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 // Mock the database
 jest.mock('../database.js');
+
+// Mock logger to prevent errors
+jest.mock('../utils/logger.js', () => ({
+  createLogger: jest.fn(() => ({
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
+  }))
+}));
 
 describe('TagHandlers', () => {
   let handlers: TagHandlers;
@@ -367,6 +377,139 @@ describe('TagHandlers', () => {
       // Should filter out or handle invalid entries
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.data.filter(t => t.name !== null)).toHaveLength(2);
+    });
+  });
+
+  describe('handleSearchAllByTag', () => {
+    beforeEach(() => {
+      mockDb.searchAllByTag = jest.fn();
+    });
+
+    it('should search all content types by tag', async () => {
+      const mockResults = {
+        issues: [
+          { id: 1, title: 'Bug fix', tags: ['bug', 'api'] },
+          { id: 2, title: 'API error', tags: ['api', 'error'] }
+        ],
+        plans: [
+          { id: 1, title: 'API refactor', tags: ['api', 'refactoring'] }
+        ],
+        docs: [
+          { id: 1, title: 'API Documentation', tags: ['api', 'docs'] }
+        ],
+        knowledge: [],
+        sessions: [
+          { id: '2025-01-26-10.00.00.000', title: 'API debugging', tags: ['api', 'debug'] }
+        ]
+      };
+      
+      mockDb.searchAllByTag.mockResolvedValue(mockResults);
+
+      const result = await handlers.handleSearchAllByTag({ tag: 'api' });
+
+      expect(mockDb.searchAllByTag).toHaveBeenCalledWith('api');
+      const data = JSON.parse(result.content[0].text).data;
+      expect(data.issues).toHaveLength(2);
+      expect(data.plans).toHaveLength(1);
+      expect(data.docs).toHaveLength(1);
+      expect(data.knowledge).toHaveLength(0);
+      expect(data.sessions).toHaveLength(1);
+    });
+
+    it('should handle empty results', async () => {
+      const emptyResults = {
+        issues: [],
+        plans: [],
+        docs: [],
+        knowledge: [],
+        sessions: []
+      };
+      
+      mockDb.searchAllByTag.mockResolvedValue(emptyResults);
+
+      const result = await handlers.handleSearchAllByTag({ tag: 'nonexistent' });
+
+      const data = JSON.parse(result.content[0].text).data;
+      expect(data.issues).toHaveLength(0);
+      expect(data.plans).toHaveLength(0);
+      expect(data.docs).toHaveLength(0);
+      expect(data.knowledge).toHaveLength(0);
+      expect(data.sessions).toHaveLength(0);
+    });
+
+    it('should validate tag parameter', async () => {
+      // Missing tag
+      await expect(handlers.handleSearchAllByTag({})).rejects.toThrow();
+      
+      // Empty tag
+      await expect(handlers.handleSearchAllByTag({ tag: '' })).rejects.toThrow();
+    });
+
+    it('should handle database errors', async () => {
+      mockDb.searchAllByTag.mockRejectedValue(new Error('Database error'));
+
+      await expect(handlers.handleSearchAllByTag({ tag: 'api' }))
+        .rejects.toThrow(McpError);
+    });
+
+    it('should propagate McpError without wrapping', async () => {
+      const originalError = new McpError(ErrorCode.InvalidRequest, 'Tag not found');
+      mockDb.searchAllByTag.mockRejectedValue(originalError);
+
+      await expect(handlers.handleSearchAllByTag({ tag: 'test' })).rejects.toBe(originalError);
+    });
+
+    it('should handle special characters in tag names', async () => {
+      const mockResults = {
+        issues: [{ id: 1, title: 'Special tag test', tags: ['feature/new'] }],
+        plans: [],
+        docs: [],
+        knowledge: [],
+        sessions: []
+      };
+      
+      mockDb.searchAllByTag.mockResolvedValue(mockResults);
+
+      const result = await handlers.handleSearchAllByTag({ tag: 'feature/new' });
+
+      expect(mockDb.searchAllByTag).toHaveBeenCalledWith('feature/new');
+      const data = JSON.parse(result.content[0].text).data;
+      expect(data.issues).toHaveLength(1);
+    });
+  });
+
+  describe('Error handling patterns', () => {
+    it('should preserve McpError type in all methods', async () => {
+      const originalError = new McpError(ErrorCode.InvalidRequest, 'Custom error');
+      
+      // Make sure searchAllByTag is defined
+      mockDb.searchAllByTag = jest.fn();
+      
+      // Test each method
+      mockDb.getTags.mockRejectedValue(originalError);
+      await expect(handlers.handleGetTags()).rejects.toBe(originalError);
+
+      mockDb.createTag.mockRejectedValue(originalError);
+      await expect(handlers.handleCreateTag({ name: 'test' })).rejects.toBe(originalError);
+
+      mockDb.deleteTag.mockRejectedValue(originalError);
+      await expect(handlers.handleDeleteTag({ name: 'test' })).rejects.toBe(originalError);
+
+      mockDb.searchTags.mockRejectedValue(originalError);
+      await expect(handlers.handleSearchTags({ pattern: 'test' })).rejects.toBe(originalError);
+
+      mockDb.searchAllByTag.mockRejectedValue(originalError);
+      await expect(handlers.handleSearchAllByTag({ tag: 'test' })).rejects.toBe(originalError);
+    });
+
+    it('should convert general errors to McpError', async () => {
+      const generalError = new Error('General error');
+
+      mockDb.getTags.mockRejectedValue(generalError);
+      await expect(handlers.handleGetTags()).rejects.toThrow(McpError);
+
+      mockDb.createTag.mockRejectedValue(generalError);
+      await expect(handlers.handleCreateTag({ name: 'test' })).rejects.toThrow(McpError);
     });
   });
 });

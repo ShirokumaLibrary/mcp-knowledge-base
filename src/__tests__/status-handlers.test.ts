@@ -1,9 +1,20 @@
 // @ts-nocheck
 import { StatusHandlers } from '../handlers/status-handlers.js';
 import { FileIssueDatabase } from '../database.js';
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 // Mock the database
 jest.mock('../database.js');
+
+// Mock logger to prevent errors in test
+jest.mock('../utils/logger.js', () => ({
+  createLogger: jest.fn(() => ({
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
+  }))
+}));
 
 describe('StatusHandlers', () => {
   let handlers: StatusHandlers;
@@ -12,7 +23,10 @@ describe('StatusHandlers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDb = {
-      getAllStatuses: jest.fn()
+      getAllStatuses: jest.fn(),
+      createStatus: jest.fn(),
+      updateStatus: jest.fn(),
+      deleteStatus: jest.fn()
     } as any;
     handlers = new StatusHandlers(mockDb);
   });
@@ -165,8 +179,8 @@ describe('StatusHandlers', () => {
         new Error('Database error')
       );
 
-      await expect(handlers.handleGetStatuses({}))
-        .rejects.toThrow('Database error');
+      await expect(handlers.handleGetStatuses())
+        .rejects.toThrow(McpError);
     });
 
     it('should handle empty status list', async () => {
@@ -298,6 +312,87 @@ describe('StatusHandlers', () => {
       expect(text).toContain('In Progress (Dev)');
       expect(text).toContain('Review - QA');
       expect(text).toContain('Done!');
+    });
+  });
+
+  describe('handleCreateStatus', () => {
+    it('should create a new status with valid name', async () => {
+      const newStatus = { id: 6, name: 'Pending Review', is_closed: false, display_order: 6 };
+      mockDb.createStatus.mockResolvedValue(newStatus);
+
+      const result = await handlers.handleCreateStatus({ name: 'Pending Review' });
+
+      expect(mockDb.createStatus).toHaveBeenCalledWith('Pending Review');
+      expect(result.content[0].text).toContain('Status created:');
+      expect(result.content[0].text).toContain('Pending Review');
+    });
+
+    it('should validate required parameters', async () => {
+      // Test with empty name - validation should fail before DB call
+      await expect(handlers.handleCreateStatus({ name: '' })).rejects.toThrow();
+      expect(mockDb.createStatus).not.toHaveBeenCalled();
+    });
+
+    it('should handle duplicate status names', async () => {
+      mockDb.createStatus.mockRejectedValue(new Error('UNIQUE constraint failed'));
+
+      await expect(handlers.handleCreateStatus({ name: 'Open' }))
+        .rejects.toThrow(McpError);
+    });
+  });
+
+  describe('handleUpdateStatus', () => {
+    it('should update an existing status', async () => {
+      mockDb.updateStatus.mockResolvedValue(true);
+
+      const result = await handlers.handleUpdateStatus({ id: 1, name: 'Updated Status' });
+
+      expect(mockDb.updateStatus).toHaveBeenCalledWith(1, 'Updated Status');
+      expect(result.content[0].text).toBe('Status ID 1 updated');
+    });
+
+    it('should handle non-existent status', async () => {
+      mockDb.updateStatus.mockResolvedValue(false);
+
+      await expect(handlers.handleUpdateStatus({ id: 999, name: 'New Name' }))
+        .rejects.toThrow(McpError);
+    });
+
+    it('should validate required parameters', async () => {
+      // Test with missing name
+      await expect(handlers.handleUpdateStatus({ id: 1 })).rejects.toThrow();
+      expect(mockDb.updateStatus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleDeleteStatus', () => {
+    it('should delete an existing status', async () => {
+      mockDb.deleteStatus.mockResolvedValue(true);
+
+      const result = await handlers.handleDeleteStatus({ id: 5 });
+
+      expect(mockDb.deleteStatus).toHaveBeenCalledWith(5);
+      expect(result.content[0].text).toBe('Status ID 5 deleted');
+    });
+
+    it('should handle non-existent status', async () => {
+      mockDb.deleteStatus.mockResolvedValue(false);
+
+      await expect(handlers.handleDeleteStatus({ id: 999 }))
+        .rejects.toThrow(McpError);
+    });
+
+    it('should validate required parameters', async () => {
+      // Test with invalid ID
+      await expect(handlers.handleDeleteStatus({ id: 'abc' })).rejects.toThrow();
+      expect(mockDb.deleteStatus).not.toHaveBeenCalled();
+    });
+
+    it('should handle foreign key constraints', async () => {
+      mockDb.deleteStatus.mockRejectedValue(new Error('FOREIGN KEY constraint failed'));
+
+      await expect(handlers.handleDeleteStatus({ id: 1 }))
+        .rejects.toThrow(McpError);
     });
   });
 });
