@@ -151,6 +151,10 @@ async function rebuildDatabase() {
     const db = fullDb.getDatabase();
     const allSequences = await db.allAsync('SELECT type FROM sequences', []);
     for (const { type } of allSequences) {
+        if (type === 'sessions' || type === 'dailies') {
+            console.log(`  ⏭️  Skipped sequence '${type}' (uses timestamp/date IDs)`);
+            continue;
+        }
         const result = await db.getAsync('SELECT MAX(CAST(id AS INTEGER)) as max_id FROM items WHERE type = ?', [type]);
         const maxId = result?.max_id || 0;
         await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [maxId, type]);
