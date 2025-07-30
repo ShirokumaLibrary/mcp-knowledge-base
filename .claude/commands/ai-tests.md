@@ -27,20 +27,20 @@ Execute systematic validation tests for all MCP server functions through the MCP
 ### Test Case Categories
 
 #### Core Functionality Tests
-1. **Initial State Verification** - @docs/commands/ai-tests/01-initial-state.md
-2. **Data Creation Tests** - @docs/commands/ai-tests/02-data-creation.md
-3. **Data Retrieval & Update Tests** - @docs/commands/ai-tests/03-data-operations.md
-4. **Tag Functionality Tests** - @docs/commands/ai-tests/04-tag-tests.md
-5. **Status Management Tests** - @docs/commands/ai-tests/05-status-tests.md
-6. **Session Management Tests** - @docs/commands/ai-tests/06-session-tests.md
-7. **Daily Summary Tests** - @docs/commands/ai-tests/07-summary-tests.md
+1. **Initial State Verification** - @.claude/commands/ai-tests/01-initial-state.md
+2. **Data Creation Tests** - @.claude/commands/ai-tests/02-data-creation.md
+3. **Data Retrieval & Update Tests** - @.claude/commands/ai-tests/03-data-operations.md
+4. **Tag Functionality Tests** - @.claude/commands/ai-tests/04-tag-tests.md
+5. **Status Management Tests** - @.claude/commands/ai-tests/05-status-tests.md
+6. **Session Management Tests** - @.claude/commands/ai-tests/06-session-tests.md
+7. **Daily Summary Tests** - @.claude/commands/ai-tests/07-summary-tests.md
 
 #### Advanced Tests
-8. **Comprehensive Verification** - @docs/commands/ai-tests/08-verification.md
-9. **Data Deletion Tests** - @docs/commands/ai-tests/09-deletion-tests.md
-10. **Edge Cases and Additional Tests** - @docs/commands/ai-tests/10-edge-cases.md
-11. **Type Management Tests** - @docs/commands/ai-tests/11-type-management.md
-12. **Database Rebuild Tests** - @docs/commands/ai-tests/12-rebuild-tests.md (MUST be run last)
+8. **Comprehensive Verification** - @.claude/commands/ai-tests/08-verification.md
+9. **Data Deletion Tests** - @.claude/commands/ai-tests/09-deletion-tests.md
+10. **Edge Cases and Additional Tests** - @.claude/commands/ai-tests/10-edge-cases.md
+11. **Type Management Tests** - @.claude/commands/ai-tests/11-type-management.md
+12. **Database Rebuild Tests** - @.claude/commands/ai-tests/12-rebuild-tests.md (MUST be run last)
 
 ### Success Criteria
 - All CRUD operations work correctly without errors

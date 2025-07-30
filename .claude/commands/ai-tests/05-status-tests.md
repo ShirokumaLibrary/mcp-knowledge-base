@@ -1,0 +1,91 @@
+# Status Management Tests
+
+Test status filtering and usage.
+
+## Test 5.1: Status List Verification
+
+### Get All Statuses
+```
+Tool: get_statuses
+Expected: Markdown table with default statuses and is_closed flags
+```
+
+## Test 5.2: Status Filtering
+
+### Get Items with Default Filter (excludes closed)
+```
+Tool: get_items
+Parameters: {type: "issues"}
+Expected: Only issues with non-closed statuses
+```
+
+### Get All Items Including Closed
+```
+Tool: get_items
+Parameters: {type: "issues", includeClosedStatuses: true}
+Expected: All issues regardless of status
+```
+
+### Filter by Specific Status
+```
+Tool: get_items
+Parameters: {type: "issues", status: "Open"}
+Expected: Only issues with "Open" status
+```
+
+### Filter by Multiple Statuses
+```
+Tool: get_items
+Parameters: {
+  type: "issues",
+  statuses: ["Open", "In Progress"]
+}
+Expected: Issues with either status
+```
+
+## Test 5.3: Status Updates
+
+### Change to Closed Status
+```
+Tool: update_item
+Parameters: {
+  type: "issues",
+  id: 3,
+  status: "Closed"
+}
+Expected: Success, issue marked as closed
+```
+
+### Verify Closed Item Filtering
+```
+Tool: get_items
+Parameters: {type: "issues"}
+Expected: Issue 3 not included (closed)
+
+Tool: get_items
+Parameters: {type: "issues", includeClosedStatuses: true}
+Expected: Issue 3 included
+```
+
+## Test 5.4: Status Management Operations
+
+### Create Custom Status (Should Fail)
+```
+Tool: create_status
+Parameters: {name: "Custom Status"}
+Expected: Error "Tool 'create_status' not found" or similar
+```
+
+### Update Status (Should Fail)
+```
+Tool: update_status
+Parameters: {id: 1, name: "Modified"}
+Expected: Error "Tool 'update_status' not found" or similar
+```
+
+### Delete Status (Should Fail)
+```
+Tool: delete_status
+Parameters: {id: 1}
+Expected: Error "Tool 'delete_status' not found" or similar
+```

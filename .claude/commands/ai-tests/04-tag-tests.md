@@ -1,0 +1,75 @@
+# Tag Functionality Tests
+
+Test tag management and search capabilities.
+
+## Test 4.1: Tag Auto-Registration
+
+### Verify Tags Were Auto-Created
+```
+Tool: get_tags
+Expected: Array containing all unique tags from created items:
+- "bug", "authentication", "urgent", "feature", "ui", "enhancement",
+- "memory", "performance", "documentation", "api", "roadmap",
+- "q1-2025", "planning", "guide", "docker", "best-practices",
+- "devops", "bugfix", "daily", "progress"
+```
+
+## Test 4.2: Tag Search
+
+### Search Items by Tag
+```
+Tool: search_items_by_tag
+Parameters: {tag: "bug"}
+Expected: Items with "bug" tag (issues 1 and 4)
+```
+
+### Search by Non-existent Tag
+```
+Tool: search_items_by_tag
+Parameters: {tag: "nonexistent"}
+Expected: Empty result
+```
+
+### Search with Type Filter
+```
+Tool: search_items_by_tag
+Parameters: {tag: "api", types: ["docs", "issues"]}
+Expected: Only docs and issues with "api" tag
+```
+
+## Test 4.3: Tag Management
+
+### Create New Tag
+```
+Tool: create_tag
+Parameters: {name: "security"}
+Expected: Success message
+```
+
+### Create Duplicate Tag
+```
+Tool: create_tag
+Parameters: {name: "bug"}
+Expected: Error "Tag 'bug' already exists"
+```
+
+### Search Tags by Pattern
+```
+Tool: search_tags
+Parameters: {pattern: "auth"}
+Expected: Tags containing "auth" (authentication)
+```
+
+### Delete Tag
+```
+Tool: delete_tag
+Parameters: {name: "urgent"}
+Expected: Success message
+```
+
+### Verify Tag Removed from Items
+```
+Tool: get_item_detail
+Parameters: {type: "issues", id: 1}
+Expected: Issue without "urgent" tag
+```
