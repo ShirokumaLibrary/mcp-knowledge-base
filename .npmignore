@@ -1,0 +1,71 @@
+# Source files (only publish dist)
+src/
+tests/
+
+# Configuration files
+.eslintrc.*
+.prettierrc.*
+tsconfig*.json
+jest.config.*
+
+# Development files
+*.test.js
+*.spec.js
+__tests__/
+coverage/
+.nyc_output/
+
+# Documentation development files
+docs/internal/
+docs/tmp/
+docs/dev/
+
+# Git and CI
+.git/
+.github/
+.gitignore
+
+# IDE
+.vscode/
+.cursor/
+.idea/
+.claude/
+*.swp
+*.swo
+CLAUDE.md
+
+# Build artifacts
+*.tsbuildinfo
+*.map
+
+# Local data
+.shirokuma/
+database/
+*.db
+*.backup
+
+# Development scripts
+scripts/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+__test_data__*/
+
+# Keep these files
+# dist/
+# package.json
+# package-lock.json
+# README.md
+# LICENSE
+# CHANGELOG.md
+# docs/
