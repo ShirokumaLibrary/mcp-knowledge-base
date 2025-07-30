@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-07-30
+
+### Added
+- **Application State Management**: New `get_current_state` and `update_current_state` tools for persisting application-wide state across sessions
+- **Type Change Functionality**: New `change_item_type` tool to change an item's type within the same base_type category
+  - Automatically creates new item with new ID and updates all references
+  - Supports both task-based and document-based type changes
+- **Type Description Updates**: New `update_type` tool to modify type descriptions
+
+### Changed
+- Documentation reorganized to separate user-facing and developer documentation
+- Updated .npmignore to properly include user documentation while excluding developer docs
+- Enhanced API documentation with new features and examples
+
+### Fixed
+- Fixed ItemRepository incompatibility issue between different implementations using dynamic imports
+- Fixed reference update bug when changing item types - now correctly updates all related items
+
 ## [0.5.3] - 2025-07-30
 
 ### Fixed

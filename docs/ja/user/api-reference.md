@@ -286,11 +286,43 @@ interface DocumentEntity extends BaseEntity {
 - `name` (string, 必須): タイプ名（小文字、アンダースコア）
 - `base_type` (string): ベースタイプ（tasks/documents）
 
+#### update_type
+タイプの説明を更新します。
+
+**パラメータ:**
+- `name` (string, 必須): 更新するタイプの名前
+- `description` (string, 必須): タイプの新しい説明
+
 #### delete_type
 カスタムコンテンツタイプを削除します。
 
 **パラメータ:**
 - `name` (string, 必須): タイプ名
+
+#### change_item_type
+同じベースタイプを持つ別のタイプにアイテムタイプを変更します。
+
+**パラメータ:**
+- `from_type` (string, 必須): アイテムの現在のタイプ
+- `from_id` (number, 必須): アイテムの現在のID
+- `to_type` (string, 必須): 新しいタイプ（同じbase_typeを持つ必要があります）
+
+**注意:** 新しいアイテムが新しいIDで作成され、すべての参照が更新されます。
+
+### アプリケーション状態
+
+#### get_current_state
+現在のアプリケーション状態を取得します。
+
+**戻り値:** 現在の状態のコンテンツ（設定されていない場合は空）
+
+#### update_current_state
+現在のアプリケーション状態を更新します。
+
+**パラメータ:**
+- `content` (string, 必須): 新しい状態のコンテンツ
+
+**使用例:** セッション間でアプリケーション全体の状態を永続化するために使用されます。
 
 ## エラーハンドリング
 

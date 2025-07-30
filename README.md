@@ -221,34 +221,15 @@ See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing document
 
 ## Documentation
 
-Full documentation is available on GitHub:
-
-📚 **[View Documentation on GitHub](https://github.com/ShirokumaLibrary/mcp-knowledge-base/tree/main/docs)**
-
-### English Documentation
-- [API Reference](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/user/api-reference.md) - Complete API documentation
-- [Examples](docs/examples.md) - Usage examples and code snippets
-- [Architecture](docs/architecture.md) - System design and implementation details
-- [Development](docs/development.md) - Development setup and guidelines
-- [Contributing](docs/CONTRIBUTING.md) - Contribution guidelines
-- [Changelog](CHANGELOG.md) - Version history and changes
-- [Upgrade Guide](docs/UPGRADE.md) - Migration instructions
-- [Security Guide](docs/security-guide.md) - Security best practices
-- [Performance Guide](docs/performance-optimization.md) - Performance tuning
-- [Testing Guide](docs/testing-guide.md) - Testing strategies
-- [E2E Testing](docs/e2e-testing-guide.md) - End-to-end testing guide
+### User Documentation
+- [API Reference](docs/user/api-reference.md) - Complete API documentation for MCP tools
+- [User Guide](docs/user/usage-guide.md) - Getting started and basic usage
+- [Configuration Guide](docs/user/configuration.md) - Environment variables and settings
 
 ### 日本語ドキュメント
-- [日本語版 README](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/ja/README.md) - プロジェクト概要
-- [APIリファレンス](docs.ja/API.md) - 完全なAPIドキュメント
-- [アーキテクチャ](docs.ja/architecture.md) - システム設計と実装の詳細
-- [開発ガイド](docs.ja/development.md) - 開発セットアップとガイドライン
-- [貢献ガイド](docs.ja/CONTRIBUTING.md) - 貢献のためのガイドライン
-- [アップグレードガイド](docs.ja/UPGRADE.md) - マイグレーション手順
-- [セキュリティガイド](docs.ja/security-guide.md) - セキュリティのベストプラクティス
-- [パフォーマンスガイド](docs.ja/performance-optimization.md) - パフォーマンスチューニング
-- [テストガイド](docs.ja/testing-guide.md) - テスト戦略
-- [E2Eテストガイド](docs.ja/e2e-testing-guide.md) - エンドツーエンドテストガイド
+- [日本語版 README](docs/ja/README.md) - プロジェクト概要
+- [ユーザーガイド](docs/ja/user-guide.md) - 基本的な使い方
+- [設定ガイド](docs/ja/configuration.md) - 環境変数と設定
 
 
 

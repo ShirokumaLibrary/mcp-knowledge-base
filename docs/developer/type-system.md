@@ -288,23 +288,62 @@ async function getValidTypes(): Promise<string[]> {
 
 ### 型の変更
 
+#### change_item_type API
+
+新しい `change_item_type` APIを使用して、同じbase_type内でアイテムの型を変更できます：
+
 ```typescript
-// 既存のアイテムの型を変更
-async function migrateItemType(
-  oldType: string, 
-  newType: string,
-  itemId: string
-): Promise<void> {
-  // 1. 新しいファイルパスに移動
-  const oldPath = getFilePath(oldType, itemId);
-  const newPath = getFilePath(newType, itemId);
-  await fs.rename(oldPath, newPath);
+// APIを使用した型変更
+const result = await mcp.change_item_type({
+  from_type: "docs",
+  from_id: 123,
+  to_type: "knowledge"
+});
+
+console.log(`New ID: ${result.newId}`);
+console.log(`Updated references: ${result.relatedUpdates}`);
+```
+
+#### 内部実装
+
+```typescript
+// 既存のアイテムの型を変更（新しいIDで作成）
+async function changeItemType(
+  fromType: string, 
+  fromId: number,
+  toType: string
+): Promise<{ success: boolean; newId?: number; error?: string; relatedUpdates?: number }> {
+  // 1. base_typeの確認
+  if (getBaseType(fromType) !== getBaseType(toType)) {
+    return { success: false, error: 'Cannot change between different base types' };
+  }
   
-  // 2. データベースを更新
-  await db.run(
-    'UPDATE items SET type = ? WHERE type = ? AND id = ?',
-    [newType, oldType, itemId]
+  // 2. 元のアイテムを取得
+  const originalItem = await this.getById(fromType, fromId);
+  if (!originalItem) {
+    return { success: false, error: 'Original item not found' };
+  }
+  
+  // 3. 新しいアイテムを作成
+  const newItem = await this.create({
+    ...originalItem,
+    type: toType
+  });
+  
+  // 4. すべての参照を更新
+  const relatedUpdates = await this.updateReferences(
+    `${fromType}-${fromId}`,
+    `${toType}-${newItem.id}`
   );
+  
+  // 5. 元のアイテムを削除
+  await this.delete(fromType, fromId);
+  
+  return { 
+    success: true, 
+    newId: newItem.id,
+    relatedUpdates
+  };
 }
 ```
 

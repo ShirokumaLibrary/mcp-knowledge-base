@@ -65,7 +65,15 @@
 - `create_type`: Create new type
   - Required: `name` (string) - Type name (lowercase letters, numbers, underscores)
   - Optional: `base_type` (string) - Base type: 'tasks' or 'documents' (default: 'documents')
+- `update_type`: Update type description
+  - Required: `name` (string) - Name of the type to update
+  - Required: `description` (string) - New description for the type
 - `delete_type`: Delete type (only if no items exist)
+- `change_item_type`: Change item type to another type with same base_type
+  - Required: `from_type` (string) - Current type of the item
+  - Required: `from_id` (number) - Current ID of the item
+  - Required: `to_type` (string) - New type (must have same base_type)
+  - Creates new item with new ID and updates all references
 
 ## API Parameters
 
@@ -135,6 +143,13 @@ get_items(type: 'dailies', start_date: '2025-07-22', end_date: '2025-07-28')
 - `tag` - Tag name to search for
 - `pattern` - Search pattern for tags
 - `types` - Array of item types to search (optional, accepts any valid type)
+
+### Application State
+- `get_current_state`: Get the current application state
+  - Returns the current state content (or empty if not set)
+- `update_current_state`: Update the current application state
+  - Required: `content` (string) - New state content
+  - Used for persisting application-wide state across sessions
 
 ## File Naming Conventions
 
