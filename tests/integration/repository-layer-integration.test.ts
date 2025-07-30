@@ -286,7 +286,7 @@ describe('Repository Layer Integration Tests', () => {
       expect(updated?.status).toBe('In Review'); // Original name is preserved
     });
 
-    test('should handle tag deletion with items', async () => {
+    test('should prevent tag deletion when used by items', async () => {
       // Create tag and item
       const tagName = await tagRepo.createTag('deletion-test');
       const item = await itemRepo.createItem({
@@ -296,14 +296,32 @@ describe('Repository Layer Integration Tests', () => {
         tags: ['deletion-test']
       });
       
-      // Delete tag (deleteTag takes tag name as parameter, not ID)
-      await tagRepo.deleteTag(tagName);
+      // Attempt to delete tag should fail
+      await expect(tagRepo.deleteTag(tagName)).rejects.toThrow(
+        'Cannot delete tag "deletion-test" because it is used by 1 item(s)'
+      );
       
-      // Item should still exist and WILL still have the tag
-      // Current implementation doesn't remove tags from items when tag is deleted
+      // Item should still exist with the tag
       const updated = await itemRepo.getItem('docs', item.id);
       expect(updated).toBeDefined();
-      expect(updated?.tags).toContain('deletion-test'); // Tag remains on item
+      expect(updated?.tags).toContain('deletion-test');
+      
+      // Tag should still exist
+      const tags = await tagRepo.getAllTags();
+      expect(tags.some(t => t.name === 'deletion-test')).toBe(true);
+    });
+
+    test('should allow tag deletion when not used', async () => {
+      // Create tag without using it
+      const tagName = await tagRepo.createTag('unused-tag');
+      
+      // Delete tag should succeed
+      const deleted = await tagRepo.deleteTag(tagName);
+      expect(deleted).toBe(true);
+      
+      // Tag should not exist
+      const tags = await tagRepo.getAllTags();
+      expect(tags.some(t => t.name === 'unused-tag')).toBe(false);
     });
 
     test('should maintain referential integrity', async () => {
