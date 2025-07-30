@@ -297,6 +297,12 @@ export class ItemRepository {
 
     // Clean and validate title
     const cleanedTitle = cleanString(params.title);
+    if (cleanedTitle.length === 0) {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        'Title cannot be empty'
+      );
+    }
     if (cleanedTitle.length > 500) {
       throw new McpError(
         ErrorCode.InvalidRequest,
