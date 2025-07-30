@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.6.1] - 2025-07-30
+
+### Added
+- CLAUDE.md.example file providing guidance template for AI assistants in English
+- CLAUDE.md.ja.example file providing guidance template for AI assistants in Japanese
+
+### Changed
+- Consolidated StatusRepositoryV2 into main StatusRepository implementation
+- Updated .gitignore to better handle database directory structures
+
+### Removed
+- Redundant v2 repository files (status-repository-v2.ts, tag-repository-v2.ts)
+- Unused v2 handler files (status-handlers-v2.ts, tag-handlers-v2.ts)
+- Obsolete test files (item-repository.test.ts, change-type-handlers.test.ts)
+
+### Documentation
+- Enhanced test case 1.13 with proper test ID and prerequisites
+- Added comprehensive CLAUDE.md examples for project-specific AI guidance
+
 ## [0.6.0] - 2025-07-30
 
 ### Added
