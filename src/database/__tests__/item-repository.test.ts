@@ -178,7 +178,7 @@ describe('ItemRepository', () => {
 
       mockDb.getAsync.mockResolvedValueOnce(undefined); // Type not found
 
-      await expect(itemRepo.createItem(createParams)).rejects.toThrow('Unknown type: invalid_type');
+      await expect(itemRepo.createItem(createParams)).rejects.toThrow("Unknown type: 'invalid_type'. Use the 'get_types' tool");
     });
   });
 

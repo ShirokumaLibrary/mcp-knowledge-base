@@ -114,7 +114,7 @@ export class TagHandlers {
       const success = await this.db.deleteTag(validatedArgs.name);  // @ai-bug: Uses name not ID
 
       if (!success) {
-        throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+        throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found. Use 'get_tags' to see all available tags.`);
       }
 
       return {

@@ -72,7 +72,7 @@ export const toolDefinitions = [
   },
   {
     name: 'create_item',
-    description: 'Create new item. For sessions: supports datetime for past data migration. For dailies: use date parameter.',
+    description: 'Create new item. Each type has different purposes and requirements. For issues/plans: task management with status/priority. For docs/knowledge: documentation and knowledge base. For sessions: individual work session records (datetime optional). For dailies: daily summaries (date required, one per day).',
     // @ai-flow 1. Validate type-specific fields -> 2. Create file -> 3. Sync to DB
     // @ai-critical Different types have different required fields
     // @ai-validation Content required for document types, dates optional for task types
@@ -84,7 +84,7 @@ export const toolDefinitions = [
       properties: {
         type: {
           type: 'string',
-          description: 'Type of item to create (use get_types to see available types)'
+          description: 'Type of item to create. Common types: issues (bug/task tracking), plans (project planning), docs (technical docs), knowledge (how-to guides), sessions (work session logs), dailies (daily summaries). Use get_types for full list with descriptions.'
         },
         title: {
           type: 'string',
@@ -96,16 +96,16 @@ export const toolDefinitions = [
         },
         content: {
           type: 'string',
-          description: 'Item content (required for document types)'
+          description: 'Item content. REQUIRED for document types (docs, knowledge, dailies). OPTIONAL for task types (issues, plans) and sessions. For dailies, should contain the daily summary.'
         },
         priority: {
           type: 'string',
           enum: ['high', 'medium', 'low'],
-          description: 'Priority (for tasks types)'
+          description: 'Priority level. REQUIRED for task types (issues, plans). OPTIONAL for document types.'
         },
         status: {
           type: 'string',
-          description: 'Status name (for tasks types)'
+          description: 'Status name. REQUIRED for task types (issues, plans). Common values: Open, In Progress, Closed. Use get_statuses for full list.'
         },
         tags: {
           type: 'array',
@@ -114,29 +114,29 @@ export const toolDefinitions = [
         },
         start_date: {
           type: 'string',
-          description: 'Start date in YYYY-MM-DD format (for tasks types)'
+          description: 'Start date in YYYY-MM-DD format. OPTIONAL for task types (issues, plans). Useful for project planning and tracking.'
         },
         end_date: {
           type: 'string',
-          description: 'End date in YYYY-MM-DD format (for tasks types)'
+          description: 'End date in YYYY-MM-DD format. OPTIONAL for task types (issues, plans). Useful for deadlines and milestones.'
         },
         related_tasks: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
+          description: 'Related task references. OPTIONAL for task types (issues, plans). Format: ["issues-1", "plans-2"]. Links to related issues or plans.'
         },
         related_documents: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+          description: 'Related document references. OPTIONAL for all types. Format: ["docs-1", "knowledge-2"]. Links to documentation or knowledge articles.'
         },
         datetime: {
           type: 'string',
-          description: 'ISO 8601 datetime (for sessions, optional for past data migration)'
+          description: 'ISO 8601 datetime (e.g., 2025-07-30T10:00:00). OPTIONAL for sessions. If not provided, current time is used. Useful for importing past data.'
         },
         date: {
           type: 'string',
-          description: 'Date in YYYY-MM-DD format (for dailies)'
+          description: 'Date in YYYY-MM-DD format. REQUIRED for dailies type. Each date can only have one daily summary. Example: "2025-07-30"'
         },
         id: {
           type: 'string',
@@ -144,7 +144,7 @@ export const toolDefinitions = [
         },
         category: {
           type: 'string',
-          description: 'Category (for sessions, optional)'
+          description: 'Category for grouping sessions. OPTIONAL for sessions type. Examples: "development", "meeting", "research", "debugging"'
         }
       },
       required: ['type', 'title']
@@ -608,13 +608,13 @@ export const toolDefinitions = [
   },
   {
     name: 'get_types',
-    description: 'Get all available content types grouped by base_type (tasks, documents)',
+    description: 'Get all available content types with their descriptions and purposes. Returns types grouped by base_type: tasks (for project management with status/priority), documents (for documentation and knowledge base). Special types like sessions (work logs) and dailies (daily summaries) are also included.',
     inputSchema: {
       type: 'object',
       properties: {
         include_definitions: {
           type: 'boolean',
-          description: 'Include full type definitions (default: false)'
+          description: 'Include full type definitions with supported fields in JSON format (default: false)'
         }
       }
     }

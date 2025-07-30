@@ -275,7 +275,7 @@ export class ItemRepository {
         }
         const validateRelatedArray = (arr, fieldName) => {
             if (arr && arr.some(item => item === '')) {
-                throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}`);
+                throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`);
             }
         };
         validateRelatedArray(params.related_tasks, 'related_tasks');
@@ -374,7 +374,7 @@ export class ItemRepository {
         validateDate(params.end_date || undefined, 'end_date');
         const validateRelatedArray = (arr, fieldName) => {
             if (arr && arr.some(item => item === '')) {
-                throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}`);
+                throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`);
             }
         };
         validateRelatedArray(params.related_tasks, 'related_tasks');

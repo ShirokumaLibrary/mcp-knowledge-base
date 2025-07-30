@@ -54,7 +54,7 @@ export class TagHandlers {
             const validatedArgs = DeleteTagSchema.parse(args);
             const success = await this.db.deleteTag(validatedArgs.name);
             if (!success) {
-                throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found`);
+                throw new McpError(ErrorCode.InvalidRequest, `Tag "${validatedArgs.name}" not found. Use 'get_tags' to see all available tags.`);
             }
             return {
                 content: [
