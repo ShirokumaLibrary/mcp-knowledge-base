@@ -161,6 +161,16 @@ export class TagRepository extends BaseRepository {
    * @ai-why Tags use name as primary key, not numeric ID
    */
   async deleteTag(id: string): Promise<boolean> {
+    // Check if tag is in use
+    const tagUsageCount = await this.db.getAsync(
+      'SELECT COUNT(*) as count FROM item_tags WHERE tag_id = (SELECT id FROM tags WHERE name = ?)',
+      [id]  // @ai-logic: 'id' parameter is actually tag name
+    ) as { count: number };
+
+    if (tagUsageCount.count > 0) {
+      throw new Error(`Cannot delete tag "${id}" because it is used by ${tagUsageCount.count} item(s)`);
+    }
+
     const result = await this.db.runAsync(
       'DELETE FROM tags WHERE name = ?',
       [id]  // @ai-logic: 'id' parameter is actually tag name
