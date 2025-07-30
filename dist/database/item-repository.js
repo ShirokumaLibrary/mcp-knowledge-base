@@ -532,18 +532,10 @@ export class ItemRepository extends BaseRepository {
                 const item = await this.getById(String(row.type), String(row.id));
                 if (item) {
                     const updatedRelated = item.related.map((ref) => ref === oldReference ? newReference : ref);
-                    const tasksTypes = ['issues', 'plans', 'bugs'];
                     await this.update(String(row.type), String(row.id), {
                         type: String(row.type),
                         id: String(row.id),
-                        related_tasks: updatedRelated.filter((r) => {
-                            const [refType] = r.split('-');
-                            return tasksTypes.includes(refType);
-                        }),
-                        related_documents: updatedRelated.filter((r) => {
-                            const [refType] = r.split('-');
-                            return !tasksTypes.includes(refType);
-                        })
+                        related: updatedRelated
                     });
                     relatedUpdates++;
                 }
