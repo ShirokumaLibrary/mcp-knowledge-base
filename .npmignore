@@ -20,12 +20,26 @@ docs/internal/
 docs/tmp/
 docs/dev/
 docs/developer/
-docs/ja/
 docs/releases/
-# Keep only user-facing documentation
-# docs/user/
-# docs/API.md
-# docs/README.md
+docs/*.md
+!docs/user/
+!docs/ja/README.md
+!docs/ja/user-guide.md
+!docs/ja/configuration.md
+# Development docs are excluded
+docs/architecture.md
+docs/development.md
+docs/testing-guide.md
+docs/e2e-testing-guide.md
+docs/performance-optimization.md
+docs/security-guide.md
+docs/CONTRIBUTING.md
+docs/examples.md
+docs/UPGRADE.md
+docs/troubleshooting.md
+docs/FAQ.md
+docs/api-documentation.md
+docs/database-schema.md
 
 # Git and CI
 .git/

@@ -246,11 +246,35 @@ Separate handlers for different tool categories:
 - `TagHandlers`: Tag operations and searches
 - `SessionHandlers`: Work session tracking
 - `SummaryHandlers`: Daily summary management
+- `CurrentStateHandlers`: Application state persistence
+- `ChangeTypeHandlers`: Item type transformation
 
 ### Service Layer Pattern
 - `SessionSearchService`: Encapsulates search logic
 - `WorkSessionManager`: Orchestrates session operations
 - Clear separation of concerns
+
+## Application State Management
+
+### Current State Persistence
+The system provides a singleton state management mechanism:
+- Single file storage at `.shirokuma/data/current_state.md`
+- JSON frontmatter for metadata, markdown content for state
+- Used for persisting application-wide state across sessions
+- Accessible via `get_current_state` and `update_current_state` tools
+
+### State File Format
+```markdown
+---json
+{
+  "updated_at": "2025-07-30T10:00:00Z"
+}
+---
+
+Project Phase: Development
+Current Sprint: 4
+Team Size: 5
+```
 
 ## Configuration Management
 

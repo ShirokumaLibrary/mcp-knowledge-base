@@ -269,6 +269,49 @@ create_item({
 get_types({
   include_definitions: true
 })
+
+// タイプの説明を更新
+update_type({
+  name: "meeting_notes",
+  description: "会議議事録と決定事項の記録"
+})
+
+// アイテムのタイプを変更（同じbase_type内）
+change_item_type({
+  from_type: "docs",
+  from_id: 123,
+  to_type: "knowledge"
+})
+// 新しいIDが割り当てられ、すべての参照が更新されます
+
+// カスタムタイプを削除（アイテムが存在しない場合のみ）
+delete_type({
+  name: "meeting_notes"
+})
+```
+
+### アプリケーション状態
+
+全体的な状態を管理：
+
+```typescript
+// 現在の状態を取得
+const state = await get_current_state();
+console.log("現在の状態:", state.content);
+
+// 状態を更新
+await update_current_state({
+  content: "プロジェクトフェーズ: 開発\n現在のスプリント: 4\nチーム人数: 5"
+});
+
+// セッション間で情報を永続化
+const appState = await get_current_state();
+if (!appState.content) {
+  // 初回は初期化
+  await update_current_state({
+    content: "初期化日時: " + new Date().toISOString()
+  });
+}
 ```
 
 ## ベストプラクティス

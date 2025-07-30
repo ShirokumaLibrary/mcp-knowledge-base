@@ -195,3 +195,58 @@ await mcp.delete_status({
   id: 5 
 });
 ```
+
+## Type Management
+
+```javascript
+// Get all available types
+const types = await mcp.get_types();
+
+// Create a custom type
+await mcp.create_type({
+  name: "recipe",
+  base_type: "documents",
+  description: "Cooking recipes and instructions"
+});
+
+// Update type description
+await mcp.update_type({
+  name: "recipe",
+  description: "Detailed cooking recipes with ingredients and steps"
+});
+
+// Change item type (within same base_type)
+const result = await mcp.change_item_type({
+  from_type: "docs",
+  from_id: 123,
+  to_type: "knowledge"
+});
+console.log(`Item moved to ${result.to_type} with new ID: ${result.newId}`);
+
+// Delete a custom type (only if no items exist)
+await mcp.delete_type({
+  name: "recipe"
+});
+```
+
+## Application State
+
+```javascript
+// Get current application state
+const state = await mcp.get_current_state();
+console.log("Current state:", state.content);
+
+// Update application state
+await mcp.update_current_state({
+  content: "Project Phase: Development\nCurrent Sprint: 4\nTeam Size: 5"
+});
+
+// Use state to persist information across sessions
+const appState = await mcp.get_current_state();
+if (!appState.content) {
+  // Initialize state for first time
+  await mcp.update_current_state({
+    content: "Initialized: " + new Date().toISOString()
+  });
+}
+```
