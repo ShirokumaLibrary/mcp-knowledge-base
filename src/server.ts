@@ -59,6 +59,8 @@ import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
 import { TypeHandlers } from './handlers/type-handlers.js';
 import { SearchHandlers } from './handlers/search-handlers.js';
+import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
+import { ChangeTypeHandlers } from './handlers/change-type-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
 
 /**
@@ -81,6 +83,8 @@ export class IssueTrackerServer {
   private summaryHandlers: SummaryHandlers;
   private typeHandlers: TypeHandlers;
   private searchHandlers: SearchHandlers;
+  private currentStateHandlers: CurrentStateHandlers;
+  private changeTypeHandlers: ChangeTypeHandlers;
 
   constructor() {
     const config = getConfig();
@@ -98,6 +102,8 @@ export class IssueTrackerServer {
     this.summaryHandlers = new SummaryHandlers(this.sessionManager);
     this.typeHandlers = new TypeHandlers(this.db);
     this.searchHandlers = new SearchHandlers(this.db);
+    this.currentStateHandlers = new CurrentStateHandlers(config.database.path);
+    this.changeTypeHandlers = new ChangeTypeHandlers(this.db);
     this.server = new Server(
       {
         name: 'shirokuma-ai-project-management-server',
@@ -208,6 +214,13 @@ export class IssueTrackerServer {
       // Full-text search handlers
       case 'search_items': return this.searchHandlers.searchItems(args);
       case 'search_suggest': return this.searchHandlers.searchSuggest(args);
+
+      // Current state handlers
+      case 'get_current_state': return this.currentStateHandlers.handleGetCurrentState();
+      case 'update_current_state': return this.currentStateHandlers.handleUpdateCurrentState(args);
+
+      // Type change handler
+      case 'change_item_type': return this.changeTypeHandlers.handleChangeItemType(args);
 
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);

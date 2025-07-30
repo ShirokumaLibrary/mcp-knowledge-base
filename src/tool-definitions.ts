@@ -701,5 +701,53 @@ export const toolDefinitions = [
       },
       required: ['query']
     }
+  },
+  
+  // Current state management tools
+  {
+    name: 'get_current_state',
+    description: 'Get the current application state',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  {
+    name: 'update_current_state',
+    description: 'Update the current application state',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        content: {
+          type: 'string',
+          description: 'New state content'
+        }
+      },
+      required: ['content']
+    }
+  },
+  
+  // Type change tool
+  {
+    name: 'change_item_type',
+    description: 'Change item type to another type with the same base type. Creates a new item with a new ID and updates all references. Original item is deleted.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        from_type: {
+          type: 'string',
+          description: 'Current type of the item'
+        },
+        from_id: {
+          type: 'number',
+          description: 'Current ID of the item'
+        },
+        to_type: {
+          type: 'string',
+          description: 'New type (must have same base_type as from_type). E.g., issues→bugs, docs→knowledge'
+        }
+      },
+      required: ['from_type', 'from_id', 'to_type']
+    }
   }
 ];
