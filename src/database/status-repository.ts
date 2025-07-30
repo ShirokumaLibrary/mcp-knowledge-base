@@ -1,169 +1,220 @@
-import type { Database } from './base.js';
-import { BaseRepository } from './base.js';
-import type { Status } from '../types/domain-types.js';
-
-// Type definitions for database rows
-interface StatusRow {
-  id: number;
-  name: string;
-  is_closed: number;
-  created_at?: string;
-}
-
 /**
- * @ai-context Repository for workflow status management
- * @ai-pattern Simple CRUD repository for status definitions
+ * @ai-context Repository for workflow status management using base repository
+ * @ai-pattern Extends BaseRepository for type-safe operations
  * @ai-critical Statuses are referenced by ID - deletion can break referential integrity
  * @ai-lifecycle Statuses created at DB init, custom ones added by users
  * @ai-assumption Default statuses (1-6) should not be deleted
  */
-export class StatusRepository extends BaseRepository {
+
+import type { Database } from '../database/base.js';
+import { BaseRepository } from './base-repository.js';
+import type { Status } from '../types/domain-types.js';
+import type { DatabaseRow } from './types/database-types.js';
+
+/**
+ * @ai-intent Extended Status type with base entity fields
+ * @ai-pattern Merges domain type with base requirements
+ */
+interface StatusEntity extends Status {
+  id: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export class StatusRepository extends BaseRepository<StatusEntity, number> {
   constructor(db: Database) {
-    super(db, 'StatusRepository');
+    super(db, 'statuses', 'StatusRepository');
+  }
+
+  /**
+   * @ai-intent Get next ID using SQLite AUTOINCREMENT
+   * @ai-pattern SQLite handles ID generation
+   * @ai-critical Returns 0 as placeholder - real ID from lastID
+   */
+  protected async getNextId(): Promise<number> {
+    // @ai-logic: SQLite AUTOINCREMENT handles this
+    return 0; // Placeholder, actual ID comes from lastID
+  }
+
+  /**
+   * @ai-intent Map database row to Status entity
+   * @ai-pattern Converts SQLite boolean representation
+   * @ai-critical is_closed stored as 0/1 in database
+   */
+  protected mapRowToEntity(row: DatabaseRow): StatusEntity {
+    return {
+      id: Number(row.id),
+      name: String(row.name),
+      is_closed: row.is_closed === 1,
+      created_at: String(row.created_at),
+      updated_at: row.updated_at ? String(row.updated_at) : String(row.created_at)
+    };
+  }
+
+  /**
+   * @ai-intent Map Status entity to database row
+   * @ai-pattern Converts boolean to SQLite integer
+   * @ai-critical Filters undefined values
+   */
+  protected mapEntityToRow(entity: Partial<StatusEntity>): DatabaseRow {
+    const row: DatabaseRow = {};
+
+    if (entity.id !== undefined) {
+      row.id = entity.id;
+    }
+    if (entity.name !== undefined) {
+      row.name = entity.name;
+    }
+    if (entity.is_closed !== undefined) {
+      row.is_closed = entity.is_closed ? 1 : 0;
+    }
+    if (entity.created_at !== undefined) {
+      row.created_at = entity.created_at;
+    }
+    if (entity.updated_at !== undefined) {
+      row.updated_at = entity.updated_at;
+    }
+
+    return row;
   }
 
   /**
    * @ai-intent Retrieve all available workflow statuses
-   * @ai-flow 1. Query all statuses -> 2. Map to typed objects -> 3. Return sorted by ID
+   * @ai-flow Uses base findAll with ordering
    * @ai-performance Cached by UI layer - called frequently
    * @ai-return Always returns array, empty if table not initialized
-   * @ai-why Ordered by ID to show default statuses first
    */
   async getAllStatuses(): Promise<Status[]> {
-    const rows = await this.db.allAsync(
-      'SELECT id, name, is_closed, created_at FROM statuses ORDER BY id'
-    );
-
-    // @ai-logic: Type safety through explicit mapping
-    return rows.map((row: unknown) => {
-      const statusRow = row as StatusRow;
-      return {
-        id: Number(statusRow.id),
-        name: String(statusRow.name),
-        is_closed: statusRow.is_closed === 1,
-        created_at: String(statusRow.created_at)
-      };
+    return this.findAll({
+      orderBy: 'id',
+      order: 'ASC'
     });
   }
 
+  /**
+   * @ai-intent Legacy async method for backward compatibility
+   * @ai-deprecated Use getAllStatuses() directly
+   */
   async getAllStatusesAsync(): Promise<Status[]> {
     return this.getAllStatuses();
   }
 
+  /**
+   * @ai-intent Get single status by ID
+   * @ai-flow Delegates to base findById
+   * @ai-return Status or null if not found
+   */
   async getStatus(id: number): Promise<Status | null> {
-    const row = await this.db.getAsync(
-      'SELECT id, name, is_closed, created_at FROM statuses WHERE id = ?',
-      [id]
-    );
-
-    if (!row) {
-      return null;
-    }
-    return {
-      id: Number(row.id),
-      name: String(row.name),
-      is_closed: row.is_closed === 1,
-      created_at: String(row.created_at)
-    };
+    return this.findById(id);
   }
 
   /**
    * @ai-intent Create custom workflow status
-   * @ai-flow 1. Insert with auto-increment ID -> 2. Return complete object
-   * @ai-side-effects Adds to statuses table, ID generated by AUTOINCREMENT
-   * @ai-error-handling Throws on duplicate names (UNIQUE constraint)
-   * @ai-critical IDs 7+ are custom statuses that need preservation during rebuilds
+   * @ai-flow Uses base insert with specific fields
+   * @ai-side-effects Adds to statuses table
+   * @ai-error-handling Throws on duplicate names
    */
   async createStatus(name: string, is_closed: boolean = false): Promise<Status> {
+    // @ai-logic: Override base insert to handle AUTOINCREMENT
+    const now = new Date().toISOString();
     const result = await this.db.runAsync(
-      'INSERT INTO statuses (name, is_closed) VALUES (?, ?)',
-      [name, is_closed ? 1 : 0]
+      'INSERT INTO statuses (name, is_closed, created_at, updated_at) VALUES (?, ?, ?, ?)',
+      [name, is_closed ? 1 : 0, now, now]
     );
 
-    return {
-      id: (result as any).lastID!,  // @ai-assumption: SQLite always provides lastID
-      name,
-      is_closed,
-      created_at: new Date().toISOString()
-    };
-  }
+    const id = (result as any).lastID!;
+    const created = await this.findById(id);
 
-  async updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean> {
-    let sql = 'UPDATE statuses SET name = ?';
-    const params: (string | number)[] = [name];
-
-    if (is_closed !== undefined) {
-      sql += ', is_closed = ?';
-      params.push(is_closed ? 1 : 0);
+    if (!created) {
+      throw new Error(`Failed to retrieve created status with ID ${id}`);
     }
 
-    sql += ' WHERE id = ?';
-    params.push(id);
+    return created;
+  }
 
-    const result = await this.db.runAsync(sql, params);
+  /**
+   * @ai-intent Update status properties
+   * @ai-flow Custom implementation for partial updates
+   * @ai-pattern Only updates provided fields
+   * @ai-return true if updated, false if not found
+   */
+  async updateStatus(id: number, name: string, is_closed?: boolean): Promise<boolean> {
+    const updateData: Partial<StatusEntity> = { name };
 
-    return (result as any).changes! > 0;
+    if (is_closed !== undefined) {
+      updateData.is_closed = is_closed;
+    }
+
+    const result = await this.updateById(id, updateData);
+    return result !== null;
   }
 
   /**
    * @ai-intent Remove status definition
-   * @ai-flow 1. Execute DELETE -> 2. Check affected rows -> 3. Return success
-   * @ai-critical Can break issues/plans using this status - no cascade delete
-   * @ai-warning Should prevent deletion of default statuses (1-6) at app layer
-   * @ai-return True if deleted, false if not found
+   * @ai-flow Delegates to base deleteById
+   * @ai-critical Can break items using this status
+   * @ai-return true if deleted, false if not found
    */
   async deleteStatus(id: number): Promise<boolean> {
-    const result = await this.db.runAsync(
-      'DELETE FROM statuses WHERE id = ?',
+    return this.deleteById(id);
+  }
+
+  /**
+   * @ai-intent Check if status is in use
+   * @ai-pattern Checks both issues and plans
+   * @ai-usage Call before deletion to prevent breaks
+   */
+  async isStatusInUse(id: number): Promise<boolean> {
+    const issueCount = await this.executeQuery<{ count: number }>(
+      'SELECT COUNT(*) as count FROM search_issues WHERE status_id = ?',
       [id]
     );
 
-    // @ai-logic: changes > 0 means row was actually deleted
-    return (result as any).changes! > 0;
+    const planCount = await this.executeQuery<{ count: number }>(
+      'SELECT COUNT(*) as count FROM search_plans WHERE status_id = ?',
+      [id]
+    );
+
+    return issueCount[0].count > 0 || planCount[0].count > 0;
   }
 
   /**
-   * @ai-intent Get status by name
-   * @ai-flow Query statuses table by name
-   * @ai-return Status object or null if not found
+   * @ai-intent Find status by exact name match
+   * @ai-flow Query by name -> Return mapped entity or null
+   * @ai-usage For finding existing statuses before creation
    */
   async getStatusByName(name: string): Promise<Status | null> {
-    const row = await this.db.getAsync(
-      'SELECT id, name, is_closed, created_at FROM statuses WHERE name = ?',
+    const rows = await this.executeQuery<DatabaseRow>(
+      'SELECT * FROM statuses WHERE name = ?',
       [name]
     );
 
-    if (!row) {
+    if (rows.length === 0) {
       return null;
     }
 
-    return {
-      id: Number(row.id),
-      name: String(row.name),
-      is_closed: row.is_closed === 1,
-      created_at: String(row.created_at)
-    };
+    return this.mapRowToEntity(rows[0]);
   }
 
   /**
-   * @ai-intent Get status by ID (alias for getStatus)
-   * @ai-flow Query statuses table by ID
-   * @ai-return Status object or null if not found
+   * @ai-intent Alias for getStatus method
+   * @ai-deprecated Use getStatus() directly
    */
   async getStatusById(id: number): Promise<Status | null> {
     return this.getStatus(id);
   }
 
   /**
-   * @ai-intent Get all closed status IDs
-   * @ai-flow Query statuses where is_closed = 1
-   * @ai-return Array of status IDs that are marked as closed
+   * @ai-intent Get IDs of all closed statuses
+   * @ai-flow Query closed statuses -> Extract IDs
+   * @ai-usage For filtering out completed items
    */
   async getClosedStatusIds(): Promise<number[]> {
-    const rows = await this.db.allAsync(
-      'SELECT id FROM statuses WHERE is_closed = 1'
+    const rows = await this.executeQuery<{ id: number }>(
+      'SELECT id FROM statuses WHERE is_closed = 1',
+      []
     );
 
-    return rows.map((row: unknown) => Number((row as StatusRow).id));
+    return rows.map(row => row.id);
   }
 }
