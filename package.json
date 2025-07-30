@@ -5,8 +5,8 @@
   "main": "dist/server.js",
   "type": "module",
   "bin": {
-    "shirokuma-mcp": "./dist/cli.js",
-    "shirokuma-rebuild": "./dist/rebuild-db.js"
+    "shirokuma-mcp-knowledge-base": "./dist/cli.js",
+    "shirokuma-mcp-knowledge-base-rebuild": "./dist/rebuild-db.js"
   },
   "scripts": {
     "dev": "tsx src/server.ts",
@@ -38,7 +38,6 @@
   },
   "files": [
     "dist/",
-    "docs/",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"

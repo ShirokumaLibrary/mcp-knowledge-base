@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8'));
 program
-    .name('shirokuma-mcp')
+    .name('shirokuma-mcp-knowledge-base')
     .description('Shirokuma MCP Knowledge Base Server')
     .version(packageJson.version)
     .option('-d, --data <path>', 'custom data directory path', '.shirokuma/data')
