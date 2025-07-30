@@ -26,21 +26,24 @@ Execute systematic validation tests for all MCP server functions through the MCP
 
 ### Test Case Categories
 
-#### Core Functionality Tests
-1. **Initial State Verification** - @.claude/commands/ai-tests/01-initial-state.md
-2. **Data Creation Tests** - @.claude/commands/ai-tests/02-data-creation.md
-3. **Data Retrieval & Update Tests** - @.claude/commands/ai-tests/03-data-operations.md
-4. **Tag Functionality Tests** - @.claude/commands/ai-tests/04-tag-tests.md
-5. **Status Management Tests** - @.claude/commands/ai-tests/05-status-tests.md
-6. **Session Management Tests** - @.claude/commands/ai-tests/06-session-tests.md
-7. **Daily Summary Tests** - @.claude/commands/ai-tests/07-summary-tests.md
+#### Phase 1: Core Functionality Tests
+1.01. **Initial State Verification** - @.claude/commands/ai-tests/1.01-initial-state.md
+1.02. **Data Creation Tests** - @.claude/commands/ai-tests/1.02-data-creation.md
+1.03. **Data Retrieval & Update Tests** - @.claude/commands/ai-tests/1.03-data-operations.md
+1.04. **Tag Functionality Tests** - @.claude/commands/ai-tests/1.04-tag-tests.md
+1.05. **Status Management Tests** - @.claude/commands/ai-tests/1.05-status-tests.md
+1.06. **Session Management Tests** - @.claude/commands/ai-tests/1.06-session-tests.md
+1.07. **Daily Summary Tests** - @.claude/commands/ai-tests/1.07-summary-tests.md
+1.08. **Comprehensive Verification** - @.claude/commands/ai-tests/1.08-verification.md
+1.09. **Data Deletion Tests** - @.claude/commands/ai-tests/1.09-deletion-tests.md
+1.10. **Edge Cases and Additional Tests** - @.claude/commands/ai-tests/1.10-edge-cases.md
+1.11. **Type Management Tests** - @.claude/commands/ai-tests/1.11-type-management.md
+1.12. **Current State Management Tests** - @.claude/commands/ai-tests/1.12-current-state.md
+1.13. **Item Type Change Tests** - @.claude/commands/ai-tests/1.13-type-change.md
 
-#### Advanced Tests
-8. **Comprehensive Verification** - @.claude/commands/ai-tests/08-verification.md
-9. **Data Deletion Tests** - @.claude/commands/ai-tests/09-deletion-tests.md
-10. **Edge Cases and Additional Tests** - @.claude/commands/ai-tests/10-edge-cases.md
-11. **Type Management Tests** - @.claude/commands/ai-tests/11-type-management.md
-12. **Database Rebuild Tests** - @.claude/commands/ai-tests/12-rebuild-tests.md (MUST be run last)
+#### Phase 2: Database Rebuild Tests
+2.01. **Database Rebuild and SQLite Verification** - @.claude/commands/ai-tests/2.01-rebuild-tests.md (MUST be run last)
+2.02. **Post-Rebuild API Verification** - @.claude/commands/ai-tests/2.02-post-rebuild-verification.md (Run after server restart)
 
 ### Success Criteria
 - All CRUD operations work correctly without errors
@@ -61,4 +64,7 @@ When reporting test results, include:
 5. Pass/Fail status
 6. Any error messages or unexpected behaviors
 
-Start with test #1 and proceed sequentially. Database Rebuild Tests MUST be executed last.
+Start with test 1.01 and proceed sequentially through Phase 1. Phase 2 consists of:
+- Test 2.01: Database rebuild and SQLite-level verification
+- Server restart (required)
+- Test 2.02: Post-rebuild API verification through MCP protocol
