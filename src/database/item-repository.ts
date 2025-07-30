@@ -150,7 +150,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     // Validate type exists
     const typeDef = await this.getType(type);
     if (!typeDef) {
-      throw new Error(`Unknown type: ${type}`);
+      throw new Error(`Unknown type: '${type}'. Use the 'get_types' tool to see all available types and their descriptions.`);
     }
 
     // Generate ID based on type
@@ -163,7 +163,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       // Check if summary already exists for this date
       const existing = await this.getById(type, id);
       if (existing) {
-        throw new Error(`Summary already exists for date: ${id}`);
+        throw new Error(`Daily summary already exists for date: ${id}. Use 'update_item' to modify the existing summary, or 'get_item_detail' with type='dailies' and id='${id}' to view it.`);
       }
     } else {
       const numId = await this.getNextId(type);
@@ -174,9 +174,10 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     let statusId = 1; // Default to "Open"
     if (data.status) {
       const status = await this.statusRepository.getStatusByName(data.status);
-      if (status) {
-        statusId = status.id;
+      if (!status) {
+        throw new Error(`Unknown status: '${data.status}'. Use the 'get_statuses' tool to see all available statuses.`);
       }
+      statusId = status.id;
     }
 
     // Set default priority if not provided
@@ -315,9 +316,10 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     let statusId = existing.status_id;
     if (params.status) {
       const status = await this.statusRepository.getStatusByName(params.status);
-      if (status) {
-        statusId = status.id;
+      if (!status) {
+        throw new Error(`Unknown status: '${params.status}'. Use the 'get_statuses' tool to see all available statuses.`);
       }
+      statusId = status.id;
     }
 
     // Merge changes - ensure proper type based on item type

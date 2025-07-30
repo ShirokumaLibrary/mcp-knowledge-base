@@ -26,6 +26,20 @@ npm install -g @shirokuma-library/mcp-knowledge-base
 npm install @shirokuma-library/mcp-knowledge-base
 ```
 
+### Updating
+
+To update the global installation to the latest version:
+
+```bash
+npm update -g @shirokuma-library/mcp-knowledge-base
+```
+
+Or to install a specific version:
+
+```bash
+npm install -g @shirokuma-library/mcp-knowledge-base@0.5.1
+```
+
 ## Usage
 
 ### Command Line Interface

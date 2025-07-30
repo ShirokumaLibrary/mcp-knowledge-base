@@ -83,7 +83,7 @@ export class ItemRepository extends BaseRepository {
         const { type, ...data } = params;
         const typeDef = await this.getType(type);
         if (!typeDef) {
-            throw new Error(`Unknown type: ${type}`);
+            throw new Error(`Unknown type: '${type}'. Use the 'get_types' tool to see all available types and their descriptions.`);
         }
         let id;
         if (type === 'sessions') {
@@ -93,7 +93,7 @@ export class ItemRepository extends BaseRepository {
             id = data.start_date || new Date().toISOString().split('T')[0];
             const existing = await this.getById(type, id);
             if (existing) {
-                throw new Error(`Summary already exists for date: ${id}`);
+                throw new Error(`Daily summary already exists for date: ${id}. Use 'update_item' to modify the existing summary, or 'get_item_detail' with type='dailies' and id='${id}' to view it.`);
             }
         }
         else {
@@ -103,9 +103,10 @@ export class ItemRepository extends BaseRepository {
         let statusId = 1;
         if (data.status) {
             const status = await this.statusRepository.getStatusByName(data.status);
-            if (status) {
-                statusId = status.id;
+            if (!status) {
+                throw new Error(`Unknown status: '${data.status}'. Use the 'get_statuses' tool to see all available statuses.`);
             }
+            statusId = status.id;
         }
         const priority = data.priority || 'medium';
         const now = new Date().toISOString();
@@ -209,9 +210,10 @@ export class ItemRepository extends BaseRepository {
         let statusId = existing.status_id;
         if (params.status) {
             const status = await this.statusRepository.getStatusByName(params.status);
-            if (status) {
-                statusId = status.id;
+            if (!status) {
+                throw new Error(`Unknown status: '${params.status}'. Use the 'get_statuses' tool to see all available statuses.`);
             }
+            statusId = status.id;
         }
         const updated = {
             ...existing,

@@ -20,7 +20,7 @@ export function createUnifiedHandlers(fileDb) {
         const { type, id } = params;
         const item = await itemRepository.getItem(type, String(id));
         if (!item) {
-            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found`);
+            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`);
         }
         return item;
     }
@@ -31,7 +31,7 @@ export function createUnifiedHandlers(fileDb) {
         const { type, id, ...updateData } = params;
         const updated = await itemRepository.updateItem({ type, id: String(id), ...updateData });
         if (!updated) {
-            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found`);
+            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`);
         }
         return updated;
     }
@@ -39,7 +39,7 @@ export function createUnifiedHandlers(fileDb) {
         const { type, id } = params;
         const deleted = await itemRepository.deleteItem(type, String(id));
         if (!deleted) {
-            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found`);
+            throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`);
         }
         return `${type} ID ${id} deleted`;
     }

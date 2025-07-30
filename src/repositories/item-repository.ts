@@ -437,7 +437,7 @@ export class ItemRepository {
       if (arr && arr.some(item => item === '')) {
         throw new McpError(
           ErrorCode.InvalidRequest,
-          `Related items cannot contain empty strings in ${fieldName}`
+          `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`
         );
       }
     };
@@ -603,7 +603,7 @@ export class ItemRepository {
       if (arr && arr.some(item => item === '')) {
         throw new McpError(
           ErrorCode.InvalidRequest,
-          `Related items cannot contain empty strings in ${fieldName}`
+          `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`
         );
       }
     };

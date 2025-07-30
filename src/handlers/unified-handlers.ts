@@ -66,7 +66,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
     if (!item) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `${type} with ID ${id} not found`
+        `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`
       );
     }
 
@@ -92,7 +92,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
     if (!updated) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `${type} with ID ${id} not found`
+        `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`
       );
     }
 
@@ -110,7 +110,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
     if (!deleted) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `${type} with ID ${id} not found`
+        `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`
       );
     }
 
