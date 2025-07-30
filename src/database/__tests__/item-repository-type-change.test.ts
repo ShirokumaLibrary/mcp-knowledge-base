@@ -170,8 +170,7 @@ describe('ItemRepository - Type Change', () => {
       expect(repository.update).toHaveBeenCalledWith('issues', '2', {
         type: 'issues',
         id: '2',
-        related_tasks: ['bugs-1'],
-        related_documents: []
+        related: ['bugs-1']
       });
     });
 
