@@ -1,0 +1,131 @@
+# CLAUDE.md.example
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 🎯 Purpose
+
+CLAUDE.md helps AI assistants understand:
+- Project-specific conventions and rules
+- Important context that should persist across conversations
+- Common pitfalls and how to avoid them
+- Essential workflows and procedures
+
+## 📚 Leveraging MCP Knowledge Base for Memory
+
+If your project uses MCP Knowledge Base, leverage it as external memory:
+
+### Starting Work Sessions
+```bash
+# Check for ongoing tasks and important notes
+mcp__[instance-name]__search_items({ query: "TODO OR important OR in-progress" })
+mcp__[instance-name]__get_current_state()
+mcp__[instance-name]__get_items({ type: "sessions", limit: 1 })
+```
+
+### Before Complex Operations
+```bash
+# Search for existing procedures
+mcp__[instance-name]__search_items({ query: "[operation] procedure" })
+```
+
+### Recording Important Information
+- **Issues**: Tasks, bugs, TODOs
+- **Knowledge**: Procedures, guides, documentation
+- **Sessions**: Work logs, progress tracking
+- **Current State**: Project status, next steps
+
+## ⚡ Essential Information Template
+
+### Project Overview
+- What this project does
+- Key technologies used
+- Important constraints or requirements
+
+### Critical Rules
+- Must-follow guidelines
+- Security considerations
+- Performance requirements
+
+### Common Commands
+```bash
+# Build commands
+npm run build
+npm test
+
+# Development
+npm run dev
+
+# Deployment
+npm run deploy
+```
+
+### Workflow Guidelines
+- How to start new features
+- Testing requirements
+- Review process
+- Documentation standards
+
+## 🚨 Common Pitfalls
+
+### 1. Destructive Operations
+- Always backup before database operations
+- Confirm before deleting data
+- Use dry-run options when available
+
+### 2. Testing
+- Run tests before committing
+- Check test coverage
+- Verify edge cases
+
+### 3. Dependencies
+- Check compatibility before updating
+- Test thoroughly after updates
+- Document breaking changes
+
+## 💡 Best Practices
+
+### Code Quality
+- Follow project style guide
+- Write meaningful commit messages
+- Keep functions focused and small
+- Document complex logic
+
+### Collaboration
+- Create issues before starting work
+- Update progress regularly
+- Ask for clarification when uncertain
+- Share knowledge through documentation
+
+### Performance
+- Profile before optimizing
+- Consider scalability
+- Monitor resource usage
+- Cache when appropriate
+
+## 📖 Project-Specific Section
+
+[Add your project-specific information here]
+
+### Architecture Notes
+- System design decisions
+- Important patterns used
+- Integration points
+
+### Development Setup
+- Environment requirements
+- Configuration steps
+- Common setup issues
+
+### Deployment Process
+- Pre-deployment checklist
+- Deployment steps
+- Post-deployment verification
+
+### Troubleshooting
+- Common errors and solutions
+- Debugging techniques
+- Useful log locations
+
+---
+
+Remember: AI assistants have no memory between conversations. This file is your way to provide consistent context and guidance.
