@@ -662,9 +662,8 @@ export class ItemRepository {
         return syncedCount;
     }
     async changeItemType(fromType, fromId, toType) {
-        return {
-            success: false,
-            error: 'changeItemType is not fully implemented yet due to database initialization issues. The item repository versions are incompatible.'
-        };
+        const { ItemRepository: DatabaseItemRepository } = await import('../database/item-repository.js');
+        const dbItemRepo = new DatabaseItemRepository(this.db, this.fileDb.dataDirectory, this.statusRepo, this.tagRepo);
+        return dbItemRepo.changeItemType(fromType, fromId, toType);
     }
 }
