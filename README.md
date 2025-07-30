@@ -12,6 +12,70 @@
 - Structure-first data with high information density
 - Design optimized for efficient AI reference and search
 
+## Installation
+
+### Global Installation (Recommended)
+
+```bash
+npm install -g @shirokuma-library/mcp-knowledge-base
+```
+
+### Local Installation
+
+```bash
+npm install @shirokuma-library/mcp-knowledge-base
+```
+
+## Usage
+
+### Command Line Interface
+
+After global installation:
+
+```bash
+# Start MCP server
+shirokuma-mcp-knowledge-base
+
+# Show help
+shirokuma-mcp-knowledge-base --help
+
+# Use custom data directory
+shirokuma-mcp-knowledge-base --data /path/to/data
+
+# Rebuild database from markdown files
+shirokuma-mcp-knowledge-base --rebuild
+
+# Run with MCP inspector
+shirokuma-mcp-knowledge-base --inspect
+```
+
+### As MCP Server
+
+Configure in your MCP client settings:
+
+```json
+{
+  "mcpServers": {
+    "shirokuma-kb": {
+      "command": "shirokuma-mcp-knowledge-base"
+    }
+  }
+}
+```
+
+With custom data directory:
+
+```json
+{
+  "mcpServers": {
+    "shirokuma-kb": {
+      "command": "shirokuma-mcp-knowledge-base",
+      "args": ["--data", "/path/to/your/data"]
+    }
+  }
+}
+```
+
 ## Overview
 
 This MCP server provides a unified knowledge base system that manages Issues, Plans, Documents, Knowledge entries, and Work Sessions for development projects.
@@ -143,8 +207,12 @@ See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing document
 
 ## Documentation
 
+Full documentation is available on GitHub:
+
+📚 **[View Documentation on GitHub](https://github.com/ShirokumaLibrary/mcp-knowledge-base/tree/main/docs)**
+
 ### English Documentation
-- [API Reference](docs/API.md) - Complete API documentation
+- [API Reference](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/user/api-reference.md) - Complete API documentation
 - [Examples](docs/examples.md) - Usage examples and code snippets
 - [Architecture](docs/architecture.md) - System design and implementation details
 - [Development](docs/development.md) - Development setup and guidelines
@@ -157,7 +225,7 @@ See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing document
 - [E2E Testing](docs/e2e-testing-guide.md) - End-to-end testing guide
 
 ### 日本語ドキュメント
-- [README](docs.ja/README.md) - プロジェクト概要
+- [日本語版 README](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/ja/README.md) - プロジェクト概要
 - [APIリファレンス](docs.ja/API.md) - 完全なAPIドキュメント
 - [アーキテクチャ](docs.ja/architecture.md) - システム設計と実装の詳細
 - [開発ガイド](docs.ja/development.md) - 開発セットアップとガイドライン

@@ -27,7 +27,7 @@ npm pack --dry-run
 
 # Or create a tarball to inspect
 npm pack
-tar -tzf shirokuma-mcp-knowledge-base-*.tgz
+tar -tzf shirokuma-library-mcp-knowledge-base-*.tgz
 ```
 
 ### 3. Update Version
@@ -63,11 +63,11 @@ npm publish
 ### 6. Verify Publication
 ```bash
 # Check if published
-npm view shirokuma-mcp-knowledge-base
+npm view @shirokuma-library/mcp-knowledge-base
 
 # Test installation
-npm install -g shirokuma-mcp-knowledge-base
-shirokuma-mcp --version
+npm install -g @shirokuma-library/mcp-knowledge-base
+shirokuma-mcp-knowledge-base --version
 ```
 
 ## Post-publish
@@ -108,8 +108,8 @@ shirokuma-mcp --version
 
 ```bash
 # Unpublish a specific version (within 72 hours)
-npm unpublish shirokuma-mcp-knowledge-base@0.4.2
+npm unpublish @shirokuma-library/mcp-knowledge-base@0.4.2
 
 # Deprecate instead of unpublish
-npm deprecate shirokuma-mcp-knowledge-base@0.4.2 "Critical bug, please use 0.4.3"
+npm deprecate @shirokuma-library/mcp-knowledge-base@0.4.2 "Critical bug, please use 0.4.3"
 ```

@@ -21,7 +21,7 @@ const packageJson = JSON.parse(
 );
 
 program
-  .name('shirokuma-mcp')
+  .name('shirokuma-mcp-knowledge-base')
   .description('Shirokuma MCP Knowledge Base Server')
   .version(packageJson.version)
   .option('-d, --data <path>', 'custom data directory path', '.shirokuma/data')

@@ -15,10 +15,17 @@ __tests__/
 coverage/
 .nyc_output/
 
-# Documentation development files
+# Documentation files (keep only essential docs)
 docs/internal/
 docs/tmp/
 docs/dev/
+docs/developer/
+docs/ja/
+docs/releases/
+# Keep only user-facing documentation
+# docs/user/
+# docs/API.md
+# docs/README.md
 
 # Git and CI
 .git/
