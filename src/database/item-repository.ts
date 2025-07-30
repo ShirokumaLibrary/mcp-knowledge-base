@@ -790,18 +790,10 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
           );
           
           // Update the item with new references
-          const tasksTypes = ['issues', 'plans', 'bugs'];
           await this.update(String(row.type), String(row.id), {
             type: String(row.type),
             id: String(row.id),
-            related_tasks: updatedRelated.filter((r: string) => {
-              const [refType] = r.split('-');
-              return tasksTypes.includes(refType);
-            }),
-            related_documents: updatedRelated.filter((r: string) => {
-              const [refType] = r.split('-');
-              return !tasksTypes.includes(refType);
-            })
+            related: updatedRelated
           });
           
           relatedUpdates++;

@@ -1045,10 +1045,18 @@ export class ItemRepository {
     fromId: number, 
     toType: string
   ): Promise<{ success: boolean; newId?: number; error?: string; relatedUpdates?: number }> {
-    // Return not implemented for now due to database initialization issues
-    return {
-      success: false,
-      error: 'changeItemType is not fully implemented yet due to database initialization issues. The item repository versions are incompatible.'
-    };
+    // Import the actual implementation
+    const { ItemRepository: DatabaseItemRepository } = await import('../database/item-repository.js');
+    
+    // Create instance with same dependencies
+    const dbItemRepo = new DatabaseItemRepository(
+      this.db,
+      this.fileDb.dataDirectory,
+      this.statusRepo,
+      this.tagRepo
+    );
+    
+    // Delegate to the actual implementation
+    return dbItemRepo.changeItemType(fromType, fromId, toType);
   }
 }
