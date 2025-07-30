@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-07-30
+
+### Fixed
+- Prevent tag deletion when the tag is being used by items
+  - Displays error with count of items using the tag
+  - Only unused tags can be deleted
+- Title validation to prevent empty titles on item creation
+
+### Added
+- AI testing commands for development workflow
+  - `/ai-commit` command for automated commit management
+  - `/ai-tests` command for comprehensive MCP functional testing
+  - Test case files for systematic validation
+
+### Changed
+- Updated .gitignore to preserve .claude/commands/ directory
+- Simplified test case documentation to reference command usage
+
 ## [0.4.2] - 2025-07-29
 
 ### Security
