@@ -31,10 +31,12 @@ logs
 .env.production.local
 
 # IDE/Editor files
-.vscode/
-.cursor/
-.idea/
-.claude/
+/.vscode/
+/.cursor/
+/.idea/
+# Claude directory - exclude everything except commands
+.claude/*
+!.claude/commands/
 *.swp
 *.swo
 *~

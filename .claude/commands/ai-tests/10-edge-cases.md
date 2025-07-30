@@ -1,0 +1,135 @@
+# Edge Cases and Additional Tests
+
+Test boundary conditions and special scenarios.
+
+## Test 10.1: Unicode and Special Characters
+
+### Create Item with Full Unicode
+```
+Tool: create_item
+Parameters: {
+  type: "knowledge",
+  title: "🌍 International Characters Guide 国際文字",
+  content: "# Unicode Support Test\n\n## Languages\n- English: Hello World\n- Japanese: こんにちは世界\n- Chinese: 你好世界\n- Arabic: مرحبا بالعالم\n- Hebrew: שלום עולם\n- Russian: Привет мир\n- Greek: Γεια σου κόσμο\n\n## Emoji Support\n🎯 🚀 💡 ⚡ 🔥 ✨ 🌟 💎\n\n## Mathematical Symbols\n∑(i=1 to n) = n(n+1)/2\n∏ ∫ ∂ ∇ ∞ ≈ ≠ ≤ ≥\n\n## Special Characters\n™ © ® € £ ¥ § ¶ † ‡",
+  tags: ["unicode", "international", "guide"]
+}
+Expected: Success, all characters preserved
+```
+
+### Zero-width Characters Test
+```
+Tool: create_item
+Parameters: {
+  type: "docs",
+  title: "Test​With​Zero​Width​Spaces",
+  content: "Content with​ zero-width​ spaces"
+}
+Expected: Success, zero-width characters filtered
+```
+
+## Test 10.2: Boundary Tests
+
+### Maximum Tags
+```
+Tool: create_item
+Parameters: {
+  type: "issues",
+  title: "Many Tags Test",
+  content: "Testing tag limits",
+  priority: "low",
+  tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10", "tag11", "tag12", "tag13", "tag14", "tag15", "tag16", "tag17", "tag18", "tag19", "tag20"]
+}
+Expected: Success or reasonable limit error
+```
+
+### Empty Content Fields
+```
+Tool: create_item
+Parameters: {
+  type: "issues",
+  title: "Empty Description Test",
+  content: "Has content but no description",
+  description: "",
+  priority: "low"
+}
+Expected: Success, empty description handled
+```
+
+### Whitespace-only Fields
+```
+Tool: create_item
+Parameters: {
+  type: "issues",
+  title: "   ",
+  content: "Content here",
+  priority: "low"
+}
+Expected: Error about invalid title
+```
+
+## Test 10.3: Date Edge Cases
+
+### Far Future Date
+```
+Tool: create_item
+Parameters: {
+  type: "plans",
+  title: "Long Term Plan",
+  content: "Very long term planning",
+  start_date: "2099-12-31",
+  end_date: "2100-01-01"
+}
+Expected: Success
+```
+
+### Invalid Date Values
+```
+Tool: create_item
+Parameters: {
+  type: "plans",
+  title: "Invalid Date Plan",
+  content: "Test",
+  start_date: "2025-13-32"
+}
+Expected: Error about invalid date
+```
+
+### Start Date After End Date
+```
+Tool: create_item
+Parameters: {
+  type: "plans",
+  title: "Backwards Date Plan",
+  content: "Test",
+  start_date: "2025-12-31",
+  end_date: "2025-01-01"
+}
+Expected: Success (validation may not prevent this)
+```
+
+## Test 10.4: Performance Tests
+
+### Large Content
+```
+Tool: create_item
+Parameters: {
+  type: "docs",
+  title: "Large Document Test",
+  content: "# Large Document\n\n" + "This is a test paragraph. ".repeat(1000)
+}
+Expected: Success
+```
+
+### Many Related Items
+```
+Tool: create_item
+Parameters: {
+  type: "issues",
+  title: "Many Relations Test",
+  content: "Test",
+  priority: "low",
+  related_tasks: ["issues-1", "issues-2", "issues-3", "plans-1"],
+  related_documents: ["docs-1", "knowledge-1", "knowledge-2"]
+}
+Expected: Success
+```
