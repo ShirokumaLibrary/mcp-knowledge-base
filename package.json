@@ -1,9 +1,13 @@
 {
-  "name": "shirokuma-mcp-knowledge-base",
+  "name": "@shirokuma-library/mcp-knowledge-base",
   "version": "0.4.2",
   "description": "Shirokuma MCP Server for comprehensive knowledge management including issues, plans, documents, and work sessions. All stored data is structured for AI processing, not human readability.",
   "main": "dist/server.js",
   "type": "module",
+  "bin": {
+    "shirokuma-mcp": "./dist/cli.js",
+    "shirokuma-rebuild": "./dist/rebuild-db.js"
+  },
   "scripts": {
     "dev": "tsx src/server.ts",
     "build": "tsc --build --clean && tsc --build --force tsconfig.prod.json",
@@ -32,6 +36,13 @@
     "clean": "rm -rf dist",
     "precommit": "npm run lint:errors && npm run build && npm run test:unit"
   },
+  "files": [
+    "dist/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "keywords": [
     "mcp",
     "knowledge-base",
@@ -44,6 +55,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.2",
     "@types/glob": "^8.1.0",
+    "commander": "^14.0.0",
     "glob": "^11.0.3",
     "sqlite3": "^5.1.7",
     "winston": "^3.17.0",
