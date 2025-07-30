@@ -59,6 +59,10 @@ export class TagRepository extends BaseRepository {
         return trimmedName;
     }
     async deleteTag(id) {
+        const tagUsageCount = await this.db.getAsync('SELECT COUNT(*) as count FROM item_tags WHERE tag_id = (SELECT id FROM tags WHERE name = ?)', [id]);
+        if (tagUsageCount.count > 0) {
+            throw new Error(`Cannot delete tag "${id}" because it is used by ${tagUsageCount.count} item(s)`);
+        }
         const result = await this.db.runAsync('DELETE FROM tags WHERE name = ?', [id]);
         return result.changes > 0;
     }
