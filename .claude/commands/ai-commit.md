@@ -1,6 +1,6 @@
 ---
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(npm run build:*), Bash(npm test:*)
-description: Commit changes following project guidelines
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(npm run build:*), Bash(npm test:*), Bash(npm version:*), Bash(npm publish:*), Bash(npm whoami:*), Bash(npm pack:*)
+description: Commit changes following project guidelines and handle releases
 ---
 
 ## Context
@@ -12,7 +12,17 @@ description: Commit changes following project guidelines
 
 ## Your task
 
-Based on the above changes, create commits following these guidelines. Changes should be separated into logical commits in the following order:
+Based on the above changes and the command arguments, perform the requested actions:
+
+### If version update is requested (e.g., "0.0.1バージョン上げて"):
+1. Create commits following the guidelines
+2. Update CHANGELOG.md
+3. Increment version using npm version
+4. Push commits and tags
+5. **Publish to npm if the package is public**
+
+### Otherwise:
+Create commits following these guidelines. Changes should be separated into logical commits in the following order:
 
 **Important**: Commit messages should only describe the changes made. Do NOT include any references to AI tools, Claude Code, or automated generation in commit messages.
 
@@ -463,9 +473,21 @@ git push && git push --tags
 # 9. Create GitHub release (optional)
 gh release create v0.0.9 --notes-from-tag
 
-# 10. Publish to npm (if applicable)
+# 10. Publish to npm
 npm publish
 ```
+
+### Automated Release Process
+
+When version update is requested via command arguments, the following steps are executed automatically:
+
+1. **Commit all changes** in the proper order (source, tests, dist, docs)
+2. **Update CHANGELOG.md** with the new version section
+3. **Increment version** using `npm version patch/minor/major`
+4. **Push to GitHub** including tags
+5. **Publish to npm** automatically
+
+This ensures a complete release cycle without manual intervention.
 
 ### NPM Publishing Process
 
