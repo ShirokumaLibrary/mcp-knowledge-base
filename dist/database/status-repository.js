@@ -1,77 +1,89 @@
-import { BaseRepository } from './base.js';
+import { BaseRepository } from './base-repository.js';
 export class StatusRepository extends BaseRepository {
     constructor(db) {
-        super(db, 'StatusRepository');
+        super(db, 'statuses', 'StatusRepository');
+    }
+    async getNextId() {
+        return 0;
+    }
+    mapRowToEntity(row) {
+        return {
+            id: Number(row.id),
+            name: String(row.name),
+            is_closed: row.is_closed === 1,
+            created_at: String(row.created_at),
+            updated_at: row.updated_at ? String(row.updated_at) : String(row.created_at)
+        };
+    }
+    mapEntityToRow(entity) {
+        const row = {};
+        if (entity.id !== undefined) {
+            row.id = entity.id;
+        }
+        if (entity.name !== undefined) {
+            row.name = entity.name;
+        }
+        if (entity.is_closed !== undefined) {
+            row.is_closed = entity.is_closed ? 1 : 0;
+        }
+        if (entity.created_at !== undefined) {
+            row.created_at = entity.created_at;
+        }
+        if (entity.updated_at !== undefined) {
+            row.updated_at = entity.updated_at;
+        }
+        return row;
     }
     async getAllStatuses() {
-        const rows = await this.db.allAsync('SELECT id, name, is_closed, created_at FROM statuses ORDER BY id');
-        return rows.map((row) => {
-            const statusRow = row;
-            return {
-                id: Number(statusRow.id),
-                name: String(statusRow.name),
-                is_closed: statusRow.is_closed === 1,
-                created_at: String(statusRow.created_at)
-            };
+        return this.findAll({
+            orderBy: 'id',
+            order: 'ASC'
         });
     }
     async getAllStatusesAsync() {
         return this.getAllStatuses();
     }
     async getStatus(id) {
-        const row = await this.db.getAsync('SELECT id, name, is_closed, created_at FROM statuses WHERE id = ?', [id]);
-        if (!row) {
-            return null;
-        }
-        return {
-            id: Number(row.id),
-            name: String(row.name),
-            is_closed: row.is_closed === 1,
-            created_at: String(row.created_at)
-        };
+        return this.findById(id);
     }
     async createStatus(name, is_closed = false) {
-        const result = await this.db.runAsync('INSERT INTO statuses (name, is_closed) VALUES (?, ?)', [name, is_closed ? 1 : 0]);
-        return {
-            id: result.lastID,
-            name,
-            is_closed,
-            created_at: new Date().toISOString()
-        };
+        const now = new Date().toISOString();
+        const result = await this.db.runAsync('INSERT INTO statuses (name, is_closed, created_at, updated_at) VALUES (?, ?, ?, ?)', [name, is_closed ? 1 : 0, now, now]);
+        const id = result.lastID;
+        const created = await this.findById(id);
+        if (!created) {
+            throw new Error(`Failed to retrieve created status with ID ${id}`);
+        }
+        return created;
     }
     async updateStatus(id, name, is_closed) {
-        let sql = 'UPDATE statuses SET name = ?';
-        const params = [name];
+        const updateData = { name };
         if (is_closed !== undefined) {
-            sql += ', is_closed = ?';
-            params.push(is_closed ? 1 : 0);
+            updateData.is_closed = is_closed;
         }
-        sql += ' WHERE id = ?';
-        params.push(id);
-        const result = await this.db.runAsync(sql, params);
-        return result.changes > 0;
+        const result = await this.updateById(id, updateData);
+        return result !== null;
     }
     async deleteStatus(id) {
-        const result = await this.db.runAsync('DELETE FROM statuses WHERE id = ?', [id]);
-        return result.changes > 0;
+        return this.deleteById(id);
+    }
+    async isStatusInUse(id) {
+        const issueCount = await this.executeQuery('SELECT COUNT(*) as count FROM search_issues WHERE status_id = ?', [id]);
+        const planCount = await this.executeQuery('SELECT COUNT(*) as count FROM search_plans WHERE status_id = ?', [id]);
+        return issueCount[0].count > 0 || planCount[0].count > 0;
     }
     async getStatusByName(name) {
-        const row = await this.db.getAsync('SELECT id, name, is_closed, created_at FROM statuses WHERE name = ?', [name]);
-        if (!row) {
+        const rows = await this.executeQuery('SELECT * FROM statuses WHERE name = ?', [name]);
+        if (rows.length === 0) {
             return null;
         }
-        return {
-            id: Number(row.id),
-            name: String(row.name),
-            is_closed: row.is_closed === 1,
-            created_at: String(row.created_at)
-        };
+        return this.mapRowToEntity(rows[0]);
     }
     async getStatusById(id) {
         return this.getStatus(id);
     }
     async getClosedStatusIds() {
-        const rows = await this.db.allAsync('SELECT id FROM statuses WHERE is_closed = 1');
-        return rows.map((row) => Number(row.id));
+        const rows = await this.executeQuery('SELECT id FROM statuses WHERE is_closed = 1', []);
+        return rows.map(row => row.id);
     }
 }
