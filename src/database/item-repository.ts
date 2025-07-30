@@ -713,4 +713,116 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       );
     }
   }
+
+  /**
+   * @ai-intent Change item type within same base type
+   * @ai-flow 1. Validate types -> 2. Create new item -> 3. Update relations -> 4. Delete old
+   * @ai-critical Must maintain referential integrity
+   */
+  async changeItemType(
+    fromType: string, 
+    fromId: number, 
+    toType: string
+  ): Promise<{ success: boolean; newId?: number; error?: string; relatedUpdates?: number }> {
+    this.logger.info(`Changing type from ${fromType}-${fromId} to ${toType}`);
+    
+    try {
+      // Get type definitions
+      const fromTypeDef = await this.getType(fromType);
+      const toTypeDef = await this.getType(toType);
+      
+      if (!fromTypeDef || !toTypeDef) {
+        return { success: false, error: 'Invalid type specified' };
+      }
+      
+      // Check base type compatibility
+      if (fromTypeDef.baseType !== toTypeDef.baseType) {
+        return { 
+          success: false, 
+          error: `Cannot change between different base types: ${fromTypeDef.baseType} → ${toTypeDef.baseType}` 
+        };
+      }
+      
+      // Special types cannot be changed
+      if (['sessions', 'dailies'].includes(fromType) || ['sessions', 'dailies'].includes(toType)) {
+        return { success: false, error: 'Sessions and dailies cannot be type-changed' };
+      }
+      
+      // Get original item
+      const originalItem = await this.getById(fromType, String(fromId));
+      if (!originalItem) {
+        return { success: false, error: 'Item not found' };
+      }
+      
+      // Create new item with same content
+      const newItem = await this.createItem({
+        type: toType,
+        title: originalItem.title,
+        description: originalItem.description,
+        content: originalItem.content || '',
+        priority: originalItem.priority,
+        status: originalItem.status,
+        tags: originalItem.tags,
+        start_date: originalItem.start_date || undefined,
+        end_date: originalItem.end_date || undefined,
+        related_tasks: originalItem.related_tasks,
+        related_documents: originalItem.related_documents
+      });
+      
+      // Update all references to this item
+      const oldReference = `${fromType}-${fromId}`;
+      const newReference = `${toType}-${newItem.id}`;
+      let relatedUpdates = 0;
+      
+      // Find all items that reference the old item
+      const relatedRows = await this.db.allAsync(`
+        SELECT DISTINCT type, id 
+        FROM items 
+        WHERE related LIKE ?
+      `, [`%"${oldReference}"%`]);
+      
+      // Update each referencing item
+      for (const row of relatedRows) {
+        const item = await this.getById(String(row.type), String(row.id));
+        if (item) {
+          const updatedRelated = item.related.map((ref: string) => 
+            ref === oldReference ? newReference : ref
+          );
+          
+          // Update the item with new references
+          const tasksTypes = ['issues', 'plans', 'bugs'];
+          await this.update(String(row.type), String(row.id), {
+            type: String(row.type),
+            id: String(row.id),
+            related_tasks: updatedRelated.filter((r: string) => {
+              const [refType] = r.split('-');
+              return tasksTypes.includes(refType);
+            }),
+            related_documents: updatedRelated.filter((r: string) => {
+              const [refType] = r.split('-');
+              return !tasksTypes.includes(refType);
+            })
+          });
+          
+          relatedUpdates++;
+        }
+      }
+      
+      // Delete original item
+      await this.delete(fromType, String(fromId));
+      
+      return { 
+        success: true, 
+        newId: Number(newItem.id),
+        relatedUpdates 
+      };
+      
+    } catch (error) {
+      this.logger.error('Failed to change item type', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  }
 }

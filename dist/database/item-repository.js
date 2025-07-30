@@ -486,4 +486,81 @@ export class ItemRepository extends BaseRepository {
             await this.db.runAsync('INSERT INTO related_items (source_type, source_id, target_type, target_id) VALUES (?, ?, ?, ?)', [item.type, item.id, targetType, targetId]);
         }
     }
+    async changeItemType(fromType, fromId, toType) {
+        this.logger.info(`Changing type from ${fromType}-${fromId} to ${toType}`);
+        try {
+            const fromTypeDef = await this.getType(fromType);
+            const toTypeDef = await this.getType(toType);
+            if (!fromTypeDef || !toTypeDef) {
+                return { success: false, error: 'Invalid type specified' };
+            }
+            if (fromTypeDef.baseType !== toTypeDef.baseType) {
+                return {
+                    success: false,
+                    error: `Cannot change between different base types: ${fromTypeDef.baseType} → ${toTypeDef.baseType}`
+                };
+            }
+            if (['sessions', 'dailies'].includes(fromType) || ['sessions', 'dailies'].includes(toType)) {
+                return { success: false, error: 'Sessions and dailies cannot be type-changed' };
+            }
+            const originalItem = await this.getById(fromType, String(fromId));
+            if (!originalItem) {
+                return { success: false, error: 'Item not found' };
+            }
+            const newItem = await this.createItem({
+                type: toType,
+                title: originalItem.title,
+                description: originalItem.description,
+                content: originalItem.content || '',
+                priority: originalItem.priority,
+                status: originalItem.status,
+                tags: originalItem.tags,
+                start_date: originalItem.start_date || undefined,
+                end_date: originalItem.end_date || undefined,
+                related_tasks: originalItem.related_tasks,
+                related_documents: originalItem.related_documents
+            });
+            const oldReference = `${fromType}-${fromId}`;
+            const newReference = `${toType}-${newItem.id}`;
+            let relatedUpdates = 0;
+            const relatedRows = await this.db.allAsync(`
+        SELECT DISTINCT type, id 
+        FROM items 
+        WHERE related LIKE ?
+      `, [`%"${oldReference}"%`]);
+            for (const row of relatedRows) {
+                const item = await this.getById(String(row.type), String(row.id));
+                if (item) {
+                    const updatedRelated = item.related.map((ref) => ref === oldReference ? newReference : ref);
+                    const tasksTypes = ['issues', 'plans', 'bugs'];
+                    await this.update(String(row.type), String(row.id), {
+                        type: String(row.type),
+                        id: String(row.id),
+                        related_tasks: updatedRelated.filter((r) => {
+                            const [refType] = r.split('-');
+                            return tasksTypes.includes(refType);
+                        }),
+                        related_documents: updatedRelated.filter((r) => {
+                            const [refType] = r.split('-');
+                            return !tasksTypes.includes(refType);
+                        })
+                    });
+                    relatedUpdates++;
+                }
+            }
+            await this.delete(fromType, String(fromId));
+            return {
+                success: true,
+                newId: Number(newItem.id),
+                relatedUpdates
+            };
+        }
+        catch (error) {
+            this.logger.error('Failed to change item type', error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            };
+        }
+    }
 }

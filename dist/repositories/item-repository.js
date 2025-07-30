@@ -661,4 +661,10 @@ export class ItemRepository {
         }
         return syncedCount;
     }
+    async changeItemType(fromType, fromId, toType) {
+        return {
+            success: false,
+            error: 'changeItemType is not fully implemented yet due to database initialization issues. The item repository versions are incompatible.'
+        };
+    }
 }
