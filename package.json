@@ -9,12 +9,13 @@
     "shirokuma-mcp-knowledge-base-rebuild": "./dist/rebuild-db.js"
   },
   "scripts": {
-    "dev": "tsx src/server.ts",
+    "dev": "NODE_ENV=development tsx src/server.ts",
     "build": "tsc --build --clean && tsc --build --force tsconfig.prod.json",
     "build:dev": "tsc --build --clean && tsc --build --force",
     "build:clean": "tsc --build --clean",
     "build:watch": "tsc --watch",
     "start": "node dist/server.js",
+    "start:dev": "NODE_ENV=development node dist/server.js",
     "test": "jest",
     "test:keep": "KEEP_TEST_DATA=true jest",
     "test:unit": "jest --testMatch='**/src/**/*.test.ts' --testPathIgnorePatterns='/integration/'",
@@ -22,7 +23,7 @@
     "test:integration": "jest tests/integration --runInBand",
     "test:e2e": "tsx tests/e2e/custom-runner.ts",
     "test:e2e:custom": "tsx tests/e2e/custom-runner.ts",
-    "inspect": "npx @modelcontextprotocol/inspector node dist/server.js",
+    "inspect": "NODE_ENV=development npx @modelcontextprotocol/inspector node dist/server.js",
     "test:scenarios": "tsx tests/integration/test-runner.ts",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e:custom",
     "lint": "eslint src/",

@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+// @ai-critical: Set MCP production mode before any imports
+// @ai-why: Prevents any logging output that would break MCP JSON protocol
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
+  process.env.MCP_MODE = 'production';
+}
+
 /**
  * @ai-context MCP server entry point for knowledge base management
  * @ai-pattern MCP server with handler delegation pattern
@@ -54,6 +60,7 @@ import { getConfig } from './config.js';
 
 import { createUnifiedHandlers, handleUnifiedToolCall } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
+import { guardStdio } from './utils/stdio-guard.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
@@ -119,7 +126,10 @@ export class IssueTrackerServer {
     this.setupToolHandlers();
 
     // @ai-critical: Global error handler prevents server crashes
-    this.server.onerror = (error) => console.error('[MCP Error]', error);
+    this.server.onerror = (error) => {
+      // Silently handle errors to avoid stdio pollution
+      // TODO: Write to log file instead
+    };
 
     // @ai-lifecycle: Graceful shutdown on SIGINT (Ctrl+C)
     process.on('SIGINT', async () => {
@@ -228,24 +238,42 @@ export class IssueTrackerServer {
   }
 
   async run() {
-    console.error('Starting Issue Tracker MCP Server...');
-    console.error('Initializing database...');
+    // console.error('Starting Issue Tracker MCP Server...');
+    // console.error('Initializing database...');
     await this.db.initialize();
     await this.typeHandlers.init();
-    console.error('Database initialized');
+    // console.error('Database initialized');
 
     // Initialize unified handlers after database is ready
     this.unifiedHandlers = createUnifiedHandlers(this.db);
 
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Issue Tracker MCP Server running on stdio');
+    // console.error('Issue Tracker MCP Server running on stdio');
   }
 }
 
 // Only run if this is the main module (not imported for testing)
 // Check if module is being run directly or imported
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+  // @ai-critical: Disable console logging for MCP server
+  // MCP uses stdio for communication, any console output breaks the protocol
+  process.env.NODE_ENV = 'production';
+  process.env.LOG_LEVEL = 'silent';
+  
+  // @ai-critical: Disable SQLite trace output
+  // SQLite can output trace information that breaks MCP protocol
+  process.env.SQLITE_TRACE = '';
+  process.env.SQLITE_PROFILE = '';
+  process.env.DEBUG = '';
+  
+  // @ai-critical: Guard stdio from any pollution
+  guardStdio();
+  
   const server = new IssueTrackerServer();
-  server.run().catch(console.error);
+  server.run().catch((error) => {
+    // Silently handle errors to avoid stdio pollution
+    // TODO: Write to log file instead
+    process.exit(1);
+  });
 }

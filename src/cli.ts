@@ -45,14 +45,14 @@ program
         process.exit(code || 0);
       });
     } else if (options.inspect) {
-      // Run with inspector
+      // Run with inspector (always in development mode for debugging)
       const inspect = spawn('npx', [
         '@modelcontextprotocol/inspector',
         'node',
         path.join(__dirname, 'server.js')
       ], {
         stdio: 'inherit',
-        env: process.env
+        env: { ...process.env, NODE_ENV: 'development' }
       });
 
       inspect.on('exit', (code) => {
