@@ -19,6 +19,9 @@ export default {
       }
     ]
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@xenova/transformers)/)'
+  ],
   testMatch: [
     '**/src/**/__tests__/**/*.test.ts',
     '**/src/**/?(*.)+(spec|test).ts',

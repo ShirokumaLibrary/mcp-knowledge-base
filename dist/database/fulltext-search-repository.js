@@ -10,13 +10,26 @@ export class FullTextSearchRepository {
         const maxLimit = 1000;
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
         const offset = Math.max(0, options?.offset || 0);
-        const escapedQuery = query.replace(/['"]/g, '');
+        const trimmedQuery = query.trim();
+        let ftsQuery;
+        if (!trimmedQuery) {
+            throw new Error('Search query cannot be empty');
+        }
+        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+        if (words.length === 1) {
+            ftsQuery = words[0];
+        }
+        else {
+            ftsQuery = words.map(word => {
+                return word.replace(/['"]/g, '');
+            }).join(' AND ');
+        }
         let typeFilter = '';
-        let params = [`"${escapedQuery}"`, limit, offset];
+        let params = [ftsQuery, limit, offset];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
             typeFilter = `AND items.type IN (${placeholders})`;
-            params = [`"${escapedQuery}"`, ...options.types, limit, offset];
+            params = [ftsQuery, ...options.types, limit, offset];
         }
         const sql = `
       SELECT 
@@ -50,13 +63,26 @@ export class FullTextSearchRepository {
         const defaultLimit = 10;
         const maxLimit = 100;
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
-        const escapedQuery = query.replace(/['"]/g, '');
+        const trimmedQuery = query.trim();
+        let ftsQuery;
+        if (!trimmedQuery) {
+            return [];
+        }
+        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+        if (words.length === 1) {
+            ftsQuery = `${words[0]}*`;
+        }
+        else {
+            const lastWord = words.pop();
+            const previousWords = words.map(word => word.replace(/['"]/g, ''));
+            ftsQuery = previousWords.join(' AND ') + ` AND ${lastWord}*`;
+        }
         let typeFilter = '';
-        let params = [`"${escapedQuery}"*`, limit];
+        let params = [ftsQuery, limit];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
             typeFilter = `AND items.type IN (${placeholders})`;
-            params = [`"${escapedQuery}"*`, ...options.types, limit];
+            params = [ftsQuery, ...options.types, limit];
         }
         const sql = `
       SELECT DISTINCT items.title
@@ -76,13 +102,26 @@ export class FullTextSearchRepository {
         }
     }
     async count(query, options) {
-        const escapedQuery = query.replace(/['"]/g, '');
+        const trimmedQuery = query.trim();
+        let ftsQuery;
+        if (!trimmedQuery) {
+            throw new Error('Search query cannot be empty');
+        }
+        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+        if (words.length === 1) {
+            ftsQuery = words[0];
+        }
+        else {
+            ftsQuery = words.map(word => {
+                return word.replace(/['"]/g, '');
+            }).join(' AND ');
+        }
         let typeFilter = '';
-        let params = [`"${escapedQuery}"`];
+        let params = [ftsQuery];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
             typeFilter = `AND items.type IN (${placeholders})`;
-            params = [`"${escapedQuery}"`, ...options.types];
+            params = [ftsQuery, ...options.types];
         }
         const sql = `
       SELECT COUNT(*) as count

@@ -146,6 +146,54 @@ describe('Full-text Search', () => {
       expect(hasOverlap).toBe(false);
     });
 
+    test('should handle multi-word AND search', async () => {
+      // Use unique words to avoid interference from other tests
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Zebra Elephant Combination',
+        content: 'Both zebra and elephant are mentioned here',
+        priority: 'high',
+        status: 'Open'
+      });
+      
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Zebra Only Document',
+        content: 'This mentions zebra but not the other animal',
+        priority: 'medium',
+        status: 'Open'
+      });
+      
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Elephant Only Document',
+        content: 'This mentions elephant but not the other animal',
+        priority: 'medium',
+        status: 'Open'
+      });
+      
+      // Test AND search - both words required
+      const results = await searchRepo.search('zebra elephant');
+      
+      expect(results.length).toBe(1);
+      expect(results[0].title).toBe('Zebra Elephant Combination');
+    });
+
+    test('should return no results when one word in multi-word search is missing', async () => {
+      await itemRepo.createItem({
+        type: 'docs',
+        title: 'Giraffe Documentation',
+        content: 'This document is about giraffe behavior',
+        priority: 'high',
+        status: 'Open'
+      });
+      
+      // Search for two words where only one exists
+      const results = await searchRepo.search('giraffe rhinoceros');
+      
+      expect(results.length).toBe(0);
+    });
+
     test('should handle Japanese text', async () => {
       const item = await itemRepo.createItem({
         type: 'knowledge',
@@ -291,6 +339,60 @@ describe('Full-text Search', () => {
       
       expect(count).toBe(0);
     });
+
+    test('should count multi-word AND search correctly', async () => {
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Kangaroo Koala Combination',
+        content: 'Both kangaroo and koala are mentioned',
+        priority: 'high',
+        status: 'Open'
+      });
+      
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Kangaroo Only',
+        content: 'Just kangaroo here',
+        priority: 'medium',
+        status: 'Open'
+      });
+      
+      await itemRepo.createItem({
+        type: 'issues',
+        title: 'Koala Only',
+        content: 'Just koala here',
+        priority: 'medium',
+        status: 'Open'
+      });
+      
+      // Count items with both words
+      const count = await searchRepo.count('kangaroo koala');
+      
+      expect(count).toBe(1);
+    });
+
+    test('should count three-word AND search correctly', async () => {
+      await itemRepo.createItem({
+        type: 'docs',
+        title: 'Penguin Polar Bear Arctic',
+        content: 'All three animals: penguin, polar bear, arctic fox',
+        priority: 'high',
+        status: 'Open'
+      });
+      
+      await itemRepo.createItem({
+        type: 'docs',
+        title: 'Penguin and Polar',
+        content: 'Just penguin and polar bear',
+        priority: 'medium',
+        status: 'Open'
+      });
+      
+      // Count items with all three words
+      const count = await searchRepo.count('penguin polar arctic');
+      
+      expect(count).toBe(1);
+    });
   });
 
   describe('FTS synchronization', () => {
@@ -312,8 +414,8 @@ describe('Full-text Search', () => {
     test('should update FTS on item update', async () => {
       const item = await itemRepo.createItem({
         type: 'issues',
-        title: 'Original Title',
-        content: 'Original content',
+        title: 'Unique Initial Title',
+        content: 'Some content here',
         priority: 'medium',
         status: 'Open'
       });
@@ -321,10 +423,12 @@ describe('Full-text Search', () => {
       await itemRepo.updateItem({
         type: 'issues',
         id: item.id,
-        title: 'Updated Searchable Title'
+        title: 'Updated Searchable Title',
+        content: 'Different content now'
       });
 
-      const oldResults = await searchRepo.search('original title');
+      // Search for a unique word from the old title that's not in the new title or content
+      const oldResults = await searchRepo.search('Initial');
       const newResults = await searchRepo.search('searchable');
       
       expect(oldResults.length).toBe(0); // Should not find old title

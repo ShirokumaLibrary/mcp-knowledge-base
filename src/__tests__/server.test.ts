@@ -27,8 +27,22 @@ jest.mock('../database.js');
 // Mock the session manager
 jest.mock('../session-manager.js');
 
+// Mock @xenova/transformers to avoid ESM issues
+jest.mock('@xenova/transformers', () => ({
+  pipeline: jest.fn().mockResolvedValue({
+    data: new Float32Array(384).fill(0.1)
+  })
+}));
+
 // Mock config
 jest.mock('../config.js', () => ({
+  config: {
+    database: {
+      path: '/tmp/test-db',
+      sessionsPath: '/tmp/test-db/sessions',
+      sqlitePath: '/tmp/test-db/search.db'
+    }
+  },
   getConfig: () => ({
     database: {
       path: '/tmp/test-db',
