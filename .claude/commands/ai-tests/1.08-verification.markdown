@@ -59,6 +59,22 @@ Parameters: {query: "bug", types: ["issues"]}
 Expected: Only issues containing "bug"
 ```
 
+### Multi-word AND Search
+```
+Tool: search_items
+Parameters: {query: "authentication system"}
+Expected: Only items containing BOTH "authentication" AND "system"
+Note: Verify that multi-word queries use AND logic, not OR
+```
+
+### Multi-word Search - Negative Test
+```
+Tool: search_items
+Parameters: {query: "authentication nonexistent"}
+Expected: No results (even though "authentication" exists, "nonexistent" doesn't)
+Note: Confirms AND logic - both words must be present
+```
+
 ### Search Suggestions
 ```
 Tool: search_suggest

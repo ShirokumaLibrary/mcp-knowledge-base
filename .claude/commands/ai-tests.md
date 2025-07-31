@@ -34,7 +34,7 @@ Execute systematic validation tests for MCP server functions through the MCP pro
 Parse arguments:
 - No arguments: Run all Phase 1 tests
 - Test number (e.g., "1.01"): Run specific test
-- "phase1": Run tests 1.01-1.14
+- "phase1": Run tests 1.01-1.15
 - "phase2": Run tests 2.01-2.02
 
 #### Phase 1: Core Functionality Tests
@@ -52,6 +52,7 @@ Parse arguments:
 1.12. **Current State Management Tests** - @.claude/commands/ai-tests/1.12-current-state.markdown
 1.13. **Item Type Change Tests** - @.claude/commands/ai-tests/1.13-type-change.markdown
 1.14. **Field Validation Tests** - @.claude/commands/ai-tests/1.14-field-validation.markdown
+1.15. **File Indexing Tests** - @.claude/commands/ai-tests/1.15-file-indexing.markdown
 
 #### Phase 2: Database Rebuild Tests
 2.01. **Database Rebuild and SQLite Verification** - @.claude/commands/ai-tests/2.01-rebuild-tests.markdown
@@ -74,11 +75,13 @@ For each test:
 - Unicode/special characters handled properly
 - Custom types validate correctly
 - Related items stored as JSON arrays
+- File indexing works for git repositories
+- Semantic code search returns relevant results
 
 ### Result Reporting Format
 ```
 📊 [Test Results Summary]
-[Phase 1]: X/14 [tests passed]
+[Phase 1]: X/15 [tests passed]
 [Phase 2]: X/2 [tests passed]
 
 [Details]:

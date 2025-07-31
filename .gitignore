@@ -63,6 +63,9 @@ Thumbs.db
 # Development scripts - temporary debugging tools
 /scripts/
 
+/poc
+/poc/*
+
 # Backup files
 *.backup
 *.bak
