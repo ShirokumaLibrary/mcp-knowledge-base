@@ -28,11 +28,27 @@ mcp__[インスタンス名]__get_items({ type: "sessions", limit: 1 })
 mcp__[インスタンス名]__search_items({ query: "[操作名] 手順" })
 ```
 
+### コード検索とナビゲーション (v0.7.0+)
+```bash
+# コードベースをインデックス化してセマンティック検索を有効化
+mcp__[インスタンス名]__index_codebase()
+
+# 自然言語でコードを検索
+mcp__[インスタンス名]__search_code({ query: "認証ロジック" })
+
+# 関連ファイルを検索
+mcp__[インスタンス名]__get_related_files({ file: "src/auth.ts" })
+
+# インデックスの状態を確認
+mcp__[インスタンス名]__get_index_status()
+```
+
 ### 重要情報の記録
 - **Issues**: タスク、バグ、TODO
 - **Knowledge**: 手順書、ガイド、ドキュメント
 - **Sessions**: 作業ログ、進捗追跡
 - **Current State**: プロジェクトの状態、次のステップ
+- **File Index**: セマンティックコード検索結果、関連ファイル
 
 ## ⚡ 必須情報テンプレート
 

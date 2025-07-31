@@ -28,11 +28,27 @@ mcp__[instance-name]__get_items({ type: "sessions", limit: 1 })
 mcp__[instance-name]__search_items({ query: "[operation] procedure" })
 ```
 
+### Code Search and Navigation (v0.7.0+)
+```bash
+# Index your codebase for semantic search
+mcp__[instance-name]__index_codebase()
+
+# Search code using natural language
+mcp__[instance-name]__search_code({ query: "authentication logic" })
+
+# Find related files
+mcp__[instance-name]__get_related_files({ file: "src/auth.ts" })
+
+# Check index status
+mcp__[instance-name]__get_index_status()
+```
+
 ### Recording Important Information
 - **Issues**: Tasks, bugs, TODOs
 - **Knowledge**: Procedures, guides, documentation
 - **Sessions**: Work logs, progress tracking
 - **Current State**: Project status, next steps
+- **File Index**: Semantic code search results, related files
 
 ## ⚡ Essential Information Template
 
