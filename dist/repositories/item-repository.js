@@ -492,10 +492,6 @@ export class ItemRepository {
                 query += ` AND ${dateField} <= ?`;
                 params.push(isDateOnly ? endDate : endDate + 'T23:59:59.999Z');
             }
-            if (type === 'sessions') {
-                console.log('Date filter query:', query);
-                console.log('Date filter params:', params);
-            }
         }
         query += ' ORDER BY i.created_at DESC';
         if (limit && limit > 0) {

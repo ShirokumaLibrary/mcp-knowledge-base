@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
+    process.env.MCP_MODE = 'production';
+}
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError } from '@modelcontextprotocol/sdk/types.js';
@@ -7,6 +10,7 @@ import { SessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 import { createUnifiedHandlers, handleUnifiedToolCall } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
+import { guardStdio } from './utils/stdio-guard.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
 import { SessionHandlers } from './handlers/session-handlers.js';
 import { SummaryHandlers } from './handlers/summary-handlers.js';
@@ -49,7 +53,8 @@ export class IssueTrackerServer {
             }
         });
         this.setupToolHandlers();
-        this.server.onerror = (error) => console.error('[MCP Error]', error);
+        this.server.onerror = (error) => {
+        };
         process.on('SIGINT', async () => {
             await this.server.close();
             this.db.close();
@@ -110,18 +115,22 @@ export class IssueTrackerServer {
         }
     }
     async run() {
-        console.error('Starting Issue Tracker MCP Server...');
-        console.error('Initializing database...');
         await this.db.initialize();
         await this.typeHandlers.init();
-        console.error('Database initialized');
         this.unifiedHandlers = createUnifiedHandlers(this.db);
         const transport = new StdioServerTransport();
         await this.server.connect(transport);
-        console.error('Issue Tracker MCP Server running on stdio');
     }
 }
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+    process.env.NODE_ENV = 'production';
+    process.env.LOG_LEVEL = 'silent';
+    process.env.SQLITE_TRACE = '';
+    process.env.SQLITE_PROFILE = '';
+    process.env.DEBUG = '';
+    guardStdio();
     const server = new IssueTrackerServer();
-    server.run().catch(console.error);
+    server.run().catch((error) => {
+        process.exit(1);
+    });
 }
