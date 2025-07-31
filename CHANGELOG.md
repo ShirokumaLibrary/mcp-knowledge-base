@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2025-07-31
+
+### Fixed
+- Critical JSON parsing errors in MCP protocol communication
+  - Removed all console output that was polluting stdio
+  - Disabled winston logging in production MCP mode
+  - Removed sqlite3 verbose mode to prevent debug output
+  - Added stdio guard utility to redirect unwanted output to log files
+  - Fixed "Unexpected non-whitespace character at position 4" errors
+
+### Changed
+- Enhanced environment configuration for development vs production modes
+  - NODE_ENV=development automatically enables logging
+  - Production mode (default) suppresses all output for clean MCP protocol
+  - Added npm scripts for explicit mode control
+
 ## [0.6.1] - 2025-07-30
 
 ### Added
