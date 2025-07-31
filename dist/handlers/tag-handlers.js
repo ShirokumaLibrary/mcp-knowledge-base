@@ -15,7 +15,7 @@ export class TagHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: tags }, null, 2)
+                        text: JSON.stringify({ data: tags })
                     }
                 ]
             };
@@ -81,7 +81,7 @@ export class TagHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: tags }, null, 2)
+                        text: JSON.stringify({ data: tags })
                     }
                 ]
             };
@@ -102,7 +102,7 @@ export class TagHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: results }, null, 2)
+                        text: JSON.stringify({ data: results })
                     }
                 ]
             };

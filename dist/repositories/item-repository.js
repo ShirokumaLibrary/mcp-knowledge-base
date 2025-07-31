@@ -465,7 +465,9 @@ export class ItemRepository {
             throw new McpError(ErrorCode.InvalidRequest, `Unknown type: ${type}`);
         }
         let query = `
-      SELECT i.*, s.name as status_name, s.is_closed
+      SELECT i.type, i.id, i.title, i.description, i.priority, 
+             i.tags, i.updated_at, s.name as status_name,
+             i.start_date
       FROM items i
       LEFT JOIN statuses s ON i.status_id = s.id
       WHERE i.type = ?
@@ -500,11 +502,13 @@ export class ItemRepository {
             query += ` LIMIT ${safeLimit}`;
         }
         const rows = await this.db.allAsync(query, params);
-        return rows.map(row => this.rowToUnifiedItem(row));
+        return rows.map(row => this.rowToListItem(row));
     }
     async searchItemsByTag(tag, types) {
         let query = `
-      SELECT DISTINCT i.*, s.name as status_name
+      SELECT DISTINCT i.type, i.id, i.title, i.description, i.priority, 
+             i.tags, i.updated_at, s.name as status_name,
+             i.start_date
       FROM items i
       JOIN item_tags it ON i.type = it.item_type AND i.id = it.item_id
       JOIN tags t ON it.tag_id = t.id
@@ -518,7 +522,7 @@ export class ItemRepository {
         }
         query += ' ORDER BY i.created_at DESC';
         const rows = await this.db.allAsync(query, params);
-        return rows.map(row => this.rowToUnifiedItem(row));
+        return rows.map(row => this.rowToListItem(row));
     }
     async syncItemToSQLite(item) {
         const params = [
@@ -580,17 +584,36 @@ export class ItemRepository {
             }
         }
     }
-    rowToUnifiedItem(row) {
+    rowToListItem(row) {
         const tags = row.tags ? JSON.parse(row.tags) : [];
-        const related = row.related ? JSON.parse(row.related) : [];
-        const related_tasks = related.filter((r) => r.match(/^(issues|plans)-/));
-        const related_documents = related.filter((r) => r.match(/^(docs|knowledge)-/));
         const item = {
             id: row.id,
             type: row.type,
             title: row.title,
             description: row.description || undefined,
-            content: row.content || '',
+            tags,
+            updated_at: row.updated_at
+        };
+        if (row.status_name) {
+            item.status = row.status_name;
+        }
+        if (row.priority) {
+            item.priority = row.priority;
+        }
+        if ((row.type === 'sessions' || row.type === 'dailies') && row.start_date) {
+            item.date = row.start_date;
+        }
+        return item;
+    }
+    rowToUnifiedItem(row) {
+        const tags = row.tags ? JSON.parse(row.tags) : [];
+        const related = row.related ? JSON.parse(row.related) : [];
+        const item = {
+            id: row.id,
+            type: row.type,
+            title: row.title,
+            description: row.description || undefined,
+            content: row.content !== undefined ? (row.content || '') : '',
             priority: row.priority,
             status: row.status_name || 'Unknown',
             status_id: row.status_id || 1,
@@ -599,8 +622,6 @@ export class ItemRepository {
             start_time: row.start_time,
             tags,
             related,
-            related_tasks,
-            related_documents,
             created_at: row.created_at,
             updated_at: row.updated_at
         };

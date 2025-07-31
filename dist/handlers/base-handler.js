@@ -68,7 +68,7 @@ export class BaseHandler {
         return items.map(item => `- ${item}`).join('\n');
     }
     formatJson(obj) {
-        return JSON.stringify(obj, null, 2);
+        return JSON.stringify(obj);
     }
     ensureDatabase() {
         if (!this.database) {

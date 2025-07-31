@@ -175,7 +175,8 @@ export class DatabaseConnection {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
         is_closed BOOLEAN DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -476,6 +477,17 @@ export class DatabaseConnection {
 
     // Index for type fields
     await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_type_fields_type ON type_fields(type)');
+    
+    // Add updated_at column to statuses table if it doesn't exist (for migration)
+    try {
+      await this.db.runAsync('ALTER TABLE statuses ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP');
+      this.logger.debug('Added updated_at column to statuses table');
+    } catch (err: any) {
+      // Column already exists, which is fine
+      if (!err.message.includes('duplicate column name')) {
+        this.logger.error('Error adding updated_at to statuses:', err);
+      }
+    }
   }
 
   getDatabase(): Database {

@@ -9,6 +9,7 @@ import { getConfig } from '../config.js';
 import { ensureInitialized } from '../utils/decorators.js';
 import { Session, Daily } from '../types/complete-domain-types.js';
 import type { Issue, Plan, Document } from '../types/domain-types.js';
+import type { ListItem } from '../types/unified-types.js';
 // import * as path from 'path';
 
 // Re-export types
@@ -64,6 +65,54 @@ export class FileIssueDatabase {
   private fullTextSearchRepo!: FullTextSearchRepository;
   private typeRepo!: TypeRepository;
   private initializationPromise: Promise<void> | null = null;
+
+  /**
+   * Convert ListItem to legacy Issue format
+   */
+  private listItemToIssue(item: ListItem): Omit<Issue, 'content' | 'related_tasks' | 'related_documents'> {
+    return {
+      id: parseInt(item.id),
+      title: item.title,
+      description: item.description,
+      priority: item.priority || 'medium',
+      status: item.status || 'Unknown',
+      start_date: null,
+      end_date: null,
+      tags: item.tags,
+      created_at: item.updated_at,
+      updated_at: item.updated_at
+    };
+  }
+
+  /**
+   * Convert ListItem to full Issue format with empty content
+   */
+  private listItemToFullIssue(item: ListItem): Issue {
+    return {
+      ...this.listItemToIssue(item),
+      content: '',
+      related_tasks: [],
+      related_documents: []
+    };
+  }
+
+  /**
+   * Convert ListItem to Document format
+   */
+  private listItemToDocument(item: ListItem): Document {
+    return {
+      type: item.type,
+      id: parseInt(item.id),
+      title: item.title,
+      description: item.description,
+      content: '',
+      tags: item.tags,
+      related_tasks: [],
+      related_documents: [],
+      created_at: item.updated_at,
+      updated_at: item.updated_at
+    };
+  }
 
   constructor(
     private dataDir: string,
@@ -503,38 +552,13 @@ export class FileIssueDatabase {
         .filter((name): name is string => name !== undefined);
     }
     const items = await this.itemRepo.getItems('issues', includeClosedStatuses, statuses);
-    return items.map(item => ({
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      priority: item.priority,
-      status: item.status,
-      start_date: item.start_date,
-      end_date: item.end_date,
-      tags: item.tags,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToIssue(item));
   }
 
   @ensureInitialized
   async searchIssuesByTag(tag: string) {
     const items = await this.itemRepo.searchItemsByTag(tag, ['issues']);
-    return items.map(item => ({
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      content: item.content,
-      priority: item.priority,
-      status: item.status,
-      tags: item.tags,
-      start_date: item.start_date,
-      end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToFullIssue(item));
   }
 
   // Plan methods (delegate to ItemRepository)
@@ -672,38 +696,13 @@ export class FileIssueDatabase {
         .filter((name): name is string => name !== undefined);
     }
     const items = await this.itemRepo.getItems('plans', includeClosedStatuses, statuses);
-    return items.map(item => ({
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      priority: item.priority,
-      status: item.status,
-      start_date: item.start_date,
-      end_date: item.end_date,
-      tags: item.tags,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToIssue(item));
   }
 
   @ensureInitialized
   async searchPlansByTag(tag: string) {
     const items = await this.itemRepo.searchItemsByTag(tag, ['plans']);
-    return items.map(item => ({
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      content: item.content,
-      priority: item.priority,
-      status: item.status,
-      tags: item.tags,
-      start_date: item.start_date,
-      end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToFullIssue(item));
   }
 
   // Document methods (delegate to ItemRepository)
@@ -713,33 +712,11 @@ export class FileIssueDatabase {
       // Get both docs and knowledge
       const docs = await this.itemRepo.getItems('docs');
       const knowledge = await this.itemRepo.getItems('knowledge');
-      return [...docs, ...knowledge].map(item => ({
-        type: item.type,
-        id: parseInt(item.id),
-        title: item.title,
-        description: item.description,
-        content: item.content,
-        tags: item.tags,
-        related_tasks: item.related_tasks,
-        related_documents: item.related_documents,
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      }));
+      return [...docs, ...knowledge].map(item => this.listItemToDocument(item));
     }
 
     const items = await this.itemRepo.getItems(type);
-    return items.map(item => ({
-      type: item.type,
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      content: item.content,
-      tags: item.tags,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToDocument(item));
   }
 
   @ensureInitialized
@@ -834,18 +811,7 @@ export class FileIssueDatabase {
   async searchDocumentsByTag(tag: string, type?: string) {
     const types = type ? [type] : ['docs', 'knowledge'];
     const items = await this.itemRepo.searchItemsByTag(tag, types);
-    return items.map(item => ({
-      type: item.type,
-      id: parseInt(item.id),
-      title: item.title,
-      description: item.description,
-      content: item.content,
-      tags: item.tags,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
-      created_at: item.created_at,
-      updated_at: item.updated_at
-    }));
+    return items.map(item => this.listItemToDocument(item));
   }
 
   @ensureInitialized
@@ -859,7 +825,7 @@ export class FileIssueDatabase {
         title: item.title,
         description: item.description,
         tags: item.tags,
-        created_at: item.created_at,
+        created_at: item.updated_at,
         updated_at: item.updated_at
       }));
     }
@@ -871,7 +837,7 @@ export class FileIssueDatabase {
       title: item.title,
       description: item.description,
       tags: item.tags,
-      created_at: item.created_at,
+      created_at: item.updated_at,
       updated_at: item.updated_at
     }));
   }

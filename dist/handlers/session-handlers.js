@@ -16,7 +16,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: session }, null, 2)
+                        text: JSON.stringify({ data: session })
                     }
                 ]
             };
@@ -37,7 +37,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: session }, null, 2)
+                        text: JSON.stringify({ data: session })
                     }
                 ]
             };
@@ -58,7 +58,7 @@ export class SessionHandlers {
                     content: [
                         {
                             type: 'text',
-                            text: JSON.stringify({ data: null }, null, 2)
+                            text: JSON.stringify({ data: null })
                         }
                     ]
                 };
@@ -67,7 +67,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: session }, null, 2)
+                        text: JSON.stringify({ data: session })
                     }
                 ]
             };
@@ -88,7 +88,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: sessions }, null, 2)
+                        text: JSON.stringify({ data: sessions })
                     }
                 ]
             };
@@ -109,7 +109,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: sessions }, null, 2)
+                        text: JSON.stringify({ data: sessions })
                     }
                 ]
             };
@@ -133,7 +133,7 @@ export class SessionHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: session }, null, 2)
+                        text: JSON.stringify({ data: session })
                     }
                 ]
             };

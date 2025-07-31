@@ -45,7 +45,18 @@ export function createUnifiedHandlers(fileDb) {
     }
     async function handleSearchItemsByTag(params) {
         const { tag, types } = params;
-        const items = await itemRepository.searchItemsByTag(tag, types);
+        const listItems = await itemRepository.searchItemsByTag(tag, types);
+        const items = listItems.map(item => ({
+            ...item,
+            content: '',
+            status_id: 1,
+            priority: item.priority || 'medium',
+            start_date: null,
+            end_date: null,
+            start_time: null,
+            related: [],
+            created_at: item.updated_at
+        }));
         const result = {
             tasks: {},
             documents: {}
@@ -345,7 +356,7 @@ export async function handleUnifiedToolCall(name, args, handlers) {
         content: [
             {
                 type: 'text',
-                text: JSON.stringify({ data: result }, null, 2)
+                text: JSON.stringify({ data: result })
             }
         ]
     };

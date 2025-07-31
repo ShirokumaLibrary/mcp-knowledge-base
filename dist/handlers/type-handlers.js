@@ -108,7 +108,7 @@ export class TypeHandlers {
                     supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents']
                 }
             ];
-            output += JSON.stringify(definitions, null, 2);
+            output += JSON.stringify(definitions);
             output += '\n```\n';
         }
         return {

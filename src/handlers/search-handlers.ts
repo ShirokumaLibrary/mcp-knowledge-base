@@ -108,7 +108,7 @@ export class SearchHandlers {
       return {
         content: [{
           type: 'text' as const,
-          text: JSON.stringify(result, null, 2)
+          text: JSON.stringify(result)
         }]
       };
     } catch (error) {
@@ -142,7 +142,7 @@ export class SearchHandlers {
       return {
         content: [{
           type: 'text' as const,
-          text: JSON.stringify({ suggestions }, null, 2)
+          text: JSON.stringify({ suggestions })
         }]
       };
     } catch (error) {

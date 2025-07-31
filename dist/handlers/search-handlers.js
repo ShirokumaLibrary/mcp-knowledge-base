@@ -76,7 +76,7 @@ export class SearchHandlers {
             return {
                 content: [{
                         type: 'text',
-                        text: JSON.stringify(result, null, 2)
+                        text: JSON.stringify(result)
                     }]
             };
         }
@@ -98,7 +98,7 @@ export class SearchHandlers {
             return {
                 content: [{
                         type: 'text',
-                        text: JSON.stringify({ suggestions }, null, 2)
+                        text: JSON.stringify({ suggestions })
                     }]
             };
         }

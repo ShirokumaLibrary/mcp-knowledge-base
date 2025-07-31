@@ -163,7 +163,7 @@ async function rebuildDatabase() {
     const tagRepo = fullDb['tagRepo'];
     const allTags = await tagRepo.getAllTags();
     console.log('\n🏷️  Tags registration:');
-    console.log(`  Collected tags: ${JSON.stringify(allTags.map(t => t.name), null, 2)}`);
+    console.log(`  Collected tags: ${JSON.stringify(allTags.map(t => t.name))}`);
     console.log('  ✅ Tags were automatically registered during data sync');
     console.log('\n📊 Database rebuild complete:');
     console.log('  Type counts:');

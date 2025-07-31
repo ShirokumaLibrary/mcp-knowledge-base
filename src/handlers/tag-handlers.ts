@@ -49,7 +49,7 @@ export class TagHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: tags }, null, 2)
+            text: JSON.stringify({ data: tags })
           }
         ]
       };
@@ -153,7 +153,7 @@ export class TagHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: tags }, null, 2)
+            text: JSON.stringify({ data: tags })
           }
         ]
       };
@@ -186,7 +186,7 @@ export class TagHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: results }, null, 2)  // @ai-pattern: Categorized by type
+            text: JSON.stringify({ data: results })  // @ai-pattern: Categorized by type
           }
         ]
       };

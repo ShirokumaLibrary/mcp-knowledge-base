@@ -78,13 +78,26 @@ Execute: mcp__shirokuma_knowledge_base__get_items({
 })
 
 ### 7. Create or update daily
-If exists: update_item, else: create_item
-- type: "dailies"
-- date: today
-- title: "[Work Summary] - " + today (translate to user's language)
-- content: generated content
-- related_tasks: array of today's session and issue IDs
-- tags: []
+Based on step 6 result:
+
+If daily does NOT exist (empty result):
+Execute: mcp__shirokuma_knowledge_base__create_item({
+  "type": "dailies",
+  "date": today,
+  "title": "[Work Summary] - " + today (translate to user's language),
+  "content": generated content,
+  "related_tasks": array of today's session and issue IDs
+})
+
+If daily EXISTS:
+Execute: mcp__shirokuma_knowledge_base__update_item({
+  "type": "dailies",
+  "id": today,
+  "content": merge existing content with new information,
+  "related_tasks": merge existing and new task IDs (remove duplicates)
+})
+
+Note: When updating, preserve valuable information from existing content.
 
 ### 8. Get all open issues
 Execute: mcp__shirokuma_knowledge_base__get_items({ 

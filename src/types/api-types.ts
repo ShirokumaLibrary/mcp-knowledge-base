@@ -149,7 +149,7 @@ export const ResponseFormatters = {
     return {
       content: [{
         type: 'text' as const,
-        text: JSON.stringify(response, null, 2)
+        text: JSON.stringify(response)
       }]
     };
   },
