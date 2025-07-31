@@ -812,10 +812,10 @@ export class ItemRepository {
       }
 
       // Debug logging
-      if (type === 'sessions') {
-        console.log('Date filter query:', query);
-        console.log('Date filter params:', params);
-      }
+      // if (type === 'sessions') {
+      //   console.log('Date filter query:', query);
+      //   console.log('Date filter params:', params);
+      // }
     }
 
     query += ' ORDER BY i.created_at DESC';

@@ -158,7 +158,7 @@ export class FileIssueDatabase {
   // Legacy status methods for tests
   @ensureInitialized
   async createStatus(name: string) {
-    console.warn('createStatus is deprecated');
+    // console.warn('createStatus is deprecated');
     const statuses = await this.statusRepo.getAllStatuses();
     const existing = statuses.find(s => s.name === name);
     if (existing) {
@@ -170,13 +170,13 @@ export class FileIssueDatabase {
 
   @ensureInitialized
   async updateStatus(_id: number, _name: string) {
-    console.warn('updateStatus is deprecated');
+    // console.warn('updateStatus is deprecated');
     return true;
   }
 
   @ensureInitialized
   async deleteStatus(_id: number) {
-    console.warn('deleteStatus is deprecated');
+    // console.warn('deleteStatus is deprecated');
     return true;
   }
 
@@ -1013,7 +1013,7 @@ export class FileIssueDatabase {
       await this.connection.close();
     } catch (error) {
       // Log but don't throw - tests need cleanup to complete
-      console.error('Error closing database connection:', error);
+      // console.error('Error closing database connection:', error);
     }
   }
 }

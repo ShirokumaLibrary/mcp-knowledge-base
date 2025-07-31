@@ -131,7 +131,9 @@ export class DatabaseConnection {
 
   private async initializeDatabase(): Promise<void> {
     this.logger.debug('Starting database initialization...');
-    const sqlite = sqlite3.verbose();
+    // @ai-critical: DO NOT use verbose() mode in MCP server
+    // verbose() outputs debug info to stderr which breaks MCP protocol
+    const sqlite = sqlite3;
     // Ensure the database directory exists
     const dbDir = path.dirname(this.dbPath);
     if (!fs.existsSync(dbDir)) {

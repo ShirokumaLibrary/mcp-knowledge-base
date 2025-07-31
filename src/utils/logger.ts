@@ -132,6 +132,15 @@ function addFileTransports(transports: winston.transport[]): void {
  * @ai-why Each component gets its own logger for tracing
  */
 export function createLogger(service: string): winston.Logger {
+  // @ai-critical: Disable all logging in production MCP mode
+  // @ai-why: MCP protocol requires clean stdio - any log output breaks JSON parsing
+  if (process.env.MCP_MODE === 'production' || process.env.DISABLE_LOGGING === 'true') {
+    return winston.createLogger({
+      silent: true,
+      transports: []
+    });
+  }
+
   // @ai-critical: Create fresh transports array for each logger to avoid shared state
   const loggerTransports: winston.transport[] = [];
 
