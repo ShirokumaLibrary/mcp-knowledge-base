@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2025-07-31
+
+### Changed
+- **BREAKING**: Optimized get_items API response structure
+  - Returns new ListItem type instead of UnifiedItem for list operations
+  - Excludes content field to reduce data transfer size
+  - Includes description field for list summaries
+  - Removed JSON pretty-printing for more compact responses
+- Fixed ai-finish.md and ai-start.md command files to match API implementation
+  - ai-finish: Added proper conditional flow for daily creation/update
+  - ai-start: Removed non-existent category field, changed related_tasks to related
+
+### Added
+- New ListItem type for lightweight list responses
+- Comprehensive field validation tests to ensure correct API output
+- Test case 1.14 for field validation in MCP test suite
+
+### Fixed
+- Removed redundant related_tasks/related_documents fields in favor of unified related field
+- Updated all tests to expect compact JSON format
+
 ## [0.6.2] - 2025-07-31
 
 ### Fixed
