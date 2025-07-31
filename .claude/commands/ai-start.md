@@ -1,6 +1,6 @@
 ---
 description: Start a work session and display current issues
-argument-hint: "[session title]"
+argument-hint: "[session description]"
 allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__update_item, Bash(date:*)
 ---
 
@@ -8,12 +8,12 @@ allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledg
 
 ## Usage
 ```
-/ai-start [session title]
+/ai-start [session description]
 ```
 
 Examples:
-- `/ai-start` - Creates session with default title
-- `/ai-start Bug fixing` - Creates session with custom title
+- `/ai-start` - Creates session with default title "[Work Session]"
+- `/ai-start Bug fixing for authentication module` - Creates session with description
 
 ## Task
 
@@ -60,10 +60,16 @@ Note: Adapt display based on number of issues and current_state guidance
 ### 3. Create work session
 Get current time: !`date +"%Y-%m-%d %H:%M:%S JST"`
 
+Based on $ARGUMENTS:
+- If no arguments: title = "[Work Session]", description = "[Work Started]: " + current_time
+- If arguments provided: 
+  - Extract concise title from arguments (main topic/action in 5-10 words)
+  - Create detailed description explaining the work context and goals
+
 Execute: mcp__shirokuma_knowledge_base__create_item({
   type: "sessions",
-  title: $ARGUMENTS || "[Work Session]",
-  description: "[Work Started]: " + current_time,
+  title: extracted_title || "[Work Session]",
+  description: detailed_description || $ARGUMENTS || "[Work Started]: " + current_time,
   content: ""
 })
 
@@ -71,7 +77,12 @@ Display:
 ```
 ✅ [Session Started]: [session-id]
 📝 [Title]: [title]
+📝 [Description]: [description]
 ```
+
+Note: When work scope becomes clear, update the session title to reflect the actual work:
+- Use mcp__shirokuma_knowledge_base__update_item to update title
+- Keep title concise (5-10 words) and descriptive
 
 ### 4. Prompt for issue selection
 Ask: "[Which issue would you like to work on? (Please provide the number or issue ID)]"
@@ -86,7 +97,7 @@ mcp__shirokuma_knowledge_base__update_item({
 
 ## Example Flow
 ```
-> /ai-start Feature implementation
+> /ai-start Implementing user authentication feature with OAuth2
 
 [Current state content displayed here - handover notes from previous session]
 
@@ -96,7 +107,7 @@ mcp__shirokuma_knowledge_base__update_item({
 3. [medium] Custom Field Feature (issues-20)
 
 ✅ [Session Started]: 2025-07-30-23.45.12.345
-📝 [Title]: Feature implementation
+📝 [Description]: Implementing user authentication feature with OAuth2
 
 [Which issue would you like to work on? (Please provide the number or issue ID)]
 ```

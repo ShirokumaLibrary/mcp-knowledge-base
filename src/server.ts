@@ -68,6 +68,7 @@ import { TypeHandlers } from './handlers/type-handlers.js';
 import { SearchHandlers } from './handlers/search-handlers.js';
 import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
 import { ChangeTypeHandlers } from './handlers/change-type-handlers.js';
+import { FileIndexHandlers, fileIndexSchemas } from './handlers/file-index-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
 
 /**
@@ -92,6 +93,7 @@ export class IssueTrackerServer {
   private searchHandlers: SearchHandlers;
   private currentStateHandlers: CurrentStateHandlers;
   private changeTypeHandlers: ChangeTypeHandlers;
+  private fileIndexHandlers: FileIndexHandlers;
 
   constructor() {
     const config = getConfig();
@@ -111,6 +113,7 @@ export class IssueTrackerServer {
     this.searchHandlers = new SearchHandlers(this.db);
     this.currentStateHandlers = new CurrentStateHandlers(config.database.path);
     this.changeTypeHandlers = new ChangeTypeHandlers(this.db);
+    this.fileIndexHandlers = new FileIndexHandlers(this.db);
     this.server = new Server(
       {
         name: 'shirokuma-ai-project-management-server',
@@ -231,6 +234,23 @@ export class IssueTrackerServer {
 
       // Type change handler
       case 'change_item_type': return this.changeTypeHandlers.handleChangeItemType(args);
+
+      // File indexing handlers
+      case 'index_codebase': {
+        const validated = fileIndexSchemas.index_codebase.parse(args);
+        return await this.fileIndexHandlers.createHandlers().index_codebase(validated);
+      }
+      case 'search_code': {
+        const validated = fileIndexSchemas.search_code.parse(args);
+        return await this.fileIndexHandlers.createHandlers().search_code(validated);
+      }
+      case 'get_related_files': {
+        const validated = fileIndexSchemas.get_related_files.parse(args);
+        return await this.fileIndexHandlers.createHandlers().get_related_files(validated);
+      }
+      case 'get_index_status': {
+        return await this.fileIndexHandlers.createHandlers().get_index_status();
+      }
 
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);

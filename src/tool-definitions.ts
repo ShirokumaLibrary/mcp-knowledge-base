@@ -749,5 +749,74 @@ export const toolDefinitions = [
       },
       required: ['from_type', 'from_id', 'to_type']
     }
+  },
+  
+  // File indexing tools
+  {
+    name: 'index_codebase',
+    description: 'Index or re-index the codebase for semantic search',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        force: {
+          type: 'boolean',
+          description: 'Force re-index all files'
+        },
+        exclude: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional exclude patterns'
+        }
+      }
+    }
+  },
+  {
+    name: 'search_code',
+    description: 'Search code semantically using natural language or code snippets',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Search query (natural language or code snippet)'
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results (default: 10)'
+        },
+        fileTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by file extensions (e.g., ["js", "ts"])'
+        }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'get_related_files',
+    description: 'Find files related to a given file based on content similarity',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          description: 'Base file path to find related files'
+        },
+        depth: {
+          type: 'number',
+          description: 'Depth of relation search (default: 1)'
+        }
+      },
+      required: ['file']
+    }
+  },
+  {
+    name: 'get_index_status',
+    description: 'Get the current status and statistics of the file index',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
   }
 ];

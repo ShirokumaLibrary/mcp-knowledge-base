@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-07-31
+
+### Added
+- **File Indexing**: Semantic code search functionality for git-managed projects
+  - New MCP tools: `index_codebase`, `search_code`, `get_related_files`, `get_index_status`
+  - Vector embeddings using all-MiniLM-L6-v2 model for semantic similarity
+  - Normalized database structure with files and file_chunks tables for efficient storage
+  - Support for .shirokumaignore file to customize indexing patterns
+  - Environment variable support for index.db location (follows MCP_DATABASE_PATH)
+  - Automatic incremental updates based on file content hashes
+- **Enhanced Multi-word Search**: Improved full-text search functionality
+  - Proper AND logic for multi-word queries (all words must be present)
+  - Fixed pagination count for multi-word searches
+  - Comprehensive test coverage for search edge cases
+
+### Changed
+- Updated ai-start command to support session descriptions instead of just titles
+  - Now creates more descriptive session records with context
+  - Improved workflow for work session tracking
+
+### Fixed
+- Security: Removed path parameter from index_codebase tool to prevent arbitrary directory indexing
+- Full-text search count method now correctly handles multi-word queries
+- Test failures in fulltext-search.test.ts and server.test.ts
+
+### Technical Details
+- File indexing creates semantic embeddings of code chunks (30 lines per chunk)
+- Uses SQLite with JSON storage for vector embeddings
+- Implements cosine similarity for semantic search
+- Supports multiple file types including programming languages, configs, and documentation
+- Database normalization achieves ~82% storage reduction compared to flat structure
+
 ## [0.6.3] - 2025-07-31
 
 ### Changed

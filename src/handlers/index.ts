@@ -20,6 +20,9 @@ export { TypeHandlers } from './type-handlers.js';
 // export { StatusHandlersV2 as StatusHandlers } from './status-handlers-v2.js';
 // export { TagHandlersV2 as TagHandlers } from './tag-handlers-v2.js';
 
+// File indexing handlers
+export { FileIndexHandlers } from './file-index-handlers.js';
+
 /**
  * @ai-intent Handler type definitions
  * @ai-pattern Type exports for TypeScript support

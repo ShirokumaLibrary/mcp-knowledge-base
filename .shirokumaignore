@@ -1,0 +1,53 @@
+# Shirokuma File Index Ignore Patterns
+
+# Test files (updated)
+**/*.test.ts
+**/*.test.js
+**/test-*.js
+**/test-*.ts
+tests/**
+poc/**
+
+# Generated files
+dist/**
+coverage/**
+*.d.ts
+
+# Documentation
+*.md
+docs/**
+
+# Dependencies
+node_modules/**
+
+# Build artifacts
+*.map
+*.min.js
+*.min.css
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# IDE and system files
+.vscode/**
+.idea/**
+.DS_Store
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/**
+
+# Temporary files
+tmp/**
+temp/**
+*.tmp
+
+# Database files (except index)
+*.db
+!.shirokuma/index.db

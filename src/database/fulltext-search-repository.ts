@@ -44,19 +44,38 @@ export class FullTextSearchRepository {
     // @ai-validation: Ensure offset is non-negative
     const offset = Math.max(0, options?.offset || 0);
 
-    // Escape special characters for FTS5
-    const escapedQuery = query.replace(/['"]/g, '');
+    // Build FTS5 query with AND search for multiple words
+    const trimmedQuery = query.trim();
+    let ftsQuery: string;
+    
+    if (!trimmedQuery) {
+      throw new Error('Search query cannot be empty');
+    }
+    
+    // Split into words and create AND query
+    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+    
+    if (words.length === 1) {
+      // Single word: use as-is (can use prefix matching with *)
+      ftsQuery = words[0];
+    } else {
+      // Multiple words: AND search (all words must appear)
+      ftsQuery = words.map(word => {
+        // Escape special characters for each word
+        return word.replace(/['"]/g, '');
+      }).join(' AND ');
+    }
 
     // Build type filter
     let typeFilter = '';
     // @ai-any-deliberate: SQLite params array - mixed types (string, number) for query parameters
 
-    let params: (string | number)[] = [`"${escapedQuery}"`, limit, offset];
+    let params: (string | number)[] = [ftsQuery, limit, offset];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
-      params = [`"${escapedQuery}"`, ...options.types, limit, offset];
+      params = [ftsQuery, ...options.types, limit, offset];
     }
 
     const sql = `
@@ -113,18 +132,36 @@ export class FullTextSearchRepository {
     );
 
     // Build prefix query for FTS5
-    const escapedQuery = query.replace(/['"]/g, '');
+    const trimmedQuery = query.trim();
+    let ftsQuery: string;
+    
+    if (!trimmedQuery) {
+      return []; // Return empty suggestions for empty query
+    }
+    
+    // For suggestions, use the last word with prefix matching
+    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+    
+    if (words.length === 1) {
+      // Single word: add prefix matching
+      ftsQuery = `${words[0]}*`;
+    } else {
+      // Multiple words: AND search with prefix on last word
+      const lastWord = words.pop()!;
+      const previousWords = words.map(word => word.replace(/['"]/g, ''));
+      ftsQuery = previousWords.join(' AND ') + ` AND ${lastWord}*`;
+    }
 
     // Build type filter
     let typeFilter = '';
     // @ai-any-deliberate: SQLite params array - mixed types for query parameters
 
-    let params: (string | number)[] = [`"${escapedQuery}"*`, limit];
+    let params: (string | number)[] = [ftsQuery, limit];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
-      params = [`"${escapedQuery}"*`, ...options.types, limit];
+      params = [ftsQuery, ...options.types, limit];
     }
 
     const sql = `
@@ -155,17 +192,36 @@ export class FullTextSearchRepository {
       types?: string[];
     }
   ): Promise<number> {
-    // Escape special characters for FTS5
-    const escapedQuery = query.replace(/['"]/g, '');
+    // Build FTS5 query with AND search for multiple words (same logic as search method)
+    const trimmedQuery = query.trim();
+    let ftsQuery: string;
+    
+    if (!trimmedQuery) {
+      throw new Error('Search query cannot be empty');
+    }
+    
+    // Split into words and create AND query
+    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+    
+    if (words.length === 1) {
+      // Single word: use as-is
+      ftsQuery = words[0];
+    } else {
+      // Multiple words: AND search (all words must appear)
+      ftsQuery = words.map(word => {
+        // Escape special characters for each word
+        return word.replace(/['"]/g, '');
+      }).join(' AND ');
+    }
 
     // Build type filter
     let typeFilter = '';
-    let params: (string | number)[] = [`"${escapedQuery}"`];
+    let params: (string | number)[] = [ftsQuery];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
-      params = [`"${escapedQuery}"`, ...options.types];
+      params = [ftsQuery, ...options.types];
     }
 
     const sql = `
