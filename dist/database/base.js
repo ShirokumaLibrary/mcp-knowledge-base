@@ -60,7 +60,7 @@ export class DatabaseConnection {
     }
     async initializeDatabase() {
         this.logger.debug('Starting database initialization...');
-        const sqlite = sqlite3.verbose();
+        const sqlite = sqlite3;
         const dbDir = path.dirname(this.dbPath);
         if (!fs.existsSync(dbDir)) {
             fs.mkdirSync(dbDir, { recursive: true });

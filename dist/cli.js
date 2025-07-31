@@ -35,7 +35,7 @@ program
             path.join(__dirname, 'server.js')
         ], {
             stdio: 'inherit',
-            env: process.env
+            env: { ...process.env, NODE_ENV: 'development' }
         });
         inspect.on('exit', (code) => {
             process.exit(code || 0);

@@ -73,7 +73,6 @@ export class FileIssueDatabase {
         return this.getAllStatuses();
     }
     async createStatus(name) {
-        console.warn('createStatus is deprecated');
         const statuses = await this.statusRepo.getAllStatuses();
         const existing = statuses.find(s => s.name === name);
         if (existing) {
@@ -83,11 +82,9 @@ export class FileIssueDatabase {
         return { id, name, is_closed: false };
     }
     async updateStatus(_id, _name) {
-        console.warn('updateStatus is deprecated');
         return true;
     }
     async deleteStatus(_id) {
-        console.warn('deleteStatus is deprecated');
         return true;
     }
     async getAllTags() {
@@ -688,7 +685,6 @@ export class FileIssueDatabase {
             await this.connection.close();
         }
         catch (error) {
-            console.error('Error closing database connection:', error);
         }
     }
 }

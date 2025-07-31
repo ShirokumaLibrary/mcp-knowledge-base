@@ -39,6 +39,12 @@ function addFileTransports(transports) {
     }
 }
 export function createLogger(service) {
+    if (process.env.MCP_MODE === 'production' || process.env.DISABLE_LOGGING === 'true') {
+        return winston.createLogger({
+            silent: true,
+            transports: []
+        });
+    }
     const loggerTransports = [];
     if (process.env.NODE_ENV !== 'test') {
         loggerTransports.push(getConsoleTransport());
