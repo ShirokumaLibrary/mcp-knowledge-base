@@ -13,6 +13,19 @@ allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledg
 ## Purpose
 End the work session, record today's work content, and save handover information to current_state for the next session.
 
+## Session and Daily Management
+- **Sessions**: Individual work periods with timestamps (sessions-YYYY-MM-DD-HH.MM.SS.sss)
+  - Created with /ai-start command
+  - Records work start time, title, and description
+  - Can be linked to issues via related field
+  
+- **Dailies**: Aggregated summary of all work done in a day (dailies-YYYY-MM-DD)
+  - Created/updated with /ai-finish command
+  - Consolidates all sessions from the day
+  - Links to sessions via related_documents field
+  - Links to issues via related_tasks field
+  - Provides overview of completed tasks, learnings, and plans
+
 ## Task
 
 Note: Respond to the user in their language.
@@ -39,20 +52,40 @@ Execute: mcp__shirokuma_knowledge_base__get_items({
 - In Progress: status === "In Progress"  
 - Open: status === "Open"
 
-### 5. Generate daily summary content
+### 5. Get existing daily and extract active session
 
-Create a markdown summary with these sections (translate headers to user's language):
-- Today's work sessions
-- Completed tasks
-- Tasks in progress
-- Technical learnings
-- Plans for tomorrow
-- Notes (including work duration)
+Execute: mcp__shirokuma_knowledge_base__get_item_detail({
+  "type": "dailies",
+  "id": today
+})
+
+Parse the content to find:
+- "## [Active Session]" section to get the current session ID
+- Existing session list from "## [Today's Work Sessions]"
+- Any existing content that should be preserved
+
+### 6. Get active session details
+
+If active session ID found:
+Execute: mcp__shirokuma_knowledge_base__get_item_detail({
+  "type": "sessions",
+  "id": active_session_id
+})
+
+Update session with completion notes if needed.
+
+### 7. Generate daily summary content
+
+Update the existing daily content:
+- Remove "## [Active Session]" section (session is complete)
+- Update "## [Today's Work Sessions]" with all sessions
+- Add/update other sections based on today's work
 
 Structure:
 ```markdown
 ## [Today's Work Sessions]
-- [List session titles]
+- [Session title] (sessions-YYYY-MM-DD-HH.MM.SS.sss)
+- **[Session title] (sessions-YYYY-MM-DD-HH.MM.SS.sss)** ← Mark completed session
 
 ## [Completed Tasks]
 - issues-ID: title (for Closed issues)
@@ -68,44 +101,42 @@ Structure:
 
 ## [Notes]
 - [Work Duration]: first_session_time - current_time
+
+## [Session Details]
+### [Session title] (sessions-ID)
+- [Session description and key accomplishments]
 ```
 
-### 6. Check for existing daily
-Execute: mcp__shirokuma_knowledge_base__get_items({ 
-  "type": "dailies", 
-  "start_date": today, 
-  "end_date": today 
-})
+Important: 
+- Remove "## [Active Session]" section as work is complete
+- Preserve existing session information
+- Add completion details for the active session
 
-### 7. Create or update daily
-Based on step 6 result:
+### 8. Update daily summary
 
-If daily does NOT exist (empty result):
-Execute: mcp__shirokuma_knowledge_base__create_item({
-  "type": "dailies",
-  "date": today,
-  "title": "[Work Summary] - " + today (translate to user's language),
-  "content": generated content,
-  "related_tasks": array of today's session and issue IDs
-})
-
-If daily EXISTS:
+Since daily should already exist (created/updated in ai-start):
 Execute: mcp__shirokuma_knowledge_base__update_item({
   "type": "dailies",
   "id": today,
-  "content": merge existing content with new information,
-  "related_tasks": merge existing and new task IDs (remove duplicates)
+  "content": updated content from step 7,
+  "related_tasks": merge existing and new issue IDs (remove duplicates),
+  "related_documents": merge existing and new session IDs (remove duplicates)
 })
 
-Note: When updating, preserve valuable information from existing content.
+Note: Daily should exist because ai-start creates/updates it. If not found, create it with full content.
 
-### 8. Get all open issues
+Important relationship management:
+- related_tasks: For tracking issues (issues-X, plans-X)
+- related_documents: For tracking sessions (sessions-YYYY-MM-DD-HH.MM.SS.sss)
+- Keep sessions and issues in separate fields for clear organization
+
+### 9. Get all open issues
 Execute: mcp__shirokuma_knowledge_base__get_items({ 
   "type": "issues", 
   "includeClosedStatuses": false 
 })
 
-### 9. Update current state
+### 10. Update current state
 
 Generate current state content (translate to user's language):
 
@@ -141,7 +172,7 @@ Template:
 - [Status of ongoing work]
 ```
 
-### 10. Display completion message
+### 11. Display completion message
 
 Display in user's language:
 - Work session completed

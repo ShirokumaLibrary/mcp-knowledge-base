@@ -95,6 +95,41 @@ mcp__shirokuma_knowledge_base__update_item({
   related: ["issues-X"]  // where X is the selected issue number
 })
 
+### 6. Update or create today's daily
+Get today's date: !`date +"%Y-%m-%d"`
+
+Check for existing daily:
+mcp__shirokuma_knowledge_base__get_items({ 
+  "type": "dailies", 
+  "start_date": today, 
+  "end_date": today 
+})
+
+If daily does NOT exist:
+Execute: mcp__shirokuma_knowledge_base__create_item({
+  "type": "dailies",
+  "date": today,
+  "title": "[Work Summary] - " + today (translate to user's language),
+  "content": "## [Today's Work Sessions]\n- " + session_title + " (sessions-" + session_id + ")\n\n## [Active Session]\n- sessions-" + session_id,
+  "related_documents": ["sessions-" + session_id]
+})
+
+If daily EXISTS:
+Execute: mcp__shirokuma_knowledge_base__get_item_detail({
+  "type": "dailies",
+  "id": today
+})
+
+Then update with new session:
+mcp__shirokuma_knowledge_base__update_item({
+  "type": "dailies",
+  "id": today,
+  "content": Add new session to existing content,
+  "related_documents": Add new session ID to existing array
+})
+
+Important: When updating content, look for "## [Today's Work Sessions]" section and add the new session. Also update or add "## [Active Session]" section with the current session ID.
+
 ## Example Flow
 ```
 > /ai-start Implementing user authentication feature with OAuth2
