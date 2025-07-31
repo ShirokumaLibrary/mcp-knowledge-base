@@ -137,7 +137,8 @@ describe('API Integration - Sessions and Dailies', () => {
 
       expect(results.length).toBe(1);
       expect(results[0].title).toBe('July 15th Session');
-      expect(results[0].start_date).toBe('2025-07-15');
+      // ListItem doesn't have start_date, sessions have date field
+      expect(results[0].date).toBe('2025-07-15');
     });
 
     it('should get session detail by ID', async () => {
@@ -295,7 +296,8 @@ describe('API Integration - Sessions and Dailies', () => {
 
       expect(results.length).toBe(1);
       expect(results[0].title).toBe('July 30 Summary');
-      expect(results[0].start_date).toBe('2025-07-30');
+      // ListItem doesn't have start_date, dailies have date field 
+      expect(results[0].date).toBe('2025-07-30');
     });
 
     it('should get daily summary detail by date', async () => {

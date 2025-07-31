@@ -95,7 +95,8 @@ export class DatabaseConnection {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
         is_closed BOOLEAN DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
         this.logger.debug('Creating tags table...');
@@ -314,6 +315,15 @@ export class DatabaseConnection {
         await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_items_type_priority ON items(type, priority)');
         await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_item_tags_item ON item_tags(item_type, item_id)');
         await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_type_fields_type ON type_fields(type)');
+        try {
+            await this.db.runAsync('ALTER TABLE statuses ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP');
+            this.logger.debug('Added updated_at column to statuses table');
+        }
+        catch (err) {
+            if (!err.message.includes('duplicate column name')) {
+                this.logger.error('Error adding updated_at to statuses:', err);
+            }
+        }
     }
     getDatabase() {
         if (!this.db) {

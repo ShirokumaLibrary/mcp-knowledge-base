@@ -19,27 +19,52 @@ Examples:
 
 Note: Respond to the user in their language.
 
-### 1. Display open issues
-Execute: mcp__shirokuma_knowledge_base__get_items({ "type": "issues", "includeClosedStatuses": false })
+### 1. Show current state
+Execute: mcp__shirokuma_knowledge_base__get_current_state()
+
+Display the current state content (handover notes from previous session).
+
+### 2. Display relevant issues
+Based on current_state content, fetch and display issues intelligently:
+
+Execute: mcp__shirokuma_knowledge_base__get_items({ 
+  "type": "issues", 
+  "includeClosedStatuses": false 
+})
+
+Then:
+- If current_state mentions "Next priorities", display those issues first with emphasis
+- Group by priority (High → Medium → Low) for better visibility
+- If there are many issues (>10), consider showing only High priority by default
 
 Display format:
 ```
-📋 [Open Issues]:
-1. [priority] title (issues-id)
-2. [priority] title (issues-id)
-...
+📋 [Priority Issues] (from current_state):
+⭐ 1. [high] title (issues-X)
+⭐ 2. [high] title (issues-Y)
+
+📋 [All Open Issues]:
+High Priority:
+3. title (issues-Z)
+
+Medium Priority:
+4. title (issues-A)
+5. title (issues-B)
+
+Low Priority:
+6. title (issues-C)
 ```
 
-### 2. Create work session
+Note: Adapt display based on number of issues and current_state guidance
+
+### 3. Create work session
 Get current time: !`date +"%Y-%m-%d %H:%M:%S JST"`
 
 Execute: mcp__shirokuma_knowledge_base__create_item({
   type: "sessions",
   title: $ARGUMENTS || "[Work Session]",
   description: "[Work Started]: " + current_time,
-  category: "development",
-  related_tasks: [],
-  tags: []
+  content: ""
 })
 
 Display:
@@ -47,11 +72,6 @@ Display:
 ✅ [Session Started]: [session-id]
 📝 [Title]: [title]
 ```
-
-### 3. Show current state
-Execute: mcp__shirokuma_knowledge_base__get_current_state()
-
-Display the current state content.
 
 ### 4. Prompt for issue selection
 Ask: "[Which issue would you like to work on? (Please provide the number or issue ID)]"
@@ -61,12 +81,14 @@ When user selects an issue, execute:
 mcp__shirokuma_knowledge_base__update_item({
   type: "sessions",
   id: [created-session-id],
-  related_tasks: [selected-issue-id]
+  related: ["issues-X"]  // where X is the selected issue number
 })
 
 ## Example Flow
 ```
 > /ai-start Feature implementation
+
+[Current state content displayed here - handover notes from previous session]
 
 📋 [Open Issues]:
 1. [high] Performance Optimization (issues-13)
@@ -75,8 +97,6 @@ mcp__shirokuma_knowledge_base__update_item({
 
 ✅ [Session Started]: 2025-07-30-23.45.12.345
 📝 [Title]: Feature implementation
-
-[Current state content displayed here]
 
 [Which issue would you like to work on? (Please provide the number or issue ID)]
 ```

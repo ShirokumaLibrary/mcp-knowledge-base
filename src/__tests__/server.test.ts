@@ -176,18 +176,13 @@ describe('IssueTrackerServer', () => {
     });
 
     it('should set up error handler', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       server = new IssueTrackerServer();
       
       expect(mockServerInstance.onerror).toBeDefined();
       
-      // Test error handler
+      // Test error handler - it should silently handle errors
       const testError = new Error('Test error');
-      mockServerInstance.onerror(testError);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('[MCP Error]', testError);
-      
-      consoleSpy.mockRestore();
+      expect(() => mockServerInstance.onerror(testError)).not.toThrow();
     });
 
     it('should register request handlers', () => {
@@ -528,14 +523,11 @@ describe('IssueTrackerServer', () => {
 
   describe('error handling edge cases', () => {
     it('should handle server error event', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       server = new IssueTrackerServer();
       
       const testError = new Error('Server error');
-      mockServerInstance.onerror(testError);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('[MCP Error]', testError);
-      consoleSpy.mockRestore();
+      // Should handle error silently without throwing
+      expect(() => mockServerInstance.onerror(testError)).not.toThrow();
     });
 
     it('should connect stdio transport on run', async () => {

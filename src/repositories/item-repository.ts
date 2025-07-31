@@ -15,7 +15,8 @@ import type {
   UnifiedItem,
   CreateItemParams,
   UpdateItemParams,
-  ItemRow
+  ItemRow,
+  ListItem
 } from '../types/unified-types.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { UnifiedStorage, STORAGE_CONFIGS, type StorageItem, type StorageConfig } from '../storage/unified-storage.js';
@@ -745,7 +746,7 @@ export class ItemRepository {
     startDate?: string,
     endDate?: string,
     limit?: number
-  ): Promise<UnifiedItem[]> {
+  ): Promise<ListItem[]> {
     // Validate type exists
     let typeInfo: { base_type: string } | undefined;
 
@@ -773,8 +774,11 @@ export class ItemRepository {
     // @ai-why 2. Tags/related as JSON = single query (avoids N+1)
     // @ai-why 3. Sorting/pagination easier in SQL
     // @ai-alternative Could read all Markdown files but slow for large datasets
+    // @ai-optimization Return only essential fields for list views
     let query = `
-      SELECT i.*, s.name as status_name, s.is_closed
+      SELECT i.type, i.id, i.title, i.description, i.priority, 
+             i.tags, i.updated_at, s.name as status_name,
+             i.start_date
       FROM items i
       LEFT JOIN statuses s ON i.status_id = s.id
       WHERE i.type = ?
@@ -831,15 +835,18 @@ export class ItemRepository {
     }
 
     const rows = await this.db.allAsync(query, params) as unknown as ItemRow[];
-    return rows.map(row => this.rowToUnifiedItem(row));
+    return rows.map(row => this.rowToListItem(row));
   }
 
   /**
    * @ai-intent Search items by tag
    */
-  async searchItemsByTag(tag: string, types?: string[]): Promise<UnifiedItem[]> {
+  async searchItemsByTag(tag: string, types?: string[]): Promise<ListItem[]> {
+    // @ai-optimization Return only essential fields for list views
     let query = `
-      SELECT DISTINCT i.*, s.name as status_name
+      SELECT DISTINCT i.type, i.id, i.title, i.description, i.priority, 
+             i.tags, i.updated_at, s.name as status_name,
+             i.start_date
       FROM items i
       JOIN item_tags it ON i.type = it.item_type AND i.id = it.item_id
       JOIN tags t ON it.tag_id = t.id
@@ -856,7 +863,7 @@ export class ItemRepository {
     query += ' ORDER BY i.created_at DESC';
 
     const rows = await this.db.allAsync(query, params) as unknown as ItemRow[];
-    return rows.map(row => this.rowToUnifiedItem(row));
+    return rows.map(row => this.rowToListItem(row));
   }
 
   /**
@@ -948,20 +955,52 @@ export class ItemRepository {
   }
 
   /**
-   * @ai-intent Convert database row to UnifiedItem
+   * @ai-intent Convert database row to ListItem (lightweight for list views)
+   */
+  private rowToListItem(row: Partial<ItemRow>): ListItem {
+    const tags = row.tags ? JSON.parse(row.tags) : [];
+    
+    const item: ListItem = {
+      id: row.id!,
+      type: row.type!,
+      title: row.title!,
+      description: row.description || undefined,
+      tags,
+      updated_at: row.updated_at!
+    };
+    
+    // Add optional fields
+    if (row.status_name) {
+      item.status = row.status_name;
+    }
+    
+    if (row.priority) {
+      item.priority = row.priority as 'high' | 'medium' | 'low';
+    }
+    
+    // Add date field for sessions and dailies
+    if ((row.type === 'sessions' || row.type === 'dailies') && row.start_date) {
+      item.date = row.start_date;
+    }
+    
+    return item;
+  }
+
+  /**
+   * @ai-intent Convert database row to UnifiedItem (full data)
    */
   private rowToUnifiedItem(row: ItemRow): UnifiedItem {
     const tags = row.tags ? JSON.parse(row.tags) : [];
     const related = row.related ? JSON.parse(row.related) : [];
-    const related_tasks = related.filter((r: string) => r.match(/^(issues|plans)-/));
-    const related_documents = related.filter((r: string) => r.match(/^(docs|knowledge)-/));
 
     const item: UnifiedItem = {
       id: row.id,
       type: row.type,
       title: row.title,
       description: row.description || undefined,
-      content: row.content || '',
+      // @ai-optimization content is excluded from list operations
+      // Only include content if it's present in the row (for getItem operations)
+      content: row.content !== undefined ? (row.content || '') : '',
       priority: row.priority as 'high' | 'medium' | 'low',
       status: row.status_name || 'Unknown',
       status_id: row.status_id || 1,
@@ -970,8 +1009,7 @@ export class ItemRepository {
       start_time: row.start_time,
       tags,
       related,
-      related_tasks,
-      related_documents,
+      // related_tasks and related_documents are deprecated - use related instead
       created_at: row.created_at,
       updated_at: row.updated_at
     };

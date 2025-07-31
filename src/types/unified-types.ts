@@ -4,6 +4,8 @@
  * @ai-critical All IDs are strings to support both numeric and timestamp formats
  */
 
+export type { ListItem } from './list-item-types.js';
+
 /**
  * @ai-intent Base interface for all items in the unified table
  * @ai-pattern Common fields across all item types

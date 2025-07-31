@@ -28,6 +28,42 @@ export class FileIssueDatabase {
     fullTextSearchRepo;
     typeRepo;
     initializationPromise = null;
+    listItemToIssue(item) {
+        return {
+            id: parseInt(item.id),
+            title: item.title,
+            description: item.description,
+            priority: item.priority || 'medium',
+            status: item.status || 'Unknown',
+            start_date: null,
+            end_date: null,
+            tags: item.tags,
+            created_at: item.updated_at,
+            updated_at: item.updated_at
+        };
+    }
+    listItemToFullIssue(item) {
+        return {
+            ...this.listItemToIssue(item),
+            content: '',
+            related_tasks: [],
+            related_documents: []
+        };
+    }
+    listItemToDocument(item) {
+        return {
+            type: item.type,
+            id: parseInt(item.id),
+            title: item.title,
+            description: item.description,
+            content: '',
+            tags: item.tags,
+            related_tasks: [],
+            related_documents: [],
+            created_at: item.updated_at,
+            updated_at: item.updated_at
+        };
+    }
     constructor(dataDir, dbPath = getConfig().database.sqlitePath) {
         this.dataDir = dataDir;
         this.dbPath = dbPath;
@@ -306,36 +342,11 @@ export class FileIssueDatabase {
                 .filter((name) => name !== undefined);
         }
         const items = await this.itemRepo.getItems('issues', includeClosedStatuses, statuses);
-        return items.map(item => ({
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            priority: item.priority,
-            status: item.status,
-            start_date: item.start_date,
-            end_date: item.end_date,
-            tags: item.tags,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToIssue(item));
     }
     async searchIssuesByTag(tag) {
         const items = await this.itemRepo.searchItemsByTag(tag, ['issues']);
-        return items.map(item => ({
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            content: item.content,
-            priority: item.priority,
-            status: item.status,
-            tags: item.tags,
-            start_date: item.start_date,
-            end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToFullIssue(item));
     }
     async createPlan(title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
         const item = await this.itemRepo.createItem({
@@ -434,67 +445,20 @@ export class FileIssueDatabase {
                 .filter((name) => name !== undefined);
         }
         const items = await this.itemRepo.getItems('plans', includeClosedStatuses, statuses);
-        return items.map(item => ({
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            priority: item.priority,
-            status: item.status,
-            start_date: item.start_date,
-            end_date: item.end_date,
-            tags: item.tags,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToIssue(item));
     }
     async searchPlansByTag(tag) {
         const items = await this.itemRepo.searchItemsByTag(tag, ['plans']);
-        return items.map(item => ({
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            content: item.content,
-            priority: item.priority,
-            status: item.status,
-            tags: item.tags,
-            start_date: item.start_date,
-            end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToFullIssue(item));
     }
     async getAllDocuments(type) {
         if (!type) {
             const docs = await this.itemRepo.getItems('docs');
             const knowledge = await this.itemRepo.getItems('knowledge');
-            return [...docs, ...knowledge].map(item => ({
-                type: item.type,
-                id: parseInt(item.id),
-                title: item.title,
-                description: item.description,
-                content: item.content,
-                tags: item.tags,
-                related_tasks: item.related_tasks,
-                related_documents: item.related_documents,
-                created_at: item.created_at,
-                updated_at: item.updated_at
-            }));
+            return [...docs, ...knowledge].map(item => this.listItemToDocument(item));
         }
         const items = await this.itemRepo.getItems(type);
-        return items.map(item => ({
-            type: item.type,
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            content: item.content,
-            tags: item.tags,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToDocument(item));
     }
     async getDocument(type, id) {
         const item = await this.itemRepo.getItem(type, String(id));
@@ -559,18 +523,7 @@ export class FileIssueDatabase {
     async searchDocumentsByTag(tag, type) {
         const types = type ? [type] : ['docs', 'knowledge'];
         const items = await this.itemRepo.searchItemsByTag(tag, types);
-        return items.map(item => ({
-            type: item.type,
-            id: parseInt(item.id),
-            title: item.title,
-            description: item.description,
-            content: item.content,
-            tags: item.tags,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
-            created_at: item.created_at,
-            updated_at: item.updated_at
-        }));
+        return items.map(item => this.listItemToDocument(item));
     }
     async getAllDocumentsSummary(type) {
         if (!type) {
@@ -582,7 +535,7 @@ export class FileIssueDatabase {
                 title: item.title,
                 description: item.description,
                 tags: item.tags,
-                created_at: item.created_at,
+                created_at: item.updated_at,
                 updated_at: item.updated_at
             }));
         }
@@ -593,7 +546,7 @@ export class FileIssueDatabase {
             title: item.title,
             description: item.description,
             tags: item.tags,
-            created_at: item.created_at,
+            created_at: item.updated_at,
             updated_at: item.updated_at
         }));
     }

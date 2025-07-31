@@ -10,7 +10,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { TypeRepository } from '../database/type-repository.js';
 import type { FileIssueDatabase } from '../database.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import type { UnifiedItem } from '../types/unified-types.js';
+import type { UnifiedItem, ListItem } from '../types/unified-types.js';
 
 // Import schemas
 import {
@@ -41,7 +41,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
    * @ai-intent Get items by type with optional filtering
    * @ai-flow 1. Validate params -> 2. Check type -> 3. Search with filters -> 4. Return items
    */
-  async function handleGetItems(params: z.infer<typeof GetItemsParams>): Promise<UnifiedItem[]> {
+  async function handleGetItems(params: z.infer<typeof GetItemsParams>): Promise<ListItem[]> {
     const { type, statuses, includeClosedStatuses, start_date, end_date, limit } = params;
 
     // Special handling for get_latest_session equivalent
@@ -124,7 +124,20 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
   async function handleSearchItemsByTag(params: z.infer<typeof SearchItemsByTagParams>): Promise<any> {
     const { tag, types } = params;
 
-    const items = await itemRepository.searchItemsByTag(tag, types);
+    const listItems = await itemRepository.searchItemsByTag(tag, types);
+
+    // Convert ListItem to UnifiedItem-like structure for backward compatibility
+    const items = listItems.map(item => ({
+      ...item,
+      content: '',  // Empty for list views
+      status_id: 1, // Default value
+      priority: item.priority || 'medium' as 'high' | 'medium' | 'low',  // Ensure non-undefined
+      start_date: null,
+      end_date: null,
+      start_time: null,
+      related: [],
+      created_at: item.updated_at  // Use updated_at as fallback
+    }));
 
     // Transform to nested format for backward compatibility
     // Define proper type for the result
@@ -474,7 +487,7 @@ export async function handleUnifiedToolCall(
     content: [
       {
         type: 'text' as const,
-        text: JSON.stringify({ data: result }, null, 2)
+        text: JSON.stringify({ data: result })
       }
     ]
   };

@@ -62,7 +62,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: session }, null, 2)  // @ai-pattern: Pretty JSON
+            text: JSON.stringify({ data: session })  // @ai-pattern: Compact JSON
           }
         ]
       };
@@ -103,7 +103,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: session }, null, 2)
+            text: JSON.stringify({ data: session })
           }
         ]
       };
@@ -137,7 +137,7 @@ export class SessionHandlers {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify({ data: null }, null, 2)
+              text: JSON.stringify({ data: null })
             }
           ]
         };
@@ -147,7 +147,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: session }, null, 2)
+            text: JSON.stringify({ data: session })
           }
         ]
       };
@@ -180,7 +180,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: sessions }, null, 2)
+            text: JSON.stringify({ data: sessions })
           }
         ]
       };
@@ -216,7 +216,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: sessions }, null, 2)
+            text: JSON.stringify({ data: sessions })
           }
         ]
       };
@@ -256,7 +256,7 @@ export class SessionHandlers {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ data: session }, null, 2)
+            text: JSON.stringify({ data: session })
           }
         ]
       };

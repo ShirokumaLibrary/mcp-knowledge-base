@@ -167,11 +167,11 @@ export abstract class BaseHandler {
 
   /**
    * @ai-intent Format JSON for display
-   * @ai-pattern Pretty-printed JSON
+   * @ai-pattern Compact JSON without formatting
    * @ai-usage For complex objects in responses
    */
   public formatJson(obj: unknown): string {
-    return JSON.stringify(obj, null, 2);
+    return JSON.stringify(obj);
   }
 
   /**

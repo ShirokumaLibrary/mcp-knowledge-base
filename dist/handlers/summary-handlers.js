@@ -16,7 +16,7 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' }, null, 2)
+                        text: JSON.stringify({ data: summary, message: 'Daily summary created successfully' })
                     }
                 ]
             };
@@ -40,7 +40,7 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summary, message: 'Daily summary updated successfully' }, null, 2)
+                        text: JSON.stringify({ data: summary, message: 'Daily summary updated successfully' })
                     }
                 ]
             };
@@ -61,7 +61,7 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summaries }, null, 2)
+                        text: JSON.stringify({ data: summaries })
                     }
                 ]
             };
@@ -85,7 +85,7 @@ export class SummaryHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify({ data: summary }, null, 2)
+                        text: JSON.stringify({ data: summary })
                     }
                 ]
             };

@@ -34,7 +34,7 @@ Execute systematic validation tests for MCP server functions through the MCP pro
 Parse arguments:
 - No arguments: Run all Phase 1 tests
 - Test number (e.g., "1.01"): Run specific test
-- "phase1": Run tests 1.01-1.13
+- "phase1": Run tests 1.01-1.14
 - "phase2": Run tests 2.01-2.02
 
 #### Phase 1: Core Functionality Tests
@@ -51,6 +51,7 @@ Parse arguments:
 1.11. **Type Management Tests** - @.claude/commands/ai-tests/1.11-type-management.markdown
 1.12. **Current State Management Tests** - @.claude/commands/ai-tests/1.12-current-state.markdown
 1.13. **Item Type Change Tests** - @.claude/commands/ai-tests/1.13-type-change.markdown
+1.14. **Field Validation Tests** - @.claude/commands/ai-tests/1.14-field-validation.markdown
 
 #### Phase 2: Database Rebuild Tests
 2.01. **Database Rebuild and SQLite Verification** - @.claude/commands/ai-tests/2.01-rebuild-tests.markdown
@@ -77,7 +78,7 @@ For each test:
 ### Result Reporting Format
 ```
 📊 [Test Results Summary]
-[Phase 1]: X/13 [tests passed]
+[Phase 1]: X/14 [tests passed]
 [Phase 2]: X/2 [tests passed]
 
 [Details]:
@@ -97,3 +98,6 @@ For each test:
 - Phase 2 requires server restart between 2.01 and 2.02
 - For content tests, verify multi-line preservation
 - Test with clean data directory when possible
+- Note: get_items now returns ListItem (lightweight) instead of full UnifiedItem
+  - Only includes: id, type, title, description, status, priority, tags, updated_at
+  - Use get_item_detail for full content

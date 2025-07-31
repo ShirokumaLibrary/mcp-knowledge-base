@@ -110,7 +110,7 @@ export class StatusHandlers {
         content: [
           {
             type: 'text' as const,
-            text: `Status created: ${JSON.stringify(status, null, 2)}`  // @ai-pattern: Pretty JSON
+            text: `Status created: ${JSON.stringify(status)}`  // @ai-pattern: Compact JSON
           }
         ]
       };

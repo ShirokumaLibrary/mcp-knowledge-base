@@ -176,13 +176,11 @@ describe('BaseHandler', () => {
   });
   
   describe('formatJson', () => {
-    it('should pretty print JSON', () => {
+    it('should format JSON without pretty printing', () => {
       const obj = { name: 'test', value: 123 };
       const result = handler.formatJson(obj);
       
-      expect(result).toContain('{\n');
-      expect(result).toContain('  "name": "test"');
-      expect(result).toContain('  "value": 123');
+      expect(result).toBe('{"name":"test","value":123}');
     });
   });
   

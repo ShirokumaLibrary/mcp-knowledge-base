@@ -122,7 +122,7 @@ describe('SessionHandlers', () => {
 
       const result = await handlers.handleGetLatestSession({});
       
-      expect(result.content[0].text).toContain('"data": null');
+      expect(result.content[0].text).toContain('"data":null');
     });
   });
 

@@ -275,7 +275,7 @@ describe('TypeHandlers', () => {
       const result = await handlers.handleGetTypes({ include_definitions: true });
 
       const text = result.content[0].text;
-      expect(text).toContain('"supported_fields": [');
+      expect(text).toContain('"supported_fields":[');
       expect(text).toContain('"priority"');
       expect(text).toContain('"status"');
       expect(text).toContain('"start_date"');
@@ -291,7 +291,7 @@ describe('TypeHandlers', () => {
       const result = await handlers.handleGetTypes({ include_definitions: true });
 
       const text = result.content[0].text;
-      expect(text).toContain('"supported_fields": [');
+      expect(text).toContain('"supported_fields":[');
       expect(text).toContain('"content"');
       expect(text).toContain('"description"');
     });
@@ -305,7 +305,7 @@ describe('TypeHandlers', () => {
       const result = await handlers.handleGetTypes({ include_definitions: true });
 
       const text = result.content[0].text;
-      expect(text).toContain('"supported_fields": [');
+      expect(text).toContain('"supported_fields":[');
       expect(text).toContain('"title"');
       expect(text).toContain('"content"');
       expect(text).toContain('"tags"');

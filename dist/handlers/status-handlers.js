@@ -53,7 +53,7 @@ export class StatusHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Status created: ${JSON.stringify(status, null, 2)}`
+                        text: `Status created: ${JSON.stringify(status)}`
                     }
                 ]
             };
