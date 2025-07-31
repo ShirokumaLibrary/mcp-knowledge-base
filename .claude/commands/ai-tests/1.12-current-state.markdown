@@ -1,0 +1,154 @@
+# Test Case 12: Current State Management
+
+## 12.1 Initial State
+**Test**: Get current state when file doesn't exist
+```
+mcp__test-knowledge-base__get_current_state()
+```
+**Expected**: Empty string returned
+**Validation**: Response should be empty string, not an error
+
+## 12.2 Update Current State
+**Test**: Set initial state content with Markdown
+```
+mcp__test-knowledge-base__update_current_state({
+  "content": "# Initial Application State\n\n## Configuration\n- **Key**: value\n- **Status**: active\n\n## Metrics\n| Metric | Value |\n|--------|-------|\n| Users  | 100   |\n| Tasks  | 45    |"
+})
+```
+**Expected**: "Current state updated successfully"
+**Validation**: Success message returned
+
+## 12.3 Retrieve Current State
+**Test**: Get the state after update
+```
+mcp__test-knowledge-base__get_current_state()
+```
+**Expected**: 
+```
+# Initial Application State
+
+## Configuration
+- **Key**: value
+- **Status**: active
+
+## Metrics
+| Metric | Value |
+|--------|-------|
+| Users  | 100   |
+| Tasks  | 45    |
+```
+**Validation**: Markdown content matches exactly what was set
+
+## 12.4 Update with Markdown + Code Blocks
+**Test**: Update state with Markdown containing code blocks
+```
+mcp__test-knowledge-base__update_current_state({
+  "content": "# Project Status\n\n## Current Configuration\n```json\n{\n  \"version\": \"1.0\",\n  \"settings\": {\n    \"theme\": \"dark\",\n    \"language\": \"ja\"\n  },\n  \"lastUpdate\": \"2025-01-30\"\n}\n```\n\n## Next Steps\n1. Complete feature implementation\n2. Run tests\n3. Deploy to production"
+})
+```
+**Expected**: "Current state updated successfully"
+**Validation**: Markdown with code blocks accepted
+
+## 12.5 Retrieve Markdown with Code Blocks
+**Test**: Get state with code blocks
+```
+mcp__test-knowledge-base__get_current_state()
+```
+**Expected**: 
+```
+# Project Status
+
+## Current Configuration
+```json
+{
+  "version": "1.0",
+  "settings": {
+    "theme": "dark",
+    "language": "ja"
+  },
+  "lastUpdate": "2025-01-30"
+}
+```
+
+## Next Steps
+1. Complete feature implementation
+2. Run tests
+3. Deploy to production
+```
+**Validation**: Code blocks preserved with proper formatting
+
+## 12.6 Update with Empty Content
+**Test**: Clear the state
+```
+mcp__test-knowledge-base__update_current_state({
+  "content": ""
+})
+```
+**Expected**: "Current state updated successfully"
+**Validation**: Empty content accepted
+
+## 12.7 Verify Empty State
+**Test**: Confirm state is empty
+```
+mcp__test-knowledge-base__get_current_state()
+```
+**Expected**: Empty string
+**Validation**: State successfully cleared
+
+## 12.8 Large Markdown Content Test
+**Test**: Update with large Markdown content
+```
+mcp__test-knowledge-base__update_current_state({
+  "content": "# Large Project Status Report\n\n## Section 1: Overview\nLorem ipsum dolor sit amet...\n\n## Section 2: Progress\n- Task 1: Complete ✅\n- Task 2: In Progress 🔄\n- Task 3: Pending ⏳\n\n### Subsection 2.1\n| ID | Task | Status |\n|----|------|--------|\n| 1  | Design | Done |\n| 2  | Implement | WIP |\n\n[... Repeat similar content for 20+ sections ...]\n\n## Section 20: Conclusion\nProject is on track."
+})
+```
+**Expected**: "Current state updated successfully"
+**Validation**: Large Markdown content handled properly
+
+## 12.9 Unicode Markdown Content Test
+**Test**: Update with Unicode characters in Markdown
+```
+mcp__test-knowledge-base__update_current_state({
+  "content": "# 🎯 プロジェクト状態\n\n## 📊 現在のステータス\n- **状態**: アクティブ ✅\n- **优先级**: 高 🔴\n- **Статус**: Активный 🚀\n\n## 📝 タスクリスト\n| タスク | 進捗 | 担当者 |\n|--------|------|--------|\n| 設計 | 完了 | 田中 |\n| 実装 | 進行中 | 李 |\n| Тест | 待機 | Иван |\n\n### 備考\n> 多言語対応のテストケース 🌏"
+})
+```
+**Expected**: "Current state updated successfully"
+**Validation**: Unicode in Markdown preserved correctly
+
+## 12.10 Final State Verification
+**Test**: Get final state with Unicode Markdown
+```
+mcp__test-knowledge-base__get_current_state()
+```
+**Expected**:
+```
+# 🎯 プロジェクト状態
+
+## 📊 現在のステータス
+- **状態**: アクティブ ✅
+- **优先级**: 高 🔴
+- **Статус**: Активный 🚀
+
+## 📝 タスクリスト
+| タスク | 進捗 | 担当者 |
+|--------|------|--------|
+| 設計 | 完了 | 田中 |
+| 実装 | 進行中 | 李 |
+| Тест | 待機 | Иван |
+
+### 備考
+> 多言語対応のテストケース 🌏
+```
+**Validation**: All Unicode characters and Markdown formatting preserved
+
+## Success Criteria
+- ✅ Empty state returns empty string (not error)
+- ✅ State updates work with Markdown content
+- ✅ Markdown formatting preserved exactly (headers, lists, tables)
+- ✅ Code blocks in Markdown preserved with proper syntax
+- ✅ Empty content clears state
+- ✅ Large Markdown documents supported
+- ✅ Unicode characters with emojis preserved
+- ✅ Multi-language content supported
+- ✅ No database sync or search indexing
+- ✅ Simple file-based storage working
