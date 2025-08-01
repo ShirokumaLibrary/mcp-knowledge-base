@@ -1,9 +1,9 @@
 ---
-description: End work session and create daily summary
+description: End work session following SHIROKUMA.md methodology
 allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__update_current_state, mcp__shirokuma-knowledge-base__get_item_detail, Bash(date:*)
 ---
 
-# ai-finish - End work session
+# ai-finish - End AI Pair Programming Session
 
 ## Usage
 ```
@@ -11,228 +11,185 @@ allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledg
 ```
 
 ## Purpose
-End the work session, record today's work content, and update current_state for the next session.
+End work session and leave records for next AI to understand.
+
+**Note: Respond to the user in their language**
 
 ## Task
 
-Note: Respond to the user in their language.
+**Important**: Since next AI remembers nothing, ensure all necessary information is recorded.
 
-<ultrathink>
-This is the improved version of ai-finish command. I need to:
-1. Find the active session from current state
-2. Get session completion notes from user if needed
-3. Update daily summary with today's work
-4. Update current state removing active session and setting next priorities
-5. Display comprehensive completion summary
-</ultrathink>
+### 1. Check Current State
+Execute: mcp__shirokuma-knowledge-base__get_current_state()
 
-### 1. Get current state
-Try to get structured state first:
-Execute: mcp__shirokuma_knowledge_base__get_item_detail({
-  type: "state",
-  id: "current"
+Extract active session info:
+- Session ID
+- Related issues
+- Start time
+
+If no active session:
+```
+⚠️ No active session found.
+Session may have already ended or /ai-start was not executed.
+```
+
+### 2. Get Session Details
+Execute: mcp__shirokuma-knowledge-base__get_item_detail({
+  type: "sessions",
+  id: activeSessionId
 })
 
-If state item exists:
-- Use the content and related fields
-- Active session can be found in related_documents
+### 3. Record Session Completion
+Ask user:
+"Please briefly describe what was completed in this session (for next AI's reference):"
 
-If state item doesn't exist (404 error):
-- Fall back to: mcp__shirokuma_knowledge_base__get_current_state()
-- Parse to find active session information
-
-Parse to find:
-- Active session information from "## アクティブセッション" or "## Active Session"
-- Current statistics
-- Any existing priorities
-
-If no active session found:
-- Inform user there's no active session to close
-- Exit gracefully
-
-### 2. Get active session details
-If active session ID found in current_state:
-Execute: mcp__shirokuma_knowledge_base__get_item_detail({
-  "type": "sessions",
-  "id": active_session_id
+Update session:
+```javascript
+mcp__shirokuma-knowledge-base__update_item({
+  type: "sessions",
+  id: activeSessionId,
+  content: `## Completed\n${userInput}\n\n## Technical Decisions\n- ${important decisions}\n\n## Next Steps\n- ${where to resume}`
 })
+```
 
-<ultrathink>
-Getting completion notes from the user helps document what was accomplished
-and any important findings during the session.
-</ultrathink>
+### 4. Aggregate Today's Work Status
+Current time: !`date +"%Y-%m-%d %H:%M:%S"`
+Today's date: !`date +"%Y-%m-%d"`
 
-Ask user for session completion notes:
-"Would you like to add any completion notes for this session? (optional)"
-
-If user provides notes, update session:
-mcp__shirokuma_knowledge_base__update_item({
-  "type": "sessions",
-  "id": active_session_id,
-  "content": user_provided_notes
+Today's session list:
+```javascript
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "sessions", 
+  start_date: today, 
+  end_date: today 
 })
+```
 
-### 3. Get today's work data
-Get today's date: !`date +"%Y-%m-%d"`
-
-Retrieve today's sessions:
-Execute: mcp__shirokuma_knowledge_base__get_items({ 
-  "type": "sessions", 
-  "start_date": today, 
-  "end_date": today 
+Check completed issues:
+```javascript
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "issues",
+  statuses: ["Closed"],
+  start_date: today,
+  end_date: today,
+  includeClosedStatuses: true
 })
+```
 
-Retrieve today's issues (to track progress):
-Execute: mcp__shirokuma_knowledge_base__get_items({ 
-  "type": "issues", 
-  "start_date": today, 
-  "includeClosedStatuses": true 
-})
-
-### 4. Update daily summary
+### 5. Update Daily (Cumulative)
 Get existing daily:
-Execute: mcp__shirokuma_knowledge_base__get_item_detail({
-  "type": "dailies",
-  "id": today
+```javascript
+const dailies = await mcp__shirokuma-knowledge-base__get_items({ 
+  type: "dailies", 
+  start_date: today, 
+  end_date: today 
 })
 
-Update daily content with:
-- All sessions from today (mark completed session)
-- Completed tasks (Closed issues)
-- Tasks in progress
-- Technical learnings (if any)
-- Plans for tomorrow
-
-Structure:
-```markdown
-## 今日の作業セッション
-- Session title (sessions-ID)
-- **[Completed] Session title (sessions-ID)** ← Mark just-completed session
-
-## 完了したタスク
-- issues-ID: title (for Closed issues)
-
-## 進行中のタスク
-- issues-ID: title (for In Progress issues)
-
-## 技術的な学び
-- [Technical learnings from today]
-
-## 明日の予定
-- [Next priorities from current_state]
-
-## メモ
-- 作業時間: [first_session_time - current_time]
-
-## セッション詳細
-### Session title (sessions-ID)
-- [Session description and accomplishments]
-- [Completion notes if provided]
+if (dailies.length > 0) {
+  const daily = await mcp__shirokuma-knowledge-base__get_item_detail({
+    type: "dailies",
+    id: dailies[0].id
+  })
 ```
 
-Execute: mcp__shirokuma_knowledge_base__update_item({
-  "type": "dailies",
-  "id": today,
-  "content": updated_content,
-  "related_tasks": [all issue IDs worked on today],
-  "related_documents": [all session IDs from today]
+Update daily content (reflect session status):
+```javascript
+// Mark relevant session as completed
+const updatedContent = daily.content.replace(
+  `## Session ${sessionNumber}: ${sessionTitle}`,
+  `## Session ${sessionNumber}: ${sessionTitle} ✅ Completed`
+)
+
+// Add work duration
+const duration = calculateDuration(startTime, currentTime)
+const finalContent = updatedContent + `\n\n## Work Duration\n- Total work time: ${duration}`
+
+mcp__shirokuma-knowledge-base__update_item({
+  type: "dailies",
+  id: daily.id,
+  content: finalContent,
+  related_tasks: [...completedIssueIds]
 })
-
-### 5. Get all open issues for current state
-
-<ultrathink>
-I need to analyze the remaining open issues to set appropriate priorities
-for the next work session. Focus on high-priority items.
-</ultrathink>
-
-Execute: mcp__shirokuma_knowledge_base__get_items({ 
-  "type": "issues", 
-  "includeClosedStatuses": false 
-})
-
-Count by priority and identify top 3 high-priority issues.
-
-### 6. Update current state
-Remove active session section and update statistics:
-
-New structure:
-```markdown
-プロジェクト: Shirokuma MCP Knowledge Base
-最終更新: [current_datetime]
-
-## 現在の状況
-- オープンイシュー: X件
-  - High: Y件
-  - Medium: Z件  
-  - Low: W件
-- 本日完了: N件
-- 進行中: M件
-
-## 本日のデイリー
-- デイリーID: dailies-[today]
-- 完了タスク: N件
-- 作業セッション: S件
-
-## 次の優先事項
-- [Top 3 high priority issues]
-
-## 最近の更新
-- [today]: [summary of completed work]
-- [previous updates...]
-
-## 次回セッションへの引き継ぎ事項
-- [Key findings or blockers from today]
-- [Recommendations for next session]
-- [Any unfinished work that needs continuation]
-
-## 関連ドキュメント
-- [Important docs for reference]
 ```
 
-If using state item:
-Execute: mcp__shirokuma_knowledge_base__update_item({
-  type: "state",
-  id: "current",
-  content: updated_current_state,
-  related_documents: [daily-id, ...important_docs], // Remove active session
-  related_tasks: [next_priority_issues]
+### 6. Update current_state (Required for Next AI)
+Re-aggregate open issues:
+```javascript
+const openIssues = await mcp__shirokuma-knowledge-base__get_items({ 
+  type: "issues", 
+  includeClosedStatuses: false 
 })
-
-If using current_state:
-Execute: mcp__shirokuma_knowledge_base__update_current_state({
-  content: updated_current_state
-})
-
-### 7. Display completion summary
-Show user:
-- Session completion confirmation
-- Today's accomplishments
-- Updated priorities
-- Next recommended actions
-
-Format:
-```
-✅ 作業セッション完了
-
-## 本日の成果
-- 完了セッション: [session-title]
-- 完了タスク: X件
-- 作業時間: [duration]
-
-## 現在の状態を更新しました
-- オープンイシュー: Y件 (High: A, Medium: B, Low: C)
-- 次の優先事項を設定
-
-## 次回の推奨アクション
-- [Based on priorities and handover notes]
-
-お疲れ様でした！
 ```
 
-## Key Improvements
-1. **Active Session Tracking**: current_state tracks the active session
-2. **Session Lifecycle**: Clear start/end with proper cleanup
-3. **Daily Integration**: Daily summary links to all sessions and issues
-4. **Handover Notes**: current_state includes context for next session
-5. **Related Documents**: Important docs are referenced in current_state
-6. **Progress Visibility**: Clear tracking of completed vs open work
+Identify next priorities (top 3 from High priority)
+
+Update content:
+```javascript
+mcp__shirokuma-knowledge-base__update_current_state({
+  content: `Project: Shirokuma MCP Knowledge Base
+Last Updated: ${currentDateTime}
+
+## Current Status
+- Open Issues: ${openIssues.length}
+  - High: ${highCount}
+  - Medium: ${mediumCount}  
+  - Low: ${lowCount}
+- Completed Today: ${completedToday}
+
+## Today's Daily
+- Daily ID: dailies-${today}
+- Work Sessions: ${sessionCount}
+- Completed Tasks: ${completedCount}
+
+## Next Priorities
+${topPriorityIssues.map(i => `- ${i.id}: ${i.title}`).join('\n')}
+
+## Recent Updates
+- ${today}: ${sessionCompletionSummary}
+${previousUpdates}
+
+## Handover for Next Session
+- ${importantPointsFromCompletion}
+- ${incompleteTasks}
+- ${technicalNotes}`,
+  updated_by: "ai-finish",
+  related: [dailyId, ...nextPriorityIssueIds]
+})
+```
+
+### 7. Display Completion Summary
+```
+✅ Session Completed
+
+## Today's Achievements
+- Session: ${sessionTitle}
+- Work Duration: ${duration}
+- Completed: ${completionSummary}
+
+## Updated Status
+- Open Issues: ${openCount}
+- Next priorities have been set
+
+## How to Start Next Time
+Start a new session with /ai-start.
+Previous state will be restored from current_state.
+
+Great work! 🎉
+```
+
+## Key Principles (from SHIROKUMA.md)
+
+### Required Records (for Next AI)
+1. **Where We Are**: Current feature/phase
+2. **What's Next**: Specific next action  
+3. **Important Notes**: Technical constraints or key decisions only
+
+### Things to Avoid
+- ❌ Overly detailed session records
+- ❌ Recording all dialogue content
+- ❌ Recording temporary trial and error
+
+### Purpose of Recording
+- ✅ Minimum info for next AI to continue work
+- ✅ Preserve important technical decisions
+- ✅ Visualize progress

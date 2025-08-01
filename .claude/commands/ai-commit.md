@@ -12,6 +12,8 @@ description: Commit changes following project guidelines and handle releases
 
 ## Task
 
+**Note: Respond to the user in their language**
+
 <ultrathink>
 I need to:
 1. Run all tests first to ensure nothing is broken
