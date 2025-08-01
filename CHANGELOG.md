@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2025-08-01
+
+### Fixed
+- **Strict Parameter Validation**: All API calls now reject unknown parameters
+  - Prevents silent failures when invalid fields are provided
+  - Improves error messages for API misuse
+  - Ensures API contract is strictly enforced
+
 ## [0.7.3] - 2025-08-01
 
 ### Fixed

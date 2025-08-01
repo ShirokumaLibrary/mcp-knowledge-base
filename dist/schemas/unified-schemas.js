@@ -8,11 +8,11 @@ export const GetItemsParams = z.object({
     start_date: z.string().optional(),
     end_date: z.string().optional(),
     limit: z.number().optional()
-});
+}).strict();
 export const GetItemDetailParams = z.object({
     type: ItemTypeSchema,
     id: z.union([z.string(), z.number()])
-});
+}).strict();
 export const CreateItemParams = z.object({
     type: ItemTypeSchema,
     title: z.string().min(1),
@@ -40,7 +40,7 @@ export const CreateItemParams = z.object({
         message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional()
-});
+}).strict();
 export const UpdateItemParams = z.object({
     type: ItemTypeSchema,
     id: z.union([z.string(), z.number()]),
@@ -56,23 +56,23 @@ export const UpdateItemParams = z.object({
     start_time: z.string().optional(),
     related_documents: z.array(z.string()).optional(),
     related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 export const DeleteItemParams = z.object({
     type: ItemTypeSchema,
     id: z.union([z.string(), z.number()])
-});
+}).strict();
 export const SearchItemsByTagParams = z.object({
     tag: z.string().min(1),
     types: z.array(ItemTypeSchema).optional()
-});
+}).strict();
 export const GetSessionsParams = z.object({
     start_date: z.string().optional(),
     end_date: z.string().optional()
-});
+}).strict();
 export const GetSessionDetailParams = z.object({
     id: z.string()
-});
-export const GetLatestSessionParams = z.object({});
+}).strict();
+export const GetLatestSessionParams = z.object({}).strict();
 export const CreateSessionParams = z.object({
     title: z.string().min(1),
     content: z.string().optional(),
@@ -92,7 +92,7 @@ export const CreateSessionParams = z.object({
         message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional()
-});
+}).strict();
 export const UpdateSessionParams = z.object({
     id: z.string(),
     title: z.string().optional(),
@@ -101,17 +101,17 @@ export const UpdateSessionParams = z.object({
     tags: z.array(z.string()).optional(),
     related_documents: z.array(z.string()).optional(),
     related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 export const SearchSessionsByTagParams = z.object({
     tag: z.string().min(1)
-});
+}).strict();
 export const GetSummariesParams = z.object({
     start_date: z.string().optional(),
     end_date: z.string().optional()
-});
+}).strict();
 export const GetSummaryDetailParams = z.object({
     date: z.string()
-});
+}).strict();
 export const CreateSummaryParams = z.object({
     date: z.string(),
     title: z.string().min(1),
@@ -119,7 +119,7 @@ export const CreateSummaryParams = z.object({
     tags: z.array(z.string()).optional(),
     related_documents: z.array(z.string()).optional(),
     related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 export const UpdateSummaryParams = z.object({
     date: z.string(),
     title: z.string().optional(),
@@ -127,4 +127,4 @@ export const UpdateSummaryParams = z.object({
     tags: z.array(z.string()).optional(),
     related_documents: z.array(z.string()).optional(),
     related_tasks: z.array(z.string()).optional()
-});
+}).strict();
