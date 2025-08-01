@@ -23,7 +23,7 @@ export const GetItemsParams = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   limit: z.number().optional()
-});
+}).strict();
 
 /**
  * @ai-intent Get item detail parameters
@@ -32,7 +32,7 @@ export const GetItemsParams = z.object({
 export const GetItemDetailParams = z.object({
   type: ItemTypeSchema,
   id: z.union([z.string(), z.number()])
-});
+}).strict();
 
 /**
  * @ai-intent Create item parameters
@@ -67,7 +67,7 @@ export const CreateItemParams = z.object({
       message: 'Invalid ID format: must not contain path traversal patterns'
     })
     .optional() // For sessions: custom ID
-});
+}).strict();
 
 /**
  * @ai-intent Update item parameters
@@ -88,7 +88,7 @@ export const UpdateItemParams = z.object({
   start_time: z.string().optional(),
   related_documents: z.array(z.string()).optional(),
   related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 
 /**
  * @ai-intent Delete item parameters
@@ -97,7 +97,7 @@ export const UpdateItemParams = z.object({
 export const DeleteItemParams = z.object({
   type: ItemTypeSchema,
   id: z.union([z.string(), z.number()])
-});
+}).strict();
 
 /**
  * @ai-intent Search items by tag parameters
@@ -106,7 +106,7 @@ export const DeleteItemParams = z.object({
 export const SearchItemsByTagParams = z.object({
   tag: z.string().min(1),
   types: z.array(ItemTypeSchema).optional()
-});
+}).strict();
 
 /**
  * @ai-intent Session operation schemas
@@ -114,13 +114,13 @@ export const SearchItemsByTagParams = z.object({
 export const GetSessionsParams = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional()
-});
+}).strict();
 
 export const GetSessionDetailParams = z.object({
   id: z.string()
-});
+}).strict();
 
-export const GetLatestSessionParams = z.object({});
+export const GetLatestSessionParams = z.object({}).strict();
 
 export const CreateSessionParams = z.object({
   title: z.string().min(1),
@@ -143,7 +143,7 @@ export const CreateSessionParams = z.object({
       message: 'Invalid ID format: must not contain path traversal patterns'
     })
     .optional()
-});
+}).strict();
 
 export const UpdateSessionParams = z.object({
   id: z.string(),
@@ -153,11 +153,11 @@ export const UpdateSessionParams = z.object({
   tags: z.array(z.string()).optional(),
   related_documents: z.array(z.string()).optional(),
   related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 
 export const SearchSessionsByTagParams = z.object({
   tag: z.string().min(1)
-});
+}).strict();
 
 /**
  * @ai-intent Summary operation schemas
@@ -165,11 +165,11 @@ export const SearchSessionsByTagParams = z.object({
 export const GetSummariesParams = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional()
-});
+}).strict();
 
 export const GetSummaryDetailParams = z.object({
   date: z.string()
-});
+}).strict();
 
 export const CreateSummaryParams = z.object({
   date: z.string(),
@@ -178,7 +178,7 @@ export const CreateSummaryParams = z.object({
   tags: z.array(z.string()).optional(),
   related_documents: z.array(z.string()).optional(),
   related_tasks: z.array(z.string()).optional()
-});
+}).strict();
 
 export const UpdateSummaryParams = z.object({
   date: z.string(),
@@ -187,4 +187,4 @@ export const UpdateSummaryParams = z.object({
   tags: z.array(z.string()).optional(),
   related_documents: z.array(z.string()).optional(),
   related_tasks: z.array(z.string()).optional()
-});
+}).strict();

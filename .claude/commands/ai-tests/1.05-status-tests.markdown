@@ -29,7 +29,7 @@ Expected: All issues regardless of status
 ### Filter by Specific Status
 ```
 Tool: get_items
-Parameters: {type: "issues", status: "Open"}
+Parameters: {type: "issues", statuses: ["Open"]}
 Expected: Only issues with "Open" status
 ```
 

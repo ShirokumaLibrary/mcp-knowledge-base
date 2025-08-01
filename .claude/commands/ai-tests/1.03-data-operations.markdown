@@ -30,15 +30,15 @@ Expected: Error "issues with ID 999 not found"
 ### List Open Issues
 ```
 Tool: get_items
-Parameters: {type: "issues", status: "Open"}
+Parameters: {type: "issues", statuses: ["Open"]}
 Expected: Array of issues with status "Open"
 ```
 
-### List High Priority Issues
+### List All Issues Including Closed
 ```
 Tool: get_items
-Parameters: {type: "issues", priority: "high"}
-Expected: Array of high priority issues
+Parameters: {type: "issues", includeClosedStatuses: true}
+Expected: Array of all issues including closed ones
 ```
 
 ### List with Date Range

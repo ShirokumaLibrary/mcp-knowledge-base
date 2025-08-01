@@ -8,7 +8,7 @@
  *   - src/schemas/unified-schemas.ts (validation)
  */
 
-import { createUnifiedHandlers } from '../unified-handlers.js';
+import { createUnifiedHandlers, handleUnifiedToolCall } from '../unified-handlers.js';
 import { FileIssueDatabase } from '../../database/index.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
@@ -498,6 +498,119 @@ describe('UnifiedHandlers', () => {
       expect(result.tasks.plans).toHaveLength(1);
       expect(result.tasks.sessions).toBeUndefined(); // Not included in types filter
       expect(result.documents).toEqual({});
+    });
+  });
+
+  describe('strict parameter validation', () => {
+    it('should reject unknown parameters in get_items', async () => {
+      await expect(handleUnifiedToolCall('get_items', {
+        type: 'issues',
+        unknown_field: 'value'
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject unknown parameters in get_item_detail', async () => {
+      await expect(handleUnifiedToolCall('get_item_detail', {
+        type: 'issues',
+        id: 1,
+        extra_param: 'value'
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject unknown parameters in create_item', async () => {
+      await expect(handleUnifiedToolCall('create_item', {
+        type: 'issues',
+        title: 'Test Issue',
+        unknown_field: 'value'
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject deprecated category field in create_item', async () => {
+      await expect(handleUnifiedToolCall('create_item', {
+        type: 'sessions',
+        title: 'Test Session',
+        category: 'development' // This field was removed
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject unknown parameters in update_item', async () => {
+      const created = await database.getItemRepository().createItem({
+        type: 'issues',
+        title: 'Test Issue',
+        content: 'Content'
+      });
+
+      await expect(handleUnifiedToolCall('update_item', {
+        type: 'issues',
+        id: parseInt(created.id),
+        title: 'Updated Title',
+        unknown_field: 'value'
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject unknown parameters in delete_item', async () => {
+      await expect(handleUnifiedToolCall('delete_item', {
+        type: 'issues',
+        id: 1,
+        force: true // Unknown parameter
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should reject unknown parameters in search_items_by_tag', async () => {
+      await expect(handleUnifiedToolCall('search_items_by_tag', {
+        tag: 'bug',
+        limit: 10 // Unknown parameter
+      }, handlers)).rejects.toThrow();
+    });
+
+    it('should accept all valid parameters without throwing', async () => {
+      // Test that valid parameters work correctly
+      const created = await handlers.create_item({
+        type: 'issues',
+        title: 'Valid Issue',
+        description: 'Description',
+        content: 'Content',
+        priority: 'high',
+        status: 'Open',
+        tags: ['test'],
+        related: [],
+        start_date: '2025-01-01',
+        end_date: '2025-12-31',
+        related_documents: [],
+        related_tasks: []
+      });
+
+      expect(created.title).toBe('Valid Issue');
+
+      // Update with all valid parameters
+      await handlers.update_item({
+        type: 'issues',
+        id: parseInt(created.id),
+        title: 'Updated Title',
+        description: 'Updated Description',
+        content: 'Updated Content',
+        priority: 'low',
+        status: 'Closed',
+        tags: ['updated'],
+        related: [],
+        start_date: null,
+        end_date: null,
+        related_documents: [],
+        related_tasks: []
+      });
+
+      // Get with all valid parameters
+      const items = await handlers.get_items({
+        type: 'issues',
+        statuses: ['Closed'],
+        includeClosedStatuses: true,
+        start_date: '2025-01-01',
+        end_date: '2025-12-31',
+        limit: 10
+      });
+
+      expect(items).toHaveLength(1);
+      expect(items[0].title).toBe('Updated Title');
     });
   });
 });
