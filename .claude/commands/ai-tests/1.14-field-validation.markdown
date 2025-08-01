@@ -17,10 +17,13 @@ Parameters: {
   tags: ["test-field", "validation"],
   start_date: "2025-01-01",
   end_date: "2025-12-31",
-  related_tasks: ["plans-1"],
+  related_tasks: ["issues-1"],
   related_documents: ["docs-1"]
 }
-Expected: Success, returns issue ID
+Expected: Success, returns full item object with:
+- related: ["issues-1", "docs-1"] (merged array)
+- related_tasks: ["issues-1"]
+- related_documents: ["docs-1"]
 ```
 
 ### Get Items List - Check Fields
@@ -55,7 +58,8 @@ Validation:
 - content: "This is detailed content that should NOT appear in list view"
 - start_date: "2025-01-01"
 - end_date: "2025-12-31"
-- related_tasks: ["plans-1"]
+- related: ["issues-1", "docs-1"] (merged from related_tasks and related_documents)
+- related_tasks: ["issues-1"]
 - related_documents: ["docs-1"]
 ```
 

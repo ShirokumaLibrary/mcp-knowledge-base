@@ -5,6 +5,9 @@
 
 **Model Context Protocol (MCP) server for comprehensive knowledge management including issues, plans, documents, and work sessions.**
 
+📦 **npm**: [@shirokuma-library/mcp-knowledge-base](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base)  
+🐙 **GitHub**: [ShirokumaLibrary/mcp-knowledge-base](https://github.com/ShirokumaLibrary/mcp-knowledge-base)
+
 ## Core Design Philosophy
 
 **⚠️ All information stored in this system is structured for AI processing, not human readability.**
@@ -17,7 +20,7 @@
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g @shirokuma-library/mcp-knowledge-base
+sudo npm install -g @shirokuma-library/mcp-knowledge-base
 ```
 
 ### Local Installation
@@ -31,13 +34,13 @@ npm install @shirokuma-library/mcp-knowledge-base
 To update the global installation to the latest version:
 
 ```bash
-npm update -g @shirokuma-library/mcp-knowledge-base
+sudo npm update -g @shirokuma-library/mcp-knowledge-base
 ```
 
 Or to install a specific version:
 
 ```bash
-npm install -g @shirokuma-library/mcp-knowledge-base@0.5.1
+npm install -g @shirokuma-library/mcp-knowledge-base@0.7.1
 ```
 
 ## Usage
@@ -142,25 +145,6 @@ For complete documentation index, see [docs/README.md](docs/README.md)
 
 - Node.js 18+
 
-## Quick Start
-
-1. **Add to your project's `.mcp.json`:**
-   ```json
-   {
-     "mcpServers": {
-       "shirokuma-knowledge-base": {
-         "command": "node",
-         "args": ["/path/to/shirokuma-knowledge-base/dist/server.js"],
-         "cwd": "/path/to/shirokuma-knowledge-base"
-       }
-     }
-   }
-   ```
-
-2. **Start using with Claude Code**
-   - The server will be automatically available in your Claude Code session
-   - All tools will be accessible through the Claude interface
-
 ## Database Maintenance
 
 ### Rebuilding the Database
@@ -186,38 +170,23 @@ The rebuild process preserves:
 - Custom status definitions (beyond the default ones)
 - All tags and relationships
 
-## Testing
+### Data Migration
+
+When upgrading from older versions, you may need to migrate your data to the latest format:
 
 ```bash
-# Run all tests
-npm test
+# Migrate related_documents/related_tasks to unified related field
+shirokuma-mcp-knowledge-base-migrate-related
 
-# Run unit tests only
-npm run test:unit
-
-# Run integration tests
-npm run test:integration
-
-# Run E2E tests
-npm run test:e2e
-
-# Run all tests including E2E
-npm run test:all
-
-# Check test coverage
-npm run test:coverage
-
-# Debug with MCP Inspector (opens browser)
-npm run inspect
+# Skip backup files
+shirokuma-mcp-knowledge-base-migrate-related --no-backup
 ```
 
-### Test Coverage Status
-- **Overall Coverage**: 79.3%
-- **Functions Coverage**: 80.33% ✅
-- **Total Tests**: 952 (all passing)
-- **Test Suites**: 50
-
-See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing documentation.
+This migration:
+- Converts old `related_documents` and `related_tasks` fields to the unified `related` field
+- Creates `.bak` backup files by default
+- Updates all markdown files in your data directory
+- Is safe to run multiple times (idempotent)
 
 ## Documentation
 
@@ -232,6 +201,15 @@ See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing document
 - [設定ガイド](docs/ja/configuration.md) - 環境変数と設定
 
 
+
+## Contributing
+
+Contributions are welcome! Please see our [Contributing Guide](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/developer/contributing.md) for details.
+
+## Issues & Support
+
+- 🐛 [Report Issues](https://github.com/ShirokumaLibrary/mcp-knowledge-base/issues)
+- 📖 [Wiki](https://github.com/ShirokumaLibrary/mcp-knowledge-base/wiki)
 
 ## License
 

@@ -19,6 +19,14 @@ Examples:
 
 Note: Respond to the user in their language.
 
+<ultrathink>
+The user wants to optimize a document for AI readability. I need to:
+1. Parse the filepath and any additional instructions
+2. Analyze the document to identify redundant content
+3. Create an optimization plan preserving essential information
+4. Show the proposed changes and get user confirmation before editing
+</ultrathink>
+
 Parse arguments:
 - First argument: filepath
 - Remaining arguments: additional optimization instructions
@@ -28,6 +36,14 @@ Optimize the document for AI readability:
 1. **Analyze file**: Read the file specified in the first argument
 
 2. **Apply optimizations**:
+   <ultrathink>
+   I need to carefully analyze what to remove and what to preserve:
+   - Standard concepts that AI already knows can be reduced to just names
+   - Project-specific rules must be preserved in full
+   - Examples should be minimal but representative
+   - Any user-specified preservation instructions must be followed
+   </ultrathink>
+   
    - Remove redundant explanations
    - Keep only names for standard methodologies (e.g., Conventional Commits)
    - Preserve project-specific important rules

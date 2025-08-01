@@ -12,6 +12,12 @@ description: Commit changes following project guidelines and handle releases
 
 ## Task
 
+<ultrathink>
+I need to analyze the current git status and diff to understand what changes have been made.
+Then I'll commit them in the proper order: source code, tests, distribution files, and documentation.
+I must ensure no AI references are included in commit messages.
+</ultrathink>
+
 Execute conventional commits in this specific order:
 
 ### 1. Source Code
@@ -43,6 +49,14 @@ git add docs/ *.md
 3. **Semantic versioning**: patch=fixes, minor=features, major=breaking
 
 ## Version Release
+
+<ultrathink>
+If a version release is requested, I need to:
+1. Determine if this is a patch, minor, or major version bump based on the changes
+2. Update the CHANGELOG.md with the new version
+3. Use npm version to create the release commit and tag
+4. Push the changes and publish to npm
+</ultrathink>
 
 When requested (e.g., "0.0.1バージョン上げて"):
 

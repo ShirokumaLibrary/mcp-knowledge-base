@@ -14,6 +14,14 @@ argument-hint: "<command-name> <description>"
 
 Note: Respond to the user in their language.
 
+<ultrathink>
+The user wants to create a new slash command. I need to:
+1. Parse the command name and description from arguments
+2. Determine what tools the command will need
+3. Create a properly formatted command file with YAML frontmatter
+4. Include appropriate placeholders for dynamic content and internationalization
+</ultrathink>
+
 Reference documentation: https://docs.anthropic.com/en/docs/claude-code/slash-commands#custom-slash-commands
 
 Create a new slash command file based on the following Claude Code specifications.
@@ -142,6 +150,14 @@ Final message: "[Commit created successfully]"
 ```
 
 ### Output Example
+
+<ultrathink>
+Based on the user's input, I need to:
+1. Extract command name: check-types
+2. Extract description: Run TypeScript type checking
+3. Determine appropriate tools (likely Bash for tsc)
+4. Create a command that runs type checking and reports results
+</ultrathink>
 
 For command: `/ai-create-command check-types "Run TypeScript type checking"`
 

@@ -1,7 +1,7 @@
 ---
 description: Start a work session and display current issues
 argument-hint: "[session description]"
-allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__update_item, Bash(date:*)
+allowed-tools: mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__update_current_state, Bash(date:*)
 ---
 
 # ai-start - Start work session
@@ -19,46 +19,89 @@ Examples:
 
 Note: Respond to the user in their language.
 
+<ultrathink>
+This is the improved version of ai-start command. I need to:
+1. Check for existing state (either state item or current_state)
+2. Check for any active sessions to avoid duplicates
+3. Display open issues organized by priority
+4. Create a new work session and link it to selected issue
+5. Update state and daily records accordingly
+</ultrathink>
+
 ### 1. Show current state
-Execute: mcp__shirokuma_knowledge_base__get_current_state()
+Try to get structured state first:
+Execute: mcp__shirokuma_knowledge_base__get_item_detail({
+  type: "state",
+  id: "current"
+})
 
-Display the current state content (handover notes from previous session).
+If state item exists:
+- Display the content
+- Note the related items for reference
 
-### 2. Display relevant issues
-Based on current_state content, fetch and display issues intelligently:
+If state item doesn't exist (404 error):
+- Fall back to: mcp__shirokuma_knowledge_base__get_current_state()
 
+IMPORTANT: Display the current state content IMMEDIATELY after execution.
+Format:
+```
+## Current State
+
+[Display the content from state item or current_state]
+
+---
+```
+
+### 2. Check for active session
+
+<ultrathink>
+I need to check if there's already an active session to prevent session conflicts.
+If found, I should offer options to the user rather than creating duplicate sessions.
+</ultrathink>
+
+If current_state contains "## アクティブセッション" or "## Active Session":
+- Inform user there's already an active session
+- Ask if they want to:
+  1. Continue the existing session
+  2. End the previous session and start a new one
+  3. Cancel
+
+If user chooses to end previous session:
+- Call /ai-finish first, then proceed with new session
+
+### 3. Display relevant issues
 Execute: mcp__shirokuma_knowledge_base__get_items({ 
   "type": "issues", 
   "includeClosedStatuses": false 
 })
 
-Then:
-- If current_state mentions "Next priorities", display those issues first with emphasis
-- Group by priority (High → Medium → Low) for better visibility
-- If there are many issues (>10), consider showing only High priority by default
+IMPORTANT: Display issues IMMEDIATELY after fetching, following these rules:
+- If current_state mentions "次の優先事項" or "Next priorities", display those issues first with ⭐ emoji
+- Group all issues by priority (High → Medium → Low)
+- Number issues sequentially for easy reference
+- If >10 issues, show all High priority + first 3 of Medium/Low
 
-Display format:
+Required display format:
 ```
-📋 [Priority Issues] (from current_state):
+## 📋 Priority Issues (from current_state):
 ⭐ 1. [high] title (issues-X)
 ⭐ 2. [high] title (issues-Y)
 
-📋 [All Open Issues]:
-High Priority:
+## 📋 All Open Issues:
+**High Priority:**
 3. title (issues-Z)
+4. title (issues-W)
 
-Medium Priority:
-4. title (issues-A)
-5. title (issues-B)
+**Medium Priority:**
+5. title (issues-A)
+6. title (issues-B)
 
-Low Priority:
-6. title (issues-C)
+**Low Priority:**
+7. title (issues-C)
 ```
 
-Note: Adapt display based on number of issues and current_state guidance
-
-### 3. Create work session
-Get current time: !`date +"%Y-%m-%d %H:%M:%S JST"`
+### 4. Create work session
+Get current time: !`date +"%Y-%m-%d %H:%M:%S"`
 
 Based on $ARGUMENTS:
 - If no arguments: title = "[Work Session]", description = "[Work Started]: " + current_time
@@ -73,29 +116,50 @@ Execute: mcp__shirokuma_knowledge_base__create_item({
   content: ""
 })
 
-Display:
+IMPORTANT: Display session creation result IMMEDIATELY:
 ```
-✅ [Session Started]: [session-id]
-📝 [Title]: [title]
-📝 [Description]: [description]
+✅ Session Started: [session-id]
+📝 Title: [title]
+📝 Description: [description]
 ```
 
-Note: When work scope becomes clear, update the session title to reflect the actual work:
-- Use mcp__shirokuma_knowledge_base__update_item to update title
-- Keep title concise (5-10 words) and descriptive
+### 5. Prompt for issue selection
+IMPORTANT: Ask this question IMMEDIATELY after displaying session info:
+"Which issue would you like to work on? (Please provide the number or issue ID)"
 
-### 4. Prompt for issue selection
-Ask: "[Which issue would you like to work on? (Please provide the number or issue ID)]"
-
-### 5. Update session with selected issue
+### 6. Update session with selected issue
 When user selects an issue, execute:
 mcp__shirokuma_knowledge_base__update_item({
   type: "sessions",
   id: [created-session-id],
-  related: ["issues-X"]  // where X is the selected issue number
+  related_tasks: ["issues-X"]  // where X is the selected issue number
 })
 
-### 6. Update or create today's daily
+### 7. Update state with active session
+If using state item:
+Execute: mcp__shirokuma_knowledge_base__update_item({
+  type: "state",
+  id: "current",
+  content: [updated content with active session section added],
+  related_documents: [...existing_documents, session-id, daily-id],
+  related_tasks: [...existing_tasks, selected-issue]
+})
+
+If using current_state:
+Execute: mcp__shirokuma_knowledge_base__update_current_state({
+  content: [updated current state with active session section added]
+})
+
+The active session section should be added after "## 現在の状況" or "## Current Status":
+```
+## アクティブセッション
+- セッションID: [session-id]
+- タイトル: [session-title]
+- 関連イシュー: [selected-issue]
+- 開始時刻: [start-time]
+```
+
+### 8. Update or create today's daily
 Get today's date: !`date +"%Y-%m-%d"`
 
 Check for existing daily:
@@ -109,40 +173,67 @@ If daily does NOT exist:
 Execute: mcp__shirokuma_knowledge_base__create_item({
   "type": "dailies",
   "date": today,
-  "title": "[Work Summary] - " + today (translate to user's language),
-  "content": "## [Today's Work Sessions]\n- " + session_title + " (sessions-" + session_id + ")\n\n## [Active Session]\n- sessions-" + session_id,
+  "title": "Work Summary - " + today,
+  "content": "## Today's Work Sessions\n- " + session_title + " (sessions-" + session_id + ")\n\n## Active Session\n- sessions-" + session_id,
   "related_documents": ["sessions-" + session_id]
 })
 
 If daily EXISTS:
-Execute: mcp__shirokuma_knowledge_base__get_item_detail({
-  "type": "dailies",
-  "id": today
-})
-
-Then update with new session:
+Update with new session:
 mcp__shirokuma_knowledge_base__update_item({
   "type": "dailies",
-  "id": today,
-  "content": Add new session to existing content,
-  "related_documents": Add new session ID to existing array
+  "id": [daily-id],
+  "content": [updated content with new session added],
+  "related_documents": [existing array + new session ID]
 })
 
-Important: When updating content, look for "## [Today's Work Sessions]" section and add the new session. Also update or add "## [Active Session]" section with the current session ID.
+### 9. Update current_state with daily reference
+Update current_state to include today's daily reference:
+```
+## 本日のデイリー
+- デイリーID: dailies-[today]
+- 作業セッション: [count]件
+```
 
 ## Example Flow
 ```
 > /ai-start Implementing user authentication feature with OAuth2
 
-[Current state content displayed here - handover notes from previous session]
+## Current State
+プロジェクト: Shirokuma MCP Knowledge Base
+最終更新: 2025-07-31 22:49
 
-📋 [Open Issues]:
-1. [high] Performance Optimization (issues-13)
-2. [high] Add Advanced Search (issues-7)
-3. [medium] Custom Field Feature (issues-20)
+## 現在の状況
+- オープンイシュー: 15件
+  - High: 3件
+  - Medium: 8件  
+  - Low: 4件
 
-✅ [Session Started]: 2025-07-30-23.45.12.345
-📝 [Description]: Implementing user authentication feature with OAuth2
+## 次の優先事項
+- issues-26: get_items response optimization
+- issues-13: Performance optimization
+- issues-7: Advanced search feature
 
-[Which issue would you like to work on? (Please provide the number or issue ID)]
+[... rest of current state content ...]
+
+---
+
+## 📋 Priority Issues (from current_state):
+⭐ 1. [high] get_items response optimization (issues-26)
+⭐ 2. [high] Performance optimization (issues-13)
+⭐ 3. [high] Advanced search feature (issues-7)
+
+## 📋 All Open Issues:
+**High Priority:**
+4. Import/Export functionality (issues-6)
+
+**Medium Priority:**
+5. Custom Field Feature (issues-20)
+[... more issues ...]
+
+✅ Session Started: 2025-07-31-23.45.12.345
+📝 Title: Implementing user authentication
+📝 Description: Implementing user authentication feature with OAuth2
+
+Which issue would you like to work on? (Please provide the number or issue ID)
 ```

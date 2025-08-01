@@ -15,7 +15,11 @@ Parameters: {
   status: "Open",
   tags: ["bug", "authentication", "urgent"]
 }
-Expected: Success with id: "1"
+Expected: Success with response containing:
+- id: string (auto-generated)
+- related: array (contains related_tasks items)
+- related_tasks: array
+- related_documents: array
 ```
 
 ### Issue 2 - Issue without tags
@@ -28,7 +32,10 @@ Parameters: {
   priority: "medium",
   status: "Open"
 }
-Expected: Success with id: "2"
+Expected: Success with response containing:
+- id: string (auto-generated)
+- related: empty array
+- tags: empty array (auto-initialized)
 ```
 
 ### Issue 3 - Issue with different status
@@ -42,7 +49,10 @@ Parameters: {
   status: "In Progress",
   tags: ["feature", "ui", "enhancement"]
 }
-Expected: Success with id: "3"
+Expected: Success with response containing:
+- id: string (auto-generated)
+- status: "In Progress"
+- related: empty array
 ```
 
 ### Issue 4 - Issue with description field
@@ -57,7 +67,10 @@ Parameters: {
   status: "Open",
   tags: ["bug", "memory", "performance"]
 }
-Expected: Success with id: "4"
+Expected: Success with response containing:
+- id: string (auto-generated)
+- description: "Background worker process consumes increasing memory over time"
+- related: empty array
 ```
 
 ### Issue 5 - Issue with related tasks and documents
@@ -70,10 +83,14 @@ Parameters: {
   priority: "medium",
   status: "Open",
   tags: ["documentation", "api"],
-  related_tasks: ["issues-1", "plans-4"],
+  related_tasks: ["issues-1", "issues-4"],
   related_documents: ["docs-1", "knowledge-1"]
 }
-Expected: Success with id: "5"
+Expected: Success with response containing:
+- id: string (auto-generated)
+- related: ["issues-1", "issues-4", "docs-1", "knowledge-1"] (merged array)
+- related_tasks: ["issues-1", "issues-4"]
+- related_documents: ["docs-1", "knowledge-1"]
 ```
 
 ## Test 2.2: Plan Creation

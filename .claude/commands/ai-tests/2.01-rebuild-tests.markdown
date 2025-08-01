@@ -23,6 +23,12 @@ Tool: get_types
 Note: Record custom types
 ```
 
+### 2.1.3 Create Database Snapshot
+```
+Bash: .claude/tools/dump-database-details.sh .shirokuma/data/search.db > /tmp/db-before-rebuild.txt
+Expected: Detailed database snapshot created
+```
+
 ## 2.2 Rebuild Execution
 
 ### 2.2.1 Execute Rebuild
@@ -35,7 +41,27 @@ Expected:
 - Count of items processed
 ```
 
-### 2.2.2 Restart MCP Server
+### 2.2.2 SQLite Verification Phase
+```
+Bash: .claude/tools/compare-databases.sh
+Expected:
+- ✅ Schemas are identical
+- ✅ Same number of items (or fewer if items were deleted)
+- ⚠️ Missing tags (deleted tags not recreated)
+- ✅ FTS indexes match item counts
+- ✅ Content matches for sample items
+```
+
+### 2.2.3 Content Verification
+```
+Bash: .claude/tools/verify-rebuild-content.sh
+Expected:
+- Matching items: 25-29 (some minor differences expected)
+- Tag associations may differ
+- Related items preserved
+```
+
+### 2.2.4 Restart MCP Server
 ```
 Note: MCP server must be restarted to use the rebuilt database
 Action: Stop and restart the MCP server connection
@@ -126,80 +152,26 @@ Parameters: {tag: "bug"}
 Expected: Same items as before rebuild
 ```
 
-## 2.6 Database Comparison
+## 2.6 Database Comparison (Alternative Manual Method)
+
+Note: The following manual comparison steps are available if the automated tools are not accessible:
 
 ### 2.6.1 File System Comparison
-
 ```
 Bash: ls -la .shirokuma/data/search.db*
 Expected: Both search.db and search.db.backup exist
 ```
 
-### 2.6.2 File Size Comparison
+### 2.6.2 Quick Comparison Script
 ```
-Bash: du -h .shirokuma/data/search.db .shirokuma/data/search.db.backup
-Expected: Sizes may differ slightly due to vacuum/optimization
-```
-
-### 2.6.3 Schema Comparison
-```
-Bash: sqlite3 .shirokuma/data/search.db ".schema" > /tmp/schema_new.sql
-Bash: sqlite3 .shirokuma/data/search.db.backup ".schema" > /tmp/schema_old.sql  
-Bash: diff /tmp/schema_old.sql /tmp/schema_new.sql
-Expected: No differences in schema
+Bash: .claude/tools/compare-databases.sh
+Expected: Comprehensive comparison report
 ```
 
-### 2.6.4 Record Count Comparison
+### 2.6.3 Detailed Content Dump
 ```
-Bash: sqlite3 .shirokuma/data/search.db "SELECT COUNT(*) FROM items;"
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT COUNT(*) FROM items;"
-Expected: New DB may have fewer items (deleted items not restored)
-```
-
-### Detailed Record Comparison
-```
-# Count by type
-Bash: sqlite3 .shirokuma/data/search.db "SELECT type, COUNT(*) FROM items GROUP BY type ORDER BY type;"
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT type, COUNT(*) FROM items GROUP BY type ORDER BY type;"
-
-# List all item IDs for comparison
-Bash: sqlite3 .shirokuma/data/search.db "SELECT type || '-' || id FROM items ORDER BY type, CAST(id AS INTEGER);" > /tmp/items_new.txt
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT type || '-' || id FROM items ORDER BY type, CAST(id AS INTEGER);" > /tmp/items_old.txt
-Bash: diff /tmp/items_old.txt /tmp/items_new.txt
-Expected: Only deleted items should be missing
-```
-
-### Verify Sequences
-```
-Bash: sqlite3 .shirokuma/data/search.db "SELECT * FROM sequences ORDER BY type;"
-Expected: All sequences preserved with correct values
-
-# Compare sequences between databases
-Bash: sqlite3 .shirokuma/data/search.db "SELECT type, sequence, base_type FROM sequences ORDER BY type;" > /tmp/seq_new.txt
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT type, sequence, base_type FROM sequences ORDER BY type;" > /tmp/seq_old.txt
-Bash: diff /tmp/seq_old.txt /tmp/seq_new.txt
-Expected: No differences (sequences should match)
-```
-
-### Tag Comparison
-```
-# Count tags
-Bash: sqlite3 .shirokuma/data/search.db "SELECT COUNT(*) FROM tags;"
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT COUNT(*) FROM tags;"
-
-# List all tags
-Bash: sqlite3 .shirokuma/data/search.db "SELECT name FROM tags ORDER BY name;" > /tmp/tags_new.txt
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT name FROM tags ORDER BY name;" > /tmp/tags_old.txt
-Bash: diff /tmp/tags_old.txt /tmp/tags_new.txt
-Expected: Deleted tags should not reappear
-```
-
-### Search Index Comparison
-```
-# Check FTS table
-Bash: sqlite3 .shirokuma/data/search.db "SELECT COUNT(*) FROM items_fts;"
-Bash: sqlite3 .shirokuma/data/search.db.backup "SELECT COUNT(*) FROM items_fts;"
-Expected: Should match items table count
+Bash: .claude/tools/dump-database-details.sh | less
+Expected: Browse detailed database contents
 ```
 
 ## 2.7 Test Completion

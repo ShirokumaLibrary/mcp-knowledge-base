@@ -5,41 +5,75 @@
 ```
 mcp__test-knowledge-base__get_current_state()
 ```
-**Expected**: Empty string returned
-**Validation**: Response should be empty string, not an error
+**Expected**: JSON object with empty content and default metadata
+```json
+{
+  "content": "",
+  "metadata": {
+    "title": "プロジェクト現在状態",
+    "type": "current_state",
+    "priority": "high",
+    "tags": ["system", "state"],
+    "related": []
+  }
+}
+```
+**Validation**: Returns structured JSON, not just empty string
 
-## 12.2 Update Current State
-**Test**: Set initial state content with Markdown
+## 12.2 Update Current State with Metadata
+**Test**: Set initial state content with metadata
 ```
 mcp__test-knowledge-base__update_current_state({
-  "content": "# Initial Application State\n\n## Configuration\n- **Key**: value\n- **Status**: active\n\n## Metrics\n| Metric | Value |\n|--------|-------|\n| Users  | 100   |\n| Tasks  | 45    |"
+  "content": "# Initial Application State\n\n## Configuration\n- **Key**: value\n- **Status**: active\n\n## Metrics\n| Metric | Value |\n|--------|-------|\n| Users  | 100   |\n| Tasks  | 45    |",
+  "related": ["issues-1", "docs-1"],
+  "tags": ["milestone", "v1.0"],
+  "updated_by": "test-user"
 })
 ```
 **Expected**: "Current state updated successfully"
 **Validation**: Success message returned
 
-## 12.3 Retrieve Current State
+## 12.3 Retrieve Current State with Metadata
 **Test**: Get the state after update
 ```
 mcp__test-knowledge-base__get_current_state()
 ```
-**Expected**: 
+**Expected**: JSON object with content and metadata
+```json
+{
+  "content": "# Initial Application State\n\n## Configuration\n- **Key**: value\n- **Status**: active\n\n## Metrics\n| Metric | Value |\n|--------|-------|\n| Users  | 100   |\n| Tasks  | 45    |",
+  "metadata": {
+    "title": "プロジェクト現在状態",
+    "type": "current_state",
+    "priority": "high",
+    "tags": ["milestone", "v1.0"],
+    "related": ["issues-1", "docs-1"],
+    "updated_at": "2025-XX-XX...",
+    "updated_by": "test-user"
+  }
+}
 ```
-# Initial Application State
+**Validation**: Content and metadata preserved
 
-## Configuration
-- **Key**: value
-- **Status**: active
-
-## Metrics
-| Metric | Value |
-|--------|-------|
-| Users  | 100   |
-| Tasks  | 45    |
+## 12.4 Update with Invalid Related Items
+**Test**: Update state with non-existent related items
 ```
-**Validation**: Markdown content matches exactly what was set
+mcp__test-knowledge-base__update_current_state({
+  "content": "# Testing Invalid References",
+  "related": ["issues-9999", "docs-1", "invalid-format", "sessions-fake"],
+  "tags": ["test"],
+  "updated_by": "validator"
+})
+```
+**Expected**: Error with instructions
+```
+The following related items do not exist: issues-9999, invalid-format, sessions-fake. 
+Please create these items first or remove them from the related field. 
+Valid items: docs-1
+```
+**Validation**: Clear error message with AI instructions
 
-## 12.4 Update with Markdown + Code Blocks
+## 12.5 Update with Markdown + Code Blocks
 **Test**: Update state with Markdown containing code blocks
 ```
 mcp__test-knowledge-base__update_current_state({
@@ -49,35 +83,34 @@ mcp__test-knowledge-base__update_current_state({
 **Expected**: "Current state updated successfully"
 **Validation**: Markdown with code blocks accepted
 
-## 12.5 Retrieve Markdown with Code Blocks
+## 12.6 Retrieve Markdown with Code Blocks
 **Test**: Get state with code blocks
 ```
 mcp__test-knowledge-base__get_current_state()
 ```
-**Expected**: 
-```
-# Project Status
+**Expected**: JSON with properly escaped content
+**Validation**: Code blocks preserved in JSON string format
 
-## Current Configuration
-```json
-{
-  "version": "1.0",
-  "settings": {
-    "theme": "dark",
-    "language": "ja"
-  },
-  "lastUpdate": "2025-01-30"
-}
+## 12.7 Tag Auto-Registration Test
+**Test**: Update with new tags
 ```
-
-## Next Steps
-1. Complete feature implementation
-2. Run tests
-3. Deploy to production
+mcp__test-knowledge-base__update_current_state({
+  "content": "# Tag Test",
+  "tags": ["auto-tag-1", "auto-tag-2", "existing-tag"]
+})
 ```
-**Validation**: Code blocks preserved with proper formatting
+**Expected**: "Current state updated successfully"
+**Validation**: New tags automatically registered
 
-## 12.6 Update with Empty Content
+## 12.8 Verify Tags Were Created
+**Test**: Check if new tags exist
+```
+mcp__test-knowledge-base__get_tags()
+```
+**Expected**: Response includes "auto-tag-1" and "auto-tag-2"
+**Validation**: Tags were auto-registered
+
+## 12.9 Update with Empty Content
 **Test**: Clear the state
 ```
 mcp__test-knowledge-base__update_current_state({
@@ -87,68 +120,55 @@ mcp__test-knowledge-base__update_current_state({
 **Expected**: "Current state updated successfully"
 **Validation**: Empty content accepted
 
-## 12.7 Verify Empty State
-**Test**: Confirm state is empty
+## 12.10 Verify Empty State Structure
+**Test**: Confirm state structure when empty
 ```
 mcp__test-knowledge-base__get_current_state()
 ```
-**Expected**: Empty string
-**Validation**: State successfully cleared
-
-## 12.8 Large Markdown Content Test
-**Test**: Update with large Markdown content
+**Expected**: JSON object with empty content but metadata intact
+```json
+{
+  "content": "",
+  "metadata": {
+    "title": "プロジェクト現在状態",
+    "type": "current_state",
+    "priority": "high",
+    "tags": ["system", "state"],
+    "related": []
+  }
+}
 ```
-mcp__test-knowledge-base__update_current_state({
-  "content": "# Large Project Status Report\n\n## Section 1: Overview\nLorem ipsum dolor sit amet...\n\n## Section 2: Progress\n- Task 1: Complete ✅\n- Task 2: In Progress 🔄\n- Task 3: Pending ⏳\n\n### Subsection 2.1\n| ID | Task | Status |\n|----|------|--------|\n| 1  | Design | Done |\n| 2  | Implement | WIP |\n\n[... Repeat similar content for 20+ sections ...]\n\n## Section 20: Conclusion\nProject is on track."
-})
-```
-**Expected**: "Current state updated successfully"
-**Validation**: Large Markdown content handled properly
+**Validation**: Structure maintained even with empty content
 
-## 12.9 Unicode Markdown Content Test
+## 12.11 Unicode Markdown Content Test
 **Test**: Update with Unicode characters in Markdown
 ```
 mcp__test-knowledge-base__update_current_state({
-  "content": "# 🎯 プロジェクト状態\n\n## 📊 現在のステータス\n- **状態**: アクティブ ✅\n- **优先级**: 高 🔴\n- **Статус**: Активный 🚀\n\n## 📝 タスクリスト\n| タスク | 進捗 | 担当者 |\n|--------|------|--------|\n| 設計 | 完了 | 田中 |\n| 実装 | 進行中 | 李 |\n| Тест | 待機 | Иван |\n\n### 備考\n> 多言語対応のテストケース 🌏"
+  "content": "# 🎯 プロジェクト状態\n\n## 📊 現在のステータス\n- **状態**: アクティブ ✅\n- **优先级**: 高 🔴\n- **Статус**: Активный 🚀\n\n## 📝 タスクリスト\n| タスク | 進捗 | 担当者 |\n|--------|------|--------|\n| 設計 | 完了 | 田中 |\n| 実装 | 進行中 | 李 |\n| Тест | 待機 | Иван |\n\n### 備考\n> 多言語対応のテストケース 🌏",
+  "tags": ["unicode", "international"],
+  "updated_by": "global-test"
 })
 ```
 **Expected**: "Current state updated successfully"
 **Validation**: Unicode in Markdown preserved correctly
 
-## 12.10 Final State Verification
+## 12.12 Final State Verification
 **Test**: Get final state with Unicode Markdown
 ```
 mcp__test-knowledge-base__get_current_state()
 ```
-**Expected**:
-```
-# 🎯 プロジェクト状態
-
-## 📊 現在のステータス
-- **状態**: アクティブ ✅
-- **优先级**: 高 🔴
-- **Статус**: Активный 🚀
-
-## 📝 タスクリスト
-| タスク | 進捗 | 担当者 |
-|--------|------|--------|
-| 設計 | 完了 | 田中 |
-| 実装 | 進行中 | 李 |
-| Тест | 待機 | Иван |
-
-### 備考
-> 多言語対応のテストケース 🌏
-```
-**Validation**: All Unicode characters and Markdown formatting preserved
+**Expected**: JSON with Unicode content preserved
+**Validation**: All Unicode characters and Markdown formatting in JSON format
 
 ## Success Criteria
-- ✅ Empty state returns empty string (not error)
+- ✅ Returns JSON object with content and metadata structure
+- ✅ Empty state returns JSON with empty content (not empty string)
+- ✅ Metadata fields (tags, related, updated_by) work correctly
+- ✅ Invalid related items trigger clear error messages
+- ✅ Tags are auto-registered when new
 - ✅ State updates work with Markdown content
-- ✅ Markdown formatting preserved exactly (headers, lists, tables)
-- ✅ Code blocks in Markdown preserved with proper syntax
-- ✅ Empty content clears state
-- ✅ Large Markdown documents supported
+- ✅ Markdown formatting preserved in JSON strings
+- ✅ Code blocks in Markdown preserved properly
+- ✅ Empty content clears state but maintains structure
 - ✅ Unicode characters with emojis preserved
 - ✅ Multi-language content supported
-- ✅ No database sync or search indexing
-- ✅ Simple file-based storage working
