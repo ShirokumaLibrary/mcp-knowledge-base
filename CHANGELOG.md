@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2025-08-01
+
+### Fixed
+- **Migration Tool**: Fixed issue where code examples in document content were incorrectly processed
+  - Now strictly processes only YAML frontmatter
+  - Ignores `related_tasks` and `related_documents` in document body
+  - Prevents corruption of documentation files containing code examples
+
 ## [0.7.1] - 2025-08-01
 
 ### Added
