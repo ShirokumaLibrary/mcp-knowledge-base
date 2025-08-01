@@ -173,7 +173,6 @@ export interface CreateItemParams {
   // Session-specific fields
   datetime?: string;      // ISO 8601 datetime for sessions (past data migration)
   id?: string;           // Custom ID for sessions
-  category?: string;     // Category for sessions
   // Dailies-specific fields
   date?: string;         // YYYY-MM-DD for dailies
 }

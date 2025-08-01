@@ -148,7 +148,7 @@ export class TypeHandlers {
           type: 'sessions',
           base_type: 'sessions',
           description: 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.',
-          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents', 'category']
+          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents']
         },
         {
           type: 'dailies',

@@ -66,8 +66,7 @@ export const CreateItemParams = z.object({
     }, {
       message: 'Invalid ID format: must not contain path traversal patterns'
     })
-    .optional(), // For sessions: custom ID
-  category: z.string().optional() // For sessions: category field
+    .optional() // For sessions: custom ID
 });
 
 /**

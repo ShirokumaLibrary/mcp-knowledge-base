@@ -135,15 +135,6 @@ export class ItemRepository {
         case 'updated_at':
           value = item.updated_at;
           break;
-        case 'category':
-          // Special handling for sessions category field
-          // Special handling for sessions category field
-          if (item.type === 'sessions' && 'category' in item && (item as any).category) {
-            value = (item as any).category;
-          } else {
-            value = fieldDef.default_value;
-          }
-          break;
         default:
           // Use default value for unknown fields
           value = fieldDef.default_value;
