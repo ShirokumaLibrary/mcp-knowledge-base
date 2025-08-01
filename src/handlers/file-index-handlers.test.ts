@@ -136,6 +136,31 @@ describe('FileIndexHandlers', () => {
       rmSync(nonGitDir, { recursive: true });
     });
 
+    it('should index from git subdirectory', async () => {
+      // Create test files in subdirectory
+      const subDir = join(testDir, 'src', 'components');
+      mkdirSync(subDir, { recursive: true });
+      
+      writeFileSync(join(testDir, 'root.js'), 'console.log("root");');
+      writeFileSync(join(subDir, 'component.js'), 'export default function Component() {}');
+      execSync('git add .');
+      
+      // Change to subdirectory
+      process.chdir(subDir);
+      
+      // Should still be able to index from subdirectory
+      const result = await handlerMap.index_codebase({});
+      
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('✅ Indexing completed successfully!');
+      // When running from subdirectory, only files in that subdirectory are indexed
+      expect(result.content[0].text).toContain('Files indexed: 1');
+      
+      // Change back to test directory
+      process.chdir(testDir);
+    });
+
   });
 
   describe('search_code', () => {
