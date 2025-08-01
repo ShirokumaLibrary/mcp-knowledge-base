@@ -57,35 +57,42 @@ function mergeRelatedArrays(relatedDocs, relatedTasks) {
     }
 }
 function migrateContent(content) {
-    const relatedDocs = extractRelatedField(content, 'related_documents');
-    const relatedTasks = extractRelatedField(content, 'related_tasks');
-    const merged = mergeRelatedArrays(relatedDocs, relatedTasks);
-    const firstDelimiter = content.indexOf('---');
-    const secondDelimiter = content.indexOf('---', firstDelimiter + 3);
-    if (firstDelimiter === -1 || secondDelimiter === -1) {
+    if (!content.startsWith('---\n')) {
         return { content, merged: '[]' };
     }
-    const beforeFrontmatter = content.substring(0, firstDelimiter);
-    const frontmatter = content.substring(firstDelimiter, secondDelimiter + 3);
-    const afterFrontmatter = content.substring(secondDelimiter + 3);
-    let newFrontmatter = frontmatter;
+    const firstDelimiterEnd = 4;
+    const secondDelimiterStart = content.indexOf('\n---\n', firstDelimiterEnd);
+    if (secondDelimiterStart === -1) {
+        return { content, merged: '[]' };
+    }
+    const frontmatter = content.substring(firstDelimiterEnd, secondDelimiterStart);
+    const frontmatterEnd = secondDelimiterStart + 5;
+    const afterFrontmatter = content.substring(frontmatterEnd);
+    const relatedDocs = extractRelatedField('---\n' + frontmatter + '\n---', 'related_documents');
+    const relatedTasks = extractRelatedField('---\n' + frontmatter + '\n---', 'related_tasks');
+    const merged = mergeRelatedArrays(relatedDocs, relatedTasks);
+    const lines = frontmatter.split('\n');
+    const newLines = [];
     let relatedInserted = false;
-    newFrontmatter = newFrontmatter.replace(/^related_documents:.*$/m, (match) => {
-        if (!relatedInserted) {
-            relatedInserted = true;
-            return `related: ${merged}`;
+    for (const line of lines) {
+        if (line.match(/^related_documents:\s*/)) {
+            if (!relatedInserted) {
+                newLines.push(`related: ${merged}`);
+                relatedInserted = true;
+            }
         }
-        return '';
-    });
-    newFrontmatter = newFrontmatter.replace(/^related_tasks:.*$/m, (match) => {
-        if (!relatedInserted) {
-            relatedInserted = true;
-            return `related: ${merged}`;
+        else if (line.match(/^related_tasks:\s*/)) {
+            if (!relatedInserted) {
+                newLines.push(`related: ${merged}`);
+                relatedInserted = true;
+            }
         }
-        return '';
-    });
-    newFrontmatter = newFrontmatter.replace(/\n\n+/g, '\n');
-    const newContent = beforeFrontmatter + newFrontmatter + afterFrontmatter;
+        else {
+            newLines.push(line);
+        }
+    }
+    const newFrontmatter = newLines.join('\n');
+    const newContent = '---\n' + newFrontmatter + '\n---\n' + afterFrontmatter;
     return { content: newContent, merged };
 }
 async function migrateFile(file, createBackup) {
