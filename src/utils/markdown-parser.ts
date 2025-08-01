@@ -57,6 +57,8 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
 
   // @ai-logic: State machine starts by checking for frontmatter delimiter
   if (lines[0] === '---') {
+    let currentKey: string | null = null;
+    let currentArray: string[] = [];
 
     // @ai-flow: Line-by-line parsing until closing delimiter
     for (let i = 1; i < lines.length; i++) {
@@ -64,18 +66,44 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
 
       // @ai-logic: Second '---' marks end of frontmatter
       if (line === '---') {
+        // Save any pending array
+        if (currentKey && currentArray.length > 0) {
+          metadata[currentKey] = currentArray;
+        }
         contentStartIndex = i + 1;
         break;
+      }
+
+      // Check for YAML array item (starts with - )
+      const arrayMatch = line.match(/^\s*-\s+(.+)$/);
+      if (arrayMatch && currentKey) {
+        currentArray.push(arrayMatch[1].trim());
+        continue;
       }
 
       // @ai-logic: Simple regex for 'key: value' pattern
       const match = line.match(/^(\w+):\s*(.*)$/);
       if (match) {
+        // Save any pending array from previous key
+        if (currentKey && currentArray.length > 0) {
+          metadata[currentKey] = currentArray;
+          currentArray = [];
+        }
+
         const [, key, value] = match;
+        currentKey = key;
 
         // @ai-logic: Type inference based on key names and value patterns
         if (value.trim() === '') {
-          metadata[key] = null;  // @ai-edge-case: Empty values become null
+          // Check if next line starts an array
+          if (i + 1 < lines.length && lines[i + 1].match(/^\s*-\s+/)) {
+            // This is the start of a YAML array
+            currentArray = [];
+            continue;
+          } else {
+            metadata[key] = null;  // @ai-edge-case: Empty values become null
+            currentKey = null;
+          }
         } else if (key === 'tags' || key === 'related_tasks' || key === 'related_documents' || key === 'related') {
           // @ai-why: These fields are always arrays for consistent API
           // @ai-logic: Check if value is JSON array format
@@ -91,6 +119,7 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
             const items = value.split(',').map(v => v.trim()).filter(v => v);
             metadata[key] = items;
           }
+          currentKey = null;
         } else if (value.includes(',')) {
           // Simple array parsing for comma-separated values
           const items = value.split(',').map(v => v.trim()).filter(v => v);
@@ -100,12 +129,16 @@ export function parseMarkdown(fileContent: string): ParsedMarkdown {
           } else {
             metadata[key] = items;
           }
+          currentKey = null;
         } else if (value === 'true' || value === 'false') {
           metadata[key] = value === 'true';
+          currentKey = null;
         } else if (!isNaN(Number(value))) {
           metadata[key] = Number(value);
+          currentKey = null;
         } else {
           metadata[key] = value.trim();
+          currentKey = null;
         }
       }
     }

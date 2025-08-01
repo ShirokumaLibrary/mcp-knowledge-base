@@ -706,7 +706,7 @@ export const toolDefinitions = [
   // Current state management tools
   {
     name: 'get_current_state',
-    description: 'Get the current application state',
+    description: 'Get the current application state with metadata. Returns JSON with content and metadata fields.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -714,13 +714,27 @@ export const toolDefinitions = [
   },
   {
     name: 'update_current_state',
-    description: 'Update the current application state',
+    description: 'Update the current application state with metadata support',
     inputSchema: {
       type: 'object',
       properties: {
         content: {
           type: 'string',
-          description: 'New state content'
+          description: 'New state content (markdown)'
+        },
+        related: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Related item IDs (sessions, dailies, issues, docs, etc.)'
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Tags for categorization'
+        },
+        updated_by: {
+          type: 'string',
+          description: 'Who/what updated the state (e.g., ai-start, ai-finish)'
         }
       },
       required: ['content']

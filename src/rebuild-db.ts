@@ -186,6 +186,7 @@ async function rebuildDatabase() {
 
   // Sync all data using ItemRepository
   console.log('\n🔄 Syncing data to SQLite using ItemRepository...');
+  console.log('   (Includes migration: related_tasks + related_documents → related)');
   const itemRepo = fullDb.getItemRepository();
 
   // Sync all types including sessions
@@ -259,10 +260,90 @@ async function rebuildDatabase() {
   console.log(`  - Tags: ${allTags.length}`);
   console.log(`  - Unique Status Names: ${counts.statuses.size}`);
 
+  // Check if --write-back flag is provided
+  if (process.argv.includes('--write-back')) {
+    console.log('\n📝 Writing migrated data back to Markdown files...');
+    await writeMigratedDataBack(fullDb, allTypes);
+  }
+
   console.log('\n✨ Database rebuild successful!');
   console.log('\n💡 Tip: You can verify the rebuild by running the MCP server and checking the data.');
+  
+  if (!process.argv.includes('--write-back')) {
+    console.log('\n💡 Note: To update Markdown files with migrated related fields, run with --write-back flag');
+  }
 
   await fullDb.close();
+}
+
+/**
+ * @ai-intent Write migrated data back to Markdown files
+ * @ai-pattern Update files only if migration occurred
+ * @ai-logic Check original markdown files to identify which ones need migration
+ */
+async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Promise<void> {
+  const itemRepo = db.getItemRepository();
+  let migratedCount = 0;
+  let checkedCount = 0;
+  
+  for (const typeInfo of allTypes) {
+    const type = typeInfo.type;
+    
+    // Skip types that don't use markdown storage
+    if (type === 'sessions' || type === 'dailies') {
+      continue;
+    }
+    
+    const items = await itemRepo.getItems(type, true);
+    
+    for (const item of items) {
+      checkedCount++;
+      
+      // Read the original markdown file to check if it has old fields
+      const databasePath = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
+      const filePath = path.join(databasePath, type, `${type}-${item.id}.md`);
+      
+      try {
+        const content = readFileSync(filePath, 'utf-8');
+        const parsed = parseMarkdown(content);
+        
+        // Check if this file has the old fields that need migration
+        const hasOldFields = 'related_tasks' in parsed.metadata || 'related_documents' in parsed.metadata;
+        
+        if (hasOldFields) {
+          // Get the migrated item from database
+          const fullItem = await itemRepo.getItem(type, item.id);
+          
+          if (fullItem) {
+            // Update will save back to Markdown with new structure
+            // Pass all existing data to preserve other fields
+            await itemRepo.updateItem({
+              type: fullItem.type,
+              id: fullItem.id,
+              title: fullItem.title,
+              description: fullItem.description,
+              content: fullItem.content,
+              tags: fullItem.tags,
+              status: fullItem.status,
+              priority: fullItem.priority,
+              related: fullItem.related,
+              start_date: fullItem.start_date,
+              end_date: fullItem.end_date
+            });
+            migratedCount++;
+            console.log(`  ✅ Migrated ${type} ${item.id}: ${parsed.metadata.related_tasks || []} + ${parsed.metadata.related_documents || []} → ${fullItem.related}`);
+          }
+        }
+      } catch (error) {
+        console.error(`  ⚠️  Failed to process ${type} ${item.id}:`, error);
+      }
+    }
+  }
+  
+  console.log(`\n  📊 Migration Summary:`);
+  console.log(`  - Checked: ${checkedCount} files`);
+  console.log(`  - Migrated: ${migratedCount} files`);
+  console.log(`  - No changes needed: ${checkedCount - migratedCount} files`);
 }
 
 // Run rebuild

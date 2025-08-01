@@ -111,6 +111,7 @@ export class IssueTrackerServer {
     this.summaryHandlers = new SummaryHandlers(this.sessionManager);
     this.typeHandlers = new TypeHandlers(this.db);
     this.searchHandlers = new SearchHandlers(this.db);
+    // CurrentStateHandlers will get TagRepository after DB is initialized
     this.currentStateHandlers = new CurrentStateHandlers(config.database.path);
     this.changeTypeHandlers = new ChangeTypeHandlers(this.db);
     this.fileIndexHandlers = new FileIndexHandlers(this.db);
@@ -266,6 +267,37 @@ export class IssueTrackerServer {
 
     // Initialize unified handlers after database is ready
     this.unifiedHandlers = createUnifiedHandlers(this.db);
+    
+    // Re-initialize CurrentStateHandlers with TagRepository and validation
+    const tagRepo = this.db.getTagRepository();
+    const itemRepo = this.db.getItemRepository();
+    
+    // Create validation function for related items
+    const validateRelatedItems = async (items: string[]): Promise<string[]> => {
+      const validItems: string[] = [];
+      for (const itemId of items) {
+        // Parse type and id from format like "issues-123"
+        const match = itemId.match(/^(\w+)-(.+)$/);
+        if (match) {
+          const [, type, id] = match;
+          try {
+            const item = await itemRepo.getItem(type, id);
+            if (item) {
+              validItems.push(itemId);
+            }
+          } catch (error) {
+            // Skip invalid items
+          }
+        }
+      }
+      return validItems;
+    };
+    
+    this.currentStateHandlers = new CurrentStateHandlers(
+      getConfig().database.path, 
+      tagRepo,
+      validateRelatedItems
+    );
 
     const transport = new StdioServerTransport();
     await this.server.connect(transport);

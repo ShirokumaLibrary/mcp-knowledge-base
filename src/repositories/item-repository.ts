@@ -473,7 +473,7 @@ export class ItemRepository {
       priority: params.priority || 'medium',
       status: statusName,
       status_id: status.id,
-      start_date: startDate || params.start_date || null,
+      start_date: type === 'dailies' ? id : (startDate || params.start_date || null),
       end_date: params.end_date || null,
       start_time: null,
       tags: cleanedTags,
@@ -1038,6 +1038,9 @@ export class ItemRepository {
           const storageItem = await this.storage.load(config, id);
           if (storageItem && storageItem.metadata.title) {
             try {
+              // Migration: Merge related_tasks and related_documents into related
+              this.migrateRelatedFields(storageItem);
+              
               const item = await this.storageItemToUnifiedItem(storageItem, type);
               await this.syncItemToSQLite(item);
               await this.tagRepo.ensureTagsExist(item.tags);
@@ -1057,6 +1060,9 @@ export class ItemRepository {
         const storageItem = await this.storage.load(config, id);
         if (storageItem && storageItem.metadata.title) {
           try {
+            // Migration: Merge related_tasks and related_documents into related
+            this.migrateRelatedFields(storageItem);
+            
             const item = await this.storageItemToUnifiedItem(storageItem, type);
             await this.syncItemToSQLite(item);
             await this.tagRepo.ensureTagsExist(item.tags);
@@ -1071,6 +1077,38 @@ export class ItemRepository {
     }
 
     return syncedCount;
+  }
+
+  /**
+   * @ai-intent Migrate old related_tasks/related_documents to unified related field
+   * @ai-pattern Data migration for backward compatibility
+   */
+  private migrateRelatedFields(storageItem: StorageItem): void {
+    const metadata = storageItem.metadata as any;
+    
+    // Check if migration is needed
+    if (!metadata.related && (metadata.related_tasks || metadata.related_documents)) {
+      const related = new Set<string>();
+      
+      // Add related_tasks
+      if (Array.isArray(metadata.related_tasks)) {
+        metadata.related_tasks.forEach((item: string) => related.add(item));
+      }
+      
+      // Add related_documents
+      if (Array.isArray(metadata.related_documents)) {
+        metadata.related_documents.forEach((item: string) => related.add(item));
+      }
+      
+      // Set unified related field
+      metadata.related = Array.from(related);
+      
+      // Remove old fields
+      delete metadata.related_tasks;
+      delete metadata.related_documents;
+      
+      this.logger.info(`Migrated related fields for ${storageItem.id}: ${metadata.related.length} items`);
+    }
   }
 
   /**

@@ -146,6 +146,14 @@ export class FileIssueDatabase {
   }
 
   /**
+   * @ai-intent Get TagRepository for direct access
+   * @ai-why CurrentStateHandlers needs access for tag registration
+   */
+  getTagRepository() {
+    return this.tagRepo;
+  }
+
+  /**
    * @ai-intent Get TypeRepository for direct access
    * @ai-why Type management tests need direct access
    */
