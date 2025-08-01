@@ -38,45 +38,30 @@ describe('ItemRepository - Dailies Date Filtering Debug', () => {
     }
   });
 
-  it('should demonstrate the date filtering bug', async () => {
-    // Create a daily
+  it('should correctly filter dailies by date', async () => {
+    // Create a daily with the proper 'date' parameter (not 'id')
     await itemRepo.createItem({
       type: 'dailies',
-      id: '2025-07-31',
+      date: '2025-07-31',
       title: 'Work Summary - 2025-07-31',
       content: 'Test daily content'
     });
 
-    // First, verify the daily was created successfully
-    const allDailies = await itemRepo.getItems('dailies');
-    console.log('All dailies:', allDailies);
-    expect(allDailies.length).toBe(1);
-
-    // Check the database directly
+    // Check the database directly to see what was stored
     const db = database.getDatabase();
     const rows = await db.allAsync(
-      'SELECT type, id, start_date FROM items WHERE type = ?',
+      'SELECT type, id, start_date, created_at FROM items WHERE type = ?',
       ['dailies']
     ) as any[];
-    console.log('Database rows:', rows);
-
-    // Try to find it with date filter
-    const filteredResults = await itemRepo.getItems('dailies', false, undefined, '2025-07-31', '2025-07-31');
-    console.log('Filtered results:', filteredResults);
     
-    // This is where the bug occurs
+    // The bug: start_date is stored correctly but the filtering doesn't work
+    expect(rows.length).toBe(1);
+    expect(rows[0].start_date).toBe('2025-07-31'); // This should pass
+    
+    // Try to find it with date filter - this is where it fails
+    const filteredResults = await itemRepo.getItems('dailies', false, undefined, '2025-07-31', '2025-07-31');
+    
+    // This should now work correctly
     expect(filteredResults.length).toBe(1);
-
-    // Let's also check the SQL query being generated
-    // Add debug output to see the actual query
-    const debugQuery = `
-      SELECT type, id, start_date 
-      FROM items 
-      WHERE type = 'dailies' 
-        AND start_date >= '2025-07-31' 
-        AND start_date <= '2025-07-31'
-    `;
-    const debugResults = await db.allAsync(debugQuery) as any[];
-    console.log('Debug query results:', debugResults);
   });
 });
