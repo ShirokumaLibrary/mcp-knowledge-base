@@ -29,8 +29,7 @@ describe('MarkdownTransformers', () => {
         description: 'Issue description',
         start_date: '2024-01-01',
         end_date: '2024-01-31',
-        related_tasks: ['plans-1'],
-        related_documents: ['docs-1']
+        related: ['plans-1', 'docs-1']
       };
 
       const result = MarkdownTransformers.formatIssue(issue);
@@ -47,9 +46,8 @@ describe('MarkdownTransformers', () => {
       expect(result).toContain('## Timeline');
       expect(result).toContain('**Start:** 2024-01-01');
       expect(result).toContain('**End:** 2024-01-31');
-      expect(result).toContain('## Related Tasks');
+      expect(result).toContain('## Related Items');
       expect(result).toContain('- plans-1');
-      expect(result).toContain('## Related Documents');
       expect(result).toContain('- docs-1');
     });
 
@@ -85,8 +83,7 @@ describe('MarkdownTransformers', () => {
         content: 'Detailed work log',
         tags: ['coding'],
         createdAt: '2024-01-01T10:30:00Z',
-        related_tasks: ['issues-1'],
-        related_documents: ['docs-1']
+        related: ['issues-1', 'docs-1']
       };
 
       const result = MarkdownTransformers.formatSession(session);
@@ -319,8 +316,7 @@ describe('MarkdownTransformers - Additional Coverage', () => {
         updated_at: '2024-01-02T00:00:00Z',
         tags: ['project', 'roadmap'],
         description: 'Annual project plan',
-        related_tasks: ['issues-1', 'issues-2'],
-        related_documents: ['docs-1']
+        related: ['issues-1', 'issues-2', 'docs-1']
       };
 
       const result = MarkdownTransformers.formatPlan(plan);
@@ -332,9 +328,10 @@ describe('MarkdownTransformers - Additional Coverage', () => {
       expect(result).toContain('**End:** 2024-12-31');
       expect(result).toContain('## Description');
       expect(result).toContain('Annual project plan');
-      expect(result).toContain('## Related Tasks');
+      expect(result).toContain('## Related Items');
       expect(result).toContain('- issues-1');
       expect(result).toContain('- issues-2');
+      expect(result).toContain('- docs-1');
     });
 
     it('should handle plan without optional fields', () => {
@@ -370,8 +367,7 @@ describe('MarkdownTransformers - Additional Coverage', () => {
         updated_at: '2024-01-02T00:00:00Z',
         tags: ['api', 'reference'],
         description: 'API reference guide',
-        related_tasks: ['issues-1'],
-        related_documents: ['docs-2', 'docs-3']
+        related: ['issues-1', 'docs-2', 'docs-3']
       };
 
       const result = MarkdownTransformers.formatDocument(doc);
@@ -380,7 +376,8 @@ describe('MarkdownTransformers - Additional Coverage', () => {
       expect(result).toContain('**Type:** docs');
       expect(result).toContain('## Description');
       expect(result).toContain('API reference guide');
-      expect(result).toContain('## Related Documents');
+      expect(result).toContain('## Related Items');
+      expect(result).toContain('- issues-1');
       expect(result).toContain('- docs-2');
       expect(result).toContain('- docs-3');
     });
