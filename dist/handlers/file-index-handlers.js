@@ -37,10 +37,6 @@ export class FileIndexHandlers {
         return {
             index_codebase: async (args) => {
                 const projectPath = process.cwd();
-                const gitPath = join(projectPath, '.git');
-                if (!existsSync(gitPath)) {
-                    throw new Error('Not a git repository. File indexing works with git-managed files only.');
-                }
                 const indexer = this.getIndexer(projectPath);
                 let indexed = 0;
                 let total = 0;
