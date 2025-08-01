@@ -182,9 +182,9 @@ export class FileIndexer {
         .split('\n')
         .filter(file => file.length > 0)
         .filter(file => this.shouldIndexFile(file));
-    } catch {
-      // Not a git repository, fall back to find
-      return [];
+    } catch (error) {
+      // Not a git repository or git command failed
+      throw new Error('Not a git repository. File indexing works with git-managed files only.');
     }
   }
 

@@ -62,12 +62,6 @@ export class FileIndexHandlers {
       index_codebase: async (args: z.infer<typeof fileIndexSchemas.index_codebase>) => {
         const projectPath = process.cwd();
 
-        // Check if it's a git repository
-        const gitPath = join(projectPath, '.git');
-        if (!existsSync(gitPath)) {
-          throw new Error('Not a git repository. File indexing works with git-managed files only.');
-        }
-
         const indexer = this.getIndexer(projectPath);
 
         // Progress tracking
