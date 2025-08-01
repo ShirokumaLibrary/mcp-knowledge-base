@@ -124,41 +124,33 @@ mcp__shirokuma-knowledge-base__update_current_state({
 ### 8. Update Daily (Cumulative)
 Get date: !`date +"%Y-%m-%d"`
 
-Check existing daily:
+**Try to get daily directly by date ID**:
 ```javascript
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "dailies", 
-  start_date: today, 
-  end_date: today 
-})
-```
-
-**If daily does NOT exist**:
-```javascript
-mcp__shirokuma-knowledge-base__create_item({
-  type: "dailies",
-  date: today,
-  title: `Work Log - ${today}`,
-  content: `## Session 1: ${sessionTitle}\n- Started: ${startTime}\n- Related: ${selectedIssue}`,
-  related_documents: [sessionId]
-})
-```
-
-**If daily EXISTS**:
-```javascript
-const daily = await mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: "dailies", 
-  id: existingDailyId 
-})
-
-const sessionCount = daily.related_documents?.filter(d => d.startsWith('sessions-')).length + 1
-
-mcp__shirokuma-knowledge-base__update_item({
-  type: "dailies",
-  id: daily.id,
-  content: daily.content + `\n\n## Session ${sessionCount}: ${sessionTitle}\n- Started: ${startTime}\n- Related: ${selectedIssue}`,
-  related_documents: [...daily.related_documents, sessionId]
-})
+try {
+  const daily = await mcp__shirokuma-knowledge-base__get_item_detail({ 
+    type: "dailies", 
+    id: today  // Direct access using date as ID
+  })
+  
+  // Daily exists - update it
+  const sessionCount = daily.related_documents?.filter(d => d.startsWith('sessions-')).length + 1
+  
+  mcp__shirokuma-knowledge-base__update_item({
+    type: "dailies",
+    id: daily.id,
+    content: daily.content + `\n\n## Session ${sessionCount}: ${sessionTitle}\n- Started: ${startTime}\n- Related: ${selectedIssue}`,
+    related_documents: [...daily.related_documents, sessionId]
+  })
+} catch (error) {
+  // Daily doesn't exist (404) - create new one
+  mcp__shirokuma-knowledge-base__create_item({
+    type: "dailies",
+    date: today,
+    title: `Work Log - ${today}`,
+    content: `## Session 1: ${sessionTitle}\n- Started: ${startTime}\n- Related: ${selectedIssue}`,
+    related_documents: [sessionId]
+  })
+}
 ```
 
 ### 9. Completion Message

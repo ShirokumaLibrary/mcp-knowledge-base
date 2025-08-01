@@ -77,39 +77,38 @@ mcp__shirokuma-knowledge-base__get_items({
 ```
 
 ### 5. Update Daily (Cumulative)
-Get existing daily:
+**Get daily directly by date ID**:
 ```javascript
-const dailies = await mcp__shirokuma-knowledge-base__get_items({ 
-  type: "dailies", 
-  start_date: today, 
-  end_date: today 
-})
-
-if (dailies.length > 0) {
+try {
   const daily = await mcp__shirokuma-knowledge-base__get_item_detail({
     type: "dailies",
-    id: dailies[0].id
+    id: today  // Direct access using date as ID
   })
 ```
 
-Update daily content (reflect session status):
-```javascript
-// Mark relevant session as completed
-const updatedContent = daily.content.replace(
-  `## Session ${sessionNumber}: ${sessionTitle}`,
-  `## Session ${sessionNumber}: ${sessionTitle} ✅ Completed`
-)
-
-// Add work duration
-const duration = calculateDuration(startTime, currentTime)
-const finalContent = updatedContent + `\n\n## Work Duration\n- Total work time: ${duration}`
-
-mcp__shirokuma-knowledge-base__update_item({
-  type: "dailies",
-  id: daily.id,
-  content: finalContent,
-  related_tasks: [...completedIssueIds]
-})
+  Update daily content (reflect session status):
+  ```javascript
+  // Mark relevant session as completed
+  const updatedContent = daily.content.replace(
+    `## Session ${sessionNumber}: ${sessionTitle}`,
+    `## Session ${sessionNumber}: ${sessionTitle} ✅ Completed`
+  )
+  
+  // Add work duration
+  const duration = calculateDuration(startTime, currentTime)
+  const finalContent = updatedContent + `\n\n## Work Duration\n- Total work time: ${duration}`
+  
+  mcp__shirokuma-knowledge-base__update_item({
+    type: "dailies",
+    id: daily.id,
+    content: finalContent,
+    related_tasks: [...completedIssueIds]
+  })
+  ```
+} catch (error) {
+  // Daily doesn't exist (rare case - ai-start should have created it)
+  console.warn("Daily not found for today. This shouldn't normally happen.")
+}
 ```
 
 ### 6. Update current_state (Required for Next AI)
