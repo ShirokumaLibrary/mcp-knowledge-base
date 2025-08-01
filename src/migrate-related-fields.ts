@@ -75,51 +75,57 @@ function mergeRelatedArrays(relatedDocs: string, relatedTasks: string): string {
 }
 
 function migrateContent(content: string): { content: string; merged: string } {
-  const relatedDocs = extractRelatedField(content, 'related_documents');
-  const relatedTasks = extractRelatedField(content, 'related_tasks');
-  const merged = mergeRelatedArrays(relatedDocs, relatedTasks);
-  
-  // Find frontmatter boundaries
-  const firstDelimiter = content.indexOf('---');
-  const secondDelimiter = content.indexOf('---', firstDelimiter + 3);
-  
-  if (firstDelimiter === -1 || secondDelimiter === -1) {
+  // Find frontmatter boundaries - must be at the very start of file
+  if (!content.startsWith('---\n')) {
     // No frontmatter found, return as is
     return { content, merged: '[]' };
   }
   
-  // Split content into parts
-  const beforeFrontmatter = content.substring(0, firstDelimiter);
-  const frontmatter = content.substring(firstDelimiter, secondDelimiter + 3);
-  const afterFrontmatter = content.substring(secondDelimiter + 3);
+  const firstDelimiterEnd = 4; // Length of "---\n"
+  const secondDelimiterStart = content.indexOf('\n---\n', firstDelimiterEnd);
   
-  // Process only frontmatter
-  let newFrontmatter = frontmatter;
+  if (secondDelimiterStart === -1) {
+    // Malformed frontmatter, return as is
+    return { content, merged: '[]' };
+  }
+  
+  // Extract parts
+  const frontmatter = content.substring(firstDelimiterEnd, secondDelimiterStart);
+  const frontmatterEnd = secondDelimiterStart + 5; // Include "\n---\n"
+  const afterFrontmatter = content.substring(frontmatterEnd);
+  
+  // Extract related fields ONLY from frontmatter
+  const relatedDocs = extractRelatedField('---\n' + frontmatter + '\n---', 'related_documents');
+  const relatedTasks = extractRelatedField('---\n' + frontmatter + '\n---', 'related_tasks');
+  const merged = mergeRelatedArrays(relatedDocs, relatedTasks);
+  
+  // Process frontmatter line by line
+  const lines = frontmatter.split('\n');
+  const newLines: string[] = [];
   let relatedInserted = false;
   
-  // Replace related_documents with related field
-  newFrontmatter = newFrontmatter.replace(/^related_documents:.*$/m, (match) => {
-    if (!relatedInserted) {
-      relatedInserted = true;
-      return `related: ${merged}`;
+  for (const line of lines) {
+    // Check if this is a related field line
+    if (line.match(/^related_documents:\s*/)) {
+      if (!relatedInserted) {
+        newLines.push(`related: ${merged}`);
+        relatedInserted = true;
+      }
+      // Skip the original line
+    } else if (line.match(/^related_tasks:\s*/)) {
+      if (!relatedInserted) {
+        newLines.push(`related: ${merged}`);
+        relatedInserted = true;
+      }
+      // Skip the original line
+    } else {
+      newLines.push(line);
     }
-    return '';
-  });
-  
-  // Remove related_tasks (or replace if related_documents wasn't found)
-  newFrontmatter = newFrontmatter.replace(/^related_tasks:.*$/m, (match) => {
-    if (!relatedInserted) {
-      relatedInserted = true;
-      return `related: ${merged}`;
-    }
-    return '';
-  });
-  
-  // Clean up empty lines in frontmatter only
-  newFrontmatter = newFrontmatter.replace(/\n\n+/g, '\n');
+  }
   
   // Reconstruct content
-  const newContent = beforeFrontmatter + newFrontmatter + afterFrontmatter;
+  const newFrontmatter = newLines.join('\n');
+  const newContent = '---\n' + newFrontmatter + '\n---\n' + afterFrontmatter;
   
   return { content: newContent, merged };
 }
