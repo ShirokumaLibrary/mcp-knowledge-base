@@ -68,7 +68,9 @@ describe('TagHandlers', () => {
       });
 
       expect(mockDb.createTag).toHaveBeenCalledWith('new-tag');
-      expect(result.content[0].text).toContain('Tag created');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toBe('Tag created successfully');
+      expect(response.data.name).toBe('new-tag');
     });
 
     it('should handle duplicate tag names', async () => {
@@ -118,7 +120,9 @@ describe('TagHandlers', () => {
 
       for (const name of validNames) {
         const result = await handlers.handleCreateTag({ name });
-        expect(result.content[0].text).toContain('Tag created');
+        const response = JSON.parse(result.content[0].text);
+        expect(response.message).toBe('Tag created successfully');
+        expect(response.data.name).toBe(name);
       }
     });
   });
@@ -132,7 +136,8 @@ describe('TagHandlers', () => {
       });
 
       expect(mockDb.deleteTag).toHaveBeenCalledWith('obsolete-tag');
-      expect(result.content[0].text).toContain('deleted');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toContain('deleted successfully');
     });
 
     it('should throw error for non-existent tag', async () => {
@@ -278,7 +283,9 @@ describe('TagHandlers', () => {
         name: 'auto-created'
       });
 
-      expect(result.content[0].text).toContain('Tag created');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toBe('Tag created successfully');
+      expect(response.data.name).toBe('auto-created');
     });
   });
 

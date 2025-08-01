@@ -41,12 +41,11 @@ describe('CurrentStateHandlers', () => {
     it('should return empty string when file does not exist', async () => {
       const result = await handlers.handleGetCurrentState();
       
-      expect(result).toEqual({
-        content: [{
-          type: 'text',
-          text: ''
-        }]
-      });
+      // Parse the JSON response
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.content).toBe('');
+      expect(parsed.metadata).toBeDefined();
+      expect(parsed.metadata.type).toBe('current_state');
     });
 
     it('should return file content when file exists', async () => {
@@ -55,12 +54,38 @@ describe('CurrentStateHandlers', () => {
       
       const result = await handlers.handleGetCurrentState();
       
-      expect(result).toEqual({
-        content: [{
-          type: 'text',
-          text: testContent
-        }]
-      });
+      // Parse the JSON response
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.content).toBe(testContent);
+      expect(parsed.metadata).toBeDefined();
+    });
+
+    it('should parse YAML frontmatter when reading', async () => {
+      const yamlContent = `---
+title: Test State
+type: current_state
+priority: high
+tags:
+  - test
+  - state
+related:
+  - issues-1
+  - docs-2
+updated_by: test-user
+---
+
+This is the actual content`;
+      
+      await fs.writeFile(filePath, yamlContent, 'utf-8');
+      
+      const result = await handlers.handleGetCurrentState();
+      
+      // Parse the JSON response
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.content).toBe('This is the actual content');
+      expect(parsed.metadata.related).toEqual(['issues-1', 'docs-2']);
+      expect(parsed.metadata.tags).toContain('test');
+      expect(parsed.metadata.updated_by).toBe('test-user');
     });
 
     it('should handle file read errors gracefully', async () => {
@@ -96,9 +121,11 @@ describe('CurrentStateHandlers', () => {
         }]
       });
       
-      // Verify file was created
+      // Verify file was created with frontmatter
       const fileContent = await fs.readFile(filePath, 'utf-8');
-      expect(fileContent).toBe(newContent);
+      expect(fileContent).toContain('---');
+      expect(fileContent).toContain(newContent);
+      expect(fileContent).toContain('type: current_state');
     });
 
     it('should overwrite existing file content', async () => {
@@ -117,9 +144,11 @@ describe('CurrentStateHandlers', () => {
         }]
       });
       
-      // Verify file was updated
+      // Verify file was updated with frontmatter
       const fileContent = await fs.readFile(filePath, 'utf-8');
-      expect(fileContent).toBe(newContent);
+      expect(fileContent).toContain('---');
+      expect(fileContent).toContain(newContent);
+      expect(fileContent).toContain('type: current_state');
     });
 
     it('should handle empty content', async () => {
@@ -134,9 +163,11 @@ describe('CurrentStateHandlers', () => {
         }]
       });
       
-      // Verify empty file was created
+      // Verify file was created with frontmatter and empty content
       const fileContent = await fs.readFile(filePath, 'utf-8');
-      expect(fileContent).toBe('');
+      expect(fileContent).toContain('---');
+      expect(fileContent).toContain('type: current_state');
+      // Empty content means only frontmatter is present
     });
 
     it('should validate parameters', async () => {
@@ -167,6 +198,28 @@ describe('CurrentStateHandlers', () => {
       }
     });
 
+    it('should handle metadata fields', async () => {
+      const result = await handlers.handleUpdateCurrentState({
+        content: 'Test content',
+        related: ['issues-1', 'docs-2'],
+        tags: ['important', 'milestone'],
+        updated_by: 'test-user'
+      });
+      
+      expect(result).toEqual({
+        content: [{
+          type: 'text',
+          text: 'Current state updated successfully'
+        }]
+      });
+      
+      // Verify file includes metadata in JSON array format
+      const fileContent = await fs.readFile(filePath, 'utf-8');
+      expect(fileContent).toContain('related: ["issues-1","docs-2"]');
+      expect(fileContent).toContain('tags: ["important","milestone"]');
+      expect(fileContent).toContain('updated_by: test-user');
+    });
+
     it('should create directory if it does not exist', async () => {
       // Use a nested path that doesn't exist
       const nestedDir = path.join(testDir, 'nested', 'path');
@@ -183,10 +236,12 @@ describe('CurrentStateHandlers', () => {
         }]
       });
       
-      // Verify file was created in nested directory
+      // Verify file was created in nested directory with frontmatter
       const nestedFilePath = path.join(nestedDir, 'current_state.md');
       const fileContent = await fs.readFile(nestedFilePath, 'utf-8');
-      expect(fileContent).toBe('Test content in nested directory');
+      expect(fileContent).toContain('---');
+      expect(fileContent).toContain('Test content in nested directory');
+      expect(fileContent).toContain('type: current_state');
     });
   });
 });

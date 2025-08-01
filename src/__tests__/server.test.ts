@@ -134,6 +134,9 @@ describe('IssueTrackerServer', () => {
       getAllTags: jest.fn().mockResolvedValue([]),
       createTag: jest.fn().mockResolvedValue({ id: 1, name: 'test-tag' }),
       getItemRepository: jest.fn().mockReturnValue({}),
+      getTagRepository: jest.fn().mockReturnValue({
+        registerTags: jest.fn().mockResolvedValue(undefined)
+      }),
       getTypeRepository: jest.fn().mockReturnValue({}),
       getFullTextSearchRepository: jest.fn().mockReturnValue({})
     } as any;

@@ -323,8 +323,9 @@ describe('StatusHandlers', () => {
       const result = await handlers.handleCreateStatus({ name: 'Pending Review' });
 
       expect(mockDb.createStatus).toHaveBeenCalledWith('Pending Review');
-      expect(result.content[0].text).toContain('Status created:');
-      expect(result.content[0].text).toContain('Pending Review');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toBe('Status created successfully');
+      expect(response.data.name).toBe('Pending Review');
     });
 
     it('should validate required parameters', async () => {
@@ -348,7 +349,8 @@ describe('StatusHandlers', () => {
       const result = await handlers.handleUpdateStatus({ id: 1, name: 'Updated Status' });
 
       expect(mockDb.updateStatus).toHaveBeenCalledWith(1, 'Updated Status');
-      expect(result.content[0].text).toBe('Status ID 1 updated');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toBe('Status ID 1 updated successfully');
     });
 
     it('should handle non-existent status', async () => {
@@ -372,7 +374,8 @@ describe('StatusHandlers', () => {
       const result = await handlers.handleDeleteStatus({ id: 5 });
 
       expect(mockDb.deleteStatus).toHaveBeenCalledWith(5);
-      expect(result.content[0].text).toBe('Status ID 5 deleted');
+      const response = JSON.parse(result.content[0].text);
+      expect(response.message).toBe('Status ID 5 deleted successfully');
     });
 
     it('should handle non-existent status', async () => {
