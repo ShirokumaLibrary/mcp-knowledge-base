@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2025-08-01
+
+### Added
+- **Related Field Migration Tool**: New command to migrate from old format to unified field
+  - `shirokuma-mcp-knowledge-base-migrate-related` command for global installations
+  - Converts `related_tasks` and `related_documents` to unified `related` field
+  - Creates backup files by default (use `--no-backup` to skip)
+  - Safe to run multiple times (idempotent)
+- **Current State Metadata Support**: Enhanced current_state with YAML frontmatter
+  - Structured metadata including title, tags, related items, and updated_by
+  - Maintains backward compatibility with plain text format
+- **Database Comparison Tools**: New tools for database verification in `.claude/tools/`
+  - `compare-databases.sh`: Comprehensive database comparison
+  - `dump-database-details.sh`: Detailed database content dump  
+  - `verify-rebuild-content.sh`: Item-by-item content verification
+- **Pre-commit Test Check**: ai-commit command now runs tests before committing
+  - Prevents broken code from being committed
+  - Stops commit process if any tests fail
+
+### Changed
+- **Unified Related Field**: Consolidated `related_tasks` and `related_documents` into single `related` field
+  - Simplifies data structure and API
+  - Automatic merging during creation and updates
+  - Full backward compatibility maintained
+- Enhanced test documentation with automated database comparison tools
+
+### Fixed
+- Dailies date filtering test using correct `date` parameter instead of `id`
+- Frontmatter spacing issues in migration tool (only processes frontmatter, preserves content)
+
 ## [0.7.0] - 2025-07-31
 
 ### Added
