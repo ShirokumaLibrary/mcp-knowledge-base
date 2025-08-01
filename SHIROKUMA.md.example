@@ -1,0 +1,448 @@
+# SHIROKUMA.md
+
+AI Pair Programming with shirokuma-knowledge-base MCP
+
+## 🤝 Fundamental Principles of AI Pair Programming
+
+### Why Detailed Recording is Necessary
+**AI's Fundamental Limitation**: Session End = Complete Memory Loss
+- AI remembers nothing from previous conversations
+- Forgets the purpose of features being implemented
+- Technical decisions discussed moments ago vanish
+- Therefore, everything must be externalized and saved in MCP
+
+### Effective Communication with AI
+1. **Provide Clear Context**: "Currently implementing XXX feature, facing YYY problem"
+2. **Specific Instructions**: "Modify AAA function in ZZZ file"
+3. **Explicit Expected Results**: "Error should be resolved and tests should pass"
+
+## 📋 Session Management Protocol
+
+### Required Steps When Starting AI Session
+**Important**: Since AI remembers nothing, carefully restore context
+
+1. **Recover Previous Memory**
+   ```typescript
+   // Get overall situation with current_state
+   const state = await get_current_state()
+   
+   // Check active issues
+   const issues = await get_items({ 
+     type: "issues", 
+     statuses: ["In Progress"],
+     includeClosedStatuses: false 
+   })
+   ```
+
+2. **Create New Session (Include Continuation Info)**
+   ```typescript
+   await create_item({
+     type: "sessions",
+     title: "Implementing [Task Name]",
+     content: "Continuing from: [What was being done]", // AI memory aid
+     related_tasks: ["issues-XX"]
+   })
+   ```
+
+
+### Required Steps When Ending AI Session
+
+#### Update Session Summary (For Next AI to Understand)
+```typescript
+await update_item({
+  type: "sessions",
+  id: currentSessionId,
+  content: `## Completed\n- [Specific achievements]\n\n## Technical Decisions\n- [Include why these decisions were made]\n\n## Next Steps\n- [Clearly state where to resume]`
+})
+```
+
+#### Update Daily (Cumulative per Session)
+```typescript
+// Create on first session of the day, update on subsequent sessions
+const today = new Date().toISOString().split('T')[0]
+const dailies = await get_items({ 
+  type: "dailies", 
+  start_date: today, 
+  end_date: today 
+})
+
+if (dailies.length === 0) {
+  // First session
+  await create_item({
+    type: "dailies",
+    date: today,
+    title: "Work Log",
+    content: `## Session 1\n- [Completed work]`,
+    related_tasks: ["sessions-XX"]
+  })
+} else {
+  // Append to existing daily
+  const daily = await get_item_detail({ type: "dailies", id: dailies[0].id })
+  await update_item({
+    type: "dailies",
+    id: daily.id,
+    content: daily.content + `\n\n## Session ${daily.related_tasks.length + 1}\n- [Completed work]`,
+    related_tasks: [...daily.related_tasks, "sessions-XX"]
+  })
+}
+```
+
+#### Update Project State (Essentials Only)
+```typescript
+await update_current_state({
+  content: `## Where We Are\n- [Current feature/phase]\n\n## What's Next\n- [Specific next action]\n\n## Important Notes\n- [Technical constraints or key decisions only]`,
+  updated_by: "session-end"
+})
+```
+
+## 💡 Issue-Driven Development with AI
+
+### Writing Issues AI Can Understand
+**Important**: Write so AI can understand and propose appropriate solutions
+
+```typescript
+await create_item({
+  type: "issues",
+  title: "[Specific feature/problem] [verb]",
+  description: "Brief one-line explanation",
+  priority: "medium",
+  status: "Open",
+  tags: ["enhancement"]
+})
+// Keep content minimal. Supplement verbally during dialogue
+```
+
+### Issue Detail Review Flow
+```typescript
+// Drill down from list to details
+const issues = await get_items({ type: "issues", includeClosedStatuses: false })
+const detail = await get_item_detail({ type: "issues", id: issues[0].id })
+
+// Follow related info to understand context
+for (const docId of detail.related_documents) {
+  const doc = await get_item_detail({ 
+    type: docId.split('-')[0], 
+    id: parseInt(docId.split('-')[1]) 
+  })
+}
+```
+
+### Issue Categories
+- **bug** / **feature** / **enhancement** / **idea** / **technical-debt** / **documentation**
+
+### Priorities
+- **high** / **medium** / **low**
+
+### Status Transitions
+```
+Open → In Progress → Closed
+              ↓
+          On Hold
+```
+
+### Status Operation Rules
+```typescript
+// Check available statuses
+const statuses = await get_statuses()
+
+// Get statistics by status
+const stats = {}
+for (const status of statuses) {
+  const items = await get_items({ 
+    type: "issues", 
+    statuses: [status.name],
+    includeClosedStatuses: true 
+  })
+  stats[status.name] = items.length
+}
+```
+
+## 📚 Learning Records with AI
+
+### Knowledge Recording Criteria (As AI Memory Aid)
+- **Problems that took time to solve** → So next AI can understand immediately
+- **Project-specific constraints** → So AI doesn't ask repeatedly
+- **Technical decision rationale** → So AI doesn't make wrong suggestions
+
+```typescript
+// Simple pattern recording
+await create_item({
+  type: "knowledge",
+  title: "[Problem] Solution Pattern",
+  content: `## Problem\n[One sentence]\n\n## Solution\n[Code or procedure]\n\n## Notes\n[If any]`,
+  tags: ["pattern"]
+})
+```
+
+### Document Categories
+- **guidelines** / **technical-docs** / **decisions** / **release-notes**
+
+## 📅 Daily Records (Cumulative)
+
+### Recording Timing
+- **Update at end of each session**
+- Create on first session of the day
+- Append content in subsequent sessions
+- Daily work history accumulates naturally
+
+## 🎯 Project State Management
+
+### Update Command
+```typescript
+mcp__shirokuma_knowledge_base__update_current_state({
+  content: `## Project Status\nCurrent Phase: XXX\n\n## Active Tasks\n- [HIGH] issue-XX: YYY\n\n## Next Priorities\n- ZZZ`,
+  updated_by: "ai-milestone", // or "ai-start", "ai-finish"
+  tags: ["milestone", "status-update"],
+  related: ["issues-XX", "sessions-YY"]
+})
+```
+
+
+## 🏷️ Tag Management
+
+### Rules
+- At least 1 tag required for all items
+- Lowercase alphanumeric and hyphens (e.g., frontend-react)
+- Use singular form (bug, not bugs)
+
+### Tag Operation Flow
+```typescript
+// 1. Check existing tags → Create new tag
+const tags = await get_tags()
+if (!tags.find(t => t.name === "new-feature")) {
+  await create_tag({ name: "new-feature" })
+}
+
+// 2. Get related items by tag search
+const items = await search_items_by_tag({ 
+  tag: "bug",
+  types: ["issues", "knowledge"] 
+})
+
+// 3. Tag name pattern search (partial match)
+const frontendTags = await search_tags({ pattern: "frontend" })
+```
+
+## 🔗 Required Relationship Rules
+
+- Session → Target issue being worked on
+- Daily → Issues/sessions worked on that day
+- Document → Related issues
+
+```typescript
+related_tasks: ["issues-1", "plans-2"]
+related_documents: ["docs-3", "knowledge-4"]
+```
+
+## ✅ Best Practices
+
+1. **Ensure Continuity**: Design information assuming AI memory loss
+2. **current_state is Essential**: Without this, next AI knows nothing
+3. **Explicit Context**: Always record "why" and "where from"
+
+## ⚠️ Anti-patterns
+
+### Behaviors to Avoid
+- ❌ **Excessive Recording**: Recording all dialogue
+- ❌ **Overly Detailed Sessions**: Long discussion content
+- ❌ **Forgetting current_state Updates**: Next session context loss
+- ❌ **Recording Irrelevant Info**: Temporary trial and error
+
+### Careful Deletion Handling
+```typescript
+// Verification flow before deletion
+const item = await get_item_detail({ type: "issues", id: 123 })
+
+// Confirm no related items
+if (item.related_tasks.length === 0 && item.related_documents.length === 0) {
+  // Confirm status is Closed
+  if (item.status === "Closed") {
+    await delete_item({ type: "issues", id: 123 })
+  }
+}
+```
+
+
+## 🔍 Search & Filtering
+
+### Basic Search Patterns
+```typescript
+// Full-text search
+search_items({ query: "keyword", types: ["issues"], limit: 20 })
+
+// Date filter
+get_items({ type: "sessions", start_date: "2025-01-01", end_date: "2025-01-31" })
+
+// Status filter
+get_items({ type: "issues", statuses: ["In Progress"], includeClosedStatuses: false })
+```
+
+### Incremental Search
+```typescript
+// Interactive search using search suggestions
+const suggestions = await search_suggest({ 
+  query: "auth",
+  types: ["knowledge", "docs"],
+  limit: 5 
+})
+// Full search with user-selected suggestion
+const results = await search_items({ query: suggestions[0] })
+```
+
+## 🔎 Codebase Search (Index)
+
+### Initial Index Creation
+```typescript
+// Index entire codebase (only needed once)
+index_codebase({ force: false })
+```
+
+### When to Use Semantic Search
+- **Natural Language Search**: "where authentication happens" → discover related code
+- **Similar Code Search**: Find duplicate implementation patterns
+- **Impact Analysis**: Identify related files affected by changes
+
+```typescript
+// Natural language code search
+search_code({ 
+  query: "user authentication processing", 
+  fileTypes: ["ts", "js"],
+  limit: 10 
+})
+
+// Find related files for specific file
+get_related_files({ 
+  file: "src/auth/login.ts",
+  depth: 2  // Relation depth
+})
+
+// Check index status
+get_index_status()
+```
+
+### Index Update Timing
+- After major refactoring
+- After adding new features
+- Regular maintenance (weekly)
+
+## 📋 Custom Types
+
+### Type Management Flow
+```typescript
+// 1. Check existing types
+const types = await get_types({ include_definitions: true })
+
+// 2. Create project-specific type
+if (!types.tasks.find(t => t.name === "bugs")) {
+  await create_type({ name: "bugs", base_type: "tasks", description: "For bug reports" })
+}
+
+// 3. Update type description (clarify during operation)
+await update_type({ 
+  name: "bugs", 
+  description: "Bug reports - reproduction steps and environment info required" 
+})
+
+// 4. Delete unused type (after confirming no data)
+const bugItems = await get_items({ type: "old_bugs" })
+if (bugItems.length === 0) {
+  await delete_type({ name: "old_bugs" })
+}
+```
+
+### Type Migration Flow
+```typescript
+// Migrate from issue to bug type (ID changes, relations auto-update)
+await change_item_type({
+  from_type: "issues",
+  from_id: 123,
+  to_type: "bugs"
+})
+```
+
+## 🚀 AI Pair Programming Setup
+
+### 1. Minimal Initial Setup
+```typescript
+// Simple project overview
+await create_item({ 
+  type: "docs", 
+  title: "Project Overview",
+  content: `## What We're Building\n[One sentence]\n\n## Tech Stack\n[Main language/framework]\n\n## Constraints\n[Important ones only]`
+})
+
+// Initialize current_state
+await update_current_state({ 
+  content: "Project started" 
+})
+```
+
+### 2. Session Flow Assuming AI Memory Loss
+1. **Start**: Remember "where we are" with current_state → Create session
+2. **Work**: AI records info needed next time in issue/knowledge
+3. **End**: State "what's next" in current_state → Accumulate daily
+
+### 3. Weekly Review Flow
+```typescript
+// Statistics by status and tag analysis
+const statuses = await get_statuses()
+const tags = await get_tags()
+
+// Archive old Closed issues with no related items
+const oldClosed = await get_items({ 
+  type: "issues", 
+  statuses: ["Closed"],
+  end_date: "30 days ago"
+})
+```
+
+
+## 📖 AI Pair Programming Quick Reference
+
+### Session Start (AI Remembers Nothing)
+```typescript
+// 1. Recover previous memory
+get_current_state()  // Check "where we are, what's next"
+get_items({ type: "sessions", limit: 1 })  // Recent work content
+get_items({ type: "issues", includeClosedStatuses: false })  // Active tasks
+
+// 2. Create session (include continuation info)
+create_item({ 
+  type: "sessions", 
+  title: "Task name",
+  content: "Previously: Completed XXX. Now: Starting from YYY"
+})
+```
+
+### During Work (Only When Necessary)
+```typescript
+// Record only important tasks
+create_item({ type: "issues", title: "Specific task" })
+
+// Record only reusable patterns
+create_item({ type: "knowledge", title: "Solution pattern" })
+```
+
+### Session End (Must Execute for Next AI)
+```typescript
+// Absolutely essential: AI knows nothing next time without this
+update_current_state({ 
+  content: "Where: XXX completed\nNext: Start from YYY\nNote: Be careful of ZZZ" 
+})
+
+// Update daily (accumulate today's work history)
+const today = new Date().toISOString().split('T')[0]
+const dailies = await get_items({ type: "dailies", start_date: today, end_date: today })
+if (dailies.length > 0) {
+  // Append to existing daily
+  const daily = await get_item_detail({ type: "dailies", id: dailies[0].id })
+  update_item({ 
+    type: "dailies", 
+    id: daily.id, 
+    content: daily.content + `\n\n## Session ${daily.related_tasks.length + 1}\n- [Completed work]` 
+  })
+} else {
+  // First session of the day
+  create_item({ type: "dailies", date: today, title: "Work Log", content: "## Session 1\n- [Completed work]" })
+}
+```
