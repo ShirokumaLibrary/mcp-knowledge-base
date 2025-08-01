@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2025-08-01
+
+### Fixed
+- **File Indexing**: Fixed error when running `index_codebase` from git subdirectories
+  - Removed redundant `.git` directory check that failed in subdirectories
+  - Relies on `git ls-files` error handling for repository validation
+  - Subdirectories now correctly index only their contained files (standard git behavior)
+
 ## [0.7.2] - 2025-08-01
 
 ### Fixed
