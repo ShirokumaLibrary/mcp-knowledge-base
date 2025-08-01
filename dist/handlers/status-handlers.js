@@ -53,7 +53,7 @@ export class StatusHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Status created: ${JSON.stringify(status)}`
+                        text: JSON.stringify({ data: status, message: 'Status created successfully' })
                     }
                 ]
             };
@@ -77,7 +77,7 @@ export class StatusHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Status ID ${validatedArgs.id} updated`
+                        text: JSON.stringify({ message: `Status ID ${validatedArgs.id} updated successfully` })
                     }
                 ]
             };
@@ -101,7 +101,7 @@ export class StatusHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Status ID ${validatedArgs.id} deleted`
+                        text: JSON.stringify({ message: `Status ID ${validatedArgs.id} deleted successfully` })
                     }
                 ]
             };

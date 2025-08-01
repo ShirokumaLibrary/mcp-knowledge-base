@@ -136,6 +136,27 @@ export class IssueTrackerServer {
         await this.db.initialize();
         await this.typeHandlers.init();
         this.unifiedHandlers = createUnifiedHandlers(this.db);
+        const tagRepo = this.db.getTagRepository();
+        const itemRepo = this.db.getItemRepository();
+        const validateRelatedItems = async (items) => {
+            const validItems = [];
+            for (const itemId of items) {
+                const match = itemId.match(/^(\w+)-(.+)$/);
+                if (match) {
+                    const [, type, id] = match;
+                    try {
+                        const item = await itemRepo.getItem(type, id);
+                        if (item) {
+                            validItems.push(itemId);
+                        }
+                    }
+                    catch (error) {
+                    }
+                }
+            }
+            return validItems;
+        };
+        this.currentStateHandlers = new CurrentStateHandlers(getConfig().database.path, tagRepo, validateRelatedItems);
         const transport = new StdioServerTransport();
         await this.server.connect(transport);
     }

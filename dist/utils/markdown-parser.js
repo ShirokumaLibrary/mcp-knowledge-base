@@ -3,17 +3,39 @@ export function parseMarkdown(fileContent) {
     const metadata = {};
     let contentStartIndex = -1;
     if (lines[0] === '---') {
+        let currentKey = null;
+        let currentArray = [];
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             if (line === '---') {
+                if (currentKey && currentArray.length > 0) {
+                    metadata[currentKey] = currentArray;
+                }
                 contentStartIndex = i + 1;
                 break;
             }
+            const arrayMatch = line.match(/^\s*-\s+(.+)$/);
+            if (arrayMatch && currentKey) {
+                currentArray.push(arrayMatch[1].trim());
+                continue;
+            }
             const match = line.match(/^(\w+):\s*(.*)$/);
             if (match) {
+                if (currentKey && currentArray.length > 0) {
+                    metadata[currentKey] = currentArray;
+                    currentArray = [];
+                }
                 const [, key, value] = match;
+                currentKey = key;
                 if (value.trim() === '') {
-                    metadata[key] = null;
+                    if (i + 1 < lines.length && lines[i + 1].match(/^\s*-\s+/)) {
+                        currentArray = [];
+                        continue;
+                    }
+                    else {
+                        metadata[key] = null;
+                        currentKey = null;
+                    }
                 }
                 else if (key === 'tags' || key === 'related_tasks' || key === 'related_documents' || key === 'related') {
                     if (value.trim().startsWith('[') && value.trim().endsWith(']')) {
@@ -29,6 +51,7 @@ export function parseMarkdown(fileContent) {
                         const items = value.split(',').map(v => v.trim()).filter(v => v);
                         metadata[key] = items;
                     }
+                    currentKey = null;
                 }
                 else if (value.includes(',')) {
                     const items = value.split(',').map(v => v.trim()).filter(v => v);
@@ -38,15 +61,19 @@ export function parseMarkdown(fileContent) {
                     else {
                         metadata[key] = items;
                     }
+                    currentKey = null;
                 }
                 else if (value === 'true' || value === 'false') {
                     metadata[key] = value === 'true';
+                    currentKey = null;
                 }
                 else if (!isNaN(Number(value))) {
                     metadata[key] = Number(value);
+                    currentKey = null;
                 }
                 else {
                     metadata[key] = value.trim();
+                    currentKey = null;
                 }
             }
         }

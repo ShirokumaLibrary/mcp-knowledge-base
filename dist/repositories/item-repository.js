@@ -299,7 +299,7 @@ export class ItemRepository {
             priority: params.priority || 'medium',
             status: statusName,
             status_id: status.id,
-            start_date: startDate || params.start_date || null,
+            start_date: type === 'dailies' ? id : (startDate || params.start_date || null),
             end_date: params.end_date || null,
             start_time: null,
             tags: cleanedTags,
@@ -641,6 +641,7 @@ export class ItemRepository {
                     const storageItem = await this.storage.load(config, id);
                     if (storageItem && storageItem.metadata.title) {
                         try {
+                            this.migrateRelatedFields(storageItem);
                             const item = await this.storageItemToUnifiedItem(storageItem, type);
                             await this.syncItemToSQLite(item);
                             await this.tagRepo.ensureTagsExist(item.tags);
@@ -662,6 +663,7 @@ export class ItemRepository {
                 const storageItem = await this.storage.load(config, id);
                 if (storageItem && storageItem.metadata.title) {
                     try {
+                        this.migrateRelatedFields(storageItem);
                         const item = await this.storageItemToUnifiedItem(storageItem, type);
                         await this.syncItemToSQLite(item);
                         await this.tagRepo.ensureTagsExist(item.tags);
@@ -677,6 +679,22 @@ export class ItemRepository {
             }
         }
         return syncedCount;
+    }
+    migrateRelatedFields(storageItem) {
+        const metadata = storageItem.metadata;
+        if (!metadata.related && (metadata.related_tasks || metadata.related_documents)) {
+            const related = new Set();
+            if (Array.isArray(metadata.related_tasks)) {
+                metadata.related_tasks.forEach((item) => related.add(item));
+            }
+            if (Array.isArray(metadata.related_documents)) {
+                metadata.related_documents.forEach((item) => related.add(item));
+            }
+            metadata.related = Array.from(related);
+            delete metadata.related_tasks;
+            delete metadata.related_documents;
+            this.logger.info(`Migrated related fields for ${storageItem.id}: ${metadata.related.length} items`);
+        }
     }
     async changeItemType(fromType, fromId, toType) {
         const { ItemRepository: DatabaseItemRepository } = await import('../database/item-repository.js');

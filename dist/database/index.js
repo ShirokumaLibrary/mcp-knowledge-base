@@ -78,6 +78,9 @@ export class FileIssueDatabase {
     getItemRepository() {
         return this.itemRepo;
     }
+    getTagRepository() {
+        return this.tagRepo;
+    }
     getTypeRepository() {
         return this.typeRepo;
     }

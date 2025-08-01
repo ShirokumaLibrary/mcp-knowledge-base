@@ -36,7 +36,7 @@ export class TagHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Tag created: ${tag.name}`
+                        text: JSON.stringify({ data: tag, message: 'Tag created successfully' })
                     }
                 ]
             };
@@ -60,7 +60,7 @@ export class TagHandlers {
                 content: [
                     {
                         type: 'text',
-                        text: `Tag "${validatedArgs.name}" deleted`
+                        text: JSON.stringify({ message: `Tag "${validatedArgs.name}" deleted successfully` })
                     }
                 ]
             };

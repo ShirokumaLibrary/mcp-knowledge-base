@@ -27,11 +27,18 @@ export class MarkdownTransformers {
             }
             lines.push('');
         }
+        const relatedItems = new Set();
+        if (issue.related && Array.isArray(issue.related)) {
+            issue.related.forEach((item) => relatedItems.add(item));
+        }
         if (issue.related_tasks && issue.related_tasks.length > 0) {
-            lines.push('## Related Tasks', '', issue.related_tasks.map(ref => `- ${ref}`).join('\n'), '');
+            issue.related_tasks.forEach(item => relatedItems.add(item));
         }
         if (issue.related_documents && issue.related_documents.length > 0) {
-            lines.push('## Related Documents', '', issue.related_documents.map(ref => `- ${ref}`).join('\n'), '');
+            issue.related_documents.forEach(item => relatedItems.add(item));
+        }
+        if (relatedItems.size > 0) {
+            lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
         }
         return lines.join('\n');
     }
@@ -55,11 +62,18 @@ export class MarkdownTransformers {
         if (plan.tags && plan.tags.length > 0) {
             lines.push('## Tags', '', plan.tags.map(tag => `- ${tag}`).join('\n'), '');
         }
+        const relatedItems = new Set();
+        if (plan.related && Array.isArray(plan.related)) {
+            plan.related.forEach((item) => relatedItems.add(item));
+        }
         if (plan.related_tasks && plan.related_tasks.length > 0) {
-            lines.push('## Related Tasks', '', plan.related_tasks.map(ref => `- ${ref}`).join('\n'), '');
+            plan.related_tasks.forEach(item => relatedItems.add(item));
         }
         if (plan.related_documents && plan.related_documents.length > 0) {
-            lines.push('## Related Documents', '', plan.related_documents.map(ref => `- ${ref}`).join('\n'), '');
+            plan.related_documents.forEach(item => relatedItems.add(item));
+        }
+        if (relatedItems.size > 0) {
+            lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
         }
         return lines.join('\n');
     }
@@ -80,11 +94,18 @@ export class MarkdownTransformers {
         if (doc.tags && doc.tags.length > 0) {
             lines.push('## Tags', '', doc.tags.map(tag => `- ${tag}`).join('\n'), '');
         }
+        const relatedItems = new Set();
+        if (doc.related && Array.isArray(doc.related)) {
+            doc.related.forEach((item) => relatedItems.add(item));
+        }
         if (doc.related_tasks && doc.related_tasks.length > 0) {
-            lines.push('## Related Tasks', '', doc.related_tasks.map(ref => `- ${ref}`).join('\n'), '');
+            doc.related_tasks.forEach(item => relatedItems.add(item));
         }
         if (doc.related_documents && doc.related_documents.length > 0) {
-            lines.push('## Related Documents', '', doc.related_documents.map(ref => `- ${ref}`).join('\n'), '');
+            doc.related_documents.forEach(item => relatedItems.add(item));
+        }
+        if (relatedItems.size > 0) {
+            lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
         }
         return lines.join('\n');
     }
