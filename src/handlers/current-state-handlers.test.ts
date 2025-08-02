@@ -40,7 +40,7 @@ describe('CurrentStateHandlers', () => {
   describe('handleGetCurrentState', () => {
     it('should return empty string when file does not exist', async () => {
       const result = await handlers.handleGetCurrentState();
-      
+
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.content).toBe('');
@@ -51,9 +51,9 @@ describe('CurrentStateHandlers', () => {
     it('should return file content when file exists', async () => {
       const testContent = 'Test state content';
       await fs.writeFile(filePath, testContent, 'utf-8');
-      
+
       const result = await handlers.handleGetCurrentState();
-      
+
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.content).toBe(testContent);
@@ -75,11 +75,11 @@ updated_by: test-user
 ---
 
 This is the actual content`;
-      
+
       await fs.writeFile(filePath, yamlContent, 'utf-8');
-      
+
       const result = await handlers.handleGetCurrentState();
-      
+
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.content).toBe('This is the actual content');
@@ -91,7 +91,7 @@ This is the actual content`;
     it('should handle file read errors gracefully', async () => {
       // Make directory unreadable (simulate permission error)
       await fs.chmod(testDir, 0o000);
-      
+
       try {
         await handlers.handleGetCurrentState();
         // Should not reach here
@@ -109,18 +109,18 @@ This is the actual content`;
   describe('handleUpdateCurrentState', () => {
     it('should create file with content when it does not exist', async () => {
       const newContent = 'New state content';
-      
+
       const result = await handlers.handleUpdateCurrentState({
         content: newContent
       });
-      
+
       expect(result).toEqual({
         content: [{
           type: 'text',
           text: 'Current state updated successfully'
         }]
       });
-      
+
       // Verify file was created with frontmatter
       const fileContent = await fs.readFile(filePath, 'utf-8');
       expect(fileContent).toContain('---');
@@ -131,19 +131,19 @@ This is the actual content`;
     it('should overwrite existing file content', async () => {
       // Create initial file
       await fs.writeFile(filePath, 'Old content', 'utf-8');
-      
+
       const newContent = 'Updated state content';
       const result = await handlers.handleUpdateCurrentState({
         content: newContent
       });
-      
+
       expect(result).toEqual({
         content: [{
           type: 'text',
           text: 'Current state updated successfully'
         }]
       });
-      
+
       // Verify file was updated with frontmatter
       const fileContent = await fs.readFile(filePath, 'utf-8');
       expect(fileContent).toContain('---');
@@ -155,14 +155,14 @@ This is the actual content`;
       const result = await handlers.handleUpdateCurrentState({
         content: ''
       });
-      
+
       expect(result).toEqual({
         content: [{
           type: 'text',
           text: 'Current state updated successfully'
         }]
       });
-      
+
       // Verify file was created with frontmatter and empty content
       const fileContent = await fs.readFile(filePath, 'utf-8');
       expect(fileContent).toContain('---');
@@ -183,7 +183,7 @@ This is the actual content`;
     it('should handle file write errors gracefully', async () => {
       // Make directory unwritable
       await fs.chmod(testDir, 0o444);
-      
+
       try {
         await handlers.handleUpdateCurrentState({
           content: 'Test content'
@@ -205,14 +205,14 @@ This is the actual content`;
         tags: ['important', 'milestone'],
         updated_by: 'test-user'
       });
-      
+
       expect(result).toEqual({
         content: [{
           type: 'text',
           text: 'Current state updated successfully'
         }]
       });
-      
+
       // Verify file includes metadata in JSON array format
       const fileContent = await fs.readFile(filePath, 'utf-8');
       expect(fileContent).toContain('related: ["issues-1","docs-2"]');
@@ -224,18 +224,18 @@ This is the actual content`;
       // Use a nested path that doesn't exist
       const nestedDir = path.join(testDir, 'nested', 'path');
       const nestedHandlers = new CurrentStateHandlers(nestedDir);
-      
+
       const result = await nestedHandlers.handleUpdateCurrentState({
         content: 'Test content in nested directory'
       });
-      
+
       expect(result).toEqual({
         content: [{
           type: 'text',
           text: 'Current state updated successfully'
         }]
       });
-      
+
       // Verify file was created in nested directory with frontmatter
       const nestedFilePath = path.join(nestedDir, 'current_state.md');
       const fileContent = await fs.readFile(nestedFilePath, 'utf-8');

@@ -21,16 +21,16 @@ interface MigrationResult {
 async function findFilesToMigrate(dataDir: string): Promise<string[]> {
   const pattern = path.join(dataDir, '**/*.md');
   const files = await glob(pattern);
-  
+
   const filesToMigrate: string[] = [];
-  
+
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf-8');
     if (content.includes('related_documents:') || content.includes('related_tasks:')) {
       filesToMigrate.push(file);
     }
   }
-  
+
   return filesToMigrate;
 }
 
@@ -51,7 +51,7 @@ function mergeRelatedArrays(relatedDocs: string, relatedTasks: string): string {
   if (relatedTasks === '[]') {
     return relatedDocs;
   }
-  
+
   // Parse and merge arrays
   try {
     const docs = JSON.parse(relatedDocs);
@@ -62,7 +62,7 @@ function mergeRelatedArrays(relatedDocs: string, relatedTasks: string): string {
     // If parsing fails, try to merge as strings
     const docsContent = relatedDocs.replace(/^\[/, '').replace(/\]$/, '');
     const tasksContent = relatedTasks.replace(/^\[/, '').replace(/\]$/, '');
-    
+
     if (docsContent && tasksContent) {
       return `[${tasksContent}, ${docsContent}]`;
     } else if (docsContent) {
@@ -80,30 +80,30 @@ function migrateContent(content: string): { content: string; merged: string } {
     // No frontmatter found, return as is
     return { content, merged: '[]' };
   }
-  
+
   const firstDelimiterEnd = 4; // Length of "---\n"
   const secondDelimiterStart = content.indexOf('\n---\n', firstDelimiterEnd);
-  
+
   if (secondDelimiterStart === -1) {
     // Malformed frontmatter, return as is
     return { content, merged: '[]' };
   }
-  
+
   // Extract parts
   const frontmatter = content.substring(firstDelimiterEnd, secondDelimiterStart);
   const frontmatterEnd = secondDelimiterStart + 5; // Include "\n---\n"
   const afterFrontmatter = content.substring(frontmatterEnd);
-  
+
   // Extract related fields ONLY from frontmatter
   const relatedDocs = extractRelatedField('---\n' + frontmatter + '\n---', 'related_documents');
   const relatedTasks = extractRelatedField('---\n' + frontmatter + '\n---', 'related_tasks');
   const merged = mergeRelatedArrays(relatedDocs, relatedTasks);
-  
+
   // Process frontmatter line by line
   const lines = frontmatter.split('\n');
   const newLines: string[] = [];
   let relatedInserted = false;
-  
+
   for (const line of lines) {
     // Check if this is a related field line
     if (line.match(/^related_documents:\s*/)) {
@@ -122,28 +122,28 @@ function migrateContent(content: string): { content: string; merged: string } {
       newLines.push(line);
     }
   }
-  
+
   // Reconstruct content
   const newFrontmatter = newLines.join('\n');
   const newContent = '---\n' + newFrontmatter + '\n---\n' + afterFrontmatter;
-  
+
   return { content: newContent, merged };
 }
 
 async function migrateFile(file: string, createBackup: boolean): Promise<MigrationResult> {
   try {
     const content = fs.readFileSync(file, 'utf-8');
-    
+
     // Create backup if requested
     if (createBackup) {
       fs.writeFileSync(`${file}.bak`, content);
     }
-    
+
     const { content: newContent, merged } = migrateContent(content);
-    
+
     // Write migrated content
     fs.writeFileSync(file, newContent);
-    
+
     return {
       file,
       success: true,
@@ -163,33 +163,33 @@ async function main() {
   const args = process.argv.slice(2);
   const createBackup = !args.includes('--no-backup');
   const dataDir = process.env.MCP_DATABASE_PATH || '.shirokuma/data';
-  
+
   console.log('🔄 Migrating related_documents/related_tasks to unified related field');
   console.log(`Directory: ${dataDir}`);
   console.log(`Backup: ${createBackup ? 'Yes' : 'No'}`);
   console.log('');
-  
+
   // Find files to migrate
   const files = await findFilesToMigrate(dataDir);
-  
+
   if (files.length === 0) {
     console.log(`${colors.green}✅ No files need migration${colors.reset}`);
     return;
   }
-  
+
   console.log(`Found ${files.length} files to migrate`);
   console.log('');
-  
+
   // Migrate each file
   let successCount = 0;
   let errorCount = 0;
-  
+
   for (const file of files) {
     const relativePath = path.relative(process.cwd(), file);
     process.stdout.write(`Processing: ${relativePath}... `);
-    
+
     const result = await migrateFile(file, createBackup);
-    
+
     if (result.success) {
       console.log(`${colors.green}✅${colors.reset}`);
       console.log(`  Related: ${result.merged}`);
@@ -200,18 +200,18 @@ async function main() {
       errorCount++;
     }
   }
-  
+
   console.log('');
   console.log(`${colors.green}✅ Migration complete${colors.reset}`);
   console.log(`  Success: ${successCount}`);
   console.log(`  Errors: ${errorCount}`);
-  
+
   if (createBackup) {
     console.log('');
     console.log('Backup files created with .bak extension');
     console.log(`To remove backups: find ${dataDir} -name '*.bak' -delete`);
   }
-  
+
   process.exit(errorCount > 0 ? 1 : 0);
 }
 

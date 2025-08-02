@@ -79,7 +79,7 @@ describe('FileIndexer', () => {
 
     it('should handle custom index path', () => {
       const customPath = '.custom/index.db';
-      indexer = new FileIndexer({ 
+      indexer = new FileIndexer({
         projectRoot: testDir,
         indexPath: customPath
       });
@@ -90,14 +90,14 @@ describe('FileIndexer', () => {
     it('should respect absolute paths from config', async () => {
       // Test that absolute paths are handled correctly
       const absolutePath = '/tmp/test-index.db';
-      indexer = new FileIndexer({ 
+      indexer = new FileIndexer({
         projectRoot: testDir,
         indexPath: absolutePath
       });
       await indexer.initialize();
-      
+
       expect(existsSync(absolutePath)).toBe(true);
-      
+
       // Clean up
       indexer.close();
       rmSync(absolutePath, { force: true });
@@ -105,11 +105,11 @@ describe('FileIndexer', () => {
 
     it('should handle absolute index paths', () => {
       const absolutePath = join(testDir, 'absolute', 'index.db');
-      indexer = new FileIndexer({ 
+      indexer = new FileIndexer({
         projectRoot: testDir,
         indexPath: absolutePath
       });
-      
+
       expect(existsSync(absolutePath)).toBe(true);
     });
   });
@@ -123,10 +123,10 @@ describe('FileIndexer', () => {
       // Create test files
       writeFileSync(join(testDir, 'test.js'), 'console.log("test");');
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
       await indexer.indexAll();
-      
+
       const stats = indexer.getStats();
       expect(stats.totalFiles).toBe(1);
     });
@@ -136,12 +136,12 @@ describe('FileIndexer', () => {
       writeFileSync(join(testDir, 'include.js'), 'console.log("include");');
       writeFileSync(join(testDir, 'exclude.js'), 'console.log("exclude");');
       writeFileSync(join(testDir, '.shirokumaignore'), 'exclude.js');
-      
+
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
       await indexer.indexAll();
-      
+
       const stats = indexer.getStats();
       expect(stats.totalFiles).toBe(2); // include.js and .shirokumaignore
     });
@@ -151,12 +151,12 @@ describe('FileIndexer', () => {
       mkdirSync(join(testDir, 'dist'));
       writeFileSync(join(testDir, 'dist/bundle.js'), 'console.log("bundle");');
       writeFileSync(join(testDir, '.shirokumaignore'), '!dist/bundle.js');
-      
+
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
       await indexer.indexAll();
-      
+
       const stats = indexer.getStats();
       expect(stats.totalFiles).toBe(1); // Force included
     });
@@ -164,7 +164,7 @@ describe('FileIndexer', () => {
 
   describe('chunking', () => {
     beforeEach(() => {
-      indexer = new FileIndexer({ 
+      indexer = new FileIndexer({
         projectRoot: testDir,
         chunkSize: 5 // Small chunks for testing
       });
@@ -175,10 +175,10 @@ describe('FileIndexer', () => {
       const content = Array(20).fill(0).map((_, i) => `line ${i}`).join('\n');
       writeFileSync(join(testDir, 'large.js'), content);
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
       await indexer.indexAll();
-      
+
       const stats = indexer.getStats();
       expect(stats.totalChunks).toBeGreaterThan(1);
     });
@@ -187,7 +187,7 @@ describe('FileIndexer', () => {
   describe('search', () => {
     beforeEach(async () => {
       indexer = new FileIndexer({ projectRoot: testDir });
-      
+
       // Create test files
       writeFileSync(join(testDir, 'auth.js'), `
 function authenticate(username, password) {
@@ -195,22 +195,22 @@ function authenticate(username, password) {
   return checkDatabase(username, password);
 }
 `);
-      
+
       writeFileSync(join(testDir, 'utils.js'), `
 function validateEmail(email) {
   return /^[^@]+@[^@]+$/.test(email);
 }
 `);
-      
+
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
       await indexer.indexAll();
     });
 
     it('should find code by natural language query', async () => {
       const results = await indexer.search('user authentication');
-      
+
       expect(results.length).toBeGreaterThan(0);
       // Check that we get relevant files
       const filePaths = results.map(r => r.filePath);
@@ -219,7 +219,7 @@ function validateEmail(email) {
 
     it('should find code by pattern', async () => {
       const results = await indexer.search('email validation regex');
-      
+
       expect(results.length).toBeGreaterThan(0);
       // With mock embeddings, we can't test semantic accuracy
       expect(results[0].filePath).toBeDefined();
@@ -229,11 +229,11 @@ function validateEmail(email) {
       writeFileSync(join(testDir, 'test.md'), '# Authentication docs');
       execSync('git add .', { cwd: testDir });
       await indexer.indexFile('test.md');
-      
+
       const results = await indexer.search('authentication', {
         fileTypes: ['md']
       });
-      
+
       expect(results.length).toBe(1);
       expect(results[0].filePath).toBe('test.md');
     });
@@ -242,7 +242,7 @@ function validateEmail(email) {
       const results = await indexer.search('completely unrelated query', {
         minScore: 0.99 // Very high threshold since our mock returns 0.1 similarity
       });
-      
+
       expect(results.length).toBe(0);
     });
   });
@@ -258,13 +258,13 @@ function validateEmail(email) {
       writeFileSync(join(testDir, 'change.js'), 'const x = 1;');
       execSync('git add .', { cwd: testDir });
       await indexer.indexFile('change.js');
-      
+
       const stats1 = indexer.getStats();
-      
+
       // Update file
       writeFileSync(join(testDir, 'change.js'), 'const x = 2; // changed');
       await indexer.indexFile('change.js');
-      
+
       const stats2 = indexer.getStats();
       expect(stats2.totalFiles).toBe(stats1.totalFiles);
     });
@@ -273,14 +273,14 @@ function validateEmail(email) {
       // Create file
       writeFileSync(join(testDir, 'same.js'), 'const y = 1;');
       execSync('git add .', { cwd: testDir });
-      
+
       // Index twice
       await indexer.indexFile('same.js');
       const stats1 = indexer.getStats();
-      
+
       await indexer.indexFile('same.js');
       const stats2 = indexer.getStats();
-      
+
       expect(stats2).toEqual(stats1);
     });
 
@@ -290,20 +290,20 @@ function validateEmail(email) {
       writeFileSync(join(testDir, 'delete.js'), 'const del = true;');
       execSync('git add .', { cwd: testDir });
       execSync('git commit -m "initial"', { cwd: testDir });
-      
+
       await indexer.indexAll();
       const stats1 = indexer.getStats();
       expect(stats1.totalFiles).toBe(2);
-      
+
       // Delete file from git
       execSync('git rm delete.js', { cwd: testDir });
       execSync('git commit -m "delete file"', { cwd: testDir });
-      
+
       // Re-index
       await indexer.indexAll();
       const stats2 = indexer.getStats();
       expect(stats2.totalFiles).toBe(1);
-      
+
       // Verify search doesn't return deleted file
       const results = await indexer.search('del');
       const filePaths = results.map(r => r.filePath);
@@ -314,19 +314,19 @@ function validateEmail(email) {
   describe('performance', () => {
     it('should handle many files efficiently', async () => {
       indexer = new FileIndexer({ projectRoot: testDir });
-      
+
       // Create many small files
       for (let i = 0; i < 50; i++) {
         writeFileSync(join(testDir, `file${i}.js`), `export const val${i} = ${i};`);
       }
       execSync('git add .', { cwd: testDir });
-      
+
       await indexer.initialize();
-      
+
       const start = Date.now();
       await indexer.indexAll();
       const duration = Date.now() - start;
-      
+
       const stats = indexer.getStats();
       expect(stats.totalFiles).toBe(50);
       expect(duration).toBeLessThan(5000); // Should complete in under 5 seconds

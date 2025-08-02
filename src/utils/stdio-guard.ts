@@ -26,10 +26,10 @@ export function guardStdio(): void {
       // Save original write methods
       const originalStderrWrite = process.stderr.write.bind(process.stderr);
       const originalStdoutWrite = process.stdout.write.bind(process.stdout);
-      
+
       // Track if we're in JSON response mode
       let inJsonResponse = false;
-      
+
       // Override process.stderr.write
       process.stderr.write = function(chunk: any, encoding?: any, callback?: any): boolean {
         // Write to file instead of stderr
@@ -37,23 +37,23 @@ export function guardStdio(): void {
           callback = encoding;
           encoding = undefined;
         }
-        
+
         stderrStream.write(chunk, encoding, callback);
         return true;
       };
-      
+
       // Override process.stdout.write to filter non-JSON output
       process.stdout.write = function(chunk: any, encoding?: any, callback?: any): boolean {
         if (typeof encoding === 'function') {
           callback = encoding;
           encoding = undefined;
         }
-        
+
         const str = chunk.toString();
-        
+
         // Log ALL stdout for debugging
         stderrStream.write(`[STDOUT DEBUG] Length: ${str.length}, First 20 chars: ${JSON.stringify(str.substring(0, 20))}\n`);
-        
+
         // Check if this looks like JSON
         if (str.trim().startsWith('{') || inJsonResponse) {
           // Allow JSON through
@@ -63,7 +63,7 @@ export function guardStdio(): void {
           // Redirect non-JSON to stderr log
           stderrStream.write('STDOUT NON-JSON: ' + chunk, encoding);
         }
-        
+
         return true;
       };
 

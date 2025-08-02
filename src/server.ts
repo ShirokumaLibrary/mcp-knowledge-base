@@ -267,11 +267,11 @@ export class IssueTrackerServer {
 
     // Initialize unified handlers after database is ready
     this.unifiedHandlers = createUnifiedHandlers(this.db);
-    
+
     // Re-initialize CurrentStateHandlers with TagRepository and validation
     const tagRepo = this.db.getTagRepository();
     const itemRepo = this.db.getItemRepository();
-    
+
     // Create validation function for related items
     const validateRelatedItems = async (items: string[]): Promise<string[]> => {
       const validItems: string[] = [];
@@ -292,9 +292,9 @@ export class IssueTrackerServer {
       }
       return validItems;
     };
-    
+
     this.currentStateHandlers = new CurrentStateHandlers(
-      getConfig().database.path, 
+      getConfig().database.path,
       tagRepo,
       validateRelatedItems
     );
@@ -312,16 +312,16 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // MCP uses stdio for communication, any console output breaks the protocol
   process.env.NODE_ENV = 'production';
   process.env.LOG_LEVEL = 'silent';
-  
+
   // @ai-critical: Disable SQLite trace output
   // SQLite can output trace information that breaks MCP protocol
   process.env.SQLITE_TRACE = '';
   process.env.SQLITE_PROFILE = '';
   process.env.DEBUG = '';
-  
+
   // @ai-critical: Guard stdio from any pollution
   guardStdio();
-  
+
   const server = new IssueTrackerServer();
   server.run().catch((error) => {
     // Silently handle errors to avoid stdio pollution

@@ -17,7 +17,7 @@ export interface ListItem {
   priority?: 'high' | 'medium' | 'low';  // For task types
   tags: string[];
   updated_at: string;
-  
+
   // Optional session/daily specific field
   date?: string;            // For sessions and dailies
 }

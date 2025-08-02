@@ -45,26 +45,30 @@ export class CurrentStateHandlers {
    */
   async handleGetCurrentState(): Promise<ToolResponse> {
     this.logger.info('Getting current state');
-    
+
     try {
       const rawContent = await fs.readFile(this.filePath, 'utf-8');
       const parsed = parseMarkdown(rawContent);
-      
+
       // Ensure null values are converted to empty arrays for compatibility
       if (parsed.metadata) {
-        if (parsed.metadata.tags === null) parsed.metadata.tags = [];
-        if (parsed.metadata.related === null) parsed.metadata.related = [];
+        if (parsed.metadata.tags === null) {
+          parsed.metadata.tags = [];
+        }
+        if (parsed.metadata.related === null) {
+          parsed.metadata.related = [];
+        }
       }
-      
+
       // Validate and merge with defaults
       const metadata = CurrentStateMetadataSchema.parse(parsed.metadata || {});
-      
+
       // Return structured response
       const response = {
         content: parsed.content,
         metadata: metadata
       };
-      
+
       return {
         content: [{
           type: 'text',
@@ -79,7 +83,7 @@ export class CurrentStateHandlers {
           content: '',
           metadata: defaultMetadata
         };
-        
+
         return {
           content: [{
             type: 'text',
@@ -87,14 +91,14 @@ export class CurrentStateHandlers {
           }]
         };
       }
-      
+
       // Other errors
       this.logger.error('Failed to read current state', error);
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to read current state. ` +
+        'Failed to read current state. ' +
         `Please ensure the file exists at ${this.filePath} and is readable. ` +
-        `If this is a permission issue, please check file permissions. ` +
+        'If this is a permission issue, please check file permissions. ' +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -108,14 +112,14 @@ export class CurrentStateHandlers {
    */
   async handleUpdateCurrentState(args: unknown): Promise<ToolResponse> {
     this.logger.info('Updating current state');
-    
+
     // Validate parameters
     const params = UpdateCurrentStateSchema.parse(args);
-    
+
     try {
       // Ensure directory exists
       await fs.mkdir(this.dataDir, { recursive: true });
-      
+
       // Build metadata
       const metadata: Record<string, any> = {
         title: 'プロジェクト現在状態',
@@ -125,7 +129,7 @@ export class CurrentStateHandlers {
         updated_at: new Date().toISOString(),
         updated_by: params.updated_by || 'system'
       };
-      
+
       // Validate related items
       if (params.related?.length) {
         if (this.validateRelatedItems) {
@@ -136,7 +140,7 @@ export class CurrentStateHandlers {
               throw new McpError(
                 ErrorCode.InvalidRequest,
                 `The following related items do not exist: ${invalid.join(', ')}. ` +
-                `Please create these items first or remove them from the related field. ` +
+                'Please create these items first or remove them from the related field. ' +
                 `Valid items: ${validatedRelated.join(', ')}`
               );
             }
@@ -147,8 +151,8 @@ export class CurrentStateHandlers {
             }
             throw new McpError(
               ErrorCode.InternalError,
-              `Failed to validate related items. Please check the format (type-id) and try again. ` +
-              `Expected format: issues-123, docs-456, sessions-2025-01-01-12.00.00.000`
+              'Failed to validate related items. Please check the format (type-id) and try again. ' +
+              'Expected format: issues-123, docs-456, sessions-2025-01-01-12.00.00.000'
             );
           }
         } else {
@@ -157,13 +161,13 @@ export class CurrentStateHandlers {
       } else {
         metadata.related = [];
       }
-      
+
       // Use generateMarkdown to ensure consistent JSON array format
       const fullContent = generateMarkdown(metadata, params.content);
-      
+
       // Write content to file
       await fs.writeFile(this.filePath, fullContent, 'utf-8');
-      
+
       // Register tags if TagRepository is available
       if (this.tagRepo && params.tags?.length) {
         try {
@@ -173,11 +177,11 @@ export class CurrentStateHandlers {
           throw new McpError(
             ErrorCode.InternalError,
             `Failed to register tags: ${params.tags.join(', ')}. ` +
-            `Please check if the tag names are valid (alphanumeric, hyphens, underscores only) and try again.`
+            'Please check if the tag names are valid (alphanumeric, hyphens, underscores only) and try again.'
           );
         }
       }
-      
+
       return {
         content: [{
           type: 'text',
@@ -186,18 +190,18 @@ export class CurrentStateHandlers {
       };
     } catch (error) {
       this.logger.error('Failed to update current state', error);
-      
+
       // Re-throw McpError with AI-friendly message
       if (error instanceof McpError) {
         throw error;
       }
-      
+
       // Convert other errors to AI-friendly instructions
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to update current state. ` +
-        `Please check: 1) The content is valid text, 2) Tags contain only alphanumeric characters, hyphens, or underscores, ` +
-        `3) Related items follow the format 'type-id' (e.g., issues-123). ` +
+        'Failed to update current state. ' +
+        'Please check: 1) The content is valid text, 2) Tags contain only alphanumeric characters, hyphens, or underscores, ' +
+        '3) Related items follow the format \'type-id\' (e.g., issues-123). ' +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
     }

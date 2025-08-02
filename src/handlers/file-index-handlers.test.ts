@@ -140,23 +140,23 @@ describe('FileIndexHandlers', () => {
       // Create test files in subdirectory
       const subDir = join(testDir, 'src', 'components');
       mkdirSync(subDir, { recursive: true });
-      
+
       writeFileSync(join(testDir, 'root.js'), 'console.log("root");');
       writeFileSync(join(subDir, 'component.js'), 'export default function Component() {}');
       execSync('git add .');
-      
+
       // Change to subdirectory
       process.chdir(subDir);
-      
+
       // Should still be able to index from subdirectory
       const result = await handlerMap.index_codebase({});
-      
+
       expect(result.content).toHaveLength(1);
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('✅ Indexing completed successfully!');
       // When running from subdirectory, only files in that subdirectory are indexed
       expect(result.content[0].text).toContain('Files indexed: 1');
-      
+
       // Change back to test directory
       process.chdir(testDir);
     });
@@ -171,12 +171,12 @@ function authenticate(username, password) {
   // Check user credentials
   return checkDatabase(username, password);
 }`);
-      
+
       writeFileSync(join(testDir, 'utils.js'), `
 function validateEmail(email) {
   return /^[^@]+@[^@]+$/.test(email);
 }`);
-      
+
       execSync('git add .');
       await handlerMap.index_codebase({});
     });
@@ -200,9 +200,9 @@ function validateEmail(email) {
     });
 
     it('should respect limit parameter', async () => {
-      const result = await handlerMap.search_code({ 
+      const result = await handlerMap.search_code({
         query: 'function',
-        limit: 1 
+        limit: 1
       });
 
       const matches = result.content[0].text.match(/^\d+\./gm);
@@ -215,7 +215,7 @@ function validateEmail(email) {
       execSync('git add .');
       await handlerMap.index_codebase({});
 
-      const result = await handlerMap.search_code({ 
+      const result = await handlerMap.search_code({
         query: 'authentication',
         fileTypes: ['md']
       });
@@ -249,17 +249,17 @@ import { validateUser } from './user.js';
 function authenticate(username, password) {
   return validateUser(username, password);
 }`);
-      
+
       writeFileSync(join(testDir, 'user.js'), `
 export function validateUser(username, password) {
   return username && password;
 }`);
-      
+
       writeFileSync(join(testDir, 'unrelated.js'), `
 function calculateTax(amount) {
   return amount * 0.1;
 }`);
-      
+
       execSync('git add .');
       await handlerMap.index_codebase({});
     });
@@ -338,7 +338,7 @@ function calculateTax(amount) {
 
       expect(result.content[0].text).toContain('index.db');
       expect(result.content[0].text).toContain('✅ Index exists');
-      
+
       // Verify the index was created in the expected location
       const indexPath = join(testDir, '.shirokuma/data/index.db');
       expect(existsSync(indexPath)).toBe(true);

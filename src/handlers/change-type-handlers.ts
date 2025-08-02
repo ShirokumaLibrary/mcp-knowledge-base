@@ -26,25 +26,25 @@ export class ChangeTypeHandlers {
    */
   async handleChangeItemType(args: unknown): Promise<ToolResponse> {
     this.logger.info('Changing item type');
-    
+
     // Validate parameters
     const { from_type, from_id, to_type } = ChangeItemTypeSchema.parse(args);
-    
+
     // Get item repository
     const itemRepository = this.db.getItemRepository();
-    
+
     try {
       // Workaround: The changeItemType method exists but is not recognized
       // Call it directly without type checking
       const result = await (itemRepository as any).changeItemType(from_type, from_id, to_type);
-      
+
       if (!result.success) {
         throw new McpError(
           ErrorCode.InvalidRequest,
           result.error || 'Failed to change item type'
         );
       }
-      
+
       return {
         content: [{
           type: 'text',
@@ -63,7 +63,7 @@ Note: The original item has been deleted.`
       if (error instanceof McpError) {
         throw error;
       }
-      
+
       this.logger.error('Failed to change item type', error);
       throw new McpError(
         ErrorCode.InternalError,

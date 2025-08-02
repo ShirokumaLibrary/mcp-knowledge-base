@@ -104,7 +104,7 @@ export class FileIndexer {
     const dbPath = this.config.indexPath.startsWith('/') || this.config.indexPath.match(/^[A-Za-z]:\\/)
       ? this.config.indexPath
       : join(this.config.projectRoot, this.config.indexPath);
-    
+
     // Ensure index directory exists
     const indexDir = dbPath.substring(0, dbPath.lastIndexOf('/'));
     if (!existsSync(indexDir)) {
@@ -122,7 +122,7 @@ export class FileIndexer {
   private initSchema(): void {
     // Enable foreign key constraints
     this.db.exec('PRAGMA foreign_keys = ON');
-    
+
     // Create normalized schema
     this.db.exec(`
       -- Files table
@@ -317,18 +317,18 @@ export class FileIndexer {
         embedding: await this.generateEmbedding(chunk.content)
       }))
     );
-    
+
     // Transaction for atomic updates
     this.db.transaction(() => {
       let fileId: number;
-      
+
       if (existing) {
         // Update existing file
         this.db.prepare(
           'UPDATE files SET file_hash = ?, total_chunks = ?, file_size = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
         ).run(fileHash, chunks.length, stats.size, existing.id);
         fileId = existing.id;
-        
+
         // Delete old chunks (cascade delete handles this with FK)
         this.db.prepare('DELETE FROM file_chunks WHERE file_id = ?').run(fileId);
       } else {
@@ -338,14 +338,14 @@ export class FileIndexer {
         ).run(filePath, fileHash, chunks.length, stats.size);
         fileId = result.lastInsertRowid as number;
       }
-      
+
       // Insert chunks with embeddings
       const insertChunk = this.db.prepare(`
         INSERT INTO file_chunks 
         (file_id, chunk_index, start_line, end_line, content, embedding)
         VALUES (?, ?, ?, ?, ?, ?)
       `);
-      
+
       for (const chunk of chunksWithEmbeddings) {
         insertChunk.run(
           fileId,
@@ -366,7 +366,7 @@ export class FileIndexer {
     await this.initialize();
 
     const files = this.getGitFiles();
-    
+
     // Clean up deleted files
     this.cleanupDeletedFiles(files);
 
@@ -390,24 +390,24 @@ export class FileIndexer {
    */
   private cleanupDeletedFiles(currentFiles: string[]): void {
     const currentFilesSet = new Set(currentFiles);
-    
+
     // Get all indexed files
     const indexedFiles = this.db.prepare(
       'SELECT id, file_path FROM files'
     ).all() as { id: number; file_path: string }[];
-    
+
     // Find and remove deleted files
     // CASCADE DELETE will automatically remove associated chunks
     const deleteStmt = this.db.prepare('DELETE FROM files WHERE id = ?');
     let deletedCount = 0;
-    
+
     for (const { id, file_path } of indexedFiles) {
       if (!currentFilesSet.has(file_path)) {
         deleteStmt.run(id);
         deletedCount++;
       }
     }
-    
+
     if (deletedCount > 0) {
       console.log(`Cleaned up ${deletedCount} deleted files from index`);
     }
@@ -503,7 +503,7 @@ export class FileIndexer {
     const fileStats = this.db.prepare(`
       SELECT COUNT(*) as total_files FROM files
     `).get() as { total_files: number };
-    
+
     const chunkStats = this.db.prepare(`
       SELECT COUNT(*) as total_chunks FROM file_chunks
     `).get() as { total_chunks: number };

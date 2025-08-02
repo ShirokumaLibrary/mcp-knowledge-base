@@ -23,10 +23,12 @@ export class CurrentStateHandlers {
             const rawContent = await fs.readFile(this.filePath, 'utf-8');
             const parsed = parseMarkdown(rawContent);
             if (parsed.metadata) {
-                if (parsed.metadata.tags === null)
+                if (parsed.metadata.tags === null) {
                     parsed.metadata.tags = [];
-                if (parsed.metadata.related === null)
+                }
+                if (parsed.metadata.related === null) {
                     parsed.metadata.related = [];
+                }
             }
             const metadata = CurrentStateMetadataSchema.parse(parsed.metadata || {});
             const response = {
@@ -55,9 +57,9 @@ export class CurrentStateHandlers {
                 };
             }
             this.logger.error('Failed to read current state', error);
-            throw new McpError(ErrorCode.InternalError, `Failed to read current state. ` +
+            throw new McpError(ErrorCode.InternalError, 'Failed to read current state. ' +
                 `Please ensure the file exists at ${this.filePath} and is readable. ` +
-                `If this is a permission issue, please check file permissions. ` +
+                'If this is a permission issue, please check file permissions. ' +
                 `Original error: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
@@ -81,7 +83,7 @@ export class CurrentStateHandlers {
                         if (validatedRelated.length < params.related.length) {
                             const invalid = params.related.filter(item => !validatedRelated.includes(item));
                             throw new McpError(ErrorCode.InvalidRequest, `The following related items do not exist: ${invalid.join(', ')}. ` +
-                                `Please create these items first or remove them from the related field. ` +
+                                'Please create these items first or remove them from the related field. ' +
                                 `Valid items: ${validatedRelated.join(', ')}`);
                         }
                         metadata.related = validatedRelated;
@@ -90,8 +92,8 @@ export class CurrentStateHandlers {
                         if (error instanceof McpError) {
                             throw error;
                         }
-                        throw new McpError(ErrorCode.InternalError, `Failed to validate related items. Please check the format (type-id) and try again. ` +
-                            `Expected format: issues-123, docs-456, sessions-2025-01-01-12.00.00.000`);
+                        throw new McpError(ErrorCode.InternalError, 'Failed to validate related items. Please check the format (type-id) and try again. ' +
+                            'Expected format: issues-123, docs-456, sessions-2025-01-01-12.00.00.000');
                     }
                 }
                 else {
@@ -110,7 +112,7 @@ export class CurrentStateHandlers {
                 }
                 catch (error) {
                     throw new McpError(ErrorCode.InternalError, `Failed to register tags: ${params.tags.join(', ')}. ` +
-                        `Please check if the tag names are valid (alphanumeric, hyphens, underscores only) and try again.`);
+                        'Please check if the tag names are valid (alphanumeric, hyphens, underscores only) and try again.');
                 }
             }
             return {
@@ -125,9 +127,9 @@ export class CurrentStateHandlers {
             if (error instanceof McpError) {
                 throw error;
             }
-            throw new McpError(ErrorCode.InternalError, `Failed to update current state. ` +
-                `Please check: 1) The content is valid text, 2) Tags contain only alphanumeric characters, hyphens, or underscores, ` +
-                `3) Related items follow the format 'type-id' (e.g., issues-123). ` +
+            throw new McpError(ErrorCode.InternalError, 'Failed to update current state. ' +
+                'Please check: 1) The content is valid text, 2) Tags contain only alphanumeric characters, hyphens, or underscores, ' +
+                '3) Related items follow the format \'type-id\' (e.g., issues-123). ' +
                 `Original error: ${error instanceof Error ? error.message : String(error)}`);
         }
     }

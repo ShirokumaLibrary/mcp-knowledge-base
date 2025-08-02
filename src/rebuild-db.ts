@@ -16,12 +16,12 @@ import { parseMarkdown } from './utils/markdown-parser.js';
 
 async function dropAllTables(db: any): Promise<void> {
   console.log('🗑️  Dropping all tables...');
-  
+
   // Drop tables in correct order to avoid foreign key constraints
   const tablesToDrop = [
     'items_fts',        // FTS virtual table first
     'related_items',    // Relationship tables
-    'item_tags',        
+    'item_tags',
     'type_fields',      // Type metadata
     'items',            // Main data table
     'sequences',        // Type registry
@@ -37,12 +37,12 @@ async function dropAllTables(db: any): Promise<void> {
       console.error(`  ⚠️  Failed to drop table ${table}:`, error);
     }
   }
-  
+
   // Also drop any indexes
   const indexes = await db.allAsync(
     "SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'"
   );
-  
+
   for (const index of indexes) {
     try {
       await db.runAsync(`DROP INDEX IF EXISTS ${index.name}`);
@@ -62,7 +62,7 @@ async function rebuildDatabase() {
 
   // Initialize database connection
   const fullDb = new FileIssueDatabase(databasePath, dbPath);
-  
+
   if (!existsSync(dbPath)) {
     // New database - just initialize normally
     console.log('📝 Creating new database...');
@@ -71,17 +71,17 @@ async function rebuildDatabase() {
     // Existing database - drop tables instead of deleting file
     console.log('🔌 Using existing database connection...');
     await fullDb.initialize();
-    
+
     // Get the raw database connection
     const db = fullDb.getDatabase();
-    
+
     // Drop all tables
     await dropAllTables(db);
-    
+
     // Force re-creation of tables by calling private method
     const connection = (fullDb as any).connection;
     await connection.createTables();
-    
+
     console.log('✅ Tables recreated');
   }
 
@@ -322,7 +322,7 @@ async function rebuildDatabase() {
   console.log('\n✨ Database rebuild successful!');
   console.log('\n💡 Tip: Connection was preserved - no need to restart MCP server.');
   console.log('💡 For forced clean rebuild, delete the database file first: rm [path]/search.db');
-  
+
   if (!process.argv.includes('--write-back')) {
     console.log('\n💡 Note: To update Markdown files with migrated related fields, run with --write-back flag');
   }
@@ -337,35 +337,35 @@ async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Pr
   const itemRepo = db.getItemRepository();
   let migratedCount = 0;
   let checkedCount = 0;
-  
+
   for (const typeInfo of allTypes) {
     const type = typeInfo.type;
-    
+
     // Skip types that don't use markdown storage
     if (type === 'sessions' || type === 'dailies') {
       continue;
     }
-    
+
     const items = await itemRepo.getItems(type, true);
-    
+
     for (const item of items) {
       checkedCount++;
-      
+
       // Read the original markdown file to check if it has old fields
       const databasePath = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
       const filePath = path.join(databasePath, type, `${type}-${item.id}.md`);
-      
+
       try {
         const content = readFileSync(filePath, 'utf-8');
         const parsed = parseMarkdown(content);
-        
+
         // Check if this file has the old fields that need migration
         const hasOldFields = 'related_tasks' in parsed.metadata || 'related_documents' in parsed.metadata;
-        
+
         if (hasOldFields) {
           // Get the migrated item from database
           const fullItem = await itemRepo.getItem(type, item.id);
-          
+
           if (fullItem) {
             // Update will save back to Markdown with new structure
             await itemRepo.updateItem({
@@ -390,8 +390,8 @@ async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Pr
       }
     }
   }
-  
-  console.log(`\n  📊 Migration Summary:`);
+
+  console.log('\n  📊 Migration Summary:');
   console.log(`  - Checked: ${checkedCount} files`);
   console.log(`  - Migrated: ${migratedCount} files`);
   console.log(`  - No changes needed: ${checkedCount - migratedCount} files`);

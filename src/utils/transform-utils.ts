@@ -69,21 +69,21 @@ export class MarkdownTransformers {
 
     // Support both old and new related fields
     const relatedItems = new Set<string>();
-    
+
     // Add from unified related field if present
     if ((issue as any).related && Array.isArray((issue as any).related)) {
       (issue as any).related.forEach((item: string) => relatedItems.add(item));
     }
-    
+
     // Add from legacy fields for backward compatibility
     if (issue.related_tasks && issue.related_tasks.length > 0) {
       issue.related_tasks.forEach(item => relatedItems.add(item));
     }
-    
+
     if (issue.related_documents && issue.related_documents.length > 0) {
       issue.related_documents.forEach(item => relatedItems.add(item));
     }
-    
+
     if (relatedItems.size > 0) {
       lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
     }
@@ -121,21 +121,21 @@ export class MarkdownTransformers {
 
     // Support both old and new related fields
     const relatedItems = new Set<string>();
-    
+
     // Add from unified related field if present
     if ((plan as any).related && Array.isArray((plan as any).related)) {
       (plan as any).related.forEach((item: string) => relatedItems.add(item));
     }
-    
+
     // Add from legacy fields for backward compatibility
     if (plan.related_tasks && plan.related_tasks.length > 0) {
       plan.related_tasks.forEach(item => relatedItems.add(item));
     }
-    
+
     if (plan.related_documents && plan.related_documents.length > 0) {
       plan.related_documents.forEach(item => relatedItems.add(item));
     }
-    
+
     if (relatedItems.size > 0) {
       lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
     }
@@ -170,21 +170,21 @@ export class MarkdownTransformers {
 
     // Support both old and new related fields
     const relatedItems = new Set<string>();
-    
+
     // Add from unified related field if present
     if ((doc as any).related && Array.isArray((doc as any).related)) {
       (doc as any).related.forEach((item: string) => relatedItems.add(item));
     }
-    
+
     // Add from legacy fields for backward compatibility
     if (doc.related_tasks && doc.related_tasks.length > 0) {
       doc.related_tasks.forEach(item => relatedItems.add(item));
     }
-    
+
     if (doc.related_documents && doc.related_documents.length > 0) {
       doc.related_documents.forEach(item => relatedItems.add(item));
     }
-    
+
     if (relatedItems.size > 0) {
       lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
     }

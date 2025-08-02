@@ -272,7 +272,7 @@ async function writeMigratedDataBack(db, allTypes) {
             }
         }
     }
-    console.log(`\n  📊 Migration Summary:`);
+    console.log('\n  📊 Migration Summary:');
     console.log(`  - Checked: ${checkedCount} files`);
     console.log(`  - Migrated: ${migratedCount} files`);
     console.log(`  - No changes needed: ${checkedCount - migratedCount} files`);

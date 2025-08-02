@@ -702,7 +702,7 @@ export const toolDefinitions = [
       required: ['query']
     }
   },
-  
+
   // Current state management tools
   {
     name: 'get_current_state',
@@ -740,7 +740,7 @@ export const toolDefinitions = [
       required: ['content']
     }
   },
-  
+
   // Type change tool
   {
     name: 'change_item_type',
@@ -764,7 +764,7 @@ export const toolDefinitions = [
       required: ['from_type', 'from_id', 'to_type']
     }
   },
-  
+
   // File indexing tools
   {
     name: 'index_codebase',
