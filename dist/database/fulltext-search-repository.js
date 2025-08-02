@@ -1,4 +1,5 @@
 import { createLogger } from '../utils/logger.js';
+import { parseSearchQuery, toFTS5Query, hasFieldSpecificSearch } from '../utils/search-query-parser.js';
 export class FullTextSearchRepository {
     db;
     logger = createLogger('FullTextSearchRepository');
@@ -15,14 +16,10 @@ export class FullTextSearchRepository {
         if (!trimmedQuery) {
             throw new Error('Search query cannot be empty');
         }
-        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
-        if (words.length === 1) {
-            ftsQuery = words[0];
-        }
-        else {
-            ftsQuery = words.map(word => {
-                return word.replace(/['"]/g, '');
-            }).join(' AND ');
+        const parsed = parseSearchQuery(trimmedQuery);
+        ftsQuery = toFTS5Query(parsed);
+        if (!ftsQuery) {
+            throw new Error('Invalid search query');
         }
         let typeFilter = '';
         let params = [ftsQuery, limit, offset];
@@ -68,15 +65,25 @@ export class FullTextSearchRepository {
         if (!trimmedQuery) {
             return [];
         }
-        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
-        if (words.length === 1) {
-            ftsQuery = `${words[0]}*`;
+        const parsed = parseSearchQuery(trimmedQuery);
+        function addPrefixToRightmostTerm(expr) {
+            if (expr.type === 'term') {
+                if (!expr.value.endsWith('*')) {
+                    return { ...expr, value: expr.value + '*' };
+                }
+                return expr;
+            }
+            else if (expr.type === 'boolean') {
+                return {
+                    ...expr,
+                    right: addPrefixToRightmostTerm(expr.right)
+                };
+            }
+            return expr;
         }
-        else {
-            const lastWord = words.pop();
-            const previousWords = words.map(word => word.replace(/['"]/g, ''));
-            ftsQuery = previousWords.join(' AND ') + ` AND ${lastWord}*`;
-        }
+        const modifiedExpression = addPrefixToRightmostTerm(parsed.expression);
+        const modifiedParsed = { ...parsed, expression: modifiedExpression };
+        ftsQuery = toFTS5Query(modifiedParsed);
         let typeFilter = '';
         let params = [ftsQuery, limit];
         if (options?.types && options.types.length > 0) {
@@ -107,14 +114,20 @@ export class FullTextSearchRepository {
         if (!trimmedQuery) {
             throw new Error('Search query cannot be empty');
         }
-        const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
-        if (words.length === 1) {
-            ftsQuery = words[0];
+        if (hasFieldSpecificSearch(trimmedQuery)) {
+            const parsed = parseSearchQuery(trimmedQuery);
+            ftsQuery = toFTS5Query(parsed);
         }
         else {
-            ftsQuery = words.map(word => {
-                return word.replace(/['"]/g, '');
-            }).join(' AND ');
+            const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+            if (words.length === 1) {
+                ftsQuery = words[0];
+            }
+            else {
+                ftsQuery = words.map(word => {
+                    return word.replace(/['"]/g, '');
+                }).join(' AND ');
+            }
         }
         let typeFilter = '';
         let params = [ftsQuery];
