@@ -15,6 +15,7 @@ export interface ListItem {
   description?: string;     // Summary for list display
   status?: string;          // For task types
   priority?: 'high' | 'medium' | 'low';  // For task types
+  version?: string;         // Version information
   tags: string[];
   updated_at: string;
 

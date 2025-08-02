@@ -45,6 +45,7 @@ export const CreateItemParams = z.object({
   content: z.string().optional(),
   priority: PrioritySchema.optional(),
   status: z.string().optional(),
+  version: z.string().optional(), // Version information (e.g. "0.7.5", "v1.2.0")
   tags: z.array(z.string()).optional(),
   related: z.array(z.string()).optional(),
   start_date: z.string().optional(),
@@ -81,6 +82,7 @@ export const UpdateItemParams = z.object({
   content: z.string().optional(),
   priority: PrioritySchema.optional(),
   status: z.string().optional(),
+  version: z.string().optional(), // Version information (e.g. "0.7.5", "v1.2.0")
   tags: z.array(z.string()).optional(),
   related: z.array(z.string()).optional(),
   start_date: z.string().nullable().optional(),

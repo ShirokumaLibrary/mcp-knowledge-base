@@ -121,6 +121,10 @@ export const toolDefinitions = [
                 category: {
                     type: 'string',
                     description: 'Category for grouping sessions. OPTIONAL for sessions type. Examples: "development", "meeting", "research", "debugging"'
+                },
+                version: {
+                    type: 'string',
+                    description: 'Version information. OPTIONAL for all types. Examples: "0.7.5", "v1.2.0", "2024.01"'
                 }
             },
             required: ['type', 'title']
@@ -183,6 +187,10 @@ export const toolDefinitions = [
                     type: 'array',
                     items: { type: 'string' },
                     description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+                },
+                version: {
+                    type: 'string',
+                    description: 'Version information (e.g. "0.7.5", "v1.2.0")'
                 }
             },
             required: ['type', 'id']

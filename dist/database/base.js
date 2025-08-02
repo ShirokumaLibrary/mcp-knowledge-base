@@ -192,6 +192,7 @@ export class DatabaseConnection {
         start_date TEXT,               -- For tasks, or date for sessions/summaries
         end_date TEXT,                 -- For tasks
         start_time TEXT,               -- For sessions (HH:MM:SS)
+        version TEXT,                  -- Version information (e.g. "0.7.5", "v1.2.0")
         tags TEXT,                     -- JSON array @ai-redundant: Also in item_tags
         related TEXT,                  -- JSON array ["type-id", ...] @ai-redundant: Also in related_items
         created_at TEXT NOT NULL,
@@ -215,6 +216,10 @@ export class DatabaseConnection {
         await this.db.runAsync(`
       CREATE INDEX IF NOT EXISTS idx_items_priority 
       ON items(priority)
+    `);
+        await this.db.runAsync(`
+      CREATE INDEX IF NOT EXISTS idx_items_version 
+      ON items(version)
     `);
     }
     async createTagRelationshipTables() {
@@ -322,6 +327,15 @@ export class DatabaseConnection {
         catch (err) {
             if (!err.message.includes('duplicate column name')) {
                 this.logger.error('Error adding updated_at to statuses:', err);
+            }
+        }
+        try {
+            await this.db.runAsync('ALTER TABLE items ADD COLUMN version TEXT');
+            this.logger.debug('Added version column to items table');
+        }
+        catch (err) {
+            if (!err.message.includes('duplicate column name')) {
+                this.logger.error('Error adding version to items:', err);
             }
         }
     }

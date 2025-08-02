@@ -3,6 +3,7 @@ import { RelatedItemsHelper } from '../types/unified-types.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
 import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
+import { normalizeVersion, denormalizeVersion } from '../utils/version-utils.js';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { glob } from 'glob';
@@ -48,6 +49,7 @@ export class ItemRepository extends BaseRepository {
             type: row.type,
             title: row.title,
             description: row.description || undefined,
+            version: denormalizeVersion(row.version) || undefined,
             content: row.content || '',
             priority: row.priority || 'medium',
             status_id: row.status_id || 1,
@@ -67,6 +69,7 @@ export class ItemRepository extends BaseRepository {
             id: entity.id,
             title: entity.title,
             description: entity.description || null,
+            version: normalizeVersion(entity.version) || null,
             content: entity.content,
             priority: entity.priority,
             status_id: entity.status_id,
@@ -124,6 +127,7 @@ export class ItemRepository extends BaseRepository {
             type,
             title: data.title,
             description: data.description || undefined,
+            version: data.version || undefined,
             content: data.content || '',
             priority,
             status_id: statusId,
@@ -166,6 +170,7 @@ export class ItemRepository extends BaseRepository {
                     type,
                     title: metadata.title,
                     description: metadata.description || undefined,
+                    version: metadata.version || undefined,
                     content: bodyContent,
                     priority: metadata.priority || 'medium',
                     status_id: statusId || 1,
@@ -184,6 +189,7 @@ export class ItemRepository extends BaseRepository {
                     type,
                     title: metadata.title,
                     description: metadata.description || undefined,
+                    version: metadata.version || undefined,
                     content: bodyContent,
                     priority: metadata.priority || 'medium',
                     status_id: statusId || 1,
@@ -219,6 +225,7 @@ export class ItemRepository extends BaseRepository {
             ...existing,
             title: params.title ?? existing.title,
             description: params.description !== undefined ? params.description : existing.description,
+            version: params.version !== undefined ? params.version : existing.version,
             content: params.content ?? existing.content,
             priority: params.priority ?? existing.priority,
             status_id: statusId,
@@ -296,6 +303,28 @@ export class ItemRepository extends BaseRepository {
         if (params.priority) {
             conditions.push('i.priority = ?');
             values.push(params.priority);
+        }
+        if (params.version) {
+            if (params.version.startsWith('>=')) {
+                conditions.push('i.version >= ?');
+                values.push(normalizeVersion(params.version.substring(2).trim()));
+            }
+            else if (params.version.startsWith('>')) {
+                conditions.push('i.version > ?');
+                values.push(normalizeVersion(params.version.substring(1).trim()));
+            }
+            else if (params.version.startsWith('<=')) {
+                conditions.push('i.version <= ?');
+                values.push(normalizeVersion(params.version.substring(2).trim()));
+            }
+            else if (params.version.startsWith('<')) {
+                conditions.push('i.version < ?');
+                values.push(normalizeVersion(params.version.substring(1).trim()));
+            }
+            else {
+                conditions.push('i.version = ?');
+                values.push(normalizeVersion(params.version));
+            }
         }
         if (params.startDate) {
             conditions.push('i.start_date >= ?');
@@ -409,6 +438,9 @@ export class ItemRepository extends BaseRepository {
         if (item.description) {
             metadata.description = item.description;
         }
+        if (item.version) {
+            metadata.version = item.version;
+        }
         if (item.start_date) {
             metadata.start_date = item.start_date;
         }
@@ -444,8 +476,8 @@ export class ItemRepository extends BaseRepository {
         await this.db.runAsync(`
       INSERT OR REPLACE INTO items 
       (type, id, title, description, content, priority, status_id, 
-       start_date, end_date, start_time, tags, related, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       start_date, end_date, start_time, version, tags, related, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
             item.type,
             item.id,
@@ -457,6 +489,7 @@ export class ItemRepository extends BaseRepository {
             item.start_date,
             item.end_date,
             item.start_time,
+            item.version || null,
             tagsJson,
             relatedJson,
             item.created_at,

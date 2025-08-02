@@ -15,6 +15,7 @@ export interface BaseItem {
   type: string;            // issues, plans, docs, knowledge, sessions, summaries
   title: string;
   description?: string;
+  version?: string;        // Version information (e.g. "0.7.5", "v1.2.0")
   tags: string[];
   related: string[];       // ["type-id", ...] format
   related_tasks?: string[];    // Backward compatibility
@@ -101,6 +102,7 @@ export interface ItemRow {
   start_date: string | null;
   end_date: string | null;
   start_time: string | null;
+  version: string | null;
   tags: string;           // JSON string
   related: string;        // JSON string
   created_at: string;
@@ -166,6 +168,7 @@ export interface CreateItemParams {
   start_date?: string;
   end_date?: string;
   start_time?: string;
+  version?: string;       // Version information (e.g. "0.7.5", "v1.2.0")
   tags?: string[];
   related?: string[];
   related_tasks?: string[];
@@ -192,6 +195,7 @@ export interface UpdateItemParams {
   start_date?: string | null;
   end_date?: string | null;
   start_time?: string;
+  version?: string;
   tags?: string[];
   related?: string[];
   related_tasks?: string[];
@@ -209,6 +213,7 @@ export interface SearchItemParams {
   tags?: string[];
   status?: string;
   priority?: 'high' | 'medium' | 'low';
+  version?: string;  // Version filter (exact match or comparison)
   includeClosedStatuses?: boolean;
   startDate?: string;
   endDate?: string;

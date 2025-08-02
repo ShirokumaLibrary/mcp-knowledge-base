@@ -72,6 +72,7 @@ export const CreateItemSchema = z.object({
   content: z.string().optional(), // @ai-logic: Required for all types (validated in handler)
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
+  version: z.string().optional(), // @ai-intent: Version information (e.g. "0.7.5", "v1.2.0")
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-pattern: YYYY-MM-DD for issues/plans
   end_date: dateFormatSchema.optional(),   // @ai-pattern: YYYY-MM-DD for issues/plans
@@ -95,6 +96,7 @@ export const UpdateItemSchema = z.object({
   content: z.string().optional(), // @ai-logic: For all type updates
   priority: z.enum(['high', 'medium', 'low']).optional(),
   status: z.string().optional(), // @ai-logic: Status name instead of ID
+  version: z.string().optional(), // @ai-intent: Version information (e.g. "0.7.5", "v1.2.0")
   tags: z.array(z.string()).optional(),
   start_date: dateFormatSchema.optional(), // @ai-logic: For issue/plan timeline changes
   end_date: dateFormatSchema.optional(),   // @ai-logic: For issue/plan timeline changes
