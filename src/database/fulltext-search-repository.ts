@@ -6,6 +6,7 @@
 
 import type { Database } from './base.js';
 import { createLogger } from '../utils/logger.js';
+import { parseSearchQuery, toFTS5Query, hasFieldSpecificSearch, type QueryExpression } from '../utils/search-query-parser.js';
 
 export interface SearchResult {
   type: string;
@@ -44,7 +45,7 @@ export class FullTextSearchRepository {
     // @ai-validation: Ensure offset is non-negative
     const offset = Math.max(0, options?.offset || 0);
 
-    // Build FTS5 query with AND search for multiple words
+    // Build FTS5 query with support for field-specific searches
     const trimmedQuery = query.trim();
     let ftsQuery: string;
     
@@ -52,18 +53,14 @@ export class FullTextSearchRepository {
       throw new Error('Search query cannot be empty');
     }
     
-    // Split into words and create AND query
-    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+    // Always use the advanced parser for consistent behavior
+    // The parser now handles simple queries, field-specific searches, and boolean operators
+    const parsed = parseSearchQuery(trimmedQuery);
+    ftsQuery = toFTS5Query(parsed);
     
-    if (words.length === 1) {
-      // Single word: use as-is (can use prefix matching with *)
-      ftsQuery = words[0];
-    } else {
-      // Multiple words: AND search (all words must appear)
-      ftsQuery = words.map(word => {
-        // Escape special characters for each word
-        return word.replace(/['"]/g, '');
-      }).join(' AND ');
+    // If the FTS query is empty after parsing, throw an error
+    if (!ftsQuery) {
+      throw new Error('Invalid search query');
     }
 
     // Build type filter
@@ -139,18 +136,32 @@ export class FullTextSearchRepository {
       return []; // Return empty suggestions for empty query
     }
     
-    // For suggestions, use the last word with prefix matching
-    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+    // For suggestions, we need to add prefix matching to the last term
+    const parsed = parseSearchQuery(trimmedQuery);
     
-    if (words.length === 1) {
-      // Single word: add prefix matching
-      ftsQuery = `${words[0]}*`;
-    } else {
-      // Multiple words: AND search with prefix on last word
-      const lastWord = words.pop()!;
-      const previousWords = words.map(word => word.replace(/['"]/g, ''));
-      ftsQuery = previousWords.join(' AND ') + ` AND ${lastWord}*`;
+    // Function to add prefix matching to the rightmost term in an expression
+    function addPrefixToRightmostTerm(expr: QueryExpression): QueryExpression {
+      if (expr.type === 'term') {
+        // For a simple term, add prefix matching if it doesn't already have it
+        if (!expr.value.endsWith('*')) {
+          return { ...expr, value: expr.value + '*' };
+        }
+        return expr;
+      } else if (expr.type === 'boolean') {
+        // For boolean expressions, modify the rightmost term
+        return {
+          ...expr,
+          right: addPrefixToRightmostTerm(expr.right)
+        };
+      }
+      return expr;
     }
+    
+    // Modify the parsed expression to add prefix matching
+    const modifiedExpression = addPrefixToRightmostTerm(parsed.expression);
+    const modifiedParsed = { ...parsed, expression: modifiedExpression };
+    
+    ftsQuery = toFTS5Query(modifiedParsed);
 
     // Build type filter
     let typeFilter = '';
@@ -192,7 +203,7 @@ export class FullTextSearchRepository {
       types?: string[];
     }
   ): Promise<number> {
-    // Build FTS5 query with AND search for multiple words (same logic as search method)
+    // Build FTS5 query with support for field-specific searches (same logic as search method)
     const trimmedQuery = query.trim();
     let ftsQuery: string;
     
@@ -200,18 +211,25 @@ export class FullTextSearchRepository {
       throw new Error('Search query cannot be empty');
     }
     
-    // Split into words and create AND query
-    const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
-    
-    if (words.length === 1) {
-      // Single word: use as-is
-      ftsQuery = words[0];
+    // Check if query contains field-specific searches
+    if (hasFieldSpecificSearch(trimmedQuery)) {
+      // Use advanced parser for field-specific searches
+      const parsed = parseSearchQuery(trimmedQuery);
+      ftsQuery = toFTS5Query(parsed);
     } else {
-      // Multiple words: AND search (all words must appear)
-      ftsQuery = words.map(word => {
-        // Escape special characters for each word
-        return word.replace(/['"]/g, '');
-      }).join(' AND ');
+      // Backward compatibility: simple AND search for multiple words
+      const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
+      
+      if (words.length === 1) {
+        // Single word: use as-is
+        ftsQuery = words[0];
+      } else {
+        // Multiple words: AND search (all words must appear)
+        ftsQuery = words.map(word => {
+          // Escape special characters for each word
+          return word.replace(/['"]/g, '');
+        }).join(' AND ');
+      }
     }
 
     // Build type filter
