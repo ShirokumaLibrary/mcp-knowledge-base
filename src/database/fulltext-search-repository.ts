@@ -48,16 +48,16 @@ export class FullTextSearchRepository {
     // Build FTS5 query with support for field-specific searches
     const trimmedQuery = query.trim();
     let ftsQuery: string;
-    
+
     if (!trimmedQuery) {
       throw new Error('Search query cannot be empty');
     }
-    
+
     // Always use the advanced parser for consistent behavior
     // The parser now handles simple queries, field-specific searches, and boolean operators
     const parsed = parseSearchQuery(trimmedQuery);
     ftsQuery = toFTS5Query(parsed);
-    
+
     // If the FTS query is empty after parsing, throw an error
     if (!ftsQuery) {
       throw new Error('Invalid search query');
@@ -131,14 +131,14 @@ export class FullTextSearchRepository {
     // Build prefix query for FTS5
     const trimmedQuery = query.trim();
     let ftsQuery: string;
-    
+
     if (!trimmedQuery) {
       return []; // Return empty suggestions for empty query
     }
-    
+
     // For suggestions, we need to add prefix matching to the last term
     const parsed = parseSearchQuery(trimmedQuery);
-    
+
     // Function to add prefix matching to the rightmost term in an expression
     function addPrefixToRightmostTerm(expr: QueryExpression): QueryExpression {
       if (expr.type === 'term') {
@@ -156,11 +156,11 @@ export class FullTextSearchRepository {
       }
       return expr;
     }
-    
+
     // Modify the parsed expression to add prefix matching
     const modifiedExpression = addPrefixToRightmostTerm(parsed.expression);
     const modifiedParsed = { ...parsed, expression: modifiedExpression };
-    
+
     ftsQuery = toFTS5Query(modifiedParsed);
 
     // Build type filter
@@ -206,11 +206,11 @@ export class FullTextSearchRepository {
     // Build FTS5 query with support for field-specific searches (same logic as search method)
     const trimmedQuery = query.trim();
     let ftsQuery: string;
-    
+
     if (!trimmedQuery) {
       throw new Error('Search query cannot be empty');
     }
-    
+
     // Check if query contains field-specific searches
     if (hasFieldSpecificSearch(trimmedQuery)) {
       // Use advanced parser for field-specific searches
@@ -219,7 +219,7 @@ export class FullTextSearchRepository {
     } else {
       // Backward compatibility: simple AND search for multiple words
       const words = trimmedQuery.split(/\s+/).filter(word => word.length > 0);
-      
+
       if (words.length === 1) {
         // Single word: use as-is
         ftsQuery = words[0];

@@ -477,7 +477,7 @@ export class DatabaseConnection {
 
     // Index for type fields
     await this.db.runAsync('CREATE INDEX IF NOT EXISTS idx_type_fields_type ON type_fields(type)');
-    
+
     // Add updated_at column to statuses table if it doesn't exist (for migration)
     try {
       await this.db.runAsync('ALTER TABLE statuses ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP');

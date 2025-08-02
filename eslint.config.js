@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import unicorn from 'eslint-plugin-unicorn';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -22,6 +23,9 @@ export default tseslint.config(
   },
   {
     files: ['src/**/*.ts'],
+    plugins: {
+      unicorn
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -30,15 +34,24 @@ export default tseslint.config(
       }
     },
     rules: {
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // AI生成コード品質向上のための厳格なルール
+      '@typescript-eslint/explicit-function-return-type': ['error', {
+        allowExpressions: true,
+        allowTypedFunctionExpressions: true
+      }],
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_'
       }],
       '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
-      'no-console': ['warn', { allow: ['error', 'warn'] }],
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      'no-console': 'error',
+      'no-debugger': 'error',
+      'no-warning-comments': ['warn', { 
+        terms: ['todo', 'fixme', 'xxx', 'hack'],
+        location: 'start' 
+      }],
       'prefer-const': 'error',
       'no-var': 'error',
       'eqeqeq': ['error', 'always'],
@@ -49,7 +62,18 @@ export default tseslint.config(
       'comma-dangle': ['error', 'never'],
       'no-trailing-spaces': 'error',
       'indent': ['error', 2, { SwitchCase: 1 }],
-      'max-len': ['warn', { code: 120, comments: 150 }]
+      'max-len': ['warn', { code: 120, comments: 150 }],
+      
+      // ファイル名規則（AI向け）
+      'unicorn/filename-case': ['error', {
+        case: 'kebabCase',
+        ignore: [
+          'CLAUDE.md',
+          'README.md',
+          'CHANGELOG.md',
+          'LICENSE'
+        ]
+      }]
     }
   }
 );

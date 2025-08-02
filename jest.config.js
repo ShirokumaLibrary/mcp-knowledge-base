@@ -23,16 +23,17 @@ export default {
     'node_modules/(?!(@xenova/transformers)/)'
   ],
   testMatch: [
-    '**/src/**/__tests__/**/*.test.ts',
-    '**/src/**/?(*.)+(spec|test).ts',
-    '**/tests/**/*.test.ts',
-    '**/tests/integration/**/*.test.ts'
+    '<rootDir>/src/**/__tests__/**/*.test.ts',
+    '<rootDir>/src/**/?(*.)+(spec|test).ts',
+    '<rootDir>/tests/**/*.test.ts',
+    '<rootDir>/tests/integration/**/*.test.ts'
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/tmp/',
     '/dist/',
-    '/tests/e2e/'
+    '/tests/e2e/',
+    '/poc/'
   ],
   collectCoverageFrom: [
     'src/**/*.ts',
