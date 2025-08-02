@@ -351,15 +351,23 @@ export class ItemRepository {
           );
         }
         createdAt = sessionDate.toISOString();
-        startDate = createdAt.split('T')[0];
+        // Don't set startDate from UTC - will be set from ID or dateObj later
       } else {
         createdAt = nowISOString;
-        startDate = nowISOString.split('T')[0];
+        // Don't set startDate here - will be set after ID generation
       }
 
       // Use custom ID or generate from datetime
       if (params.id) {
         id = params.id;
+        // Extract date from custom ID if it follows the expected format
+        const idMatch = id.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (idMatch) {
+          startDate = idMatch[1];
+        } else {
+          // Fallback to current date for non-standard IDs
+          startDate = now.toISOString().split('T')[0];
+        }
       } else {
         // Generate date-based ID for sessions: YYYY-MM-DD-HH.MM.SS.sss
         const dateObj = params.datetime ? new Date(params.datetime) : now;
@@ -371,6 +379,8 @@ export class ItemRepository {
         const seconds = String(dateObj.getSeconds()).padStart(2, '0');
         const milliseconds = String(dateObj.getMilliseconds()).padStart(3, '0');
         id = `${year}-${month}-${day}-${hours}.${minutes}.${seconds}.${milliseconds}`;
+        // Set startDate from the generated ID components (local date)
+        startDate = `${year}-${month}-${day}`;
       }
     } else if (type === 'dailies') {
       // Use provided date or today for dailies

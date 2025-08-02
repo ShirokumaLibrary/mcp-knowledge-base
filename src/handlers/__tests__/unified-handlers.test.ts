@@ -27,10 +27,14 @@ describe('UnifiedHandlers', () => {
     testDataDir = path.join(tempDir, '.shirokuma/data');
     
     // Create required directories
-    const dirs = ['issues', 'plans', 'docs', 'knowledge', 'sessions', 'dailies'];
+    const dirs = ['issues', 'plans', 'docs', 'knowledge', 'sessions', 'sessions/dailies'];
     for (const dir of dirs) {
       await fs.mkdir(path.join(testDataDir, dir), { recursive: true });
     }
+    
+    // Create date-based subdirectories for sessions (for today)
+    const today = new Date().toISOString().split('T')[0];
+    await fs.mkdir(path.join(testDataDir, 'sessions', today), { recursive: true });
     
     // Initialize database
     const dbPath = path.join(testDataDir, 'search.db');
@@ -145,23 +149,45 @@ describe('UnifiedHandlers', () => {
     });
 
     it('should handle get latest session', async () => {
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Create session for today
+      // Create multiple sessions including today
       await database.getItemRepository().createItem({
         type: 'sessions',
+        title: 'Old Session',
+        content: 'Old content',
+        datetime: '2025-07-01T10:00:00.000Z'
+      });
+      
+      // Create session for today (start_date will be set from ID)
+      const todaySession = await database.getItemRepository().createItem({
+        type: 'sessions',
         title: 'Today Session',
-        content: 'Content',
-        start_date: today
+        content: 'Content'
       });
 
+      // Debug: check today's date and session's date
+      const today = new Date().toISOString().split('T')[0];
+      const sessionDate = todaySession.id.substring(0, 10);
+      console.log('Today:', today);
+      console.log('Session date:', sessionDate);
+      console.log('Session start_date:', todaySession.start_date);
+      
+      // When limit=1 with sessions, it should get today's sessions only
       const items = await handlers.get_items({ 
         type: 'sessions',
         limit: 1
       });
       
+      console.log('Items returned:', items.length);
+      
       expect(items).toHaveLength(1);
       expect(items[0].title).toBe('Today Session');
+      
+      // Without limit, should get all sessions
+      const allItems = await handlers.get_items({ 
+        type: 'sessions'
+      });
+      
+      expect(allItems.length).toBeGreaterThan(1);
     });
   });
 

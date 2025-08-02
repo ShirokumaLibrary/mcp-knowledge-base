@@ -209,14 +209,19 @@ export class ItemRepository {
                     throw new McpError(ErrorCode.InvalidRequest, 'Invalid datetime format');
                 }
                 createdAt = sessionDate.toISOString();
-                startDate = createdAt.split('T')[0];
             }
             else {
                 createdAt = nowISOString;
-                startDate = nowISOString.split('T')[0];
             }
             if (params.id) {
                 id = params.id;
+                const idMatch = id.match(/^(\d{4}-\d{2}-\d{2})/);
+                if (idMatch) {
+                    startDate = idMatch[1];
+                }
+                else {
+                    startDate = now.toISOString().split('T')[0];
+                }
             }
             else {
                 const dateObj = params.datetime ? new Date(params.datetime) : now;
@@ -228,6 +233,7 @@ export class ItemRepository {
                 const seconds = String(dateObj.getSeconds()).padStart(2, '0');
                 const milliseconds = String(dateObj.getMilliseconds()).padStart(3, '0');
                 id = `${year}-${month}-${day}-${hours}.${minutes}.${seconds}.${milliseconds}`;
+                startDate = `${year}-${month}-${day}`;
             }
         }
         else if (type === 'dailies') {

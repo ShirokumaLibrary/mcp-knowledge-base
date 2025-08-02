@@ -1,40 +1,96 @@
 #!/usr/bin/env node
 
 /**
- * @ai-context Database rebuild utility for disaster recovery
- * @ai-pattern Command-line tool that reconstructs SQLite from markdown files
- * @ai-critical Used when database is corrupted or out of sync
- * @ai-flow 1. Drop DB -> 2. Reinitialize -> 3. Scan files -> 4. Rebuild data
- * @ai-assumption Markdown files are source of truth
+ * @ai-context Database rebuild utility that preserves connection
+ * @ai-pattern Drops all tables instead of deleting database file
+ * @ai-critical Prevents connection loss during rebuild
+ * @ai-flow 1. Drop tables -> 2. Reinitialize tables -> 3. Scan files -> 4. Rebuild data
+ * @ai-note For forced clean rebuild, manually delete the database file first
  */
 
 import path from 'path';
 import { globSync } from 'glob';
-import { existsSync, statSync, unlinkSync, readFileSync } from 'fs';
+import { existsSync, statSync, readFileSync } from 'fs';
 import { FileIssueDatabase } from './database/index.js';
 import { parseMarkdown } from './utils/markdown-parser.js';
+
+async function dropAllTables(db: any): Promise<void> {
+  console.log('🗑️  Dropping all tables...');
+  
+  // Drop tables in correct order to avoid foreign key constraints
+  const tablesToDrop = [
+    'items_fts',        // FTS virtual table first
+    'related_items',    // Relationship tables
+    'item_tags',        
+    'type_fields',      // Type metadata
+    'items',            // Main data table
+    'sequences',        // Type registry
+    'tags',             // Reference tables
+    'statuses'
+  ];
+
+  for (const table of tablesToDrop) {
+    try {
+      await db.runAsync(`DROP TABLE IF EXISTS ${table}`);
+      console.log(`  ✅ Dropped table: ${table}`);
+    } catch (error) {
+      console.error(`  ⚠️  Failed to drop table ${table}:`, error);
+    }
+  }
+  
+  // Also drop any indexes
+  const indexes = await db.allAsync(
+    "SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'"
+  );
+  
+  for (const index of indexes) {
+    try {
+      await db.runAsync(`DROP INDEX IF EXISTS ${index.name}`);
+      console.log(`  ✅ Dropped index: ${index.name}`);
+    } catch (error) {
+      console.error(`  ⚠️  Failed to drop index ${index.name}:`, error);
+    }
+  }
+}
 
 async function rebuildDatabase() {
   const databasePath = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
   const dbPath = path.join(databasePath, 'search.db');
 
-  console.log('🔄 Starting database rebuild from Markdown files...');
+  console.log('🔄 Starting database rebuild...');
   console.log(`📂 Database path: ${databasePath}`);
 
-  // Remove existing database
-  if (existsSync(dbPath)) {
-    unlinkSync(dbPath);
-    console.log('🗑️  Removed existing database');
+  // Initialize database connection
+  const fullDb = new FileIssueDatabase(databasePath, dbPath);
+  
+  if (!existsSync(dbPath)) {
+    // New database - just initialize normally
+    console.log('📝 Creating new database...');
+    await fullDb.initialize();
+  } else {
+    // Existing database - drop tables instead of deleting file
+    console.log('🔌 Using existing database connection...');
+    await fullDb.initialize();
+    
+    // Get the raw database connection
+    const db = fullDb.getDatabase();
+    
+    // Drop all tables
+    await dropAllTables(db);
+    
+    // Force re-creation of tables by calling private method
+    const connection = (fullDb as any).connection;
+    await connection.createTables();
+    
+    console.log('✅ Tables recreated');
   }
 
-  // Initialize new database
-  const fullDb = new FileIssueDatabase(databasePath, dbPath);
-  await fullDb.initialize();
-  console.log('✅ Database initialized');
+  // Re-initialize repositories after table recreation
+  const typeRepo = fullDb['typeRepo'];
+  await typeRepo.init();
 
   // Check for new types by scanning directories
   console.log('\n🔍 Scanning filesystem for types...');
-  const typeRepo = fullDb['typeRepo'];
   const existingTypes = await typeRepo.getAllTypes();
   const existingTypeNames = new Set(existingTypes.map(t => t.type));
 
@@ -66,8 +122,7 @@ async function rebuildDatabase() {
     if (!existingTypeNames.has(typeName)) {
       console.log(`  📁 Found unregistered type: ${typeName}`);
 
-      // @ai-critical: Determine base type from markdown header or content
-      // @ai-pattern: No special treatment for initial types - treat all types equally
+      // Determine base type from markdown header or content
       let baseType = 'documents';
 
       // Check markdown files for 'base' field in header
@@ -77,15 +132,13 @@ async function rebuildDatabase() {
           const content = readFileSync(file, 'utf-8');
           const parsed = parseMarkdown(content);
 
-          // @ai-priority: Always check for explicit 'base' field first
-          // @ai-why: Explicit metadata should override any inference
+          // Always check for explicit 'base' field first
           if (parsed.metadata.base) {
             baseType = parsed.metadata.base;
             break;
           }
 
-          // @ai-fallback: Only infer if no explicit base field
-          // @ai-logic: Tasks have priority and status, documents don't
+          // Only infer if no explicit base field
           if (parsed.metadata.priority && parsed.metadata.status) {
             baseType = 'tasks';
             break;
@@ -267,7 +320,8 @@ async function rebuildDatabase() {
   }
 
   console.log('\n✨ Database rebuild successful!');
-  console.log('\n💡 Tip: You can verify the rebuild by running the MCP server and checking the data.');
+  console.log('\n💡 Tip: Connection was preserved - no need to restart MCP server.');
+  console.log('💡 For forced clean rebuild, delete the database file first: rm [path]/search.db');
   
   if (!process.argv.includes('--write-back')) {
     console.log('\n💡 Note: To update Markdown files with migrated related fields, run with --write-back flag');
@@ -277,9 +331,7 @@ async function rebuildDatabase() {
 }
 
 /**
- * @ai-intent Write migrated data back to Markdown files
- * @ai-pattern Update files only if migration occurred
- * @ai-logic Check original markdown files to identify which ones need migration
+ * Write migrated data back to Markdown files
  */
 async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Promise<void> {
   const itemRepo = db.getItemRepository();
@@ -316,7 +368,6 @@ async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Pr
           
           if (fullItem) {
             // Update will save back to Markdown with new structure
-            // Pass all existing data to preserve other fields
             await itemRepo.updateItem({
               type: fullItem.type,
               id: fullItem.id,

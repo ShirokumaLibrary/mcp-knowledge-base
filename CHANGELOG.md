@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Database Rebuild Improved**: `rebuild-db` command now preserves MCP connections
+  - Drops and recreates tables instead of deleting database file
+  - No server restart required - operations can continue immediately
+  - Preserves all data integrity while maintaining active connections
+  - For forced clean rebuild, manually delete database file first: `rm .shirokuma/data/search.db`
+  - Removed redundant `rebuild-db-safe` command
+
 ## [0.7.4] - 2025-08-01
 
 ### Fixed

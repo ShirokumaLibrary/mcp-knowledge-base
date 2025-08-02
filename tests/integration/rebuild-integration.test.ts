@@ -157,7 +157,7 @@ Today's summary.`,
     
     // Verify output
     expect(stdout).toContain('Starting database rebuild');
-    expect(stdout).toContain('Database initialized');
+    expect(stdout).toContain('Creating new database');
     expect(stdout).toContain('Scanning issues');
     expect(stdout).toContain('Scanning plans');
     expect(stdout).toContain('Scanning docs');
@@ -212,7 +212,7 @@ Today's summary.`,
     const { stdout } = await runRebuildScript(dataPath);
     
     expect(stdout).toContain('Starting database rebuild');
-    expect(stdout).toContain('Database initialized');
+    expect(stdout).toContain('Creating new database');
     expect(stdout).toContain('Total items synced: 0');
     expect(stdout).toContain('Database rebuild successful!');
   });

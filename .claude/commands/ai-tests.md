@@ -53,25 +53,25 @@ Parse arguments:
 - "phase2": Run tests 2.01-2.02
 
 #### Phase 1: Core Functionality Tests
-1.01. **Initial State Verification** - @.claude/commands/ai-tests/1.01-initial-state.markdown
-1.02. **Data Creation Tests** - @.claude/commands/ai-tests/1.02-data-creation.markdown
-1.03. **Data Retrieval & Update Tests** - @.claude/commands/ai-tests/1.03-data-operations.markdown
-1.04. **Tag Functionality Tests** - @.claude/commands/ai-tests/1.04-tag-tests.markdown
-1.05. **Status Management Tests** - @.claude/commands/ai-tests/1.05-status-tests.markdown
-1.06. **Session Management Tests** - @.claude/commands/ai-tests/1.06-session-tests.markdown
-1.07. **Daily Summary Tests** - @.claude/commands/ai-tests/1.07-summary-tests.markdown
-1.08. **Comprehensive Verification** - @.claude/commands/ai-tests/1.08-verification.markdown
-1.09. **Data Deletion Tests** - @.claude/commands/ai-tests/1.09-deletion-tests.markdown
-1.10. **Edge Cases and Additional Tests** - @.claude/commands/ai-tests/1.10-edge-cases.markdown
-1.11. **Type Management Tests** - @.claude/commands/ai-tests/1.11-type-management.markdown
-1.12. **Current State Management Tests** - @.claude/commands/ai-tests/1.12-current-state.markdown
-1.13. **Item Type Change Tests** - @.claude/commands/ai-tests/1.13-type-change.markdown
-1.14. **Field Validation Tests** - @.claude/commands/ai-tests/1.14-field-validation.markdown
-1.15. **File Indexing Tests** - @.claude/commands/ai-tests/1.15-file-indexing.markdown
+1.01. [Initial State Verification](.claude/commands/ai-tests/1.01-initial-state.markdown)
+1.02. [Data Creation Tests](.claude/commands/ai-tests/1.02-data-creation.markdown)
+1.03. [Data Retrieval & Update Tests](.claude/commands/ai-tests/1.03-data-operations.markdown)
+1.04. [Tag Functionality Tests](.claude/commands/ai-tests/1.04-tag-tests.markdown)
+1.05. [Status Management Tests](.claude/commands/ai-tests/1.05-status-tests.markdown)
+1.06. [Session Management Tests](.claude/commands/ai-tests/1.06-session-tests.markdown)
+1.07. [Daily Summary Tests](.claude/commands/ai-tests/1.07-summary-tests.markdown)
+1.08. [Comprehensive Verification](.claude/commands/ai-tests/1.08-verification.markdown)
+1.09. [Data Deletion Tests](.claude/commands/ai-tests/1.09-deletion-tests.markdown)
+1.10. [Edge Cases and Additional Tests](.claude/commands/ai-tests/1.10-edge-cases.markdown)
+1.11. [Type Management Tests](.claude/commands/ai-tests/1.11-type-management.markdown)
+1.12. [Current State Management Tests](.claude/commands/ai-tests/1.12-current-state.markdown)
+1.13. [Item Type Change Tests](.claude/commands/ai-tests/1.13-type-change.markdown)
+1.14. [Field Validation Tests](.claude/commands/ai-tests/1.14-field-validation.markdown)
+1.15. [File Indexing Tests](.claude/commands/ai-tests/1.15-file-indexing.markdown)
 
 #### Phase 2: Database Rebuild Tests
-2.01. **Database Rebuild and SQLite Verification** - @.claude/commands/ai-tests/2.01-rebuild-tests.markdown
-2.02. **Post-Rebuild API Verification** - @.claude/commands/ai-tests/2.02-post-rebuild-verification.markdown
+2.01. [Database Rebuild and SQLite Verification](.claude/commands/ai-tests/2.01-rebuild-tests.markdown)
+2.02. [Post-Rebuild API Verification](.claude/commands/ai-tests/2.02-post-rebuild-verification.markdown)
 
 ### Test Process
 For each test:
@@ -113,7 +113,8 @@ For each test:
 - Note any blocking issues that prevent further tests
 
 ### Important Notes
-- Phase 2 requires server restart between 2.01 and 2.02
+- Phase 2: Safe rebuild (v0.7.5+) does NOT require server restart
+- Phase 2: Traditional rebuild requires server restart between 2.01 and 2.02
 - For content tests, verify multi-line preservation
 - Test with clean data directory when possible
 - Note: get_items now returns ListItem (lightweight) instead of full UnifiedItem

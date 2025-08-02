@@ -1,23 +1,63 @@
 #!/usr/bin/env node
 import path from 'path';
 import { globSync } from 'glob';
-import { existsSync, statSync, unlinkSync, readFileSync } from 'fs';
+import { existsSync, statSync, readFileSync } from 'fs';
 import { FileIssueDatabase } from './database/index.js';
 import { parseMarkdown } from './utils/markdown-parser.js';
+async function dropAllTables(db) {
+    console.log('🗑️  Dropping all tables...');
+    const tablesToDrop = [
+        'items_fts',
+        'related_items',
+        'item_tags',
+        'type_fields',
+        'items',
+        'sequences',
+        'tags',
+        'statuses'
+    ];
+    for (const table of tablesToDrop) {
+        try {
+            await db.runAsync(`DROP TABLE IF EXISTS ${table}`);
+            console.log(`  ✅ Dropped table: ${table}`);
+        }
+        catch (error) {
+            console.error(`  ⚠️  Failed to drop table ${table}:`, error);
+        }
+    }
+    const indexes = await db.allAsync("SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'");
+    for (const index of indexes) {
+        try {
+            await db.runAsync(`DROP INDEX IF EXISTS ${index.name}`);
+            console.log(`  ✅ Dropped index: ${index.name}`);
+        }
+        catch (error) {
+            console.error(`  ⚠️  Failed to drop index ${index.name}:`, error);
+        }
+    }
+}
 async function rebuildDatabase() {
     const databasePath = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
     const dbPath = path.join(databasePath, 'search.db');
-    console.log('🔄 Starting database rebuild from Markdown files...');
+    console.log('🔄 Starting database rebuild...');
     console.log(`📂 Database path: ${databasePath}`);
-    if (existsSync(dbPath)) {
-        unlinkSync(dbPath);
-        console.log('🗑️  Removed existing database');
-    }
     const fullDb = new FileIssueDatabase(databasePath, dbPath);
-    await fullDb.initialize();
-    console.log('✅ Database initialized');
-    console.log('\n🔍 Scanning filesystem for types...');
+    if (!existsSync(dbPath)) {
+        console.log('📝 Creating new database...');
+        await fullDb.initialize();
+    }
+    else {
+        console.log('🔌 Using existing database connection...');
+        await fullDb.initialize();
+        const db = fullDb.getDatabase();
+        await dropAllTables(db);
+        const connection = fullDb.connection;
+        await connection.createTables();
+        console.log('✅ Tables recreated');
+    }
     const typeRepo = fullDb['typeRepo'];
+    await typeRepo.init();
+    console.log('\n🔍 Scanning filesystem for types...');
     const existingTypes = await typeRepo.getAllTypes();
     const existingTypeNames = new Set(existingTypes.map(t => t.type));
     const dirs = globSync(path.join(databasePath, '*')).filter(dir => {
@@ -181,7 +221,8 @@ async function rebuildDatabase() {
         await writeMigratedDataBack(fullDb, allTypes);
     }
     console.log('\n✨ Database rebuild successful!');
-    console.log('\n💡 Tip: You can verify the rebuild by running the MCP server and checking the data.');
+    console.log('\n💡 Tip: Connection was preserved - no need to restart MCP server.');
+    console.log('💡 For forced clean rebuild, delete the database file first: rm [path]/search.db');
     if (!process.argv.includes('--write-back')) {
         console.log('\n💡 Note: To update Markdown files with migrated related fields, run with --write-back flag');
     }

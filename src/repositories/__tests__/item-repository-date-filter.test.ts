@@ -43,6 +43,73 @@ describe('ItemRepository Date Filtering', () => {
   });
 
   describe('Date field mapping', () => {
+    it('should automatically set start_date from session ID', async () => {
+      // Create session (ID will be generated with current date)
+      const session = await itemRepo.createItem({
+        type: 'sessions',
+        title: 'Test session',
+        content: 'Session content'
+      });
+
+      // Extract expected date from ID
+      const expectedDate = session.id.substring(0, 10); // YYYY-MM-DD
+
+      // Verify start_date is set correctly
+      expect(session.start_date).toBe(expectedDate);
+      expect((session as any).date).toBe(expectedDate);
+
+      // Verify filtering works
+      const results = await itemRepo.getItems('sessions', false, undefined, expectedDate, expectedDate);
+      expect(results.length).toBe(1);
+      expect(results[0].id).toBe(session.id);
+    });
+
+    it('should extract date from session ID when created with datetime', async () => {
+      // Create session with specific datetime (JST)
+      const session = await itemRepo.createItem({
+        type: 'sessions',
+        title: 'JST session',
+        content: 'Session content',
+        datetime: '2025-08-02T07:25:00+09:00' // JST time
+      });
+
+      // Should extract local date from ID, not UTC date
+      expect(session.id).toMatch(/^2025-08-02-07\.25\.00\.\d{3}$/);
+      expect(session.start_date).toBe('2025-08-02');
+      expect((session as any).date).toBe('2025-08-02');
+
+      // Verify filtering works with the local date
+      const results = await itemRepo.getItems('sessions', false, undefined, '2025-08-02', '2025-08-02');
+      expect(results.length).toBe(1);
+      expect(results[0].id).toBe(session.id);
+
+      // Should NOT find it with UTC date (2025-08-01)
+      const utcResults = await itemRepo.getItems('sessions', false, undefined, '2025-08-01', '2025-08-01');
+      const foundSession = utcResults.find(s => s.id === session.id);
+      expect(foundSession).toBeUndefined();
+    });
+
+    it('should extract date from custom session ID', async () => {
+      // Create session with custom ID
+      const customId = '2025-07-15-10.30.00.000';
+      const session = await itemRepo.createItem({
+        type: 'sessions',
+        title: 'Custom ID session',
+        content: 'Session content',
+        id: customId
+      });
+
+      // Should extract date from the custom ID
+      expect(session.id).toBe(customId);
+      expect(session.start_date).toBe('2025-07-15');
+      expect((session as any).date).toBe('2025-07-15');
+
+      // Verify filtering works
+      const results = await itemRepo.getItems('sessions', false, undefined, '2025-07-15', '2025-07-15');
+      expect(results.length).toBe(1);
+      expect(results[0].id).toBe(customId);
+    });
+
     it('should filter sessions by start_date', async () => {
       // Create sessions
       const session1 = await itemRepo.createItem({

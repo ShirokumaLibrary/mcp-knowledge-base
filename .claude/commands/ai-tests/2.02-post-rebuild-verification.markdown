@@ -2,23 +2,24 @@
 
 **Prerequisites**: 
 - Test Case 2.01 (Database Rebuild) must be completed
-- MCP server must be restarted after rebuild
-- Run this test immediately after server restart
+- For standard rebuild: Connection is preserved, proceed immediately
+- For forced clean rebuild: May need server restart if database was deleted while connected
 
-## 2.02.1 Server Restart Request
+## 2.02.1 Connection Status
 
-### Request User Action
+### Standard Rebuild (Connection Preserved)
 ```
-Action: Display message to user
-Message: "Database rebuild complete (Test 2.01). 
-         Please restart the MCP server connection now.
-         After restart, we will verify all API operations work correctly."
-Expected: User acknowledges and restarts server
+Note: Connection remains active after rebuild
+Action: Proceed directly to verification tests
+Expected: All API calls work immediately
 ```
 
----
-**⚠️ WAIT FOR SERVER RESTART BEFORE PROCEEDING ⚠️**
----
+### Forced Clean Rebuild (If Database Was Deleted)
+```
+Action: Test connection with get_types
+If fails: Request server restart
+If succeeds: Proceed with verification
+```
 
 ## 2.02.2 Initial Connection Verification
 
@@ -216,7 +217,7 @@ Expected: Deletion successful
 ## 2.02.10 Test Summary
 
 ### Success Criteria
-- ✅ Server connection restored after restart
+- ✅ Server connection active (or restored after restart)
 - ✅ All read operations return correct data
 - ✅ Create operations assign correct sequential IDs
 - ✅ Update operations modify data correctly

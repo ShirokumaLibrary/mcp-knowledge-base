@@ -46,8 +46,12 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
 
     // Special handling for get_latest_session equivalent
     if (type === 'sessions' && !start_date && !end_date && limit === 1) {
-      // Get today's latest session
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's latest session (using local date, not UTC)
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
       const sessions = await itemRepository.getItems(type, includeClosedStatuses, statuses, today, today, limit);
       return sessions;
     }

@@ -10,7 +10,11 @@ export function createUnifiedHandlers(fileDb) {
     async function handleGetItems(params) {
         const { type, statuses, includeClosedStatuses, start_date, end_date, limit } = params;
         if (type === 'sessions' && !start_date && !end_date && limit === 1) {
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const today = `${year}-${month}-${day}`;
             const sessions = await itemRepository.getItems(type, includeClosedStatuses, statuses, today, today, limit);
             return sessions;
         }

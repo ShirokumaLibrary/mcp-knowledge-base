@@ -22,12 +22,15 @@ AI Pair Programming with shirokuma-knowledge-base MCP
 **Important**: Since AI remembers nothing, carefully restore context
 
 1. **Recover Previous Memory**
-   ```typescript
-   // Get overall situation with current_state
-   const state = await get_current_state()
    
-   // Check active issues
-   const issues = await get_items({ 
+   Get overall situation:
+   ```
+   mcp__shirokuma-knowledge-base__get_current_state()
+   ```
+   
+   Check active issues:
+   ```
+   mcp__shirokuma-knowledge-base__get_items({ 
      type: "issues", 
      statuses: ["In Progress"],
      includeClosedStatuses: false 
@@ -35,11 +38,13 @@ AI Pair Programming with shirokuma-knowledge-base MCP
    ```
 
 2. **Create New Session (Include Continuation Info)**
-   ```typescript
-   await create_item({
+   
+   Use MCP to create session with continuation info for AI memory aid:
+   ```
+   mcp__shirokuma-knowledge-base__create_item({
      type: "sessions",
      title: "Implementing [Task Name]",
-     content: "Continuing from: [What was being done]", // AI memory aid
+     content: "Continuing from: [What was being done]",
      related_tasks: ["issues-XX"]
    })
    ```
@@ -48,49 +53,83 @@ AI Pair Programming with shirokuma-knowledge-base MCP
 ### Required Steps When Ending AI Session
 
 #### Update Session Summary (For Next AI to Understand)
-```typescript
-await update_item({
+
+Structure the session update with clear sections:
+```
+mcp__shirokuma-knowledge-base__update_item({
   type: "sessions",
   id: currentSessionId,
-  content: `## Completed\n- [Specific achievements]\n\n## Technical Decisions\n- [Include why these decisions were made]\n\n## Next Steps\n- [Clearly state where to resume]`
+  content: `## Completed
+- [Specific achievements]
+
+## Technical Decisions
+- [Include why these decisions were made]
+
+## Next Steps
+- [Clearly state where to resume]`
 })
 ```
 
 #### Update Daily (Cumulative per Session)
-```typescript
-// Create on first session of the day, update on subsequent sessions
-const today = new Date().toISOString().split('T')[0]
-const dailies = await get_items({ 
+
+Daily is created on first session and updated on subsequent sessions.
+
+**Step 1: Get today's date and check existing daily**
+```
+Get current date in YYYY-MM-DD format
+Then call:
+mcp__shirokuma-knowledge-base__get_items({ 
   type: "dailies", 
   start_date: today, 
   end_date: today 
 })
+```
 
-if (dailies.length === 0) {
-  // First session
-  await create_item({
-    type: "dailies",
-    date: today,
-    title: "Work Log",
-    content: `## Session 1\n- [Completed work]`,
-    related_tasks: ["sessions-XX"]
-  })
-} else {
-  // Append to existing daily
-  const daily = await get_item_detail({ type: "dailies", id: dailies[0].id })
-  await update_item({
-    type: "dailies",
-    id: daily.id,
-    content: daily.content + `\n\n## Session ${daily.related_tasks.length + 1}\n- [Completed work]`,
-    related_tasks: [...daily.related_tasks, "sessions-XX"]
-  })
-}
+**Step 2a: If no daily exists (first session):**
+```
+mcp__shirokuma-knowledge-base__create_item({
+  type: "dailies",
+  date: today,
+  title: "Work Log",
+  content: `## Session 1
+- [Completed work]`,
+  related_tasks: ["sessions-XX"]
+})
+```
+
+**Step 2b: If daily exists (append to existing):**
+```
+First get details:
+mcp__shirokuma-knowledge-base__get_item_detail({ 
+  type: "dailies", 
+  id: dailies[0].id 
+})
+
+Then update with new session:
+mcp__shirokuma-knowledge-base__update_item({
+  type: "dailies",
+  id: daily.id,
+  content: daily.content + `
+
+## Session ${sessionNumber}
+- [Completed work]`,
+  related_tasks: [...daily.related_tasks, "sessions-XX"]
+})
 ```
 
 #### Update Project State (Essentials Only)
-```typescript
-await update_current_state({
-  content: `## Where We Are\n- [Current feature/phase]\n\n## What's Next\n- [Specific next action]\n\n## Important Notes\n- [Technical constraints or key decisions only]`,
+
+Keep state minimal but informative:
+```
+mcp__shirokuma-knowledge-base__update_current_state({
+  content: `## Where We Are
+- [Current feature/phase]
+
+## What's Next
+- [Specific next action]
+
+## Important Notes
+- [Technical constraints or key decisions only]`,
   updated_by: "session-end"
 })
 ```
@@ -100,8 +139,9 @@ await update_current_state({
 ### Writing Issues AI Can Understand
 **Important**: Write so AI can understand and propose appropriate solutions
 
-```typescript
-await create_item({
+Create issues with clear structure:
+```
+mcp__shirokuma-knowledge-base__create_item({
   type: "issues",
   title: "[Specific feature/problem] [verb]",
   description: "Brief one-line explanation",
@@ -109,22 +149,34 @@ await create_item({
   status: "Open",
   tags: ["enhancement"]
 })
-// Keep content minimal. Supplement verbally during dialogue
 ```
+*Keep content minimal. Supplement verbally during dialogue.*
 
 ### Issue Detail Review Flow
-```typescript
-// Drill down from list to details
-const issues = await get_items({ type: "issues", includeClosedStatuses: false })
-const detail = await get_item_detail({ type: "issues", id: issues[0].id })
 
-// Follow related info to understand context
-for (const docId of detail.related_documents) {
-  const doc = await get_item_detail({ 
-    type: docId.split('-')[0], 
-    id: parseInt(docId.split('-')[1]) 
-  })
-}
+**Step 1: Get issue list**
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "issues", 
+  includeClosedStatuses: false 
+})
+```
+
+**Step 2: Get details of specific issue**
+```
+mcp__shirokuma-knowledge-base__get_item_detail({ 
+  type: "issues", 
+  id: issues[0].id 
+})
+```
+
+**Step 3: Follow related documents for context**
+For each related document ID (format: "type-id"):
+```
+mcp__shirokuma-knowledge-base__get_item_detail({ 
+  type: [extracted type], 
+  id: [extracted id] 
+})
 ```
 
 ### Issue Categories
@@ -141,41 +193,104 @@ Open → In Progress → Closed
 ```
 
 ### Status Operation Rules
-```typescript
-// Check available statuses
-const statuses = await get_statuses()
 
-// Get statistics by status
-const stats = {}
-for (const status of statuses) {
-  const items = await get_items({ 
-    type: "issues", 
-    statuses: [status.name],
-    includeClosedStatuses: true 
-  })
-  stats[status.name] = items.length
-}
+**Check available statuses:**
+```
+mcp__shirokuma-knowledge-base__get_statuses()
 ```
 
-## 📚 Learning Records with AI
+**Get statistics by status:**
+For each status, count items:
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "issues", 
+  statuses: [status.name],
+  includeClosedStatuses: true 
+})
+```
+Then count the returned items for statistics.
 
-### Knowledge Recording Criteria (As AI Memory Aid)
-- **Problems that took time to solve** → So next AI can understand immediately
-- **Project-specific constraints** → So AI doesn't ask repeatedly
-- **Technical decision rationale** → So AI doesn't make wrong suggestions
+## 📚 Generic Learning Records (Knowledge)
 
-```typescript
-// Simple pattern recording
-await create_item({
+### Knowledge Recording Criteria (Reusable Across Projects)
+- **Programming Patterns** → Design patterns, implementation techniques
+- **Best Practices** → General development methods, efficient approaches
+- **Tool Usage** → Commands, configuration, troubleshooting
+- **Technical Learning** → Language specs, framework characteristics
+
+Example of generic pattern recording:
+```
+mcp__shirokuma-knowledge-base__create_item({
   type: "knowledge",
-  title: "[Problem] Solution Pattern",
-  content: `## Problem\n[One sentence]\n\n## Solution\n[Code or procedure]\n\n## Notes\n[If any]`,
-  tags: ["pattern"]
+  title: "Type-safe Error Handling in TypeScript",
+  content: `## Overview
+Generic error handling pattern
+
+## Implementation
+[Code example]
+
+## Use Cases
+[Applicable to any project]`,
+  tags: ["typescript", "error-handling", "pattern"]
+})
+```
+
+## 📋 Project-Specific Decisions (decisions)
+
+### Decisions Recording Criteria (Project-Specific Rules)
+- **Technical Decisions** → Why that approach was chosen
+- **Constraints** → Rules to follow and their reasons
+- **Naming Conventions** → Project-specific naming rules
+- **Avoid Patterns** → Features not to use and why
+
+Example of project-specific decision:
+```
+mcp__shirokuma-knowledge-base__create_item({
+  type: "decisions",
+  title: "Use Hyphen Format for MCP Function Names",
+  content: `## Decision
+Use hyphen format for shirokuma-knowledge-base function calls
+
+## Reason
+Consistency with instance name
+
+## Impact
+All MCP function calls`,
+  tags: ["mcp", "naming-convention"]
 })
 ```
 
 ### Document Categories
-- **guidelines** / **technical-docs** / **decisions** / **release-notes**
+- **docs**: Project specifications, API specs, architecture documents
+- **knowledge**: Generic technical knowledge, patterns, best practices
+- **decisions**: Project-specific decisions, constraints, rules
+- **features**: 実装済み機能カタログ、API仕様、バージョン情報
+
+## 📦 Implementation Catalog (features)
+
+### When to Use Features Type
+- **Before implementing new functionality**: Search to avoid duplication
+- **When documenting completed features**: Record API specs and usage
+- **Version tracking**: Track feature status (Implemented/Experimental/Deprecated)
+
+### Search for Existing Features
+```
+mcp__shirokuma-knowledge-base__search_items({ 
+  query: "authentication", 
+  types: ["features"] 
+})
+```
+
+### Record New Feature Implementation
+```
+mcp__shirokuma-knowledge-base__create_item({
+  type: "features",
+  title: "Feature Name",
+  description: "Brief description",
+  content: `## API\n## Usage\n## Status\n- Version: vX.X.X`,
+  tags: ["category", "version"]
+})
+```
 
 ## 📅 Daily Records (Cumulative)
 
@@ -188,14 +303,24 @@ await create_item({
 ## 🎯 Project State Management
 
 ### Update Command
-```typescript
-mcp__shirokuma_knowledge_base__update_current_state({
-  content: `## Project Status\nCurrent Phase: XXX\n\n## Active Tasks\n- [HIGH] issue-XX: YYY\n\n## Next Priorities\n- ZZZ`,
-  updated_by: "ai-milestone", // or "ai-start", "ai-finish"
+
+Update project state with structured content:
+```
+mcp__shirokuma-knowledge-base__update_current_state({
+  content: `## Project Status
+Current Phase: XXX
+
+## Active Tasks
+- [HIGH] issue-XX: YYY
+
+## Next Priorities
+- ZZZ`,
+  updated_by: "ai-milestone",  
   tags: ["milestone", "status-update"],
   related: ["issues-XX", "sessions-YY"]
 })
 ```
+*updated_by options: "ai-start", "ai-finish", "ai-milestone"*
 
 
 ## 🏷️ Tag Management
@@ -206,21 +331,31 @@ mcp__shirokuma_knowledge_base__update_current_state({
 - Use singular form (bug, not bugs)
 
 ### Tag Operation Flow
-```typescript
-// 1. Check existing tags → Create new tag
-const tags = await get_tags()
-if (!tags.find(t => t.name === "new-feature")) {
-  await create_tag({ name: "new-feature" })
-}
 
-// 2. Get related items by tag search
-const items = await search_items_by_tag({ 
+**1. Check existing tags and create if needed:**
+```
+mcp__shirokuma-knowledge-base__get_tags()
+```
+If tag doesn't exist:
+```
+mcp__shirokuma-knowledge-base__create_tag({ 
+  name: "new-feature" 
+})
+```
+
+**2. Get items by tag:**
+```
+mcp__shirokuma-knowledge-base__search_items_by_tag({ 
   tag: "bug",
   types: ["issues", "knowledge"] 
 })
+```
 
-// 3. Tag name pattern search (partial match)
-const frontendTags = await search_tags({ pattern: "frontend" })
+**3. Search tags by pattern (partial match):**
+```
+mcp__shirokuma-knowledge-base__search_tags({ 
+  pattern: "frontend" 
+})
 ```
 
 ## 🔗 Required Relationship Rules
@@ -229,10 +364,11 @@ const frontendTags = await search_tags({ pattern: "frontend" })
 - Daily → Issues/sessions worked on that day
 - Document → Related issues
 
-```typescript
-related_tasks: ["issues-1", "plans-2"]
-related_documents: ["docs-3", "knowledge-4"]
-```
+**Format for relationships:**
+- related_tasks: ["issues-1", "plans-2"]
+- related_documents: ["docs-3", "knowledge-4"]
+
+*ID format: "type-number" (e.g., "issues-123")*
 
 ## ✅ Best Practices
 
@@ -249,52 +385,89 @@ related_documents: ["docs-3", "knowledge-4"]
 - ❌ **Recording Irrelevant Info**: Temporary trial and error
 
 ### Careful Deletion Handling
-```typescript
-// Verification flow before deletion
-const item = await get_item_detail({ type: "issues", id: 123 })
 
-// Confirm no related items
-if (item.related_tasks.length === 0 && item.related_documents.length === 0) {
-  // Confirm status is Closed
-  if (item.status === "Closed") {
-    await delete_item({ type: "issues", id: 123 })
-  }
-}
+**Verification flow before deletion:**
+
+1. Get item details:
+```
+mcp__shirokuma-knowledge-base__get_item_detail({ 
+  type: "issues", 
+  id: 123 
+})
+```
+
+2. Check conditions before deletion:
+- No related tasks (related_tasks.length === 0)
+- No related documents (related_documents.length === 0)  
+- Status is "Closed"
+
+3. If all conditions met:
+```
+mcp__shirokuma-knowledge-base__delete_item({ 
+  type: "issues", 
+  id: 123 
+})
 ```
 
 
 ## 🔍 Search & Filtering
 
 ### Basic Search Patterns
-```typescript
-// Full-text search
-search_items({ query: "keyword", types: ["issues"], limit: 20 })
 
-// Date filter
-get_items({ type: "sessions", start_date: "2025-01-01", end_date: "2025-01-31" })
+**Full-text search:**
+```
+mcp__shirokuma-knowledge-base__search_items({ 
+  query: "keyword", 
+  types: ["issues"], 
+  limit: 20 
+})
+```
 
-// Status filter
-get_items({ type: "issues", statuses: ["In Progress"], includeClosedStatuses: false })
+**Date filter:**
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "sessions", 
+  start_date: "2025-01-01", 
+  end_date: "2025-01-31" 
+})
+```
+
+**Status filter:**
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "issues", 
+  statuses: ["In Progress"], 
+  includeClosedStatuses: false 
+})
 ```
 
 ### Incremental Search
-```typescript
-// Interactive search using search suggestions
-const suggestions = await search_suggest({ 
+
+**Step 1: Get search suggestions:**
+```
+mcp__shirokuma-knowledge-base__search_suggest({ 
   query: "auth",
   types: ["knowledge", "docs"],
   limit: 5 
 })
-// Full search with user-selected suggestion
-const results = await search_items({ query: suggestions[0] })
+```
+
+**Step 2: Full search with selected suggestion:**
+```
+mcp__shirokuma-knowledge-base__search_items({ 
+  query: [selected suggestion] 
+})
 ```
 
 ## 🔎 Codebase Search (Index)
 
 ### Initial Index Creation
-```typescript
-// Index entire codebase (only needed once)
-index_codebase({ force: false })
+
+Index entire codebase (only needed once):
+```
+mcp__shirokuma-knowledge-base__index_codebase({ 
+  force: false 
+})
 ```
 
 ### When to Use Semantic Search
@@ -302,22 +475,26 @@ index_codebase({ force: false })
 - **Similar Code Search**: Find duplicate implementation patterns
 - **Impact Analysis**: Identify related files affected by changes
 
-```typescript
-// Natural language code search
-search_code({ 
+**Natural language code search:**
+```
+mcp__shirokuma-knowledge-base__search_code({ 
   query: "user authentication processing", 
   fileTypes: ["ts", "js"],
   limit: 10 
 })
+```
 
-// Find related files for specific file
-get_related_files({ 
+**Find related files for specific file:**
+```
+mcp__shirokuma-knowledge-base__get_related_files({ 
   file: "src/auth/login.ts",
-  depth: 2  // Relation depth
+  depth: 2  
 })
+```
 
-// Check index status
-get_index_status()
+**Check index status:**
+```
+mcp__shirokuma-knowledge-base__get_index_status()
 ```
 
 ### Index Update Timing
@@ -328,32 +505,51 @@ get_index_status()
 ## 📋 Custom Types
 
 ### Type Management Flow
-```typescript
-// 1. Check existing types
-const types = await get_types({ include_definitions: true })
 
-// 2. Create project-specific type
-if (!types.tasks.find(t => t.name === "bugs")) {
-  await create_type({ name: "bugs", base_type: "tasks", description: "For bug reports" })
-}
+**1. Check existing types:**
+```
+mcp__shirokuma-knowledge-base__get_types({ 
+  include_definitions: true 
+})
+```
 
-// 3. Update type description (clarify during operation)
-await update_type({ 
+**2. Create project-specific type:**
+If type doesn't exist:
+```
+mcp__shirokuma-knowledge-base__create_type({ 
+  name: "bugs", 
+  base_type: "tasks", 
+  description: "For bug reports" 
+})
+```
+
+**3. Update type description:**
+```
+mcp__shirokuma-knowledge-base__update_type({ 
   name: "bugs", 
   description: "Bug reports - reproduction steps and environment info required" 
 })
+```
 
-// 4. Delete unused type (after confirming no data)
-const bugItems = await get_items({ type: "old_bugs" })
-if (bugItems.length === 0) {
-  await delete_type({ name: "old_bugs" })
-}
+**4. Delete unused type:**
+First check if any items exist:
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "old_bugs" 
+})
+```
+If no items (length === 0):
+```
+mcp__shirokuma-knowledge-base__delete_type({ 
+  name: "old_bugs" 
+})
 ```
 
 ### Type Migration Flow
-```typescript
-// Migrate from issue to bug type (ID changes, relations auto-update)
-await change_item_type({
+
+Migrate items between types (ID changes, relations auto-update):
+```
+mcp__shirokuma-knowledge-base__change_item_type({
   from_type: "issues",
   from_id: 123,
   to_type: "bugs"
@@ -363,33 +559,46 @@ await change_item_type({
 ## 🚀 AI Pair Programming Setup
 
 ### 1. Minimal Initial Setup
-```typescript
-// Simple project overview
-await create_item({ 
+
+**Create simple project overview:**
+```
+mcp__shirokuma-knowledge-base__create_item({ 
   type: "docs", 
   title: "Project Overview",
-  content: `## What We're Building\n[One sentence]\n\n## Tech Stack\n[Main language/framework]\n\n## Constraints\n[Important ones only]`
-})
+  content: `## What We're Building
+[One sentence]
 
-// Initialize current_state
-await update_current_state({ 
+## Tech Stack
+[Main language/framework]
+
+## Constraints
+[Important ones only]`
+})
+```
+
+**Initialize current_state:**
+```
+mcp__shirokuma-knowledge-base__update_current_state({ 
   content: "Project started" 
 })
 ```
 
 ### 2. Session Flow Assuming AI Memory Loss
 1. **Start**: Remember "where we are" with current_state → Create session
-2. **Work**: AI records info needed next time in issue/knowledge
+2. **Work**: AI records info needed next time in issue/decisions/knowledge
 3. **End**: State "what's next" in current_state → Accumulate daily
 
 ### 3. Weekly Review Flow
-```typescript
-// Statistics by status and tag analysis
-const statuses = await get_statuses()
-const tags = await get_tags()
 
-// Archive old Closed issues with no related items
-const oldClosed = await get_items({ 
+**Get statistics:**
+```
+mcp__shirokuma-knowledge-base__get_statuses()
+mcp__shirokuma-knowledge-base__get_tags()
+```
+
+**Find old closed issues to archive:**
+```
+mcp__shirokuma-knowledge-base__get_items({ 
   type: "issues", 
   statuses: ["Closed"],
   end_date: "30 days ago"
@@ -400,14 +609,18 @@ const oldClosed = await get_items({
 ## 📖 AI Pair Programming Quick Reference
 
 ### Session Start (AI Remembers Nothing)
-```typescript
-// 1. Recover previous memory
-get_current_state()  // Check "where we are, what's next"
-get_items({ type: "sessions", limit: 1 })  // Recent work content
-get_items({ type: "issues", includeClosedStatuses: false })  // Active tasks
 
-// 2. Create session (include continuation info)
-create_item({ 
+**1. Recover previous memory:**
+```
+mcp__shirokuma-knowledge-base__get_current_state()
+mcp__shirokuma-knowledge-base__get_items({ type: "sessions", limit: 1 })
+mcp__shirokuma-knowledge-base__get_items({ type: "issues", includeClosedStatuses: false })
+mcp__shirokuma-knowledge-base__get_items({ type: "decisions" })
+```
+
+**2. Create session (include continuation info):**
+```
+mcp__shirokuma-knowledge-base__create_item({ 
   type: "sessions", 
   title: "Task name",
   content: "Previously: Completed XXX. Now: Starting from YYY"
@@ -415,34 +628,71 @@ create_item({
 ```
 
 ### During Work (Only When Necessary)
-```typescript
-// Record only important tasks
-create_item({ type: "issues", title: "Specific task" })
 
-// Record only reusable patterns
-create_item({ type: "knowledge", title: "Solution pattern" })
+**Record important tasks:**
+```
+mcp__shirokuma-knowledge-base__create_item({ 
+  type: "issues", 
+  title: "Specific task" 
+})
+```
+
+**Project-specific decisions:**
+```
+mcp__shirokuma-knowledge-base__create_item({ 
+  type: "decisions", 
+  title: "XXX should be YYY" 
+})
+```
+
+**Generic knowledge (reusable):**
+```
+mcp__shirokuma-knowledge-base__create_item({ 
+  type: "knowledge", 
+  title: "General solution pattern" 
+})
 ```
 
 ### Session End (Must Execute for Next AI)
-```typescript
-// Absolutely essential: AI knows nothing next time without this
-update_current_state({ 
+
+**Absolutely essential - Update current state:**
+```
+mcp__shirokuma-knowledge-base__update_current_state({ 
   content: "Where: XXX completed\nNext: Start from YYY\nNote: Be careful of ZZZ" 
 })
+```
 
-// Update daily (accumulate today's work history)
-const today = new Date().toISOString().split('T')[0]
-const dailies = await get_items({ type: "dailies", start_date: today, end_date: today })
-if (dailies.length > 0) {
-  // Append to existing daily
-  const daily = await get_item_detail({ type: "dailies", id: dailies[0].id })
-  update_item({ 
-    type: "dailies", 
-    id: daily.id, 
-    content: daily.content + `\n\n## Session ${daily.related_tasks.length + 1}\n- [Completed work]` 
-  })
-} else {
-  // First session of the day
-  create_item({ type: "dailies", date: today, title: "Work Log", content: "## Session 1\n- [Completed work]" })
-}
+**Update daily (accumulate work history):**
+
+1. Get today's daily:
+```
+mcp__shirokuma-knowledge-base__get_items({ 
+  type: "dailies", 
+  start_date: today, 
+  end_date: today 
+})
+```
+
+2a. If daily exists, get details and append:
+```
+mcp__shirokuma-knowledge-base__get_item_detail({ 
+  type: "dailies", 
+  id: dailies[0].id 
+})
+
+mcp__shirokuma-knowledge-base__update_item({ 
+  type: "dailies", 
+  id: daily.id, 
+  content: daily.content + `\n\n## Session ${sessionNumber}\n- [Completed work]` 
+})
+```
+
+2b. If no daily exists, create:
+```
+mcp__shirokuma-knowledge-base__create_item({ 
+  type: "dailies", 
+  date: today, 
+  title: "Work Log", 
+  content: "## Session 1\n- [Completed work]" 
+})
 ```

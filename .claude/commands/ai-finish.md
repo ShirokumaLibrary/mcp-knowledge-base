@@ -111,6 +111,37 @@ try {
 }
 ```
 
+### 5.5 Record New Features (If Implemented)
+If new functionality was implemented:
+```javascript
+// Search existing features to confirm it's new
+const existingFeatures = await mcp__shirokuma-knowledge-base__search_items({ 
+  query: "feature keywords", 
+  types: ["features"] 
+})
+
+// If truly new, create features entry
+if (notDuplicate) {
+  mcp__shirokuma-knowledge-base__create_item({
+    type: "features",
+    title: "New Feature Name",
+    description: "Brief description",
+    content: `## API Specification
+[Tool definition or API details]
+
+## Usage Examples
+[Code examples]
+
+## Status
+- Status: Implemented
+- Version: vX.X.X
+- Related Issues: issues-XX`,
+    tags: ["category", "vX.X.X"],
+    related_documents: ["issues-XX"]
+  })
+}
+```
+
 ### 6. Update current_state (Required for Next AI)
 Re-aggregate open issues:
 ```javascript
