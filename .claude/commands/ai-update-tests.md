@@ -1,6 +1,6 @@
 ---
 allowed-tools: Read, Write, MultiEdit, Edit, Grep, Bash(npm test:*), mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__index_codebase, mcp__shirokuma-knowledge-base__search_code, mcp__shirokuma-knowledge-base__get_index_status
-description: テストコードやテストコマンドを最新の仕様に合わせて更新
+description: Update test code and test commands to match the latest specifications
 ---
 
 # ai-update-tests - Update tests to match current implementation

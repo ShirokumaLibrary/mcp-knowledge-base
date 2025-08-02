@@ -195,8 +195,8 @@ When creating commands that output text to users:
 
 1. **Use placeholder notation** for translatable strings:
    ```
-   "[Work completed]" → AIが適切な言語に翻訳
-   "[Error]: specific error" → エラー部分は翻訳、詳細は保持
+   "[Work completed]" → AI translates to appropriate language
+   "[Error]: specific error" → Translate error part, keep details
    ```
 
 2. **Structure vs Content**:
@@ -206,7 +206,7 @@ When creating commands that output text to users:
 
 3. **Example transformations**:
    - English: "Work completed"
-   - Japanese: "作業完了"
+   - Japanese: "[Work completed]" (translated)
    - Spanish: "Trabajo completado"
 
 Report creation success: "✅ Created command: /check-types at .claude/commands/check-types.md"

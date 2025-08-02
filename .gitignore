@@ -38,6 +38,7 @@ logs
 .claude/*
 !.claude/commands/
 !.claude/tools/
+!.claude/agents/
 *.swp
 *.swo
 *~

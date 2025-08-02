@@ -80,7 +80,7 @@ If a version release is requested, I need to:
 4. Push the changes and publish to npm
 </ultrathink>
 
-When requested (e.g., "0.0.1バージョン上げて"):
+When requested (e.g., "bump version by 0.0.1"):
 
 1. Update CHANGELOG.md (move [Unreleased] to new version)
 2. `git commit -m "docs: update CHANGELOG for vX.X.X"`

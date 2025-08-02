@@ -89,6 +89,34 @@ mcp__shirokuma-knowledge-base__create_item({
 📝 Description: [description]
 ```
 
+### 4.5 Agent Selection (Optional)
+**Analyze task complexity and suggest appropriate agents**:
+
+Based on task description and selected issue, suggest agents:
+```
+## 🤖 Recommended Agents
+
+**For this task, consider using:**
+```
+
+**Agent selection criteria**:
+- Simple bug fix → Single agent (shirokuma-issue-manager)
+- Feature implementation → Multiple agents (issue-manager + knowledge-curator)
+- Complex refactoring → Full team (up to 10 agents)
+- Daily review → shirokuma-daily-reporter
+
+**Suggest command**:
+```
+💡 For intelligent agent orchestration, use:
+/ai-shirokuma [task description]
+
+This will automatically:
+- Select appropriate agents based on task
+- Initialize Memory Bank for knowledge sharing
+- Manage parallel agent execution
+- Aggregate results efficiently
+```
+
 ### 5. Issue Selection Prompt
 "Which issue would you like to work on? (Enter number or issue ID)"
 
@@ -153,14 +181,41 @@ try {
 }
 ```
 
-### 9. Completion Message
+### 9. Initialize Memory Bank (If Using Agents)
+If agents will be used:
+```javascript
+// Prepare shared context for agents
+const memoryBank = {
+  context: current_state,
+  session: {
+    id: sessionId,
+    issue: selectedIssue,
+    startTime: startTime
+  },
+  decisions: recentDecisions, // From get_items({ type: "decisions", limit: 5 })
+  patterns: establishedPatterns // From get_items({ type: "knowledge", limit: 5 })
+}
+```
+
+### 10. Completion Message
 ```
 ## 🚀 Ready to Start!
 
 Selected Issue: issues-${selectedIssue}
 Session: ${sessionId}
 
-You can now start working. Run /ai-finish when done.
+**Next Steps:**
+1. Start working on the issue
+2. Use /ai-shirokuma for complex tasks requiring multiple agents
+3. Run /ai-finish when done
+
+**Available Agents:**
+- shirokuma-mcp-specialist: MCP operations and data management expert
+- shirokuma-methodology-keeper: Ensures TDD, quality standards, and best practices
+- shirokuma-issue-manager: Issue creation and management
+- shirokuma-daily-reporter: Daily summaries
+- shirokuma-knowledge-curator: Knowledge organization
+- shirokuma-session-automator: Session automation
 ```
 
 ## Key Principles (from SHIROKUMA.md)
@@ -168,3 +223,6 @@ You can now start working. Run /ai-finish when done.
 - **Minimal recording**: Record only essential information
 - **Cumulative daily**: Update with each session
 - **Clear context**: Always record "why" and "where from"
+- **Agent orchestration**: Use specialized agents for complex tasks
+- **10x Engineer Pattern**: Manage up to 10 agents in parallel
+- **Memory Bank Pattern**: Share context across agents

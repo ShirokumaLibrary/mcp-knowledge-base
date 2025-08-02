@@ -39,7 +39,27 @@ Execute: mcp__shirokuma-knowledge-base__get_item_detail({
   id: activeSessionId
 })
 
-### 3. Record Session Completion
+### 3. Aggregate Agent Results (If Agents Were Used)
+If agents were active during this session:
+```javascript
+// Collect agent results from Memory Bank or task results
+const agentResults = {
+  issuesCreated: [], // New issues created by agents
+  knowledgeAdded: [], // Knowledge items created
+  decisionsRecorded: [], // Technical decisions documented
+  performance: {
+    agentsUsed: 0,
+    tasksCompleted: 0,
+    parallelExecutions: 0,
+    totalDuration: 0
+  }
+}
+
+// Merge and deduplicate findings
+const mergedFindings = deduplicateResults(agentResults)
+```
+
+### 4. Record Session Completion
 Ask user:
 "Please briefly describe what was completed in this session (for next AI's reference):"
 
@@ -48,11 +68,11 @@ Update session:
 mcp__shirokuma-knowledge-base__update_item({
   type: "sessions",
   id: activeSessionId,
-  content: `## Completed\n${userInput}\n\n## Technical Decisions\n- ${important decisions}\n\n## Next Steps\n- ${where to resume}`
+  content: `## Completed\n${userInput}\n\n## Technical Decisions\n- ${important decisions}\n\n## Agent Performance\n- Agents Used: ${agentResults.performance.agentsUsed}\n- Tasks Completed: ${agentResults.performance.tasksCompleted}\n- Efficiency: ${efficiency}%\n\n## Next Steps\n- ${where to resume}`
 })
 ```
 
-### 4. Aggregate Today's Work Status
+### 5. Aggregate Today's Work Status
 Current time: !`date +"%Y-%m-%d %H:%M:%S"`
 Today's date: !`date +"%Y-%m-%d"`
 
@@ -76,7 +96,7 @@ mcp__shirokuma-knowledge-base__get_items({
 })
 ```
 
-### 5. Update Daily (Cumulative)
+### 6. Update Daily (Cumulative)
 **Get daily directly by date ID**:
 ```javascript
 try {
@@ -111,7 +131,7 @@ try {
 }
 ```
 
-### 5.5 Record New Features (If Implemented)
+### 6.5 Record New Features (If Implemented)
 If new functionality was implemented:
 ```javascript
 // Search existing features to confirm it's new
@@ -142,7 +162,7 @@ if (notDuplicate) {
 }
 ```
 
-### 6. Update current_state (Required for Next AI)
+### 7. Update current_state (Required for Next AI)
 Re-aggregate open issues:
 ```javascript
 const openIssues = await mcp__shirokuma-knowledge-base__get_items({ 
@@ -170,6 +190,11 @@ Last Updated: ${currentDateTime}
 - Daily ID: dailies-${today}
 - Work Sessions: ${sessionCount}
 - Completed Tasks: ${completedCount}
+${agentResults ? `
+## Agent Performance Today
+- Total Agents Used: ${totalAgentsUsed}
+- Tasks by Agents: ${agentTaskCount}
+- Efficiency Boost: ${efficiencyBoost}x` : ''}
 
 ## Next Priorities
 ${topPriorityIssues.map(i => `- ${i.id}: ${i.title}`).join('\n')}
@@ -181,13 +206,15 @@ ${previousUpdates}
 ## Handover for Next Session
 - ${importantPointsFromCompletion}
 - ${incompleteTasks}
-- ${technicalNotes}`,
+- ${technicalNotes}
+${agentResults ? `- Agent recommendations: ${agentRecommendations}` : ''}`,
   updated_by: "ai-finish",
-  related: [dailyId, ...nextPriorityIssueIds]
+  related: [dailyId, ...nextPriorityIssueIds],
+  tags: agentResults ? ["agent-enhanced", ...existingTags] : existingTags
 })
 ```
 
-### 7. Display Completion Summary
+### 8. Display Completion Summary
 ```
 ✅ Session Completed
 
@@ -195,6 +222,12 @@ ${previousUpdates}
 - Session: ${sessionTitle}
 - Work Duration: ${duration}
 - Completed: ${completionSummary}
+${agentResults ? `
+## Agent Performance
+- ${agentResults.performance.agentsUsed} agents executed
+- ${agentResults.performance.tasksCompleted} tasks completed
+- ${agentResults.issuesCreated.length} new issues created
+- ${agentResults.knowledgeAdded.length} knowledge items added` : ''}
 
 ## Updated Status
 - Open Issues: ${openCount}
