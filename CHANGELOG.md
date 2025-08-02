@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.5] - 2025-08-02
+
+### Added
+- **Advanced Search with Boolean Operators**: Full support for AND/OR/NOT operators in search queries
+  - Explicit boolean operators: `bug AND fix`, `bug OR error`, `NOT deprecated`
+  - Negation prefix: `-tags:old`
+  - Parentheses for grouping: `(bug OR error) AND critical`
+  - Operator precedence: NOT > AND > OR
+  - Combined with field-specific searches: `title:bug AND content:fix`
+- **Expression Tree Parser**: New recursive descent parser for complex search queries
+  - Handles nested expressions and proper operator precedence
+  - Converts to optimized FTS5 queries
+  - Backward compatible with simple searches
+
 ### Changed
 - **Database Rebuild Improved**: `rebuild-db` command now preserves MCP connections
   - Drops and recreates tables instead of deleting database file
