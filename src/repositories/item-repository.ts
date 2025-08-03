@@ -252,6 +252,25 @@ export class ItemRepository {
   }
 
   /**
+   * @ai-intent Get current sequence value without incrementing
+   */
+  private async getCurrentSequenceValue(type: string): Promise<number> {
+    const row = await this.db.getAsync(
+      'SELECT current_value FROM sequences WHERE type = ?',
+      [type]
+    ) as { current_value: number } | undefined;
+    
+    if (!row) {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        `Sequence not found for type: ${type}`
+      );
+    }
+    
+    return row.current_value;
+  }
+
+  /**
    * @ai-intent Create a new item
    */
   async createItem(params: CreateItemParams): Promise<UnifiedItem> {
@@ -424,6 +443,27 @@ export class ItemRepository {
       }
     } else {
       // Use sequential ID for other types
+      // First, check what the next ID would be
+      const currentValue = await this.getCurrentSequenceValue(type);
+      const nextId = currentValue + 1;
+      
+      // Check if file already exists
+      const config = this.getStorageConfig(type);
+      const testId = String(nextId);
+      const exists = await this.storage.exists(config, testId);
+      
+      if (exists) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `File already exists for ${type}-${testId}. ` +
+          `This may indicate a sequence corruption. ` +
+          `Current sequence value: ${currentValue}, ` +
+          `Next ID would be: ${nextId}. ` +
+          `Please check the sequences table and rebuild if necessary.`
+        );
+      }
+      
+      // Now safe to increment and use the ID
       const numId = await this.getNextId(type);
       id = String(numId);
       createdAt = nowISOString;
@@ -1053,10 +1093,12 @@ export class ItemRepository {
     } else {
       // For types without date subdirectories
       const ids = await this.storage.list(config);
+      this.logger.info(`Found ${ids.length} ${type} files to rebuild`);
+      
       for (const id of ids) {
-        const storageItem = await this.storage.load(config, id);
-        if (storageItem && storageItem.metadata.title) {
-          try {
+        try {
+          const storageItem = await this.storage.load(config, id);
+          if (storageItem && storageItem.metadata.title) {
             // Migration: Merge related_tasks and related_documents into related
             this.migrateRelatedFields(storageItem);
 
@@ -1064,13 +1106,23 @@ export class ItemRepository {
             await this.syncItemToSQLite(item);
             await this.tagRepo.ensureTagsExist(item.tags);
             syncedCount++;
-          } catch (error) {
-            this.logger.error(`Failed to sync ${type} ${id}:`, error);
+          } else if (storageItem) {
+            this.logger.warn(`Skipping ${type} ${id}: missing title`);
+          } else {
+            this.logger.warn(`Failed to load ${type} ${id}`);
           }
-        } else if (storageItem) {
-          this.logger.warn(`Skipping ${type} ${id}: missing title`);
+        } catch (error) {
+          this.logger.error(`Failed to sync ${type} ${id}:`, error);
+          // Log more details for debugging
+          if (error instanceof Error) {
+            this.logger.error(`  Error message: ${error.message}`);
+            this.logger.error(`  Stack: ${error.stack}`);
+          }
+          // Continue with next file
         }
       }
+      
+      this.logger.info(`Completed rebuilding ${type}: ${syncedCount}/${ids.length} files synced`);
     }
 
     return syncedCount;

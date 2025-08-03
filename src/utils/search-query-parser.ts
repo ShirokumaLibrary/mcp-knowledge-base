@@ -267,13 +267,18 @@ function expressionToFTS5(expr: QueryExpression): string {
       return '';
     }
 
+    // Check if the value contains dots (like version numbers)
+    // FTS5 treats dots as special characters, so we need to quote them
+    const needsQuoting = escapedValue.includes('.');
+    const quotedValue = needsQuoting ? `"${escapedValue}"` : escapedValue;
+
     if (expr.field) {
       // Field-specific search using FTS5 column filter syntax
       // Example: title:bug becomes {title}:bug
-      ftsQuery = `{${expr.field}}:${escapedValue}`;
+      ftsQuery = `{${expr.field}}:${quotedValue}`;
     } else {
       // General search across all fields
-      ftsQuery = escapedValue;
+      ftsQuery = quotedValue;
     }
 
     // Handle negation

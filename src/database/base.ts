@@ -118,9 +118,8 @@ export class DatabaseConnection {
   private initializationComplete: boolean = false;
   private logger: winston.Logger;
 
-  constructor(private dbPath: string) {
+  constructor(private dbPath: string, private dataDir?: string) {
     this.logger = createLogger('DatabaseConnection');
-    
     // @ai-critical: Disable all logging in MCP mode to prevent protocol corruption
     // MCP uses stdio for communication, any output breaks the protocol
     if (this.isMCPEnvironment()) {
@@ -194,14 +193,18 @@ export class DatabaseConnection {
     await this.createTables();
     this.logger.debug('Tables created');
 
-    // Set database version
-    const programVersion = await getProgramVersion();
-    await setDbVersion(this.db, programVersion);
-    this.logger.info(`Database version set to: ${programVersion}`);
+    // Only set database version for new databases
+    if (isNewDatabase) {
+      const programVersion = await getProgramVersion();
+      await setDbVersion(this.db, programVersion);
+      this.logger.info(`New database - version set to: ${programVersion}`);
+    }
 
     // Check for existing markdown files if this is a new database
     if (isNewDatabase) {
-      const hasExistingData = await this.checkForExistingMarkdownFiles(dbDir);
+      // Use dataDir if provided, otherwise use dbDir
+      const markdownDir = this.dataDir || dbDir;
+      const hasExistingData = await this.checkForExistingMarkdownFiles(markdownDir);
       if (hasExistingData) {
         this.logger.warn('New database created, but existing markdown files detected');
         this.logger.warn('To import existing data, run: npm run rebuild:mcp');
@@ -217,7 +220,7 @@ export class DatabaseConnection {
     this.logger.debug('Database initialization complete');
   }
 
-  private async checkForExistingMarkdownFiles(dbDir: string): Promise<boolean> {
+  private async checkForExistingMarkdownFiles(markdownDir: string): Promise<boolean> {
     try {
       // Check for any markdown files in subdirectories
       const patterns = [
@@ -229,7 +232,8 @@ export class DatabaseConnection {
       ];
 
       for (const pattern of patterns) {
-        const files = globSync(path.join(dbDir, pattern));
+        const fullPattern = path.join(markdownDir, pattern);
+        const files = globSync(fullPattern);
         if (files.length > 0) {
           this.logger.info(`Found existing markdown files in ${pattern}`);
           return true;
@@ -243,7 +247,7 @@ export class DatabaseConnection {
     }
   }
 
-  private async createTables(): Promise<void> {
+  public async createTables(): Promise<void> {
     this.logger.debug('Creating tables...');
 
     // Status management table

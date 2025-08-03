@@ -146,7 +146,6 @@ export class UnifiedStorage {
       const files = await fs.readdir(directory);
       const prefix = config.filePrefix;
       const suffix = '.md';
-
       return files
         .filter(file => file.startsWith(prefix) && file.endsWith(suffix))
         .map(file => file.slice(prefix.length, -suffix.length));

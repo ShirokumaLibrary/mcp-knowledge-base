@@ -120,7 +120,7 @@ export class FileIssueDatabase {
     private dataDir: string,
     private dbPath: string = getConfig().database.sqlitePath
   ) {
-    this.connection = new DatabaseConnection(this.dbPath);
+    this.connection = new DatabaseConnection(this.dbPath, this.dataDir);
   }
 
   /**
@@ -217,7 +217,6 @@ export class FileIssueDatabase {
         'SELECT value FROM db_metadata WHERE key = ?',
         ['needs_rebuild']
       ) as { value: string } | undefined;
-      
       return row?.value === 'true';
     } catch {
       return false;
@@ -227,7 +226,6 @@ export class FileIssueDatabase {
   private async performAutoRebuild(): Promise<void> {
     // Do not output anything during auto-rebuild to avoid breaking MCP protocol
     // MCP uses stdio for communication, any output breaks the protocol
-    
     try {
       // Scan for types and register them
       const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {

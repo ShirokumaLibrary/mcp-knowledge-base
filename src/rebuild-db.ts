@@ -293,12 +293,36 @@ async function rebuildDatabase() {
 
     const maxId = result?.max_id || 0;
 
+    // Also check actual files in the filesystem for comparison
+    const filesPattern = path.join(databasePath, type, `${type}-*.md`);
+    const files = globSync(filesPattern);
+    let maxFileId = 0;
+    
+    for (const file of files) {
+      const basename = path.basename(file);
+      const match = basename.match(new RegExp(`^${type}-(\\d+)\\.md$`));
+      if (match) {
+        const fileId = parseInt(match[1], 10);
+        if (fileId > maxFileId) {
+          maxFileId = fileId;
+        }
+      }
+    }
+    
+    if (maxFileId > maxId) {
+      console.log(`  ⚠️  Warning: Found file ${type}-${maxFileId}.md but max ID in DB is ${maxId}`);
+      console.log(`     This suggests some files were not imported during rebuild`);
+    }
+
+    // Use the higher value between DB max ID and file max ID
+    const sequenceValue = Math.max(maxId, maxFileId);
+
     // Update sequence
     await db.runAsync(
       'UPDATE sequences SET current_value = ? WHERE type = ?',
-      [maxId, type]
+      [sequenceValue, type]
     );
-    console.log(`  ✅ Updated sequence '${type}' to ${maxId}`);
+    console.log(`  ✅ Updated sequence '${type}' to ${sequenceValue} (DB max: ${maxId}, File max: ${maxFileId})`);
   }
 
   // Collect and display all tags

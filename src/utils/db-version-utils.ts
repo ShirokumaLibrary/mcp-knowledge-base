@@ -8,10 +8,9 @@ export class VersionMismatchError extends Error {
   public readonly dbVersion: string;
 
   constructor(params: { programVersion: string; dbVersion: string; message?: string }) {
-    const message = params.message || 
+    const message = params.message ||
       `Database version (${params.dbVersion}) does not match program version (${params.programVersion}).\n` +
-      `Please rebuild the database using: npm run rebuild:mcp`;
-    
+      'Please rebuild the database using: npm run rebuild:mcp';
     super(message);
     this.name = 'VersionMismatchError';
     this.programVersion = params.programVersion;
@@ -32,13 +31,25 @@ export async function getProgramVersion(): Promise<string> {
   }
 }
 
+export async function hasDbMetadataTable(db: Database): Promise<boolean> {
+  try {
+    const result = await db.getAsync(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='db_metadata'"
+    ) as { name: string } | undefined;
+    
+    return !!result;
+  } catch {
+    return false;
+  }
+}
+
 export async function getDbVersion(db: Database): Promise<string | null> {
   try {
     const row = await db.getAsync(
       'SELECT value FROM db_metadata WHERE key = ?',
       ['schema_version']
     ) as { value: string } | undefined;
-    
+
     return row?.value || null;
   } catch {
     // Table might not exist in old databases
@@ -55,16 +66,37 @@ export async function setDbVersion(db: Database, version: string): Promise<void>
 
 export async function checkDatabaseVersion(db: Database, logger: winston.Logger): Promise<void> {
   const programVersion = await getProgramVersion();
+  
+  // First check if db_metadata table exists
+  const hasMetadataTable = await hasDbMetadataTable(db);
+  
+  if (!hasMetadataTable) {
+    // Old database without version tracking (< 0.7.5)
+    logger.info('Database version table not found. This appears to be an old database.');
+    throw new VersionMismatchError({
+      programVersion,
+      dbVersion: '<0.7.5',
+      message: `This database appears to be from a version older than 0.7.5.\n` +
+        `Current program version is ${programVersion}.\n` +
+        'Please rebuild the database using: npm run rebuild:mcp'
+    });
+  }
+  
   const dbVersion = await getDbVersion(db);
 
   logger.info(`Program version: ${programVersion}`);
   logger.info(`Database version: ${dbVersion || 'not set'}`);
 
-  // If DB version is not set (old database), set it to current version
+  // If DB version is not set in the table, also treat as old database
   if (!dbVersion) {
-    logger.info('Database version not set. Setting to current program version.');
-    await setDbVersion(db, programVersion);
-    return;
+    logger.info('Database version not set in db_metadata table.');
+    throw new VersionMismatchError({
+      programVersion,
+      dbVersion: 'unknown',
+      message: `Database version is not set.\n` +
+        `Current program version is ${programVersion}.\n` +
+        'Please rebuild the database using: npm run rebuild:mcp'
+    });
   }
 
   // Check for version mismatch

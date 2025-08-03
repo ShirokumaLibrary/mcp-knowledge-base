@@ -57,15 +57,12 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { FileIssueDatabase } from './database.js';
-import { SessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 
 import { createUnifiedHandlers, handleUnifiedToolCall } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
 import { guardStdio } from './utils/stdio-guard.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
-import { SessionHandlers } from './handlers/session-handlers.js';
-import { SummaryHandlers } from './handlers/summary-handlers.js';
 import { TypeHandlers } from './handlers/type-handlers.js';
 import { SearchHandlers } from './handlers/search-handlers.js';
 import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
@@ -86,34 +83,41 @@ import type winston from 'winston';
 export class IssueTrackerServer {
   private server: Server;
   private db: FileIssueDatabase;
-  private sessionManager: SessionManager;
 
   // @ai-logic: Separate handlers for different tool categories
   private unifiedHandlers?: ReturnType<typeof createUnifiedHandlers>;
   private statusHandlers: StatusHandlers;
   private tagHandlers: TagHandlers;
-  private sessionHandlers: SessionHandlers;
-  private summaryHandlers: SummaryHandlers;
   private typeHandlers: TypeHandlers;
   private searchHandlers: SearchHandlers;
   private currentStateHandlers: CurrentStateHandlers;
+  private versionError: VersionMismatchError | null = null;
   private changeTypeHandlers: ChangeTypeHandlers;
   private fileIndexHandlers: FileIndexHandlers;
+
+  /**
+   * Check if there's a version mismatch error and throw it
+   * This is called before processing any API request
+   */
+  private checkVersionError(): void {
+    if (this.versionError) {
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Database version mismatch: ${this.versionError.message}. ` +
+        'Please update your database or application to matching versions.'
+      );
+    }
+  }
 
   constructor() {
     const config = getConfig();
     this.db = new FileIssueDatabase(config.database.path);
-    this.sessionManager = new SessionManager(
-      config.database.sessionsPath,
-      this.db
-    );
 
     // @ai-logic: Handler initialization order doesn't matter - no dependencies
     // unified handlers will be initialized after database is ready
     this.statusHandlers = new StatusHandlers(this.db);
     this.tagHandlers = new TagHandlers(this.db);
-    this.sessionHandlers = new SessionHandlers(this.sessionManager);
-    this.summaryHandlers = new SummaryHandlers(this.sessionManager);
+    // Session and Summary handlers are created inline as needed
     this.typeHandlers = new TypeHandlers(this.db);
     this.searchHandlers = new SearchHandlers(this.db);
     // CurrentStateHandlers will get TagRepository after DB is initialized
@@ -185,6 +189,9 @@ export class IssueTrackerServer {
   }
 
   private async handleToolCall(toolName: string, args: unknown): Promise<{ content: { type: 'text'; text: string }[] }> {
+    // Check for version mismatch before processing any request
+    this.checkVersionError();
+    
     switch (toolName) {
       // Unified item handlers
       case 'get_items':
@@ -280,11 +287,16 @@ export class IssueTrackerServer {
       await checkDatabaseVersion(this.db.getDatabase(), logger);
     } catch (error) {
       if (error instanceof VersionMismatchError) {
-        // In MCP mode, we cannot output to console
-        // Just exit with error code
-        process.exit(1);
+        // Store the error to be returned on API calls
+        this.versionError = error;
+        // In test environment, throw the error immediately
+        if (process.env.NODE_ENV === 'test') {
+          throw error;
+        }
+        // Continue initialization but remember the error
+      } else {
+        throw error;
       }
-      throw error;
     }
     
     await this.typeHandlers.init();
@@ -309,7 +321,7 @@ export class IssueTrackerServer {
             if (item) {
               validItems.push(itemId);
             }
-          } catch (error) {
+          } catch {
             // Skip invalid items
           }
         }
