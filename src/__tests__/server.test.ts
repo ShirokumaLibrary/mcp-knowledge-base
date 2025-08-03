@@ -27,6 +27,20 @@ jest.mock('../database.js');
 // Mock the session manager
 jest.mock('../session-manager.js');
 
+// Mock the database version check
+jest.mock('../utils/db-version-utils.js', () => ({
+  checkDatabaseVersion: jest.fn().mockResolvedValue(undefined),
+  getProgramVersion: jest.fn().mockResolvedValue('0.7.7'),
+  getDbVersion: jest.fn().mockResolvedValue('0.7.7'),
+  setDbVersion: jest.fn().mockResolvedValue(undefined),
+  hasDbMetadataTable: jest.fn().mockResolvedValue(true),
+  VersionMismatchError: class VersionMismatchError extends Error {
+    constructor(public details: { programVersion: string; dbVersion: string }) {
+      super(`Version mismatch: program=${details.programVersion}, db=${details.dbVersion}`);
+    }
+  }
+}));
+
 // Mock @xenova/transformers to avoid ESM issues
 jest.mock('@xenova/transformers', () => ({
   pipeline: jest.fn().mockResolvedValue({
@@ -41,6 +55,9 @@ jest.mock('../config.js', () => ({
       path: '/tmp/test-db',
       sessionsPath: '/tmp/test-db/sessions',
       sqlitePath: '/tmp/test-db/search.db'
+    },
+    logging: {
+      enabled: false
     }
   },
   getConfig: () => ({
@@ -48,6 +65,9 @@ jest.mock('../config.js', () => ({
       path: '/tmp/test-db',
       sessionsPath: '/tmp/test-db/sessions',
       sqlitePath: '/tmp/test-db/search.db'
+    },
+    logging: {
+      enabled: false
     }
   })
 }));
@@ -560,6 +580,76 @@ describe('IssueTrackerServer', () => {
       
       expect(StdioServerTransport).toHaveBeenCalled();
       expect(mockServerInstance.connect).toHaveBeenCalledWith(mockTransport);
+    });
+  });
+
+  describe('version mismatch handling', () => {
+    let callToolHandler: any;
+
+    beforeEach(async () => {
+      // Reset mock
+      const { checkDatabaseVersion } = jest.requireMock('../utils/db-version-utils.js');
+      checkDatabaseVersion.mockReset();
+    });
+
+    it('should return version error on API calls when version mismatch detected', async () => {
+      // Set NODE_ENV to production to test production behavior
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+      
+      // Mock version mismatch error
+      const { VersionMismatchError, checkDatabaseVersion } = jest.requireMock('../utils/db-version-utils.js');
+      const versionError = new VersionMismatchError({ 
+        programVersion: '0.7.8', 
+        dbVersion: '0.7.7' 
+      });
+      checkDatabaseVersion.mockRejectedValue(versionError);
+
+      server = new IssueTrackerServer();
+      await server['run']();
+      
+      // Get the call tool handler
+      callToolHandler = mockServerInstance.setRequestHandler.mock.calls[1][1];
+
+      // Try to call any API
+      const request = {
+        params: {
+          name: 'get_statuses',
+          arguments: {}
+        }
+      };
+
+      // Should throw error with version mismatch message
+      await expect(callToolHandler(request)).rejects.toThrow(
+        'Database version mismatch'
+      );
+      
+      // Restore NODE_ENV
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('should continue working normally when no version mismatch', async () => {
+      // Mock successful version check
+      const { checkDatabaseVersion } = jest.requireMock('../utils/db-version-utils.js');
+      checkDatabaseVersion.mockResolvedValue(undefined);
+
+      server = new IssueTrackerServer();
+      await server['run']();
+      
+      // Get the call tool handler
+      callToolHandler = mockServerInstance.setRequestHandler.mock.calls[1][1];
+
+      // Try to call API
+      const request = {
+        params: {
+          name: 'get_statuses',
+          arguments: {}
+        }
+      };
+
+      // Should work normally
+      const result = await callToolHandler(request);
+      expect(result).toHaveProperty('content');
     });
   });
 });

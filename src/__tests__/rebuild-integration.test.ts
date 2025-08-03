@@ -27,16 +27,17 @@ describe('Database Rebuild Integration', () => {
     }
   });
 
-  it('should mark database for rebuild when markdown files exist', async () => {
+  it('should auto-rebuild database when markdown files exist', async () => {
     // Create test markdown files BEFORE creating database
     fs.mkdirSync(path.join(testDataDir, 'issues'), { recursive: true });
     
-    // Create test issue
-    const issueContent = `# Test Issue
-
-Priority: high
-Status: Open
-Tags: test, rebuild
+    // Create test issue with proper frontmatter format
+    const issueContent = `---
+title: Test Issue
+priority: high
+status: Open
+tags: ["test", "rebuild"]
+---
 
 This is a test issue for rebuild functionality.`;
     
@@ -48,19 +49,52 @@ This is a test issue for rebuild functionality.`;
     // Ensure database doesn't exist yet
     expect(fs.existsSync(testDbPath)).toBe(false);
 
-    // Initialize database for the first time with existing markdown files
-    const db = new FileIssueDatabase(testDataDir, testDbPath);
-    await db.initialize();
+    // First initialization - should set needs_rebuild flag
+    const db1 = new FileIssueDatabase(testDataDir, testDbPath);
+    await db1.initialize();
 
-    // Database should now exist and have auto-imported the markdown
+    // Database should now exist
     expect(fs.existsSync(testDbPath)).toBe(true);
 
-    // Verify the database was populated via auto-rebuild
-    const itemRepo = db.getItemRepository();
-    const items = await itemRepo.getItems('issues');
+    // The auto-rebuild should have already happened during initialization
+    // Check that the markdown files were imported
+    const itemRepo1 = db1.getItemRepository();
+    const items1 = await itemRepo1.getItems('issues');
     
-    expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({
+    // The rebuild should have imported the test issue
+    expect(items1).toHaveLength(1);
+    expect(items1[0]).toMatchObject({
+      type: 'issues',
+      id: '1',
+      title: 'Test Issue',
+      priority: 'high',
+      status: 'Open',
+      tags: ['test', 'rebuild']
+    });
+    
+    // Check that needs_rebuild flag was cleared after rebuild
+    const rawDb1 = db1.getDatabase();
+    const needsRebuild = await rawDb1.getAsync(
+      'SELECT value FROM db_metadata WHERE key = ?',
+      ['needs_rebuild']
+    ) as { value: string } | undefined;
+    
+    // Flag should be cleared after successful rebuild
+    expect(needsRebuild).toBeUndefined();
+
+    // Close first instance
+    await db1.close();
+
+    // Second initialization - should NOT trigger rebuild again
+    const db2 = new FileIssueDatabase(testDataDir, testDbPath);
+    await db2.initialize();
+
+    // Verify the database still has the imported data
+    const itemRepo2 = db2.getItemRepository();
+    const items2 = await itemRepo2.getItems('issues');
+    
+    expect(items2).toHaveLength(1);
+    expect(items2[0]).toMatchObject({
       type: 'issues',
       id: '1',
       title: 'Test Issue',
@@ -69,7 +103,16 @@ This is a test issue for rebuild functionality.`;
       tags: ['test', 'rebuild']
     });
 
-    db.close();
+    // Confirm that needs_rebuild flag is still cleared
+    const rawDb2 = db2.getDatabase();
+    const stillNeedsRebuild = await rawDb2.getAsync(
+      'SELECT value FROM db_metadata WHERE key = ?',
+      ['needs_rebuild']
+    ) as { value: string } | undefined;
+    
+    expect(stillNeedsRebuild).toBeUndefined();
+
+    await db2.close();
   });
 
   it('should create empty database when no markdown files exist', async () => {
@@ -94,6 +137,6 @@ This is a test issue for rebuild functionality.`;
     const issues = await itemRepo.getItems('issues');
     expect(issues).toHaveLength(0);
 
-    db.close();
+    await db.close();
   });
 });
