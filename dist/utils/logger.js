@@ -46,12 +46,12 @@ export function createLogger(service) {
         });
     }
     const loggerTransports = [];
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== 'test' && process.env.MCP_MODE !== 'production') {
         loggerTransports.push(getConsoleTransport());
     }
     const loggerOptions = {
         level: logLevel,
-        silent: logLevel === 'silent' || process.env.NODE_ENV === 'test',
+        silent: logLevel === 'silent' || process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'production',
         defaultMeta: { service },
         transports: loggerTransports
     };

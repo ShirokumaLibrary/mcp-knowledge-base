@@ -62,6 +62,28 @@ export abstract class BaseRepository<T extends { id: string | number }, K extend
     loggerName: string
   ) {
     this.logger = createLogger(loggerName);
+    
+    // @ai-critical: Disable all logging in MCP mode to prevent protocol corruption
+    if (this.isMCPEnvironment()) {
+      const noop = (): Logger => this.logger;
+      this.logger.debug = noop;
+      this.logger.info = noop;
+      this.logger.warn = noop;
+      this.logger.error = noop;
+    }
+  }
+
+  /**
+   * @ai-intent Detect if running in MCP server environment
+   */
+  private isMCPEnvironment(): boolean {
+    // Skip in test environment
+    if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+      return false;
+    }
+    return process.argv.some(arg => arg.includes('server.js')) ||
+           process.env.MCP_MODE === 'true' ||
+           process.env.NODE_ENV === 'production';
   }
 
   /**

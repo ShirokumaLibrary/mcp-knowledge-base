@@ -4,6 +4,8 @@
 // @ai-why: Prevents any logging output that would break MCP JSON protocol
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
   process.env.MCP_MODE = 'production';
+  process.env.NODE_ENV = 'production';
+  process.env.LOG_LEVEL = 'silent';
 }
 
 /**
@@ -72,6 +74,7 @@ import { FileIndexHandlers, fileIndexSchemas } from './handlers/file-index-handl
 import { toolDefinitions } from './tool-definitions.js';
 import { checkDatabaseVersion, VersionMismatchError } from './utils/db-version-utils.js';
 import { createLogger } from './utils/logger.js';
+import type winston from 'winston';
 
 /**
  * @ai-context Main server class orchestrating all MCP operations
@@ -261,36 +264,30 @@ export class IssueTrackerServer {
   }
 
   async run() {
-    // console.error('Starting Issue Tracker MCP Server...');
-    // console.error('Initializing database...');
     await this.db.initialize();
     
     // Check database version compatibility
     try {
+      // Create a silent logger for MCP environment
       const logger = createLogger('VersionCheck');
+      // Disable all logging in MCP mode
+      const noop = (): winston.Logger => logger;
+      logger.debug = noop;
+      logger.info = noop;
+      logger.warn = noop;
+      logger.error = noop;
+      
       await checkDatabaseVersion(this.db.getDatabase(), logger);
     } catch (error) {
       if (error instanceof VersionMismatchError) {
-        console.error(`
-⚠️  Database Version Mismatch Detected
-====================================
-Program version: ${error.programVersion}
-Database version: ${error.dbVersion}
-
-This usually happens after updating the package.
-To fix this issue, please run:
-
-  npm run rebuild:mcp
-
-This will safely rebuild the database while preserving your data.
-`);
+        // In MCP mode, we cannot output to console
+        // Just exit with error code
         process.exit(1);
       }
       throw error;
     }
     
     await this.typeHandlers.init();
-    // console.error('Database initialized');
 
     // Initialize unified handlers after database is ready
     this.unifiedHandlers = createUnifiedHandlers(this.db);
@@ -328,7 +325,6 @@ This will safely rebuild the database while preserving your data.
 
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    // console.error('Issue Tracker MCP Server running on stdio');
   }
 }
 

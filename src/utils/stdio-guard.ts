@@ -3,81 +3,63 @@
  * @ai-critical MCP protocol requires clean stdio for JSON communication
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-
 /**
- * @ai-intent Redirect stderr to a file to prevent stdio pollution
- * @ai-why Some native modules (like sqlite3) may write directly to stderr
+ * @ai-intent Prevent any non-JSON output to stdout/stderr
+ * @ai-why MCP uses stdio for JSON-RPC communication
  */
 export function guardStdio(): void {
+  // Skip in test environment
+  if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+    return;
+  }
+  
   if (process.env.NODE_ENV === 'production' || process.env.MCP_GUARD_STDIO === 'true') {
     try {
-      // Create a log directory if it doesn't exist
-      const logDir = path.join(process.cwd(), 'logs');
-      if (!fs.existsSync(logDir)) {
-        fs.mkdirSync(logDir, { recursive: true });
-      }
-
-      // Create a writable stream to a log file
-      const stderrLog = path.join(logDir, `stderr-${Date.now()}.log`);
-      const stderrStream = fs.createWriteStream(stderrLog, { flags: 'a' });
-
-      // Save original write methods
-      const originalStderrWrite = process.stderr.write.bind(process.stderr);
+      // Save original stdout write
       const originalStdoutWrite = process.stdout.write.bind(process.stdout);
 
-      // Track if we're in JSON response mode
-      let inJsonResponse = false;
-
-      // Override process.stderr.write
-      process.stderr.write = function(chunk: any, encoding?: any, callback?: any): boolean {
-        // Write to file instead of stderr
-        if (typeof encoding === 'function') {
-          callback = encoding;
-          encoding = undefined;
-        }
-
-        stderrStream.write(chunk, encoding, callback);
+      // Override process.stderr.write - completely silence it
+      process.stderr.write = function(): boolean {
         return true;
       };
 
       // Override process.stdout.write to filter non-JSON output
-      process.stdout.write = function(chunk: any, encoding?: any, callback?: any): boolean {
+      process.stdout.write = function(chunk: unknown, encoding?: BufferEncoding | ((err?: Error | null) => void), callback?: (err?: Error | null) => void): boolean {
         if (typeof encoding === 'function') {
           callback = encoding;
           encoding = undefined;
         }
 
-        const str = chunk.toString();
+        const str = String(chunk);
 
-        // Log ALL stdout for debugging
-        stderrStream.write(`[STDOUT DEBUG] Length: ${str.length}, First 20 chars: ${JSON.stringify(str.substring(0, 20))}\n`);
-
-        // Check if this looks like JSON
-        if (str.trim().startsWith('{') || inJsonResponse) {
-          // Allow JSON through
-          originalStdoutWrite.call(process.stdout, chunk, encoding, callback);
-          inJsonResponse = str.includes('"jsonrpc"');
-        } else {
-          // Redirect non-JSON to stderr log
-          stderrStream.write('STDOUT NON-JSON: ' + chunk, encoding);
+        // Only allow JSON-RPC messages through
+        if (str.trim().startsWith('{') && (str.includes('"jsonrpc"') || str.includes('"result"') || str.includes('"method"'))) {
+          originalStdoutWrite.call(process.stdout, str, encoding as BufferEncoding, callback);
+        } else if (str.trim() === '') {
+          // Allow empty lines
+          originalStdoutWrite.call(process.stdout, str, encoding as BufferEncoding, callback);
         }
 
+        if (callback) {
+          callback();
+        }
         return true;
       };
 
-      // Also override console methods that might write to stderr
-      const noop = () => {};
-      console.error = noop;
-      console.warn = noop;
-      console.log = noop;
-      console.info = noop;
-      console.debug = noop;
-      console.trace = noop;
+      // Override console methods
+      const noop = (): void => {};
+      (console as unknown as Record<string, unknown>).error = noop;
+      (console as unknown as Record<string, unknown>).warn = noop;
+      (console as unknown as Record<string, unknown>).log = noop;
+      (console as unknown as Record<string, unknown>).info = noop;
+      (console as unknown as Record<string, unknown>).debug = noop;
+      (console as unknown as Record<string, unknown>).trace = noop;
 
-    } catch (error) {
-      // Silently fail - we can't log errors when guarding stdio
+      // Override process.emitWarning
+      process.emitWarning = noop;
+
+    } catch {
+      // Silently fail
     }
   }
 }

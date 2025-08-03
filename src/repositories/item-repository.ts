@@ -816,11 +816,6 @@ export class ItemRepository {
         params.push(isDateOnly ? endDate : endDate + 'T23:59:59.999Z');
       }
 
-      // Debug logging
-      // if (type === 'sessions') {
-      //   console.log('Date filter query:', query);
-      //   console.log('Date filter params:', params);
-      // }
     }
 
     query += ' ORDER BY i.created_at DESC';

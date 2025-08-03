@@ -42,7 +42,12 @@ describe('Database Rebuild Integration', () => {
 
   async function runRebuildScript(dataPath: string): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
-      const env = { ...process.env, MCP_DATABASE_PATH: dataPath };
+      const env = { 
+        ...process.env, 
+        MCP_DATABASE_PATH: dataPath,
+        NODE_ENV: 'test',
+        MCP_MODE: 'false'
+      };
       const child = spawn('npx', ['tsx', 'src/rebuild-db.ts'], { 
         env,
         cwd: process.cwd()

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
     process.env.MCP_MODE = 'production';
+    process.env.NODE_ENV = 'production';
+    process.env.LOG_LEVEL = 'silent';
 }
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -138,23 +140,15 @@ export class IssueTrackerServer {
         await this.db.initialize();
         try {
             const logger = createLogger('VersionCheck');
+            const noop = () => logger;
+            logger.debug = noop;
+            logger.info = noop;
+            logger.warn = noop;
+            logger.error = noop;
             await checkDatabaseVersion(this.db.getDatabase(), logger);
         }
         catch (error) {
             if (error instanceof VersionMismatchError) {
-                console.error(`
-⚠️  Database Version Mismatch Detected
-====================================
-Program version: ${error.programVersion}
-Database version: ${error.dbVersion}
-
-This usually happens after updating the package.
-To fix this issue, please run:
-
-  npm run rebuild:mcp
-
-This will safely rebuild the database while preserving your data.
-`);
                 process.exit(1);
             }
             throw error;

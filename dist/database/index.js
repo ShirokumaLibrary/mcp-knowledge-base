@@ -16,6 +16,9 @@ import { FullTextSearchRepository } from './fulltext-search-repository.js';
 import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
 import { ensureInitialized } from '../utils/decorators.js';
+import * as path from 'path';
+import { globSync } from 'glob';
+import { statSync } from 'fs';
 export * from '../types/domain-types.js';
 export class FileIssueDatabase {
     dataDir;
@@ -104,6 +107,63 @@ export class FileIssueDatabase {
         this.fullTextSearchRepo = new FullTextSearchRepository(db);
         this.typeRepo = new TypeRepository(this);
         await this.typeRepo.init();
+        const needsRebuild = await this.checkNeedsRebuild();
+        if (needsRebuild) {
+            await this.performAutoRebuild();
+        }
+    }
+    async checkNeedsRebuild() {
+        try {
+            const db = this.connection.getDatabase();
+            const row = await db.getAsync('SELECT value FROM db_metadata WHERE key = ?', ['needs_rebuild']);
+            return row?.value === 'true';
+        }
+        catch {
+            return false;
+        }
+    }
+    async performAutoRebuild() {
+        try {
+            const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
+                const stat = statSync(dir);
+                const dirName = path.basename(dir);
+                if (!stat.isDirectory() || dirName === 'search.db') {
+                    return false;
+                }
+                return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
+            });
+            const typeMapping = {
+                issues: 'tasks',
+                plans: 'tasks',
+                docs: 'documents',
+                knowledge: 'documents',
+                decisions: 'documents',
+                features: 'documents'
+            };
+            const existingTypes = await this.typeRepo.getAllTypes();
+            const existingTypeNames = new Set(existingTypes.map(t => t.type));
+            for (const dir of dirs) {
+                const typeName = path.basename(dir);
+                const baseType = typeMapping[typeName] || 'documents';
+                if (!existingTypeNames.has(typeName)) {
+                    await this.typeRepo.createType(typeName, baseType);
+                }
+            }
+            const allTypes = await this.typeRepo.getAllTypes();
+            allTypes.push({ type: 'sessions', base_type: 'sessions' });
+            allTypes.push({ type: 'dailies', base_type: 'documents' });
+            let totalSynced = 0;
+            for (const typeInfo of allTypes) {
+                const type = typeInfo.type;
+                const count = await this.itemRepo.rebuildFromMarkdown(type);
+                totalSynced += count;
+            }
+            const db = this.connection.getDatabase();
+            await db.runAsync('DELETE FROM db_metadata WHERE key = ?', ['needs_rebuild']);
+        }
+        catch (error) {
+            throw error;
+        }
     }
     async getAllStatuses() {
         return this.statusRepo.getAllStatuses();

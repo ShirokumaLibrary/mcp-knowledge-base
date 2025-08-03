@@ -144,17 +144,17 @@ export function createLogger(service: string): winston.Logger {
   // @ai-critical: Create fresh transports array for each logger to avoid shared state
   const loggerTransports: winston.transport[] = [];
 
-  // @ai-logic: Skip console transport in test environment to prevent warnings
-  // @ai-why: Test environment creates 27+ loggers, each adding listeners to Console
-  // @ai-fix: Complete prevention of MaxListenersExceededWarning in Jest tests
-  if (process.env.NODE_ENV !== 'test') {
+  // @ai-logic: Skip console transport in test and MCP environments
+  // @ai-why: Test environment creates 27+ loggers, MCP requires clean stdio
+  // @ai-fix: Complete prevention of MaxListenersExceededWarning and stdio pollution
+  if (process.env.NODE_ENV !== 'test' && process.env.MCP_MODE !== 'production') {
     loggerTransports.push(getConsoleTransport());
   }
 
   const loggerOptions: winston.LoggerOptions = {
     level: logLevel,
-    silent: logLevel === 'silent' || process.env.NODE_ENV === 'test',  // @ai-logic: Complete silence for tests
-    // @ai-why: Prevents any log output and listener registration in test environment
+    silent: logLevel === 'silent' || process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'production',  // @ai-logic: Complete silence for tests and MCP
+    // @ai-why: Prevents any log output and listener registration in test/MCP environments
     defaultMeta: { service },  // @ai-logic: Service tagged on all logs
     transports: loggerTransports
   };

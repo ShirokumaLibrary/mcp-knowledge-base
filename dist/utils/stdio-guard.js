@@ -1,23 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
 export function guardStdio() {
+    if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+        return;
+    }
     if (process.env.NODE_ENV === 'production' || process.env.MCP_GUARD_STDIO === 'true') {
         try {
-            const logDir = path.join(process.cwd(), 'logs');
-            if (!fs.existsSync(logDir)) {
-                fs.mkdirSync(logDir, { recursive: true });
-            }
-            const stderrLog = path.join(logDir, `stderr-${Date.now()}.log`);
-            const stderrStream = fs.createWriteStream(stderrLog, { flags: 'a' });
-            const originalStderrWrite = process.stderr.write.bind(process.stderr);
             const originalStdoutWrite = process.stdout.write.bind(process.stdout);
-            let inJsonResponse = false;
-            process.stderr.write = function (chunk, encoding, callback) {
-                if (typeof encoding === 'function') {
-                    callback = encoding;
-                    encoding = undefined;
-                }
-                stderrStream.write(chunk, encoding, callback);
+            process.stderr.write = function () {
                 return true;
             };
             process.stdout.write = function (chunk, encoding, callback) {
@@ -25,14 +13,15 @@ export function guardStdio() {
                     callback = encoding;
                     encoding = undefined;
                 }
-                const str = chunk.toString();
-                stderrStream.write(`[STDOUT DEBUG] Length: ${str.length}, First 20 chars: ${JSON.stringify(str.substring(0, 20))}\n`);
-                if (str.trim().startsWith('{') || inJsonResponse) {
-                    originalStdoutWrite.call(process.stdout, chunk, encoding, callback);
-                    inJsonResponse = str.includes('"jsonrpc"');
+                const str = String(chunk);
+                if (str.trim().startsWith('{') && (str.includes('"jsonrpc"') || str.includes('"result"') || str.includes('"method"'))) {
+                    originalStdoutWrite.call(process.stdout, str, encoding, callback);
                 }
-                else {
-                    stderrStream.write('STDOUT NON-JSON: ' + chunk, encoding);
+                else if (str.trim() === '') {
+                    originalStdoutWrite.call(process.stdout, str, encoding, callback);
+                }
+                if (callback) {
+                    callback();
                 }
                 return true;
             };
@@ -43,8 +32,9 @@ export function guardStdio() {
             console.info = noop;
             console.debug = noop;
             console.trace = noop;
+            process.emitWarning = noop;
         }
-        catch (error) {
+        catch {
         }
     }
 }

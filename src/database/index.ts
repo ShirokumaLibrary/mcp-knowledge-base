@@ -10,7 +10,9 @@ import { ensureInitialized } from '../utils/decorators.js';
 import { Session, Daily } from '../types/complete-domain-types.js';
 import type { Issue, Plan, Document } from '../types/domain-types.js';
 import type { ListItem } from '../types/unified-types.js';
-// import * as path from 'path';
+import * as path from 'path';
+import { globSync } from 'glob';
+import { statSync } from 'fs';
 
 // Re-export types
 export * from '../types/domain-types.js';
@@ -200,6 +202,92 @@ export class FileIssueDatabase {
     this.typeRepo = new TypeRepository(this);
 
     await this.typeRepo.init();
+
+    // Check if database needs rebuild
+    const needsRebuild = await this.checkNeedsRebuild();
+    if (needsRebuild) {
+      await this.performAutoRebuild();
+    }
+  }
+
+  private async checkNeedsRebuild(): Promise<boolean> {
+    try {
+      const db = this.connection.getDatabase();
+      const row = await db.getAsync(
+        'SELECT value FROM db_metadata WHERE key = ?',
+        ['needs_rebuild']
+      ) as { value: string } | undefined;
+      
+      return row?.value === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  private async performAutoRebuild(): Promise<void> {
+    // Do not output anything during auto-rebuild to avoid breaking MCP protocol
+    // MCP uses stdio for communication, any output breaks the protocol
+    
+    try {
+      // Scan for types and register them
+      const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
+        const stat = statSync(dir);
+        const dirName = path.basename(dir);
+        
+        if (!stat.isDirectory() || dirName === 'search.db') {
+          return false;
+        }
+        
+        return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
+      });
+
+      const typeMapping: Record<string, 'tasks' | 'documents'> = {
+        issues: 'tasks',
+        plans: 'tasks',
+        docs: 'documents',
+        knowledge: 'documents',
+        decisions: 'documents',
+        features: 'documents'
+      };
+
+      const existingTypes = await this.typeRepo.getAllTypes();
+      const existingTypeNames = new Set(existingTypes.map(t => t.type));
+
+      for (const dir of dirs) {
+        const typeName = path.basename(dir);
+        const baseType = typeMapping[typeName] || 'documents';
+
+        if (!existingTypeNames.has(typeName)) {
+          await this.typeRepo.createType(typeName, baseType);
+          // Silent - no output during MCP operation
+        }
+      }
+
+      // Rebuild all types including special ones
+      const allTypes = await this.typeRepo.getAllTypes();
+      allTypes.push({ type: 'sessions', base_type: 'sessions' });
+      allTypes.push({ type: 'dailies', base_type: 'documents' });
+
+      let totalSynced = 0;
+      for (const typeInfo of allTypes) {
+        const type = typeInfo.type;
+        const count = await this.itemRepo.rebuildFromMarkdown(type);
+        totalSynced += count;
+        // Silent - no output during MCP operation
+      }
+
+      // Auto-rebuild complete - no output to avoid breaking MCP protocol
+
+      // Clear the rebuild flag
+      const db = this.connection.getDatabase();
+      await db.runAsync(
+        'DELETE FROM db_metadata WHERE key = ?',
+        ['needs_rebuild']
+      );
+    } catch (error) {
+      // Re-throw error without logging to avoid breaking MCP protocol
+      throw error;
+    }
   }
 
   // Status methods
@@ -215,7 +303,6 @@ export class FileIssueDatabase {
   // Legacy status methods for tests
   @ensureInitialized
   async createStatus(name: string) {
-    // console.warn('createStatus is deprecated');
     const statuses = await this.statusRepo.getAllStatuses();
     const existing = statuses.find(s => s.name === name);
     if (existing) {
@@ -227,13 +314,11 @@ export class FileIssueDatabase {
 
   @ensureInitialized
   async updateStatus(_id: number, _name: string) {
-    // console.warn('updateStatus is deprecated');
     return true;
   }
 
   @ensureInitialized
   async deleteStatus(_id: number) {
-    // console.warn('deleteStatus is deprecated');
     return true;
   }
 
@@ -987,7 +1072,6 @@ export class FileIssueDatabase {
       await this.connection.close();
     } catch (error) {
       // Log but don't throw - tests need cleanup to complete
-      // console.error('Error closing database connection:', error);
     }
   }
 }

@@ -9,6 +9,21 @@ export class BaseRepository {
         this.db = db;
         this.tableName = tableName;
         this.logger = createLogger(loggerName);
+        if (this.isMCPEnvironment()) {
+            const noop = () => this.logger;
+            this.logger.debug = noop;
+            this.logger.info = noop;
+            this.logger.warn = noop;
+            this.logger.error = noop;
+        }
+    }
+    isMCPEnvironment() {
+        if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+            return false;
+        }
+        return process.argv.some(arg => arg.includes('server.js')) ||
+            process.env.MCP_MODE === 'true' ||
+            process.env.NODE_ENV === 'production';
     }
     async getNextId(type) {
         const result = await this.db.runAsync('UPDATE sequences SET current_value = current_value + 1 WHERE type = ?', [type]);

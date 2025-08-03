@@ -120,6 +120,32 @@ export class DatabaseConnection {
 
   constructor(private dbPath: string) {
     this.logger = createLogger('DatabaseConnection');
+    
+    // @ai-critical: Disable all logging in MCP mode to prevent protocol corruption
+    // MCP uses stdio for communication, any output breaks the protocol
+    if (this.isMCPEnvironment()) {
+      // Override all logger methods to be no-ops
+      const noop = (): winston.Logger => this.logger;
+      this.logger.debug = noop;
+      this.logger.info = noop;
+      this.logger.warn = noop;
+      this.logger.error = noop;
+    }
+  }
+
+  /**
+   * @ai-intent Detect if running in MCP server environment
+   * @ai-logic Check for MCP-specific environment indicators
+   */
+  private isMCPEnvironment(): boolean {
+    // Check if running as MCP server (stdio mode)
+    // Skip in test environment
+    if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+      return false;
+    }
+    return process.argv.some(arg => arg.includes('server.js')) ||
+           process.env.MCP_MODE === 'true' ||
+           process.env.NODE_ENV === 'production';
   }
 
   async initialize(): Promise<void> {
@@ -177,11 +203,13 @@ export class DatabaseConnection {
     if (isNewDatabase) {
       const hasExistingData = await this.checkForExistingMarkdownFiles(dbDir);
       if (hasExistingData) {
-        // Use logger.warn instead of console.error
         this.logger.warn('New database created, but existing markdown files detected');
         this.logger.warn('To import existing data, run: npm run rebuild:mcp');
-        // Note: We don't exit here to allow the user to continue
-        // if they want to start fresh without the existing data
+        // Mark that rebuild is needed
+        await this.db.runAsync(
+          'INSERT INTO db_metadata (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)',
+          ['needs_rebuild', 'true']
+        );
       }
     }
 

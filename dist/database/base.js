@@ -52,6 +52,21 @@ export class DatabaseConnection {
     constructor(dbPath) {
         this.dbPath = dbPath;
         this.logger = createLogger('DatabaseConnection');
+        if (this.isMCPEnvironment()) {
+            const noop = () => this.logger;
+            this.logger.debug = noop;
+            this.logger.info = noop;
+            this.logger.warn = noop;
+            this.logger.error = noop;
+        }
+    }
+    isMCPEnvironment() {
+        if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
+            return false;
+        }
+        return process.argv.some(arg => arg.includes('server.js')) ||
+            process.env.MCP_MODE === 'true' ||
+            process.env.NODE_ENV === 'production';
     }
     async initialize() {
         if (this.initializationPromise) {
@@ -95,6 +110,7 @@ export class DatabaseConnection {
             if (hasExistingData) {
                 this.logger.warn('New database created, but existing markdown files detected');
                 this.logger.warn('To import existing data, run: npm run rebuild:mcp');
+                await this.db.runAsync('INSERT INTO db_metadata (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)', ['needs_rebuild', 'true']);
             }
         }
         this.initializationComplete = true;

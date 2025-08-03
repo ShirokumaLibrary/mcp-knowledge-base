@@ -8,6 +8,13 @@
  * @ai-note For forced clean rebuild, manually delete the database file first
  */
 
+// @ai-critical: Ensure rebuild script runs in non-production mode
+// @ai-why: Need console output for rebuild progress
+if (process.argv[1] && (process.argv[1].endsWith('rebuild-db.ts') || process.argv[1].endsWith('rebuild-db.js'))) {
+  process.env.NODE_ENV = 'development';
+  process.env.MCP_MODE = 'false';
+}
+
 import path from 'path';
 import { globSync } from 'glob';
 import { existsSync, statSync, readFileSync } from 'fs';
@@ -397,8 +404,93 @@ async function writeMigratedDataBack(db: FileIssueDatabase, allTypes: any[]): Pr
   console.log(`  - No changes needed: ${checkedCount - migratedCount} files`);
 }
 
-// Run rebuild
-rebuildDatabase().catch(error => {
-  console.error('❌ Database rebuild failed:', error);
-  process.exit(1);
-});
+// Export function for programmatic use
+export async function rebuildFromMarkdown(dbPath: string): Promise<void> {
+  const databasePath = path.dirname(dbPath);
+  console.log('🔄 Starting automatic database rebuild from markdown files...');
+  console.log(`📂 Database path: ${databasePath}`);
+
+  // Initialize database connection
+  const fullDb = new FileIssueDatabase(databasePath, dbPath);
+
+  // Initialize database (tables will be created)
+  await fullDb.initialize();
+
+  // Re-initialize repositories after table creation
+  const typeRepo = fullDb['typeRepo'];
+  await typeRepo.init();
+
+  // Register types by scanning directories
+  console.log('\n🔍 Scanning filesystem for types...');
+  const existingTypes = await typeRepo.getAllTypes();
+  const existingTypeNames = new Set(existingTypes.map(t => t.type));
+
+  const dirs = globSync(path.join(databasePath, '*')).filter(dir => {
+    const stat = statSync(dir);
+    const dirName = path.basename(dir);
+
+    if (!stat.isDirectory() || dirName === 'search.db') {
+      return false;
+    }
+
+    const parentDir = path.dirname(dir);
+    if (path.basename(parentDir) === 'sessions') {
+      return false;
+    }
+
+    return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
+  });
+
+  const typeMapping = {
+    issues: 'tasks',
+    plans: 'tasks',
+    docs: 'documents',
+    knowledge: 'documents',
+    decisions: 'documents',
+    features: 'documents'
+  };
+
+  for (const dir of dirs) {
+    const typeName = path.basename(dir);
+    const baseType = typeMapping[typeName as keyof typeof typeMapping] || 'documents';
+
+    if (!existingTypeNames.has(typeName)) {
+      try {
+        await typeRepo.createType(typeName, baseType);
+        console.log(`  ✅ Registered type: ${typeName} (base_type: ${baseType})`);
+      } catch (error) {
+        console.error(`  ⚠️  Failed to register type ${typeName}:`, error);
+      }
+    }
+  }
+
+  // Sync all data using ItemRepository
+  console.log('\n🔄 Syncing data to SQLite using ItemRepository...');
+  const itemRepo = fullDb.getItemRepository();
+
+  // Get all types including special ones
+  const allTypes = await typeRepo.getAllTypes();
+  allTypes.push({ type: 'sessions', base_type: 'sessions' });
+  allTypes.push({ type: 'dailies', base_type: 'documents' });
+
+  let totalSynced = 0;
+  for (const typeInfo of allTypes) {
+    const type = typeInfo.type;
+    const count = await itemRepo.rebuildFromMarkdown(type);
+    totalSynced += count;
+    console.log(`  ✅ ${type}: ${count} items`);
+  }
+
+  console.log(`\n✅ Database rebuild complete! Total items: ${totalSynced}`);
+}
+
+// Run rebuild if executed directly
+// Check if this file is being run directly (not imported)
+const isMainModule = process.argv[1] && 
+  (process.argv[1].endsWith('rebuild-db.js') || process.argv[1].endsWith('rebuild-db.ts'));
+if (isMainModule) {
+  rebuildDatabase().catch(error => {
+    console.error('❌ Database rebuild failed:', error);
+    process.exit(1);
+  });
+}
