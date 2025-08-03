@@ -1,25 +1,33 @@
 # Session Management Tests
 
-Test work session operations.
+Test work session operations using the unified API.
+
+Note: Session-specific tools (create_session, get_sessions, etc.) have been deprecated. Use the unified create_item/get_items tools with type="sessions".
 
 ## Test 6.1: Session Creation
 
 ### Create Morning Session
 ```
-Tool: create_session
+Tool: create_item
 Parameters: {
+  type: "sessions",
   title: "Morning Development Session",
   content: "## Tasks Completed\n- Fixed authentication bug\n- Added unit tests\n- Updated documentation\n\n## Notes\n- Special character handling was tricky\n- Need to review edge cases",
   tags: ["development", "morning"],
-  related_tasks: ["issues-1", "issues-2"]
+  related: ["issues-1", "issues-2"]
 }
-Expected: Success with timestamp ID (YYYY-MM-DD-HH.MM.SS.sss)
+Expected: Success with:
+- id: timestamp ID (YYYY-MM-DD-HH.MM.SS.sss)
+- related: ["issues-1", "issues-2"] (unified field)
+- related_tasks: ["issues-1", "issues-2"] (backward compatibility)
+- related_documents: [] (backward compatibility)
 ```
 
 ### Create Session with Custom DateTime
 ```
-Tool: create_session
+Tool: create_item
 Parameters: {
+  type: "sessions",
   title: "Yesterday's Review Session",
   content: "Reviewed pull requests and provided feedback",
   datetime: "2025-01-14T15:30:00",
@@ -32,14 +40,18 @@ Expected: Success with custom timestamp
 
 ### Get Today's Sessions
 ```
-Tool: get_sessions
+Tool: get_items
+Parameters: {
+  type: "sessions"
+}
 Expected: Array of today's sessions
 ```
 
 ### Get Sessions by Date Range
 ```
-Tool: get_sessions
+Tool: get_items
 Parameters: {
+  type: "sessions",
   start_date: "2025-01-14",
   end_date: "2025-01-15"
 }
@@ -48,14 +60,21 @@ Expected: Sessions within date range
 
 ### Get Latest Session
 ```
-Tool: get_latest_session
+Tool: get_items
+Parameters: {
+  type: "sessions",
+  limit: 1
+}
 Expected: Most recent session created
 ```
 
 ### Get Session Detail
 ```
-Tool: get_session_detail
-Parameters: {id: "<session-id-from-creation>"}
+Tool: get_item_detail
+Parameters: {
+  type: "sessions",
+  id: "<session-id-from-creation>"
+}
 Expected: Full session object
 ```
 
@@ -63,8 +82,9 @@ Expected: Full session object
 
 ### Update Session Content
 ```
-Tool: update_session
+Tool: update_item
 Parameters: {
+  type: "sessions",
   id: "<session-id>",
   content: "## Tasks Completed\n- Fixed authentication bug\n- Added unit tests\n- Updated documentation\n- Added integration tests\n\n## Notes\n- All tests passing\n- Ready for deployment"
 }
@@ -73,8 +93,9 @@ Expected: Updated session
 
 ### Add Tags to Session
 ```
-Tool: update_session
+Tool: update_item
 Parameters: {
+  type: "sessions",
   id: "<session-id>",
   tags: ["development", "morning", "completed"]
 }
@@ -83,9 +104,9 @@ Expected: Updated session with new tags
 
 ## Test 6.4: Session Search
 
-### Search Sessions by Tag
+### Search Sessions by Tag (Deprecated Method)
 ```
-Tool: search_sessions_by_tag
+Tool: search_sessions_by_tag (DEPRECATED - use search_items_by_tag)
 Parameters: {tag: "development"}
 Expected: Sessions with "development" tag
 ```

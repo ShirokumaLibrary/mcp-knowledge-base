@@ -21,9 +21,9 @@ Parameters: {
   related_documents: ["docs-1"]
 }
 Expected: Success, returns full item object with:
-- related: ["issues-1", "docs-1"] (merged array)
-- related_tasks: ["issues-1"]
-- related_documents: ["docs-1"]
+- related: ["issues-1", "docs-1"] (unified array containing all related items)
+- related_tasks: ["issues-1"] (maintained for backward compatibility)
+- related_documents: ["docs-1"] (maintained for backward compatibility)
 ```
 
 ### Get Items List - Check Fields
@@ -44,8 +44,10 @@ For the created issue in the list:
 - priority: "high" (NOT undefined)
 - status: "Open" (NOT undefined)
 - tags: ["test-field", "validation"]
-- content: Should NOT exist in response
-- related_tasks: Should NOT exist in response
+- content: Should NOT exist in list response
+- related_tasks: Should NOT exist in list response
+- related_documents: Should NOT exist in list response
+- related: Should NOT exist in list response
 
 ## Test 14.2: Verify get_item_detail Full Structure
 
@@ -59,9 +61,9 @@ Validation:
 - start_date: "2025-01-01"
 - end_date: "2025-12-31"
 - version: null or undefined (optional field)
-- related: ["issues-1", "docs-1"] (merged from related_tasks and related_documents)
-- related_tasks: ["issues-1"]
-- related_documents: ["docs-1"]
+- related: ["issues-1", "docs-1"] (unified array containing all related items)
+- related_tasks: ["issues-1"] (maintained for backward compatibility)
+- related_documents: ["docs-1"] (maintained for backward compatibility)
 ```
 
 ## Test 14.3: Search by Tag Field Validation
@@ -74,7 +76,8 @@ Validation:
 - Returns grouped structure with tasks/documents
 - Each item should have full UnifiedItem fields (for backward compatibility)
 - Check that content field exists but is empty string
-- Check that related_tasks/related_documents exist (even if empty arrays)
+- Check that related field exists (unified array)
+- Check that related_tasks/related_documents exist for backward compatibility (even if empty arrays)
 ```
 
 ## Test 14.4: Document Types Field Validation

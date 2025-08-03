@@ -17,9 +17,9 @@ Parameters: {
 }
 Expected: Success with response containing:
 - id: string (auto-generated)
-- related: array (contains related_tasks items)
-- related_tasks: array
-- related_documents: array
+- related: array (unified list of all related items)
+- related_tasks: array (for backward compatibility)
+- related_documents: array (for backward compatibility)
 ```
 
 ### Issue 2 - Issue without tags
@@ -35,6 +35,8 @@ Parameters: {
 Expected: Success with response containing:
 - id: string (auto-generated)
 - related: empty array
+- related_tasks: empty array (for backward compatibility)
+- related_documents: empty array (for backward compatibility)
 - tags: empty array (auto-initialized)
 ```
 

@@ -22,13 +22,11 @@ argument-hint: "[test-number or phase]"
 
 Note: Respond to the user in their language.
 
-<ultrathink>
 The user wants to run MCP functional tests. I need to:
 1. Check prerequisites (MCP server availability, data directory)
 2. Parse arguments to determine which tests to run
 3. Execute tests systematically and record results
 4. Report comprehensive results with pass/fail status
-</ultrathink>
 
 Execute systematic validation tests for MCP server functions through the MCP protocol.
 
@@ -39,12 +37,10 @@ Execute systematic validation tests for MCP server functions through the MCP pro
 
 ### Test Execution
 
-<ultrathink>
 I need to parse the user's arguments to determine the test scope:
 - If specific test number provided, run only that test
 - If phase specified, run all tests in that phase
 - If no arguments, default to all Phase 1 tests
-</ultrathink>
 
 Parse arguments:
 - No arguments: Run all Phase 1 tests

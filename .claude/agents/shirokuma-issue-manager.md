@@ -71,38 +71,41 @@ Content:
 4. Issues In Progress for 30+ days → Automatically check status
 5. Issues Closed for 90+ days → Propose as archive candidates
 
-## Memory Bank Integration
+## Issue Management Process
 
-### Input Information Received
-```javascript
-const memoryBank = {
-  context: // Current project state
-  session: // Active session information
-  decisions: // Recent technical decisions
-  patterns: // Established patterns
-  agentFindings: // Findings from other agents
-}
-```
+### When Creating New Issues
+Receive information about:
+- Current project context
+- Active session details
+- Recent technical decisions
+- Established patterns
+- Findings from other agents
 
-### Output Information Provided
-```javascript
-return {
-  createdIssues: [], // IDs of created issues
-  updatedIssues: [], // IDs of updated issues
-  duplicatesFound: [], // Duplicates discovered
-  recommendations: [], // Recommended next actions
-  metrics: {
-    totalIssues: 0,
-    byPriority: {},
-    byStatus: {}
-  }
-}
-```
+### Issue Creation Workflow
+1. Search for similar existing issues
+2. Check if issue should be linked to existing ones
+3. Determine appropriate priority based on impact
+4. Select relevant tags from existing ones
+5. Create with complete template filled out
+
+### Ongoing Management
+Provide information about:
+- Created issue IDs for tracking
+- Updated issue IDs with changes made
+- Duplicates found and how they were handled
+- Recommendations for next actions
+- Metrics: total issues, breakdown by priority and status
 
 ## Collaboration with Other Agents
 
-1. **shirokuma-daily-reporter**: Provide issue statistics for daily reports
-2. **shirokuma-knowledge-curator**: Request knowledge related to technical issues
-3. **shirokuma-session-automator**: Coordinate automatic issue updates during sessions
+### Integration Points
+1. **daily-reporter**: Provide issue statistics for daily reports
+2. **knowledge-curator**: Request knowledge related to technical issues
+3. **session-automator**: Coordinate automatic issue updates during sessions
+
+### Information Sharing
+- Share issue creation patterns for knowledge base
+- Provide issue resolution trends for analysis
+- Coordinate on technical documentation needs
 
 Always communicate with users to support healthy project progression.

@@ -101,7 +101,21 @@ Expected: Error "Unknown status: 'InvalidStatus'"
 
 ## Test 3.4: Related Fields Update
 
-### Add Related Items
+### Add Related Items (Using New Unified Field)
+```
+Tool: update_item
+Parameters: {
+  type: "issues",
+  id: 2,
+  related: ["issues-1", "issues-3", "docs-1"]
+}
+Expected: Updated issue with:
+- related: ["issues-1", "issues-3", "docs-1"]
+- related_tasks: ["issues-1", "issues-3"] (auto-populated for backward compatibility)
+- related_documents: ["docs-1"] (auto-populated for backward compatibility)
+```
+
+### Add Related Items (Using Legacy Fields - Still Supported)
 ```
 Tool: update_item
 Parameters: {
@@ -110,10 +124,24 @@ Parameters: {
   related_tasks: ["issues-1", "issues-3"],
   related_documents: ["docs-1"]
 }
-Expected: Updated issue with related items
+Expected: Updated issue with:
+- related: ["issues-1", "issues-3", "docs-1"] (auto-populated from legacy fields)
+- related_tasks: ["issues-1", "issues-3"]
+- related_documents: ["docs-1"]
 ```
 
-### Self-reference Test
+### Self-reference Test (Using New Field)
+```
+Tool: update_item
+Parameters: {
+  type: "issues",
+  id: 1,
+  related: ["issues-1"]
+}
+Expected: Error about self-reference
+```
+
+### Self-reference Test (Using Legacy Field)
 ```
 Tool: update_item
 Parameters: {
