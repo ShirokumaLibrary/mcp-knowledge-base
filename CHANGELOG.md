@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.8] - 2025-08-04
+
+### Changed
+- Enhanced database initialization with unified flow
+- Improved rebuild process with better table existence checking
+- Moved transaction management to base repository level
+- Enhanced search query parser with better whitespace handling
+
+### Fixed
+- Database initialization now properly checks table existence before MCP server starts
+- Removed duplicate code in rebuild process
+- Fixed transaction handling in database operations
+
 ## [0.7.7] - 2025-08-03
 
 ### Fixed
