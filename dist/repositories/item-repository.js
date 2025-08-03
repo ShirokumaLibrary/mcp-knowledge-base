@@ -155,6 +155,13 @@ export class ItemRepository {
         const row = await this.db.getAsync('SELECT current_value FROM sequences WHERE type = ?', [type]);
         return row.current_value;
     }
+    async getCurrentSequenceValue(type) {
+        const row = await this.db.getAsync('SELECT current_value FROM sequences WHERE type = ?', [type]);
+        if (!row) {
+            throw new McpError(ErrorCode.InvalidRequest, `Sequence not found for type: ${type}`);
+        }
+        return row.current_value;
+    }
     async createItem(params) {
         const { type } = params;
         let typeInfo;
@@ -264,6 +271,18 @@ export class ItemRepository {
             }
         }
         else {
+            const currentValue = await this.getCurrentSequenceValue(type);
+            const nextId = currentValue + 1;
+            const config = this.getStorageConfig(type);
+            const testId = String(nextId);
+            const exists = await this.storage.exists(config, testId);
+            if (exists) {
+                throw new McpError(ErrorCode.InvalidRequest, `File already exists for ${type}-${testId}. ` +
+                    `This may indicate a sequence corruption. ` +
+                    `Current sequence value: ${currentValue}, ` +
+                    `Next ID would be: ${nextId}. ` +
+                    `Please check the sequences table and rebuild if necessary.`);
+            }
             const numId = await this.getNextId(type);
             id = String(numId);
             createdAt = nowISOString;
@@ -658,24 +677,33 @@ export class ItemRepository {
         }
         else {
             const ids = await this.storage.list(config);
+            this.logger.info(`Found ${ids.length} ${type} files to rebuild`);
             for (const id of ids) {
-                const storageItem = await this.storage.load(config, id);
-                if (storageItem && storageItem.metadata.title) {
-                    try {
+                try {
+                    const storageItem = await this.storage.load(config, id);
+                    if (storageItem && storageItem.metadata.title) {
                         this.migrateRelatedFields(storageItem);
                         const item = await this.storageItemToUnifiedItem(storageItem, type);
                         await this.syncItemToSQLite(item);
                         await this.tagRepo.ensureTagsExist(item.tags);
                         syncedCount++;
                     }
-                    catch (error) {
-                        this.logger.error(`Failed to sync ${type} ${id}:`, error);
+                    else if (storageItem) {
+                        this.logger.warn(`Skipping ${type} ${id}: missing title`);
+                    }
+                    else {
+                        this.logger.warn(`Failed to load ${type} ${id}`);
                     }
                 }
-                else if (storageItem) {
-                    this.logger.warn(`Skipping ${type} ${id}: missing title`);
+                catch (error) {
+                    this.logger.error(`Failed to sync ${type} ${id}:`, error);
+                    if (error instanceof Error) {
+                        this.logger.error(`  Error message: ${error.message}`);
+                        this.logger.error(`  Stack: ${error.stack}`);
+                    }
                 }
             }
+            this.logger.info(`Completed rebuilding ${type}: ${syncedCount}/${ids.length} files synced`);
         }
         return syncedCount;
     }

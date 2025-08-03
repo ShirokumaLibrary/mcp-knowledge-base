@@ -45,12 +45,14 @@ export class BaseRepository {
 }
 export class DatabaseConnection {
     dbPath;
+    dataDir;
     db;
     initializationPromise = null;
     initializationComplete = false;
     logger;
-    constructor(dbPath) {
+    constructor(dbPath, dataDir) {
         this.dbPath = dbPath;
+        this.dataDir = dataDir;
         this.logger = createLogger('DatabaseConnection');
         if (this.isMCPEnvironment()) {
             const noop = () => this.logger;
@@ -102,11 +104,14 @@ export class DatabaseConnection {
         this.logger.debug('Promise wrappers added');
         await this.createTables();
         this.logger.debug('Tables created');
-        const programVersion = await getProgramVersion();
-        await setDbVersion(this.db, programVersion);
-        this.logger.info(`Database version set to: ${programVersion}`);
         if (isNewDatabase) {
-            const hasExistingData = await this.checkForExistingMarkdownFiles(dbDir);
+            const programVersion = await getProgramVersion();
+            await setDbVersion(this.db, programVersion);
+            this.logger.info(`New database - version set to: ${programVersion}`);
+        }
+        if (isNewDatabase) {
+            const markdownDir = this.dataDir || dbDir;
+            const hasExistingData = await this.checkForExistingMarkdownFiles(markdownDir);
             if (hasExistingData) {
                 this.logger.warn('New database created, but existing markdown files detected');
                 this.logger.warn('To import existing data, run: npm run rebuild:mcp');
@@ -116,7 +121,7 @@ export class DatabaseConnection {
         this.initializationComplete = true;
         this.logger.debug('Database initialization complete');
     }
-    async checkForExistingMarkdownFiles(dbDir) {
+    async checkForExistingMarkdownFiles(markdownDir) {
         try {
             const patterns = [
                 'issues/*.md',
@@ -126,7 +131,8 @@ export class DatabaseConnection {
                 'sessions/**/*.md'
             ];
             for (const pattern of patterns) {
-                const files = globSync(path.join(dbDir, pattern));
+                const fullPattern = path.join(markdownDir, pattern);
+                const files = globSync(fullPattern);
                 if (files.length > 0) {
                     this.logger.info(`Found existing markdown files in ${pattern}`);
                     return true;

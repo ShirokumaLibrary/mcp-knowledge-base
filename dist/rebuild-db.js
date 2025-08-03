@@ -202,8 +202,26 @@ async function rebuildDatabase() {
         }
         const result = await db.getAsync('SELECT MAX(CAST(id AS INTEGER)) as max_id FROM items WHERE type = ?', [type]);
         const maxId = result?.max_id || 0;
-        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [maxId, type]);
-        console.log(`  ✅ Updated sequence '${type}' to ${maxId}`);
+        const filesPattern = path.join(databasePath, type, `${type}-*.md`);
+        const files = globSync(filesPattern);
+        let maxFileId = 0;
+        for (const file of files) {
+            const basename = path.basename(file);
+            const match = basename.match(new RegExp(`^${type}-(\\d+)\\.md$`));
+            if (match) {
+                const fileId = parseInt(match[1], 10);
+                if (fileId > maxFileId) {
+                    maxFileId = fileId;
+                }
+            }
+        }
+        if (maxFileId > maxId) {
+            console.log(`  ⚠️  Warning: Found file ${type}-${maxFileId}.md but max ID in DB is ${maxId}`);
+            console.log(`     This suggests some files were not imported during rebuild`);
+        }
+        const sequenceValue = Math.max(maxId, maxFileId);
+        await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [sequenceValue, type]);
+        console.log(`  ✅ Updated sequence '${type}' to ${sequenceValue} (DB max: ${maxId}, File max: ${maxFileId})`);
     }
     const tagRepo = fullDb['tagRepo'];
     const allTags = await tagRepo.getAllTags();

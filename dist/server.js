@@ -8,14 +8,11 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { FileIssueDatabase } from './database.js';
-import { SessionManager } from './session-manager.js';
 import { getConfig } from './config.js';
 import { createUnifiedHandlers, handleUnifiedToolCall } from './handlers/unified-handlers.js';
 import { StatusHandlers } from './handlers/status-handlers.js';
 import { guardStdio } from './utils/stdio-guard.js';
 import { TagHandlers } from './handlers/tag-handlers.js';
-import { SessionHandlers } from './handlers/session-handlers.js';
-import { SummaryHandlers } from './handlers/summary-handlers.js';
 import { TypeHandlers } from './handlers/type-handlers.js';
 import { SearchHandlers } from './handlers/search-handlers.js';
 import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
@@ -27,25 +24,26 @@ import { createLogger } from './utils/logger.js';
 export class IssueTrackerServer {
     server;
     db;
-    sessionManager;
     unifiedHandlers;
     statusHandlers;
     tagHandlers;
-    sessionHandlers;
-    summaryHandlers;
     typeHandlers;
     searchHandlers;
     currentStateHandlers;
+    versionError = null;
     changeTypeHandlers;
     fileIndexHandlers;
+    checkVersionError() {
+        if (this.versionError) {
+            throw new McpError(ErrorCode.InternalError, `Database version mismatch: ${this.versionError.message}. ` +
+                'Please update your database or application to matching versions.');
+        }
+    }
     constructor() {
         const config = getConfig();
         this.db = new FileIssueDatabase(config.database.path);
-        this.sessionManager = new SessionManager(config.database.sessionsPath, this.db);
         this.statusHandlers = new StatusHandlers(this.db);
         this.tagHandlers = new TagHandlers(this.db);
-        this.sessionHandlers = new SessionHandlers(this.sessionManager);
-        this.summaryHandlers = new SummaryHandlers(this.sessionManager);
         this.typeHandlers = new TypeHandlers(this.db);
         this.searchHandlers = new SearchHandlers(this.db);
         this.currentStateHandlers = new CurrentStateHandlers(config.database.path);
@@ -92,6 +90,7 @@ export class IssueTrackerServer {
         });
     }
     async handleToolCall(toolName, args) {
+        this.checkVersionError();
         switch (toolName) {
             case 'get_items':
             case 'get_item_detail':
@@ -149,9 +148,14 @@ export class IssueTrackerServer {
         }
         catch (error) {
             if (error instanceof VersionMismatchError) {
-                process.exit(1);
+                this.versionError = error;
+                if (process.env.NODE_ENV === 'test') {
+                    throw error;
+                }
             }
-            throw error;
+            else {
+                throw error;
+            }
         }
         await this.typeHandlers.init();
         this.unifiedHandlers = createUnifiedHandlers(this.db);
@@ -169,7 +173,7 @@ export class IssueTrackerServer {
                             validItems.push(itemId);
                         }
                     }
-                    catch (error) {
+                    catch {
                     }
                 }
             }

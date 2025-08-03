@@ -152,11 +152,13 @@ function expressionToFTS5(expr) {
         if (!escapedValue) {
             return '';
         }
+        const needsQuoting = escapedValue.includes('.');
+        const quotedValue = needsQuoting ? `"${escapedValue}"` : escapedValue;
         if (expr.field) {
-            ftsQuery = `{${expr.field}}:${escapedValue}`;
+            ftsQuery = `{${expr.field}}:${quotedValue}`;
         }
         else {
-            ftsQuery = escapedValue;
+            ftsQuery = quotedValue;
         }
         if (expr.negated) {
             ftsQuery = `-${ftsQuery}`;

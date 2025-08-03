@@ -70,7 +70,7 @@ export class FileIssueDatabase {
     constructor(dataDir, dbPath = getConfig().database.sqlitePath) {
         this.dataDir = dataDir;
         this.dbPath = dbPath;
-        this.connection = new DatabaseConnection(this.dbPath);
+        this.connection = new DatabaseConnection(this.dbPath, this.dataDir);
     }
     get dataDirectory() {
         return this.dataDir;
