@@ -64,7 +64,7 @@ Parameters: {
   content: "Content here",
   priority: "low"
 }
-Expected: Error about invalid title
+Expected: Error "Title cannot be empty"
 ```
 
 ## Test 10.3: Date Edge Cases
@@ -91,7 +91,7 @@ Parameters: {
   content: "Test",
   start_date: "2025-13-32"
 }
-Expected: Error about invalid date
+Expected: Error "Invalid date: 2025-13-32"
 ```
 
 ### Start Date After End Date

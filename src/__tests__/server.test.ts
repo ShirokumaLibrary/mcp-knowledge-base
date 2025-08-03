@@ -127,6 +127,10 @@ describe('IssueTrackerServer', () => {
     mockDb = {
       initialize: jest.fn().mockResolvedValue(undefined),
       close: jest.fn(),
+      getDatabase: jest.fn().mockReturnValue({
+        getAsync: jest.fn().mockResolvedValue({ value: '0.7.5' }),
+        runAsync: jest.fn().mockResolvedValue(undefined)
+      }),
       getAllStatuses: jest.fn().mockResolvedValue([
         { id: 1, name: 'Open', is_closed: false },
         { id: 2, name: 'Closed', is_closed: true }

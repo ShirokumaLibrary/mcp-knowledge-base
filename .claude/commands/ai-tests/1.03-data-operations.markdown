@@ -22,7 +22,7 @@ Expected: Full plan object with start_date and end_date
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 999}
-Expected: Error "issues with ID 999 not found"
+Expected: Error "issues with ID 999 not found. Use 'get_items' with type='issues' to see available items."
 ```
 
 ## Test 3.2: List Items with Filters

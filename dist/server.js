@@ -20,6 +20,8 @@ import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
 import { ChangeTypeHandlers } from './handlers/change-type-handlers.js';
 import { FileIndexHandlers, fileIndexSchemas } from './handlers/file-index-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
+import { checkDatabaseVersion, VersionMismatchError } from './utils/db-version-utils.js';
+import { createLogger } from './utils/logger.js';
 export class IssueTrackerServer {
     server;
     db;
@@ -134,6 +136,29 @@ export class IssueTrackerServer {
     }
     async run() {
         await this.db.initialize();
+        try {
+            const logger = createLogger('VersionCheck');
+            await checkDatabaseVersion(this.db.getDatabase(), logger);
+        }
+        catch (error) {
+            if (error instanceof VersionMismatchError) {
+                console.error(`
+⚠️  Database Version Mismatch Detected
+====================================
+Program version: ${error.programVersion}
+Database version: ${error.dbVersion}
+
+This usually happens after updating the package.
+To fix this issue, please run:
+
+  npm run rebuild:mcp
+
+This will safely rebuild the database while preserving your data.
+`);
+                process.exit(1);
+            }
+            throw error;
+        }
         await this.typeHandlers.init();
         this.unifiedHandlers = createUnifiedHandlers(this.db);
         const tagRepo = this.db.getTagRepository();

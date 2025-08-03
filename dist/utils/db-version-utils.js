@@ -1,0 +1,55 @@
+import * as fs from 'fs/promises';
+import * as path from 'path';
+export class VersionMismatchError extends Error {
+    programVersion;
+    dbVersion;
+    constructor(params) {
+        const message = params.message ||
+            `Database version (${params.dbVersion}) does not match program version (${params.programVersion}).\n` +
+                `Please rebuild the database using: npm run rebuild:mcp`;
+        super(message);
+        this.name = 'VersionMismatchError';
+        this.programVersion = params.programVersion;
+        this.dbVersion = params.dbVersion;
+    }
+}
+export async function getProgramVersion() {
+    try {
+        const packageJsonPath = path.join(process.cwd(), 'package.json');
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
+        return packageJson.version;
+    }
+    catch {
+        return '0.7.5';
+    }
+}
+export async function getDbVersion(db) {
+    try {
+        const row = await db.getAsync('SELECT value FROM db_metadata WHERE key = ?', ['schema_version']);
+        return row?.value || null;
+    }
+    catch {
+        return null;
+    }
+}
+export async function setDbVersion(db, version) {
+    await db.runAsync('INSERT OR REPLACE INTO db_metadata (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)', ['schema_version', version]);
+}
+export async function checkDatabaseVersion(db, logger) {
+    const programVersion = await getProgramVersion();
+    const dbVersion = await getDbVersion(db);
+    logger.info(`Program version: ${programVersion}`);
+    logger.info(`Database version: ${dbVersion || 'not set'}`);
+    if (!dbVersion) {
+        logger.info('Database version not set. Setting to current program version.');
+        await setDbVersion(db, programVersion);
+        return;
+    }
+    if (dbVersion !== programVersion) {
+        throw new VersionMismatchError({
+            programVersion,
+            dbVersion
+        });
+    }
+    logger.info('Database version check passed');
+}

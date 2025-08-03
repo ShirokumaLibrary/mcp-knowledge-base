@@ -5,6 +5,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger } from '../utils/logger.js';
 import type { DatabaseRow, QueryParameters } from './types/database-types.js';
+import { getProgramVersion, setDbVersion } from '../utils/db-version-utils.js';
+import { globSync } from 'glob';
 
 /**
  * @ai-context Promise-based wrapper for SQLite3 database operations
@@ -139,6 +141,10 @@ export class DatabaseConnection {
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
     }
+
+    // Check if this is a new database
+    const isNewDatabase = !fs.existsSync(this.dbPath);
+
     this.db = new sqlite.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE) as Database;
     this.logger.debug('Database connection created');
 
@@ -161,8 +167,52 @@ export class DatabaseConnection {
     // Initialize tables
     await this.createTables();
     this.logger.debug('Tables created');
+
+    // Set database version
+    const programVersion = await getProgramVersion();
+    await setDbVersion(this.db, programVersion);
+    this.logger.info(`Database version set to: ${programVersion}`);
+
+    // Check for existing markdown files if this is a new database
+    if (isNewDatabase) {
+      const hasExistingData = await this.checkForExistingMarkdownFiles(dbDir);
+      if (hasExistingData) {
+        // Use logger.warn instead of console.error
+        this.logger.warn('New database created, but existing markdown files detected');
+        this.logger.warn('To import existing data, run: npm run rebuild:mcp');
+        // Note: We don't exit here to allow the user to continue
+        // if they want to start fresh without the existing data
+      }
+    }
+
     this.initializationComplete = true;
     this.logger.debug('Database initialization complete');
+  }
+
+  private async checkForExistingMarkdownFiles(dbDir: string): Promise<boolean> {
+    try {
+      // Check for any markdown files in subdirectories
+      const patterns = [
+        'issues/*.md',
+        'plans/*.md',
+        'docs/*.md',
+        'knowledge/*.md',
+        'sessions/**/*.md'
+      ];
+
+      for (const pattern of patterns) {
+        const files = globSync(path.join(dbDir, pattern));
+        if (files.length > 0) {
+          this.logger.info(`Found existing markdown files in ${pattern}`);
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      this.logger.error('Error checking for markdown files', error);
+      return false;
+    }
   }
 
   private async createTables(): Promise<void> {
@@ -212,6 +262,16 @@ export class DatabaseConnection {
     } catch {
       // Column already exists, ignore error
     }
+
+    // Database metadata table for version tracking
+    this.logger.debug('Creating db_metadata table...');
+    await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS db_metadata (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
     // Insert default statuses
     this.logger.debug('Inserting default statuses...');

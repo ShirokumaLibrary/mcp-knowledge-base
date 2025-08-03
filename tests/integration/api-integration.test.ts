@@ -26,8 +26,9 @@ describe('API Integration - Sessions and Dailies', () => {
       await fs.mkdir(path.join(dataDir, dir), { recursive: true });
     }
     
-    // Initialize database
-    database = new FileIssueDatabase(dataDir);
+    // Initialize database with custom SQLite path for test isolation
+    const dbPath = path.join(dataDir, 'test.db');
+    database = new FileIssueDatabase(dataDir, dbPath);
     await database.initialize();
     
     // Create handlers

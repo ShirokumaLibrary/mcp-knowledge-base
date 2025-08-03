@@ -882,6 +882,7 @@ export class ItemRepository {
       item.start_date,
       item.end_date,
       item.start_time,
+      item.version || null,
       JSON.stringify(item.tags),
       JSON.stringify(item.related),
       item.created_at,
@@ -891,8 +892,8 @@ export class ItemRepository {
     await this.db.runAsync(`
       INSERT OR REPLACE INTO items 
       (type, id, title, description, content, priority, status_id, 
-       start_date, end_date, start_time, tags, related, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       start_date, end_date, start_time, version, tags, related, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, params);
 
     // Update FTS

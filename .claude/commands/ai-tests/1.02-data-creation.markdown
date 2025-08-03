@@ -93,6 +93,24 @@ Expected: Success with response containing:
 - related_documents: ["docs-1", "knowledge-1"]
 ```
 
+### Issue 6 - Issue with version field
+```
+Tool: create_item
+Parameters: {
+  type: "issues",
+  title: "Release Planning for v0.8.0",
+  content: "## Release Goals\nPrepare and release version 0.8.0 with new features.\n\n### Tasks\n- Code freeze\n- Testing\n- Documentation update\n- Release notes",
+  priority: "high",
+  status: "Open",
+  tags: ["release", "planning"],
+  version: "0.8.0"
+}
+Expected: Success with response containing:
+- id: string (auto-generated)
+- version: "0.8.0"
+- related: empty array
+```
+
 ## Test 2.2: Plan Creation
 
 ### Plan 1 - Plan with dates and tags

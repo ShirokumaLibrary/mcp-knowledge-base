@@ -54,10 +54,11 @@ For the created issue in the list:
 Tool: get_item_detail
 Parameters: {type: "issues", id: <created_id>}
 Validation:
-- MUST include ALL fields: id, type, title, description, content, priority, status, status_id, start_date, end_date, start_time, tags, related, related_tasks, related_documents, created_at, updated_at
+- MUST include ALL fields: id, type, title, description, content, priority, status, status_id, start_date, end_date, start_time, version, tags, related, related_tasks, related_documents, created_at, updated_at
 - content: "This is detailed content that should NOT appear in list view"
 - start_date: "2025-01-01"
 - end_date: "2025-12-31"
+- version: null or undefined (optional field)
 - related: ["issues-1", "docs-1"] (merged from related_tasks and related_documents)
 - related_tasks: ["issues-1"]
 - related_documents: ["docs-1"]

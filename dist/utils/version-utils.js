@@ -1,6 +1,7 @@
 export function normalizeVersion(version) {
-    if (!version)
+    if (!version) {
         return null;
+    }
     const cleaned = version.trim().replace(/^v/i, '');
     const parts = cleaned.split('.');
     const [major = '0', minor = '0', patch = '0'] = parts;
@@ -15,17 +16,20 @@ export function normalizeVersion(version) {
     return normalized;
 }
 export function denormalizeVersion(normalized) {
-    if (!normalized)
+    if (!normalized) {
         return null;
+    }
     try {
         const parts = normalized.split('.');
-        if (parts.length !== 3)
+        if (parts.length !== 3) {
             return normalized;
+        }
         const denormalized = parts
             .map(part => {
             const num = parseInt(part, 10);
-            if (isNaN(num))
+            if (isNaN(num)) {
                 return part;
+            }
             return num.toString();
         })
             .join('.');

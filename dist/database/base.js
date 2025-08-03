@@ -3,6 +3,8 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger } from '../utils/logger.js';
+import { getProgramVersion, setDbVersion } from '../utils/db-version-utils.js';
+import { globSync } from 'glob';
 export class BaseRepository {
     db;
     logger;
@@ -65,6 +67,7 @@ export class DatabaseConnection {
         if (!fs.existsSync(dbDir)) {
             fs.mkdirSync(dbDir, { recursive: true });
         }
+        const isNewDatabase = !fs.existsSync(this.dbPath);
         this.db = new sqlite.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
         this.logger.debug('Database connection created');
         this.db.runAsync = (sql, params) => {
@@ -84,8 +87,41 @@ export class DatabaseConnection {
         this.logger.debug('Promise wrappers added');
         await this.createTables();
         this.logger.debug('Tables created');
+        const programVersion = await getProgramVersion();
+        await setDbVersion(this.db, programVersion);
+        this.logger.info(`Database version set to: ${programVersion}`);
+        if (isNewDatabase) {
+            const hasExistingData = await this.checkForExistingMarkdownFiles(dbDir);
+            if (hasExistingData) {
+                this.logger.warn('New database created, but existing markdown files detected');
+                this.logger.warn('To import existing data, run: npm run rebuild:mcp');
+            }
+        }
         this.initializationComplete = true;
         this.logger.debug('Database initialization complete');
+    }
+    async checkForExistingMarkdownFiles(dbDir) {
+        try {
+            const patterns = [
+                'issues/*.md',
+                'plans/*.md',
+                'docs/*.md',
+                'knowledge/*.md',
+                'sessions/**/*.md'
+            ];
+            for (const pattern of patterns) {
+                const files = globSync(path.join(dbDir, pattern));
+                if (files.length > 0) {
+                    this.logger.info(`Found existing markdown files in ${pattern}`);
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch (error) {
+            this.logger.error('Error checking for markdown files', error);
+            return false;
+        }
     }
     async createTables() {
         this.logger.debug('Creating tables...');
@@ -123,6 +159,14 @@ export class DatabaseConnection {
         }
         catch {
         }
+        this.logger.debug('Creating db_metadata table...');
+        await this.db.runAsync(`
+      CREATE TABLE IF NOT EXISTS db_metadata (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
         this.logger.debug('Inserting default statuses...');
         await this.db.runAsync(`INSERT OR IGNORE INTO statuses (name, is_closed) VALUES 
       ('Open', 0), ('In Progress', 0), ('Review', 0), ('Completed', 1), ('Closed', 1), ('On Hold', 0), ('Cancelled', 1)`);

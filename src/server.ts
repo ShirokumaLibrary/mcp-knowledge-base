@@ -70,6 +70,8 @@ import { CurrentStateHandlers } from './handlers/current-state-handlers.js';
 import { ChangeTypeHandlers } from './handlers/change-type-handlers.js';
 import { FileIndexHandlers, fileIndexSchemas } from './handlers/file-index-handlers.js';
 import { toolDefinitions } from './tool-definitions.js';
+import { checkDatabaseVersion, VersionMismatchError } from './utils/db-version-utils.js';
+import { createLogger } from './utils/logger.js';
 
 /**
  * @ai-context Main server class orchestrating all MCP operations
@@ -262,6 +264,31 @@ export class IssueTrackerServer {
     // console.error('Starting Issue Tracker MCP Server...');
     // console.error('Initializing database...');
     await this.db.initialize();
+    
+    // Check database version compatibility
+    try {
+      const logger = createLogger('VersionCheck');
+      await checkDatabaseVersion(this.db.getDatabase(), logger);
+    } catch (error) {
+      if (error instanceof VersionMismatchError) {
+        console.error(`
+⚠️  Database Version Mismatch Detected
+====================================
+Program version: ${error.programVersion}
+Database version: ${error.dbVersion}
+
+This usually happens after updating the package.
+To fix this issue, please run:
+
+  npm run rebuild:mcp
+
+This will safely rebuild the database while preserving your data.
+`);
+        process.exit(1);
+      }
+      throw error;
+    }
+    
     await this.typeHandlers.init();
     // console.error('Database initialized');
 
