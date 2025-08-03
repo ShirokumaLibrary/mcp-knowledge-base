@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.7] - 2025-08-03
+
+### Fixed
+- **MCP Server Stability**: Resolved stdout corruption issues that caused MCP server crashes on reconnect
+  - Fixed stdio output filtering to only allow JSON-RPC messages
+  - Properly suppress all logging in MCP production mode
+  - Added environment detection for MCP vs test modes
+- **Database Auto-Rebuild**: Fixed automatic rebuild when creating new database with existing markdown files
+  - Database now automatically imports existing markdown files on first initialization
+  - Added `needs_rebuild` flag to track when rebuild is required
+  - Fixed rebuild script compatibility with TypeScript execution
+- **Test Environment**: Ensured console output works properly in test environment
+  - Tests no longer affected by MCP output suppression
+  - Fixed rebuild-db script to detect both .js and .ts execution
+
+### Changed
+- Cleaned up experimental code from stdio-guard module
+- Improved error handling for database version mismatches
+
 ## [0.7.5] - 2025-08-02
 
 ### Added
