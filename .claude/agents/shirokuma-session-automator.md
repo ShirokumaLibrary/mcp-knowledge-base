@@ -33,12 +33,17 @@ Since AI completely loses memory between sessions:
 
 ### 2. Active Session Detection
 
-Check current_state for "## Active Session" section:
-- If exists: Notify user and offer options:
-  1. Continue existing session
-  2. End previous session and start new one (would need to run finish process)
-  3. Cancel operation
-- If not: Proceed with new session creation
+Parse current_state for "## Active Session" section (per design decisions-24):
+- **If exists**: Extract session ID and details directly from content:
+  - Session ID: Extract from "**Session ID**: sessions-XXXX" line
+  - Working issue: Extract from "**Working on**" line  
+  - Notify user and offer options:
+    1. Continue existing session
+    2. End previous session and start new one (would run finish process)
+    3. Cancel operation
+- **If not exists**: Proceed with new session creation
+
+This eliminates inefficient date range searches to find current sessions.
 
 ### 3. Issue Presentation Strategy
 
@@ -95,14 +100,16 @@ After selection, update session with related_tasks.
 
 ### 7. State Updates
 
-Update current_state to add active session:
+Update current_state to add active session section (per design decisions-24):
 ```markdown
 ## Active Session
-- Session ID: [session-id]
-- Title: [session title]
-- Related Issue: issues-XX
-- Start Time: [timestamp]
+- **Session ID**: [session-id]
+- **Started**: [YYYY-MM-DD HH:MM JST]
+- **Working on**: [issue-id] ([brief description])
+- **Status**: In Progress
 ```
+
+This format enables efficient session management without date range searches.
 
 ### 8. Daily Management
 
@@ -123,9 +130,11 @@ When called to end a session, execute these operations:
 
 ### 1. Session Validation
 
-- Check current_state for active session
-- If no active session, notify user and exit
-- Get session details using get_item_detail
+- Parse current_state for "## Active Session" section
+- **If no active session**: Notify user and exit gracefully
+- **If exists**: Extract session ID from "**Session ID**: sessions-XXXX" line
+- Get session details using get_item_detail with extracted session ID
+- This avoids inefficient date range searches to find the current session
 
 ### 2. Memory Bank Collection
 
@@ -180,11 +189,20 @@ Fallback (if daily-reporter unavailable):
 
 ### 7. State Handover
 
-Update current_state with:
-- Remove "## Active Session" section
-- Update main content with latest status
-- Add "## Next Priorities" based on incomplete todos
-- Include any blockers or considerations
+Update current_state to ensure clean handover (per design decisions-24):
+- **Remove** "## Active Session" section completely
+- **Add session summary** to "## Recent Context" section:
+  ```markdown
+  ## Recent Context
+  ### Last Session ([session-id])
+  - Duration: X hours Y minutes
+  - Completed: [brief summary]
+  - Working on: [issue-id]
+  ```
+- **Update "## Next Priorities"** based on incomplete todos
+- Include any blockers or considerations for next AI
+
+This eliminates the need for inefficient date range searches to find active sessions.
 
 ### 8. Final Display
 

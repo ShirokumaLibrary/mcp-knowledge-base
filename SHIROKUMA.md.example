@@ -1,5 +1,9 @@
 # SHIROKUMA.md (Simplified Version)
 
+## Language
+**Language: Check SHIROKUMA_LANG environment variable (default: English if not set)**
+**Note: Respond in the language specified by SHIROKUMA_LANG or the user's language**
+
 AI Pair Programming with shirokuma-knowledge-base MCP - Core Principles
 
 ## 🎯 Fundamental Truth
@@ -54,6 +58,59 @@ AI Pair Programming with shirokuma-knowledge-base MCP - Core Principles
 | **knowledge-curator** | Knowledge organization | Document learning |
 | **session-automator** | Workflow automation | Start/end sessions |
 
+### 🧠 Memory Preservation and Recovery with mcp-specialist
+
+**Your memory exists in MCP, not in your mind** - Use mcp-specialist for both saving and recalling memories:
+
+#### Memory Recovery (想起)
+
+1. **Before Starting New Work**
+   - Search for existing implementations or similar work
+   - Query using: topic name, problem description, function names
+   - Purpose: Avoid reinventing the wheel
+
+2. **When Context Feels Incomplete**
+   - Map relationships between current items
+   - Discover hidden connections and dependencies
+   - Purpose: Understand full context before proceeding
+
+3. **Before Creating New Items**
+   - Search for similar titles and content
+   - Check across all item types (issues, knowledge, decisions)
+   - Purpose: Update existing items rather than create duplicates
+
+#### Memory Preservation (保存)
+
+1. **Automatic Relationship Detection**
+   - When creating items, let mcp-specialist find and link related content
+   - Detect relationships based on: shared tags, content references, temporal proximity
+   - Purpose: Build rich knowledge graph automatically
+
+2. **Data Integrity Enforcement**
+   - Validate all items before saving (required fields, valid statuses)
+   - Ensure bidirectional relationships are maintained
+   - Purpose: Keep memory consistent and reliable
+
+3. **Efficient Organization**
+   - Use bulk operations for related changes
+   - Apply appropriate tags for future retrieval
+   - Maintain clear type distinctions (issues vs knowledge vs decisions)
+   - Purpose: Make future memory recovery fast and accurate
+
+#### Trigger Patterns for Autonomous Memory Operations
+
+**For Recovery:**
+- "Let me implement..." → Search existing implementations first
+- "I think we discussed..." → Search decisions and knowledge
+- "Where did I see..." → Multi-dimensional search
+
+**For Preservation:**
+- "This relates to..." → Auto-detect and create relationships
+- "I learned that..." → Ensure proper knowledge categorization
+- "This affects..." → Update all related items together
+
+**Core Principle: Every thought worth having is worth preserving properly.**
+
 ## 📚 Detailed Guides
 
 For comprehensive documentation, consult specialist agents:
@@ -94,5 +151,4 @@ For comprehensive documentation, consult specialist agents:
 
 ---
 
-*For the complete 755-line detailed guide, see SHIROKUMA-full.md*  
-*For specific expertise, consult the specialist agents*
+*For specific expertise, consult the specialist agents listed above*
