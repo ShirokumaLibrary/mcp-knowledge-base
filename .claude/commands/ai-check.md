@@ -1,20 +1,80 @@
 ---
 description: Check current work status and recent memory records
-allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, Bash(date:*)
+argument-hint: "[deep|validate]"
+allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__search_items, Bash(date:*), Task
 ---
 
 # ai-check - Current Work Status Check
 
 ## Usage
 ```
-/ai-check
+/ai-check          # Basic status check
+/ai-check deep     # Deep analysis with mcp-specialist
+/ai-check validate # Check items needing validation
 ```
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 **Check your current work status - like checking your notes with memory disorder**
+
+Parse arguments: $ARGUMENTS
+- If "deep": Use shirokuma-mcp-specialist for advanced analysis
+- If "validate": Check items needing validation
+- Otherwise: Perform standard check
+
+If $ARGUMENTS === "deep":
+  Task: Use shirokuma-mcp-specialist for deep analysis
+  Purpose: Comprehensive relationship mapping and pattern detection
+  Details:
+    - Analyze item relationships across all types
+    - Detect patterns in recent work
+    - Identify orphaned or disconnected items
+    - Create visualization of work structure
+    - Suggest optimizations and connections
+    - Generate detailed insights report
+  After agent completes, continue with standard check below.
+
+If $ARGUMENTS === "validate":
+  ## 🔍 Validation Check
+  
+  # Search for items with validation_needed tag
+  Execute: `mcp__shirokuma-knowledge-base__search_items_by_tag`
+  - tag: "validation_needed"
+  
+  # Also search for items missing validated tag
+  Execute in parallel:
+  - Search decisions without "validated" tag from last 30 days
+  - Search knowledge items with technical keywords without "validated" tag
+  
+  Display:
+  ```
+  ## 🔍 Items Needing Validation
+  
+  ### Decisions requiring validation: [count]
+  - [age] days: [title] (decisions-XX)
+    Keywords: [technical keywords found]
+    
+  ### Knowledge items to verify: [count]  
+  - [age] days: [title] (knowledge-XX)
+    Topic: [main technical area]
+  
+  ### Validation Tips:
+  - Use WebSearch to check current best practices
+  - Update items with validation results
+  - Add "validated" tag when complete
+  - Consider re-validation after 30 days
+  
+  Quick validate: /ai-remember decision: validate [item-id]
+  ```
+  
+  If no items need validation:
+  ```
+  ✅ All items are validated or non-technical!
+  ```
+  
+  End after validation check (skip standard check).
 
 ### 1. Get Current State
 Execute: `mcp__shirokuma-knowledge-base__get_current_state()`

@@ -20,7 +20,7 @@ argument-hint: "[test-number or phase]"
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 The user wants to run MCP functional tests. I need to:
 1. Check prerequisites (MCP server availability, data directory)

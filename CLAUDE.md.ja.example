@@ -1,9 +1,8 @@
 # CLAUDE.md.ja.example
 
 ## Language
-Japanese
-
-*注: ここに希望の言語を設定してください（例: Japanese, English, Chinese）。AIはデフォルトでこの言語で応答します。プロジェクトで使用する際はこのコメントを削除してください。*
+**Language: SHIROKUMA_LANG環境変数をチェック（設定されていない場合のデフォルト: English）**
+**Note: SHIROKUMA_LANGまたはユーザーの言語で指定された言語で応答**
 
 このファイルは、Claude Code (claude.ai/code) がこのリポジトリで作業する際のプロジェクト固有情報を提供します。
 

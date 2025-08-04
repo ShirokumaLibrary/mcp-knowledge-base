@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 <ultrathink>
 The user wants to optimize a document for AI readability. I need to:

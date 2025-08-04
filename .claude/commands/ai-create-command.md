@@ -12,7 +12,7 @@ argument-hint: "<command-name> <description>"
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 <ultrathink>
 The user wants to create a new slash command. I need to:
@@ -29,7 +29,7 @@ Create a new slash command file based on the following Claude Code specification
 **IMPORTANT**: 
 1. Always include the following in the Task section of the created command:
    ```
-   @.claude/commands/LANG.markdown
+   @.claude/agents/LANG.markdown
    ```
 2. For internationalization, use placeholder notation `[text]` for any user-facing text that should be translated.
 3. Structure content in English but mark translatable strings clearly.

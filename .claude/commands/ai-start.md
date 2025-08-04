@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 ### Execute Session Start
 

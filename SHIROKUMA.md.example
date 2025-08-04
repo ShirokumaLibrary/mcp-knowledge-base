@@ -1,698 +1,98 @@
-# SHIROKUMA.md
+# SHIROKUMA.md (Simplified Version)
 
-AI Pair Programming with shirokuma-knowledge-base MCP
+AI Pair Programming with shirokuma-knowledge-base MCP - Core Principles
 
-## 🤝 Fundamental Principles of AI Pair Programming
+## 🎯 Fundamental Truth
+**AI Memory = Zero After Session End**
+- Every new conversation starts from scratch
+- All context must be externalized to MCP
+- Continuity depends on explicit documentation
 
-### Why Detailed Recording is Necessary
-**AI's Fundamental Limitation**: Session End = Complete Memory Loss
-- AI remembers nothing from previous conversations
-- Forgets the purpose of features being implemented
-- Technical decisions discussed moments ago vanish
-- Therefore, everything must be externalized and saved in MCP
+## 📋 Four Core Principles
 
-### Effective Communication with AI
-1. **Provide Clear Context**: "Currently implementing XXX feature, facing YYY problem"
-2. **Specific Instructions**: "Modify AAA function in ZZZ file"
-3. **Explicit Expected Results**: "Error should be resolved and tests should pass"
+### 1. Issue-Driven Development
+- **No code without an issue** - Every change needs a "why"
+- **Clear context required** - Future AI needs to understand
+- **Link everything** - Code → Issue → Documentation
 
-## 📋 Session Management Protocol
+### 2. Continuity Through Documentation
+- **Session start**: Restore context from MCP
+- **During work**: Record decisions immediately  
+- **Session end**: Update state for next AI
 
-### Required Steps When Starting AI Session
-**Important**: Since AI remembers nothing, carefully restore context
+### 3. Quality Through Method
+- **TDD**: Test → Code → Refactor (always in this order)
+- **Tidy First**: Separate structure changes from behavior changes
+- **Document "why"**: Code shows "what", docs explain "why"
 
-1. **Recover Previous Memory**
-   
-   Get overall situation:
-   ```
-   mcp__shirokuma-knowledge-base__get_current_state()
-   ```
-   
-   Check active issues:
-   ```
-   mcp__shirokuma-knowledge-base__get_items({ 
-     type: "issues", 
-     statuses: ["In Progress"],
-     includeClosedStatuses: false 
-   })
-   ```
+### 4. Validate Through External Search
+- **Technical decisions need validation** - Don't rely on internal knowledge alone
+- **Use WebSearch for best practices** - Check current standards and patterns
+- **Record validation results** - Include sources and findings in decisions
 
-2. **Create New Session (Include Continuation Info)**
-   
-   Use MCP to create session with continuation info for AI memory aid:
-   ```
-   mcp__shirokuma-knowledge-base__create_item({
-     type: "sessions",
-     title: "Implementing [Task Name]",
-     content: "Continuing from: [What was being done]",
-     related_tasks: ["issues-XX"]
-   })
-   ```
+## 🚀 Quick Start Commands
 
+```bash
+# Start your session
+/ai-start                  # Restore context and begin work
 
-### Required Steps When Ending AI Session
+# During work
+/ai-remember               # Record decisions (with validation option)
+/ai-check validate         # Check items needing validation
 
-#### Update Session Summary (For Next AI to Understand)
-
-Structure the session update with clear sections:
-```
-mcp__shirokuma-knowledge-base__update_item({
-  type: "sessions",
-  id: currentSessionId,
-  content: `## Completed
-- [Specific achievements]
-
-## Technical Decisions
-- [Include why these decisions were made]
-
-## Next Steps
-- [Clearly state where to resume]`
-})
-```
-
-#### Update Daily (Cumulative per Session)
-
-Daily is created on first session and updated on subsequent sessions.
-
-**Step 1: Get today's date and check existing daily**
-```
-Get current date in YYYY-MM-DD format
-Then call:
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "dailies", 
-  start_date: today, 
-  end_date: today 
-})
-```
-
-**Step 2a: If no daily exists (first session):**
-```
-mcp__shirokuma-knowledge-base__create_item({
-  type: "dailies",
-  date: today,
-  title: "Work Log",
-  content: `## Session 1
-- [Completed work]`,
-  related_tasks: ["sessions-XX"]
-})
-```
-
-**Step 2b: If daily exists (append to existing):**
-```
-First get details:
-mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: "dailies", 
-  id: dailies[0].id 
-})
-
-Then update with new session:
-mcp__shirokuma-knowledge-base__update_item({
-  type: "dailies",
-  id: daily.id,
-  content: daily.content + `
-
-## Session ${sessionNumber}
-- [Completed work]`,
-  related_tasks: [...daily.related_tasks, "sessions-XX"]
-})
-```
-
-#### Update Project State (Essentials Only)
-
-Keep state minimal but informative:
-```
-mcp__shirokuma-knowledge-base__update_current_state({
-  content: `## Where We Are
-- [Current feature/phase]
-
-## What's Next
-- [Specific next action]
-
-## Important Notes
-- [Technical constraints or key decisions only]`,
-  updated_by: "session-end"
-})
-```
-
-## 💡 Issue-Driven Development with AI
-
-### Writing Issues AI Can Understand
-**Important**: Write so AI can understand and propose appropriate solutions
-
-Create issues with clear structure:
-```
-mcp__shirokuma-knowledge-base__create_item({
-  type: "issues",
-  title: "[Specific feature/problem] [verb]",
-  description: "Brief one-line explanation",
-  priority: "medium",
-  status: "Open",
-  tags: ["enhancement"]
-})
-```
-*Keep content minimal. Supplement verbally during dialogue.*
-
-### Issue Detail Review Flow
-
-**Step 1: Get issue list**
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "issues", 
-  includeClosedStatuses: false 
-})
-```
-
-**Step 2: Get details of specific issue**
-```
-mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: "issues", 
-  id: issues[0].id 
-})
-```
-
-**Step 3: Follow related documents for context**
-For each related document ID (format: "type-id"):
-```
-mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: [extracted type], 
-  id: [extracted id] 
-})
-```
-
-### Issue Categories
-- **bug** / **feature** / **enhancement** / **idea** / **technical-debt** / **documentation**
-
-### Priorities
-- **high** / **medium** / **low**
-
-### Status Transitions
-```
-Open → In Progress → Closed
-              ↓
-          On Hold
-```
-
-### Status Operation Rules
-
-**Check available statuses:**
-```
-mcp__shirokuma-knowledge-base__get_statuses()
-```
-
-**Get statistics by status:**
-For each status, count items:
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "issues", 
-  statuses: [status.name],
-  includeClosedStatuses: true 
-})
-```
-Then count the returned items for statistics.
-
-## 📚 Generic Learning Records (Knowledge)
-
-### Knowledge Recording Criteria (Reusable Across Projects)
-- **Programming Patterns** → Design patterns, implementation techniques
-- **Best Practices** → General development methods, efficient approaches
-- **Tool Usage** → Commands, configuration, troubleshooting
-- **Technical Learning** → Language specs, framework characteristics
-
-Example of generic pattern recording:
-```
-mcp__shirokuma-knowledge-base__create_item({
-  type: "knowledge",
-  title: "Type-safe Error Handling in TypeScript",
-  content: `## Overview
-Generic error handling pattern
-
-## Implementation
-[Code example]
-
-## Use Cases
-[Applicable to any project]`,
-  tags: ["typescript", "error-handling", "pattern"]
-})
-```
-
-## 📋 Project-Specific Decisions (decisions)
-
-### Decisions Recording Criteria (Project-Specific Rules)
-- **Technical Decisions** → Why that approach was chosen
-- **Constraints** → Rules to follow and their reasons
-- **Naming Conventions** → Project-specific naming rules
-- **Avoid Patterns** → Features not to use and why
-
-Example of project-specific decision:
-```
-mcp__shirokuma-knowledge-base__create_item({
-  type: "decisions",
-  title: "Use Hyphen Format for MCP Function Names",
-  content: `## Decision
-Use hyphen format for shirokuma-knowledge-base function calls
-
-## Reason
-Consistency with instance name
-
-## Impact
-All MCP function calls`,
-  tags: ["mcp", "naming-convention"]
-})
-```
-
-### Document Categories
-- **docs**: Project specifications, API specs, architecture documents
-- **knowledge**: Generic technical knowledge, patterns, best practices
-- **decisions**: Project-specific decisions, constraints, rules
-- **features**: 実装済み機能カタログ、API仕様、バージョン情報
-
-## 📦 Implementation Catalog (features)
-
-### When to Use Features Type
-- **Before implementing new functionality**: Search to avoid duplication
-- **When documenting completed features**: Record API specs and usage
-- **Version tracking**: Track feature status (Implemented/Experimental/Deprecated)
-
-### Search for Existing Features
-```
-mcp__shirokuma-knowledge-base__search_items({ 
-  query: "authentication", 
-  types: ["features"] 
-})
-```
-
-### Record New Feature Implementation
-```
-mcp__shirokuma-knowledge-base__create_item({
-  type: "features",
-  title: "Feature Name",
-  description: "Brief description",
-  content: `## API\n## Usage\n## Status\n- Version: vX.X.X`,
-  tags: ["category", "version"]
-})
-```
-
-## 📅 Daily Records (Cumulative)
-
-### Recording Timing
-- **Update at end of each session**
-- Create on first session of the day
-- Append content in subsequent sessions
-- Daily work history accumulates naturally
-
-## 🎯 Project State Management
-
-### Update Command
-
-Update project state with structured content:
-```
-mcp__shirokuma-knowledge-base__update_current_state({
-  content: `## Project Status
-Current Phase: XXX
-
-## Active Tasks
-- [HIGH] issue-XX: YYY
-
-## Next Priorities
-- ZZZ`,
-  updated_by: "ai-milestone",  
-  tags: ["milestone", "status-update"],
-  related: ["issues-XX", "sessions-YY"]
-})
-```
-*updated_by options: "ai-start", "ai-finish", "ai-milestone"*
-
-
-## 🏷️ Tag Management
-
-### Rules
-- At least 1 tag required for all items
-- Lowercase alphanumeric and hyphens (e.g., frontend-react)
-- Use singular form (bug, not bugs)
-
-### Tag Operation Flow
-
-**1. Check existing tags and create if needed:**
-```
-mcp__shirokuma-knowledge-base__get_tags()
-```
-If tag doesn't exist:
-```
-mcp__shirokuma-knowledge-base__create_tag({ 
-  name: "new-feature" 
-})
-```
-
-**2. Get items by tag:**
-```
-mcp__shirokuma-knowledge-base__search_items_by_tag({ 
-  tag: "bug",
-  types: ["issues", "knowledge"] 
-})
-```
-
-**3. Search tags by pattern (partial match):**
-```
-mcp__shirokuma-knowledge-base__search_tags({ 
-  pattern: "frontend" 
-})
-```
-
-## 🔗 Required Relationship Rules
-
-- Session → Target issue being worked on
-- Daily → Issues/sessions worked on that day
-- Document → Related issues
-
-**Format for relationships:**
-- related_tasks: ["issues-1", "plans-2"]
-- related_documents: ["docs-3", "knowledge-4"]
-
-*ID format: "type-number" (e.g., "issues-123")*
-
-## ✅ Best Practices
-
-1. **Ensure Continuity**: Design information assuming AI memory loss
-2. **current_state is Essential**: Without this, next AI knows nothing
-3. **Explicit Context**: Always record "why" and "where from"
-
-## ⚠️ Anti-patterns
-
-### Behaviors to Avoid
-- ❌ **Excessive Recording**: Recording all dialogue
-- ❌ **Overly Detailed Sessions**: Long discussion content
-- ❌ **Forgetting current_state Updates**: Next session context loss
-- ❌ **Recording Irrelevant Info**: Temporary trial and error
-
-### Careful Deletion Handling
-
-**Verification flow before deletion:**
-
-1. Get item details:
-```
-mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: "issues", 
-  id: 123 
-})
-```
-
-2. Check conditions before deletion:
-- No related tasks (related_tasks.length === 0)
-- No related documents (related_documents.length === 0)  
-- Status is "Closed"
-
-3. If all conditions met:
-```
-mcp__shirokuma-knowledge-base__delete_item({ 
-  type: "issues", 
-  id: 123 
-})
-```
-
-
-## 🔍 Search & Filtering
-
-### Basic Search Patterns
-
-**Full-text search:**
-```
-mcp__shirokuma-knowledge-base__search_items({ 
-  query: "keyword", 
-  types: ["issues"], 
-  limit: 20 
-})
-```
-
-**Date filter:**
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "sessions", 
-  start_date: "2025-01-01", 
-  end_date: "2025-01-31" 
-})
-```
-
-**Status filter:**
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "issues", 
-  statuses: ["In Progress"], 
-  includeClosedStatuses: false 
-})
-```
-
-### Incremental Search
-
-**Step 1: Get search suggestions:**
-```
-mcp__shirokuma-knowledge-base__search_suggest({ 
-  query: "auth",
-  types: ["knowledge", "docs"],
-  limit: 5 
-})
-```
-
-**Step 2: Full search with selected suggestion:**
-```
-mcp__shirokuma-knowledge-base__search_items({ 
-  query: [selected suggestion] 
-})
-```
-
-## 🔎 Codebase Search (Index)
-
-### Initial Index Creation
-
-Index entire codebase (only needed once):
-```
-mcp__shirokuma-knowledge-base__index_codebase({ 
-  force: false 
-})
-```
-
-### When to Use Semantic Search
-- **Natural Language Search**: "where authentication happens" → discover related code
-- **Similar Code Search**: Find duplicate implementation patterns
-- **Impact Analysis**: Identify related files affected by changes
-
-**Natural language code search:**
-```
-mcp__shirokuma-knowledge-base__search_code({ 
-  query: "user authentication processing", 
-  fileTypes: ["ts", "js"],
-  limit: 10 
-})
-```
-
-**Find related files for specific file:**
-```
-mcp__shirokuma-knowledge-base__get_related_files({ 
-  file: "src/auth/login.ts",
-  depth: 2  
-})
-```
-
-**Check index status:**
-```
-mcp__shirokuma-knowledge-base__get_index_status()
-```
-
-### Index Update Timing
-- After major refactoring
-- After adding new features
-- Regular maintenance (weekly)
-
-## 📋 Custom Types
-
-### Type Management Flow
-
-**1. Check existing types:**
-```
-mcp__shirokuma-knowledge-base__get_types({ 
-  include_definitions: true 
-})
-```
-
-**2. Create project-specific type:**
-If type doesn't exist:
+# End your session  
+/ai-finish                 # Save context and handover
 ```
-mcp__shirokuma-knowledge-base__create_type({ 
-  name: "bugs", 
-  base_type: "tasks", 
-  description: "For bug reports" 
-})
-```
-
-**3. Update type description:**
-```
-mcp__shirokuma-knowledge-base__update_type({ 
-  name: "bugs", 
-  description: "Bug reports - reproduction steps and environment info required" 
-})
-```
-
-**4. Delete unused type:**
-First check if any items exist:
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "old_bugs" 
-})
-```
-If no items (length === 0):
-```
-mcp__shirokuma-knowledge-base__delete_type({ 
-  name: "old_bugs" 
-})
-```
-
-### Type Migration Flow
-
-Migrate items between types (ID changes, relations auto-update):
-```
-mcp__shirokuma-knowledge-base__change_item_type({
-  from_type: "issues",
-  from_id: 123,
-  to_type: "bugs"
-})
-```
-
-## 🚀 AI Pair Programming Setup
-
-### 1. Minimal Initial Setup
-
-**Create simple project overview:**
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "docs", 
-  title: "Project Overview",
-  content: `## What We're Building
-[One sentence]
-
-## Tech Stack
-[Main language/framework]
-
-## Constraints
-[Important ones only]`
-})
-```
-
-**Initialize current_state:**
-```
-mcp__shirokuma-knowledge-base__update_current_state({ 
-  content: "Project started" 
-})
-```
-
-### 2. Session Flow Assuming AI Memory Loss
-1. **Start**: Remember "where we are" with current_state → Create session
-2. **Work**: AI records info needed next time in issue/decisions/knowledge
-3. **End**: State "what's next" in current_state → Accumulate daily
-
-### 3. Weekly Review Flow
-
-**Get statistics:**
-```
-mcp__shirokuma-knowledge-base__get_statuses()
-mcp__shirokuma-knowledge-base__get_tags()
-```
-
-**Find old closed issues to archive:**
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "issues", 
-  statuses: ["Closed"],
-  end_date: "30 days ago"
-})
-```
-
 
-## 📖 AI Pair Programming Quick Reference
+## 🤖 Specialist Agents
 
-### Session Start (AI Remembers Nothing)
+| Agent | Purpose | When to Use |
+|-------|---------|-------------|
+| **mcp-specialist** | MCP operations expert | Complex queries, bulk operations |
+| **methodology-keeper** | Quality guardian | Ensure best practices |
+| **issue-manager** | Issue tracking | Task management |
+| **knowledge-curator** | Knowledge organization | Document learning |
+| **session-automator** | Workflow automation | Start/end sessions |
 
-**1. Recover previous memory:**
-```
-mcp__shirokuma-knowledge-base__get_current_state()
-mcp__shirokuma-knowledge-base__get_items({ type: "sessions", limit: 1 })
-mcp__shirokuma-knowledge-base__get_items({ type: "issues", includeClosedStatuses: false })
-mcp__shirokuma-knowledge-base__get_items({ type: "decisions" })
-```
-
-**2. Create session (include continuation info):**
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "sessions", 
-  title: "Task name",
-  content: "Previously: Completed XXX. Now: Starting from YYY"
-})
-```
+## 📚 Detailed Guides
 
-### During Work (Only When Necessary)
-
-**Record important tasks:**
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "issues", 
-  title: "Specific task" 
-})
-```
+For comprehensive documentation, consult specialist agents:
 
-**Project-specific decisions:**
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "decisions", 
-  title: "XXX should be YYY" 
-})
-```
+- **MCP Operations** → Ask `shirokuma-mcp-specialist`
+- **Development Methods** → Ask `shirokuma-methodology-keeper`  
+- **Issue Management** → Ask `shirokuma-issue-manager`
+- **Knowledge Organization** → Ask `shirokuma-knowledge-curator`
+- **Session Workflows** → Ask `shirokuma-session-automator`
 
-**Generic knowledge (reusable):**
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "knowledge", 
-  title: "General solution pattern" 
-})
-```
+## ⚡ Essential MCP Operations
 
-### Session End (Must Execute for Next AI)
+### Restore Context (Session Start)
+- Retrieve overall project state
+- Check last session for continuity
+- Review active work items
 
-**Absolutely essential - Update current state:**
-```
-mcp__shirokuma-knowledge-base__update_current_state({ 
-  content: "Where: XXX completed\nNext: Start from YYY\nNote: Be careful of ZZZ" 
-})
-```
+### Save Progress (During Work)
+- Record important decisions immediately
+- Update progress on active tasks
+- Document learnings and patterns
+- For technical decisions: validate with web search
+- Tag items appropriately for future reference
 
-**Update daily (accumulate work history):**
+### Handover (Session End)
+- Update project state for next AI
+- Summarize daily accomplishments
+- Close session with clear next steps
 
-1. Get today's daily:
-```
-mcp__shirokuma-knowledge-base__get_items({ 
-  type: "dailies", 
-  start_date: today, 
-  end_date: today 
-})
-```
+## 🎓 Remember
 
-2a. If daily exists, get details and append:
-```
-mcp__shirokuma-knowledge-base__get_item_detail({ 
-  type: "dailies", 
-  id: dailies[0].id 
-})
+1. **You are stateless** - Next session's AI won't remember anything
+2. **Issues drive work** - Create before coding
+3. **Tests come first** - Red → Green → Refactor
+4. **Document immediately** - If you think it, record it
+5. **Use specialists** - Each agent has deep expertise
+6. **Validate externally** - Technical decisions need web search verification
 
-mcp__shirokuma-knowledge-base__update_item({ 
-  type: "dailies", 
-  id: daily.id, 
-  content: daily.content + `\n\n## Session ${sessionNumber}\n- [Completed work]` 
-})
-```
+---
 
-2b. If no daily exists, create:
-```
-mcp__shirokuma-knowledge-base__create_item({ 
-  type: "dailies", 
-  date: today, 
-  title: "Work Log", 
-  content: "## Session 1\n- [Completed work]" 
-})
-```
+*For the complete 755-line detailed guide, see SHIROKUMA-full.md*  
+*For specific expertise, consult the specialist agents*

@@ -1,6 +1,6 @@
 ---
 description: Remind AI of fundamental principles and project context
-allowed-tools: Read, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__search_items
+allowed-tools: Read, mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__search_items, Task
 ---
 
 # ai-remind - Return to Fundamentals
@@ -18,7 +18,7 @@ Examples:
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 **Like someone with memory disorder checking their fundamental notes**
 
@@ -66,6 +66,17 @@ Based on $ARGUMENTS or current context, emphasize relevant principles:
 - If "memory" → Emphasize immediate recording
 - If "rules" → Emphasize 作業8条
 - If working on complex task → Emphasize breaking down
+
+If $ARGUMENTS contains "tdd" or "method" or "quality":
+  Task: Use shirokuma-methodology-keeper to check adherence
+  Purpose: Ensure current work follows SHIROKUMA principles
+  Details:
+    - Check if TDD cycle is being followed properly
+    - Verify code quality standards
+    - Review recent decisions against best practices
+    - Identify methodology violations
+    - Provide specific guidance for improvement
+    - Reinforce positive patterns observed
 
 ### 6. Action Prompt
 ```

@@ -85,7 +85,7 @@ export DATABASE_ROOT="/path/to/data"
 export LOG_LEVEL="info"  # debug, info, warn, error
 
 # Optional: Response language (for Claude AI integration)
-export SHIROKUMA_LANG="Japanese"  # English (default), Japanese
+export SHIROKUMA_LANG="日本語"  # "English" (default), "日本語", or any language name in its native script
 ```
 
 ## 📊 Content Types

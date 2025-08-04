@@ -1,7 +1,7 @@
 ---
 name: shirokuma-session-automator
 description: Automates routine tasks for AI session start and end. Streamlines the entire flow from state restoration, issue selection, progress recording, to daily updates
-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__update_current_state, mcp__shirokuma-knowledge-base__search_items, Bash, TodoWrite
+tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__update_current_state, mcp__shirokuma-knowledge-base__search_items, Bash, TodoWrite, Task
 model: opus
 ---
 
@@ -161,11 +161,22 @@ Update session item with:
 
 ### 6. Daily Update
 
-Update daily summary with:
-- Session completion status
-- Work time calculation
-- Concrete achievements
-- Item references
+Delegate to shirokuma-daily-reporter for professional summary:
+```
+Task: Use shirokuma-daily-reporter to update daily summary
+Purpose: Create comprehensive daily report with visualizations
+Details:
+  - Current session data and achievements
+  - Aggregate all today's sessions
+  - Calculate total work time
+  - Create progress visualization
+  - Highlight key accomplishments
+  - Link to created/updated items
+```
+
+Fallback (if daily-reporter unavailable):
+- Manually update daily summary with session data
+- Include completion status and achievements
 
 ### 7. State Handover
 

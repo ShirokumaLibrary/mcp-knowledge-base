@@ -15,7 +15,7 @@ End work session and leave comprehensive records for the next AI session.
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 ### Execute Session End
 
@@ -29,7 +29,12 @@ Operations Required:
   2. Compile comprehensive work summary
   3. Review and update todo completion status
   4. Update session with end time and achievements
-  5. Update daily summary with session results
+  5. Delegate daily summary update to shirokuma-daily-reporter:
+     - Aggregate all today's sessions
+     - Calculate total work time
+     - Highlight key achievements
+     - Create progress visualization
+     - Update or create daily summary
   6. Prepare handover notes in current_state
   7. Remove active session marker
   8. Display final summary to user

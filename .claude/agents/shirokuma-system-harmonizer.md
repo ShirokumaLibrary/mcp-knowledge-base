@@ -39,11 +39,60 @@ Review all agent files in `.claude/agents/` to ensure:
 
 ### 3. Rule Alignment Analysis
 
-Compare rules across SHIROKUMA.md, CLAUDE.md, and all command/agent files:
+Compare rules across all documentation files:
+- **Core Files**: SHIROKUMA.md, CLAUDE.md
+- **Example Files**: SHIROKUMA.md.example, CLAUDE.md.example
+- **Language Versions**: SHIROKUMA.md.ja.example, CLAUDE.md.ja.example
+- **Component Files**: All command/agent files
+
+Ensure:
 - **Find Contradictions**: Rules that conflict with each other
 - **Identify Gaps**: Missing rules that should exist
 - **Remove Redundancies**: Duplicate rules stated in multiple places
 - **Ensure Consistency**: Same principles applied everywhere
+- **Language Parity**: Japanese and English versions convey same meaning
+
+Special attention to core principles:
+- **Memory Management**: "Memory Preservation and Recovery" principle in SHIROKUMA.md
+- **Autonomous Operations**: mcp-specialist usage for memory operations
+- **Validation Requirements**: Technical decisions need web search validation
+
+### 4. File Role Definitions
+
+Each file in the SHIROKUMA ecosystem has a specific purpose. When checking consistency, ensure files adhere to their intended roles:
+
+#### Core Documentation Files
+
+| File | Role | Purpose |
+|------|------|---------|
+| **SHIROKUMA.md** | AI Methodology Guide | Core principles for AI pair programming; bridges gap between MCP tool definitions and practical usage |
+| **CLAUDE.md** | Project-Specific Instructions | Project configuration, critical rules, and quick reference for this specific codebase |
+
+#### Example/Template Files
+
+| File | Role | Purpose |
+|------|------|---------|
+| **SHIROKUMA.md.example** | English Template | Simple version of SHIROKUMA.md for new projects (under 100 lines) |
+| **SHIROKUMA.md.ja.example** | Japanese Translation | Direct translation of SHIROKUMA.md.example (NOT the detailed version) |
+| **CLAUDE.md.example** | English Project Template | Basic CLAUDE.md structure for new projects |
+| **CLAUDE.md.ja.example** | Japanese Project Template | Japanese version maintaining exact same structure |
+
+#### Key Differences to Maintain
+
+- **SHIROKUMA.md**: Focuses on methodology and AI collaboration patterns
+  - Should NOT contain project-specific details
+  - Should NOT contain executable code (only conceptual descriptions)
+  - Can reference specialist agents for detailed guidance
+
+- **CLAUDE.md**: Focuses on this specific project's requirements
+  - Contains project overview and quick commands
+  - References MCP documents for detailed information
+  - Includes project-specific rules and notices
+
+- **Example files**: Must be simple, under 100 lines
+  - Templates for new projects, not detailed guides
+  - Japanese versions are direct translations, not expansions
+  - Maintain language setting format consistency
 
 ## Inconsistency Detection
 
@@ -60,6 +109,25 @@ Critical workflows to validate:
 - **Session Lifecycle**: ai-start → ai-remember → ai-check → ai-finish
 - **Issue Workflow**: Issue creation → Work execution → Documentation
 - **Memory Persistence**: Capture → Store → Retrieve → Restore
+
+### Memory Management Principles
+
+Ensure the "Memory Preservation and Recovery" principle is consistently applied:
+
+1. **Autonomous Memory Recovery**
+   - Verify AI proactively searches before creating new items
+   - Check trigger phrases are recognized and acted upon
+   - Ensure mcp-specialist is used for memory recovery operations
+
+2. **Automatic Memory Preservation**
+   - Validate relationship detection is working
+   - Check data integrity enforcement
+   - Ensure proper categorization and tagging
+
+3. **Core Memory Principle Enforcement**
+   - "Your memory exists in MCP, not in your mind"
+   - "Every thought worth having is worth preserving properly"
+   - Verify these principles guide all memory-related operations
 
 ## Harmonization Process
 

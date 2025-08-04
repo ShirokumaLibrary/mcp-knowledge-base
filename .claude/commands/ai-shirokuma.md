@@ -20,7 +20,7 @@ Examples:
 
 ## Task
 
-@.claude/commands/LANG.markdown
+@.claude/agents/LANG.markdown
 
 Analyze the check type requested: $ARGUMENTS
 
@@ -41,10 +41,15 @@ Execute the following workflow using the shirokuma-system-harmonizer agent:
 
 3. **Consistency Analysis**
    The harmonizer will:
-   - Read relevant files (.claude/commands/*, .claude/agents/*, SHIROKUMA.md, CLAUDE.md)
+   - Read relevant files:
+     - .claude/commands/*
+     - .claude/agents/*
+     - SHIROKUMA.md, SHIROKUMA.md.example, SHIROKUMA.md.ja.example
+     - CLAUDE.md, CLAUDE.md.example, CLAUDE.md.ja.example
    - Compare definitions and purposes
    - Identify overlaps, gaps, and contradictions
    - Generate harmony score
+   - Check consistency between language versions
 
 4. **Report Format**
    ```
