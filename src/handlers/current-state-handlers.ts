@@ -9,7 +9,7 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolResponse } from '../types/mcp-types.js';
 import { UpdateCurrentStateSchema, CurrentStateMetadataSchema } from '../schemas/current-state-schemas.js';
 import { createLogger } from '../utils/logger.js';
-import { parseMarkdown, generateMarkdown, type ParsedMarkdown } from '../utils/markdown-parser.js';
+import { parseMarkdown, generateMarkdown } from '../utils/markdown-parser.js';
 import type { TagRepository } from '../database/tag-repository.js';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -121,7 +121,17 @@ export class CurrentStateHandlers {
       await fs.mkdir(this.dataDir, { recursive: true });
 
       // Build metadata
-      const metadata: Record<string, any> = {
+      interface CurrentStateMetadata {
+        title: string;
+        type: string;
+        priority: string;
+        tags: string[];
+        updated_at: string;
+        updated_by: string;
+        related?: string[];
+      }
+
+      const metadata: CurrentStateMetadata = {
         title: 'プロジェクト現在状態',
         type: 'current_state',
         priority: 'high',
@@ -173,7 +183,8 @@ export class CurrentStateHandlers {
         try {
           await this.tagRepo.ensureTagsExist(params.tags);
           this.logger.info(`Registered ${params.tags.length} tags`);
-        } catch (error) {
+        } catch (tagError) {
+          this.logger.error('Failed to register tags', tagError);
           throw new McpError(
             ErrorCode.InternalError,
             `Failed to register tags: ${params.tags.join(', ')}. ` +
