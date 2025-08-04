@@ -42,6 +42,14 @@ export const CommonValidators = {
   priority: z.enum(['high', 'medium', 'low']),
 
   /**
+   * @ai-intent Version string validation
+   * @ai-pattern Strict semantic version format: X.Y.Z where X, Y, Z are numbers
+   */
+  versionString: z.string()
+    .trim()
+    .regex(/^\d+\.\d+\.\d+$/, 'Version must be in X.Y.Z format where X, Y, Z are numbers'),
+
+  /**
    * @ai-intent Date string validation
    * @ai-pattern YYYY-MM-DD format with valid date check
    */

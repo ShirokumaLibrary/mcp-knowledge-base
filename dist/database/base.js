@@ -338,6 +338,7 @@ export class DatabaseConnection {
                     { name: 'id', type: 'string', required: true, default: '', desc: 'Unique identifier' },
                     { name: 'title', type: 'string', required: true, default: '', desc: 'Title of the item' },
                     { name: 'description', type: 'string', required: false, default: '', desc: 'Brief description' },
+                    { name: 'version', type: 'string', required: false, default: '', desc: 'Version information' },
                     { name: 'tags', type: 'tags', required: false, default: '[]', desc: 'Tags for categorization' },
                     { name: 'created_at', type: 'date', required: true, default: '', desc: 'Creation timestamp' },
                     { name: 'updated_at', type: 'date', required: true, default: '', desc: 'Last update timestamp' }

@@ -82,6 +82,10 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
    * @ai-flow 1. Validate params -> 2. Create item -> 3. Return created item
    */
   async function handleCreateItem(params: z.infer<typeof CreateItemParams>): Promise<UnifiedItem> {
+    // Debug logging for version field
+    if (params.version) {
+      console.log('unified-handlers: Received version field', { type: params.type, version: params.version });
+    }
     return itemRepository.createItem(params);
   }
 

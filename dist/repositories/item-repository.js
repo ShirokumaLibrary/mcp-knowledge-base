@@ -1,6 +1,7 @@
 import { TypeRepository } from '../database/type-repository.js';
 import { createLogger } from '../utils/logger.js';
 import { cleanString } from '../utils/string-utils.js';
+import { normalizeVersion } from '../utils/version-utils.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { UnifiedStorage, STORAGE_CONFIGS } from '../storage/unified-storage.js';
 export class ItemRepository {
@@ -89,6 +90,9 @@ export class ItemRepository {
                 case 'updated_at':
                     value = item.updated_at;
                     break;
+                case 'version':
+                    value = ('version' in item ? item.version : undefined) || fieldDef.default_value;
+                    break;
                 default:
                     value = fieldDef.default_value;
             }
@@ -131,6 +135,7 @@ export class ItemRepository {
             type,
             title: String(metadata.title || ''),
             description: metadata.description ? String(metadata.description) : undefined,
+            version: metadata.version ? String(metadata.version) : undefined,
             content: item.content,
             priority: (metadata.priority === 'high' || metadata.priority === 'medium' || metadata.priority === 'low' ? metadata.priority : 'medium'),
             status: statusName,
@@ -278,10 +283,10 @@ export class ItemRepository {
             const exists = await this.storage.exists(config, testId);
             if (exists) {
                 throw new McpError(ErrorCode.InvalidRequest, `File already exists for ${type}-${testId}. ` +
-                    `This may indicate a sequence corruption. ` +
+                    'This may indicate a sequence corruption. ' +
                     `Current sequence value: ${currentValue}, ` +
                     `Next ID would be: ${nextId}. ` +
-                    `Please check the sequences table and rebuild if necessary.`);
+                    'Please check the sequences table and rebuild if necessary.');
             }
             const numId = await this.getNextId(type);
             id = String(numId);
@@ -301,6 +306,16 @@ export class ItemRepository {
         validateRelatedArray(params.related_tasks, 'related_tasks');
         validateRelatedArray(params.related_documents, 'related_documents');
         validateRelatedArray(params.related, 'related');
+        if (params.version !== undefined && params.version !== null && params.version !== '') {
+            if (!/^\d+\.\d+\.\d+$/.test(params.version)) {
+                throw new McpError(ErrorCode.InvalidRequest, 'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")');
+            }
+            const parts = params.version.split('.');
+            const [major, minor, patch] = parts.map(p => parseInt(p, 10));
+            if (major > 99999 || minor > 99999 || patch > 99999) {
+                throw new McpError(ErrorCode.InvalidRequest, 'Version numbers must not exceed 99999 (e.g., "99999.99999.99999" is the maximum)');
+            }
+        }
         const uniqueRelatedTasks = params.related_tasks ? [...new Set(params.related_tasks)] : [];
         const uniqueRelatedDocuments = params.related_documents ? [...new Set(params.related_documents)] : [];
         const uniqueRelated = [...new Set([...uniqueRelatedTasks, ...uniqueRelatedDocuments])];
@@ -312,6 +327,7 @@ export class ItemRepository {
             type,
             title: cleanedTitle,
             description: params.description,
+            version: params.version,
             content: params.content || '',
             priority: params.priority || 'medium',
             status: statusName,
@@ -409,6 +425,16 @@ export class ItemRepository {
         if (allRelated.includes(currentItemRef)) {
             throw new McpError(ErrorCode.InvalidRequest, 'Items cannot reference themselves');
         }
+        if (params.version !== undefined && params.version !== null && params.version !== '') {
+            if (!/^\d+\.\d+\.\d+$/.test(params.version)) {
+                throw new McpError(ErrorCode.InvalidRequest, 'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")');
+            }
+            const parts = params.version.split('.');
+            const [major, minor, patch] = parts.map(p => parseInt(p, 10));
+            if (major > 99999 || minor > 99999 || patch > 99999) {
+                throw new McpError(ErrorCode.InvalidRequest, 'Version numbers must not exceed 99999 (e.g., "99999.99999.99999" is the maximum)');
+            }
+        }
         const uniqueRelatedTasks = params.related_tasks !== undefined
             ? [...new Set(params.related_tasks)]
             : current.related_tasks;
@@ -422,6 +448,7 @@ export class ItemRepository {
             ...current,
             title: cleanedTitle !== undefined ? cleanedTitle : current.title,
             description: params.description !== undefined ? params.description : current.description,
+            version: params.version !== undefined ? params.version : current.version,
             content: params.content !== undefined ? params.content : current.content,
             priority: params.priority !== undefined ? params.priority : current.priority,
             start_date: params.start_date !== undefined ? params.start_date : current.start_date,
@@ -553,7 +580,7 @@ export class ItemRepository {
             item.start_date,
             item.end_date,
             item.start_time,
-            item.version || null,
+            normalizeVersion(item.version) || null,
             JSON.stringify(item.tags),
             JSON.stringify(item.related),
             item.created_at,
@@ -631,6 +658,7 @@ export class ItemRepository {
             type: row.type,
             title: row.title,
             description: row.description || undefined,
+            version: row.version || undefined,
             content: row.content !== undefined ? (row.content || '') : '',
             priority: row.priority,
             status: row.status_name || 'Unknown',

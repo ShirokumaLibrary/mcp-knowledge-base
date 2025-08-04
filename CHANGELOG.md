@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.9] - 2025-08-04
+
 ### Fixed
 - **Database Rebuild**: Fixed db_metadata version not updating during rebuild (Issue #79)
   - Added schema_version update in rebuild-db.ts
@@ -17,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Version Field**: Fixed missing version field implementation in MCP handlers (Issue #81)
   - Added version field support in create/update operations
   - Version information now properly saved and retrieved
+  - Added strict format validation (X.Y.Z format only)
+  - Added overflow protection (max 99999 per segment)
+  - Version values are normalized in database for proper comparison
 
 ## [0.7.8] - 2025-08-04
 

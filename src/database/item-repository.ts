@@ -217,6 +217,13 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       updated_at: now
     } as UnifiedItem;
 
+    // Debug logging for version field
+    if (data.version) {
+      this.logger.debug('Creating item with version', { type, id, version: data.version });
+    }
+    console.log('[DEBUG] createItem - data.version:', data.version);
+    console.log('[DEBUG] createItem - item.version:', item.version);
+
     // Save to markdown
     await this.saveToMarkdown(item);
 
@@ -615,8 +622,13 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     const status = await this.statusRepository.getStatusById(item.status_id);
     const statusName = status?.name || 'Open';
 
+    // Get type definition for base field
+    const typeDef = await this.getType(item.type);
+    const baseType = typeDef?.baseType || 'documents';
+
     // Prepare metadata
     const metadata: Record<string, string | number | null | string[]> = {
+      base: baseType,
       id: item.type === 'sessions' || item.type === 'dailies' ? item.id : parseInt(item.id),
       title: item.title,
       priority: item.priority,
@@ -631,8 +643,14 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     if (item.description) {
       metadata.description = item.description;
     }
+    console.log('[DEBUG] saveToMarkdown - item.version:', item.version);
     if (item.version) {
       metadata.version = item.version;
+      this.logger.debug('Adding version to metadata', { type: item.type, id: item.id, version: item.version });
+      console.log('[DEBUG] saveToMarkdown - metadata after adding version:', metadata);
+    } else {
+      this.logger.debug('No version field in item', { type: item.type, id: item.id });
+      console.log('[DEBUG] saveToMarkdown - No version field in item');
     }
     if (item.start_date) {
       metadata.start_date = item.start_date;

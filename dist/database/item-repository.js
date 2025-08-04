@@ -139,6 +139,11 @@ export class ItemRepository extends BaseRepository {
             created_at: now,
             updated_at: now
         };
+        if (data.version) {
+            this.logger.debug('Creating item with version', { type, id, version: data.version });
+        }
+        console.log('[DEBUG] createItem - data.version:', data.version);
+        console.log('[DEBUG] createItem - item.version:', item.version);
         await this.saveToMarkdown(item);
         await this.syncToDatabase(item);
         if (item.tags.length > 0) {
@@ -425,7 +430,10 @@ export class ItemRepository extends BaseRepository {
         await fs.mkdir(dir, { recursive: true });
         const status = await this.statusRepository.getStatusById(item.status_id);
         const statusName = status?.name || 'Open';
+        const typeDef = await this.getType(item.type);
+        const baseType = typeDef?.baseType || 'documents';
         const metadata = {
+            base: baseType,
             id: item.type === 'sessions' || item.type === 'dailies' ? item.id : parseInt(item.id),
             title: item.title,
             priority: item.priority,
@@ -438,8 +446,15 @@ export class ItemRepository extends BaseRepository {
         if (item.description) {
             metadata.description = item.description;
         }
+        console.log('[DEBUG] saveToMarkdown - item.version:', item.version);
         if (item.version) {
             metadata.version = item.version;
+            this.logger.debug('Adding version to metadata', { type: item.type, id: item.id, version: item.version });
+            console.log('[DEBUG] saveToMarkdown - metadata after adding version:', metadata);
+        }
+        else {
+            this.logger.debug('No version field in item', { type: item.type, id: item.id });
+            console.log('[DEBUG] saveToMarkdown - No version field in item');
         }
         if (item.start_date) {
             metadata.start_date = item.start_date;

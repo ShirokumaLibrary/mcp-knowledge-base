@@ -9,14 +9,14 @@ describe('Version Utils', () => {
       expect(normalizeVersion('12.345.6789')).toBe('00012.00345.06789');
     });
 
-    it('should handle version with v prefix', () => {
-      expect(normalizeVersion('v0.7.11')).toBe('00000.00007.00011');
-      expect(normalizeVersion('V1.2.3')).toBe('00001.00002.00003');
+    it('should reject version with v prefix', () => {
+      expect(normalizeVersion('v0.7.11')).toBe(null);
+      expect(normalizeVersion('V1.2.3')).toBe(null);
     });
 
-    it('should handle incomplete versions', () => {
-      expect(normalizeVersion('0.7')).toBe('00000.00007.00000');
-      expect(normalizeVersion('1')).toBe('00001.00000.00000');
+    it('should reject incomplete versions', () => {
+      expect(normalizeVersion('0.7')).toBe(null);
+      expect(normalizeVersion('1')).toBe(null);
     });
 
     it('should handle null/undefined', () => {
@@ -61,6 +61,16 @@ describe('Version Utils', () => {
         const denormalized = denormalizeVersion(normalized);
         expect(denormalized).toBe(version);
       });
+    });
+
+    it('should reject versions exceeding max value', () => {
+      expect(normalizeVersion('100000.0.0')).toBe(null);
+      expect(normalizeVersion('0.100000.0')).toBe(null);
+      expect(normalizeVersion('0.0.100000')).toBe(null);
+    });
+
+    it('should handle max valid version', () => {
+      expect(normalizeVersion('99999.99999.99999')).toBe('99999.99999.99999');
     });
   });
 });

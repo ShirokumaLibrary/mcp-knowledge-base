@@ -29,6 +29,9 @@ export function createUnifiedHandlers(fileDb) {
         return item;
     }
     async function handleCreateItem(params) {
+        if (params.version) {
+            console.log('unified-handlers: Received version field', { type: params.type, version: params.version });
+        }
         return itemRepository.createItem(params);
     }
     async function handleUpdateItem(params) {

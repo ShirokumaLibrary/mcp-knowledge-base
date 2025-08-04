@@ -8,6 +8,9 @@ export const CommonValidators = {
         .min(1, 'Tag name is required')
         .regex(/^[a-z][a-z0-9-]*$/, 'Tag name must start with a letter and contain only lowercase letters, numbers, and hyphens'),
     priority: z.enum(['high', 'medium', 'low']),
+    versionString: z.string()
+        .trim()
+        .regex(/^\d+\.\d+\.\d+$/, 'Version must be in X.Y.Z format where X, Y, Z are numbers'),
     dateString: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
         .refine((val) => {

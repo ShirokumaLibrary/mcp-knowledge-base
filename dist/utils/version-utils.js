@@ -2,17 +2,26 @@ export function normalizeVersion(version) {
     if (!version) {
         return null;
     }
-    const cleaned = version.trim().replace(/^v/i, '');
-    const parts = cleaned.split('.');
-    const [major = '0', minor = '0', patch = '0'] = parts;
+    const trimmed = version.trim();
+    if (!/^\d+\.\d+\.\d+$/.test(trimmed)) {
+        return null;
+    }
+    const parts = trimmed.split('.');
+    const [major, minor, patch] = parts;
+    const majorNum = parseInt(major, 10);
+    const minorNum = parseInt(minor, 10);
+    const patchNum = parseInt(patch, 10);
+    if (isNaN(majorNum) || isNaN(minorNum) || isNaN(patchNum)) {
+        return null;
+    }
+    if (majorNum > 99999 || minorNum > 99999 || patchNum > 99999) {
+        return null;
+    }
     const normalized = [
         major.padStart(5, '0'),
         minor.padStart(5, '0'),
         patch.padStart(5, '0')
     ].join('.');
-    if (normalized === '00000.00000.00000' && cleaned !== '0.0.0') {
-        return null;
-    }
     return normalized;
 }
 export function denormalizeVersion(normalized) {

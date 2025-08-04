@@ -8,20 +8,37 @@
  * @ai-intent Normalize version string for database storage
  * @ai-flow "0.7.11" -> "00000.00007.00011"
  * @ai-validation Returns null for invalid input
+ * @ai-requirement Strict format: X.Y.Z where X, Y, Z are numbers
  */
 export function normalizeVersion(version: string | null | undefined): string | null {
   if (!version) {
     return null;
   }
 
-  // Remove common prefixes
-  const cleaned = version.trim().replace(/^v/i, '');
+  const trimmed = version.trim();
+
+  // Strict validation: must match X.Y.Z format exactly
+  if (!/^\d+\.\d+\.\d+$/.test(trimmed)) {
+    return null;
+  }
 
   // Split into parts
-  const parts = cleaned.split('.');
+  const parts = trimmed.split('.');
+  const [major, minor, patch] = parts;
 
-  // Handle various formats
-  const [major = '0', minor = '0', patch = '0'] = parts;
+  // Validate each part is a valid number
+  const majorNum = parseInt(major, 10);
+  const minorNum = parseInt(minor, 10);
+  const patchNum = parseInt(patch, 10);
+
+  if (isNaN(majorNum) || isNaN(minorNum) || isNaN(patchNum)) {
+    return null;
+  }
+
+  // Check for overflow (max 99999)
+  if (majorNum > 99999 || minorNum > 99999 || patchNum > 99999) {
+    return null;
+  }
 
   // Pad each part to 5 digits
   const normalized = [
@@ -29,12 +46,6 @@ export function normalizeVersion(version: string | null | undefined): string | n
     minor.padStart(5, '0'),
     patch.padStart(5, '0')
   ].join('.');
-
-  // Validate result
-  if (normalized === '00000.00000.00000' && cleaned !== '0.0.0') {
-    // Invalid version
-    return null;
-  }
 
   return normalized;
 }

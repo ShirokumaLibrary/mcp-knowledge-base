@@ -148,13 +148,13 @@ export class TypeHandlers {
           type: 'sessions',
           base_type: 'sessions',
           description: 'Work session tracking. Content is optional - can be created at session start and updated later. Uses timestamp-based IDs.',
-          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents']
+          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents', 'version']
         },
         {
           type: 'dailies',
           base_type: 'documents',
           description: 'Daily summaries with required content. One entry per date. Uses date as ID (YYYY-MM-DD).',
-          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents']
+          supported_fields: ['title', 'content', 'description', 'tags', 'related_tasks', 'related_documents', 'version']
         }
       ];
       output += JSON.stringify(definitions);
@@ -177,11 +177,11 @@ export class TypeHandlers {
   private getFieldsForBaseType(baseType: string): string[] {
     switch (baseType) {
       case 'tasks':
-        return ['title', 'content', 'description', 'priority', 'status', 'tags', 'start_date', 'end_date', 'related_tasks'];
+        return ['title', 'content', 'description', 'priority', 'status', 'tags', 'start_date', 'end_date', 'related_tasks', 'version'];
       case 'documents':
-        return ['title', 'content', 'description', 'tags'];
+        return ['title', 'content', 'description', 'tags', 'version'];
       default:
-        return ['title', 'content', 'tags'];
+        return ['title', 'content', 'tags', 'version'];
     }
   }
 
