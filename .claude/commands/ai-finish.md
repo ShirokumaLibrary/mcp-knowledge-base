@@ -13,9 +13,9 @@ allowed-tools: Task
 ## Purpose
 End work session and leave comprehensive records for the next AI session.
 
-**Note: Respond to the user in their language**
-
 ## Task
+
+@.claude/commands/LANG.markdown
 
 ### Execute Session End
 

@@ -18,36 +18,30 @@ Shirokuma MCP Knowledge Baseの詳細な使い方を説明します。
 
 ### データ構造
 
-すべてのアイテムは以下の基本フィールドを持ちます：
+すべてのアイテムに含まれる基本情報：
 
-```typescript
-{
-  type: string;        // コンテンツタイプ
-  id: string;          // 一意のID
-  title: string;       // タイトル
-  content?: string;    // 本文（オプション）
-  tags: string[];      // タグの配列
-  created_at: string;  // 作成日時
-  updated_at: string;  // 更新日時
-}
-```
+- **type**: コンテンツタイプ（issues、docsなど）
+- **id**: 一意の識別子
+- **title**: アイテムのタイトル
+- **content**: 本文内容（オプション）
+- **tags**: タグのリスト
+- **created_at**: 作成日時
+- **updated_at**: 更新日時
 
 ## CRUD操作
 
 ### 作成（Create）
 
-新しいアイテムを作成：
+**新しいアイテムを作成するには：**
 
-```typescript
-// 基本的な作成
-create_item({
-  type: "issues",
-  title: "ログイン機能のバグ",
-  content: "パスワードリセット時にエラーが発生",
-  tags: ["bug", "認証"],
-  priority: "high",
-  status: "Open"
-})
+`create_item`ツールを使用します。例えば、イシューを作成する場合：
+
+- type: "issues"
+- title: "ログイン機能のバグ"
+- content: "パスワードリセット時にエラーが発生"
+- tags: ["bug", "認証"]
+- priority: "high"
+- status: "Open"
 
 // 関連アイテムを含む作成
 create_item({

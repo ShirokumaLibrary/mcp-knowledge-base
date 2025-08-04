@@ -1,252 +1,292 @@
-# Usage Examples
+# Usage Guide
 
-## Working with Items
+> Last Updated: 2025-08-03 (v0.7.8)
+
+This guide provides practical examples for using the Shirokuma MCP Knowledge Base.
+
+## Core Concepts
+
+### Content Types
+
+Shirokuma uses a unified API for all content types:
+
+- **Built-in** (`sessions`, `dailies`) - Cannot be deleted, special ID formats, not shown in `get_types`
+- **Default Tasks** (`issues`, `plans`) - Pre-configured with status/priority, can be deleted
+- **Default Documents** (`docs`, `knowledge`) - Pre-configured for content, can be deleted
+- **Custom** - Create your own types with `create_type`, inherit from tasks or documents
 
 ### Creating Items
 
-```javascript
-// Create an issue
-const issue = await mcp.create_item({
-  type: "issue",
-  title: "Fix login bug",
-  content: "Users cannot login with special characters",
-  priority: "high",
-  tags: ["bug", "auth"]
-});
+**Creating an issue with version tracking:**
 
-// Create a document
-const doc = await mcp.create_item({
-  type: "doc",
-  title: "API Documentation",
-  content: "# API Guide\n\n## Endpoints...",
-  tags: ["documentation", "api"]
-});
+Use the `create_item` tool with these parameters:
+- type: "issues" (note: plural form)
+- title: "Fix login bug"
+- content: "Users cannot login with special characters"
+- status: "Open" (required for task types)
+- priority: "high"
+- version: "0.7.8"
+- tags: ["bug", "auth"]
 
-// Create a knowledge entry
-const knowledge = await mcp.create_item({
-  type: "knowledge",
-  title: "Best Practices for Error Handling",
-  content: "## Error Handling Guidelines\n\n1. Always use try-catch...",
-  tags: ["best-practices", "error-handling"]
-});
+**Creating documentation:**
 
-// Create a plan
-const plan = await mcp.create_item({
-  type: "plan",
-  title: "Q1 2025 Roadmap",
-  content: "Major features for Q1",
-  priority: "high",
-  start_date: "2025-01-01",
-  end_date: "2025-03-31",
-  tags: ["roadmap", "q1-2025"]
-});
-```
+- type: "docs"
+- title: "API Documentation"
+- content: Your markdown content
+- tags: ["documentation", "api"]
+
+**Creating a knowledge entry:**
+
+- type: "knowledge"
+- title: "Best Practices for Error Handling"
+- content: Guidelines in markdown format
+- tags: ["best-practices", "error-handling"]
+
+**Creating a plan:**
+
+- type: "plans" (note: plural form)
+- title: "Q1 2025 Roadmap"
+- content: "Major features for Q1"
+- status: "Open" (required)
+- priority: "high"
+- start_date: "2025-01-01"
+- end_date: "2025-03-31"
+- tags: ["roadmap", "q1-2025"]
 
 ### Retrieving Items
 
-```javascript
-// Get all issues
-const issues = await mcp.get_items({ type: "issue" });
+**To get all issues:**
 
-// Get all plans
-const plans = await mcp.get_items({ type: "plan" });
+Use `get_items` with:
+- type: "issues"
 
-// Get specific item details
-const itemDetail = await mcp.get_item_detail({
-  type: "issue",
-  id: 123
-});
-```
+**To get open issues only:**
+
+- type: "issues"
+- statuses: ["Open", "In Progress"]
+
+**To get specific item details:**
+
+Use `get_item_detail` with:
+- type: "issues"
+- id: 123
 
 ### Updating Items
 
-```javascript
-// Update an issue
-await mcp.update_item({
-  type: "issue",
-  id: 123,
-  title: "Updated: Fix login bug",
-  priority: "critical",
-  status_id: 2
-});
+**To update an issue:**
 
-// Update document content
-await mcp.update_item({
-  type: "doc",
-  id: 456,
-  content: "# Updated API Guide\n\n## New endpoints..."
-});
-```
+Use `update_item` with:
+- type: "issues"
+- id: 123
+- title: "Updated: Fix login bug" (optional)
+- priority: "critical" (optional)
+- status: "In Progress" (use status name, not ID)
+
+**To update document content:**
+
+- type: "docs"
+- id: 456
+- content: Your updated markdown content
 
 ### Searching Items
 
-```javascript
-// Search across multiple types
-const results = await mcp.search_items_by_tag({
-  tag: "feature",
-  types: ["issue", "plan"]  // Search only issues and plans
-});
+**To search across multiple types:**
 
-// Search all types
-const allResults = await mcp.search_items_by_tag({
-  tag: "important"
-  // types omitted = search all types
-});
-```
+Use `search_items_by_tag` with:
+- tag: "feature"
+- types: ["issues", "plans"] (note: plural forms)
+
+**To search all types:**
+
+- tag: "important"
+- types: (omit to search all)
 
 ## Working with Sessions
 
-```javascript
-// Create a new work session
-const session = await mcp.create_session({
-  title: "Implementing authentication",
-  content: "## Tasks completed\n- Set up JWT library\n- Created auth middleware",
-  tags: ["auth", "backend"],
-  category: "development"
-});
+**Creating a new work session:**
 
-// Get latest session to continue work
-const latest = await mcp.get_latest_session();
+Use `create_item` with:
+- type: "sessions"
+- title: "Implementing authentication"
+- content: Progress notes in markdown format
+- tags: ["auth", "backend"]
+- category: "development" (optional)
 
-// Update session with progress
-await mcp.update_session({
-  id: latest.data.id,
-  content: latest.data.content + "\n- Added user validation\n- Updated tests"
-});
+**Getting the latest session:**
 
-// Search sessions by tag
-const authSessions = await mcp.search_sessions_by_tag({
-  tag: "auth"
-});
+Use `get_items` with:
+- type: "sessions"
+- limit: 1
 
-// Get sessions for date range
-const weekSessions = await mcp.get_sessions({
-  start_date: "2025-07-20",
-  end_date: "2025-07-24"
-});
-```
+**Updating session with progress:**
+
+Use `update_item` with:
+- type: "sessions"
+- id: The session ID (e.g., "2025-08-03-10.30.00.123")
+- content: Updated progress notes
+
+**Searching sessions by tag:**
+
+Use `search_items_by_tag` with:
+- tag: "auth"
+- types: ["sessions"]
+
+**Getting sessions for a date range:**
+
+Use `get_items` with:
+- type: "sessions"
+- start_date: "2025-07-20"
+- end_date: "2025-07-24"
 
 ## Working with Daily Summaries
 
-```javascript
-// Create a daily summary
-await mcp.create_summary({
-  date: "2025-07-24",
-  title: "Major refactoring completed",
-  content: "## Achievements\n- Improved type safety\n- Fixed memory leaks\n- Refactored database layer",
-  tags: ["milestone", "refactoring"]
-});
+**Creating a daily summary:**
 
-// Get summaries for a date range
-const summaries = await mcp.get_summaries({
-  start_date: "2025-07-20",
-  end_date: "2025-07-24"
-});
+Use `create_item` with:
+- type: "dailies"
+- date: "2025-07-24" (required, one per day)
+- title: "Major refactoring completed"
+- content: Summary in markdown format
+- tags: ["milestone", "refactoring"]
 
-// Update today's summary
-await mcp.update_summary({
-  date: "2025-07-24",
-  content: summaries.data[0].content + "\n- Updated documentation"
-});
-```
+**Getting summaries for a date range:**
+
+Use `get_items` with:
+- type: "dailies"
+- start_date: "2025-07-20"
+- end_date: "2025-07-24"
+
+**Updating today's summary:**
+
+Use `update_item` with:
+- type: "dailies"
+- id: The date (e.g., "2025-07-24")
+- content: Updated summary content
 
 ## Tag Management
 
-```javascript
-// Create a tag
-await mcp.create_tag({ 
-  name: "feature"
-});
+**Creating a tag:**
 
-// Get all tags
-const tags = await mcp.get_tags();
+Use `create_tag` with:
+- name: "feature"
 
-// Search for tags by pattern
-const testTags = await mcp.search_tags({ 
-  pattern: "test" 
-});
-// Returns all tags containing "test"
+**Getting all tags:**
 
-// Delete a tag
-await mcp.delete_tag({ 
-  name: "obsolete-tag" 
-});
-```
+Run `get_tags` to see all available tags with usage counts.
+
+**Searching for tags by pattern:**
+
+Use `search_tags` with:
+- pattern: "test" (returns all tags containing "test")
+
+**Deleting a tag:**
+
+Use `delete_tag` with:
+- name: "obsolete-tag"
 
 ## Status Management
 
-```javascript
-// Get all statuses
-const statuses = await mcp.get_statuses();
+**Getting all statuses:**
 
-// Create custom status
-await mcp.create_status({ 
-  name: "In Review" 
-});
+Run `get_statuses` to see available statuses with their `is_closed` status.
 
-// Update status name
-await mcp.update_status({
-  id: 4,
-  name: "Under Review"
-});
+**Note:** Status creation, update, and deletion are disabled. Statuses are managed through database initialization.
 
-// Delete status
-await mcp.delete_status({ 
-  id: 5 
-});
-```
+Default statuses:
+- Open (is_closed: false)
+- In Progress (is_closed: false) 
+- Closed (is_closed: true)
+- On Hold (is_closed: false)
+- Resolved (is_closed: true)
 
 ## Type Management
 
-```javascript
-// Get all available types
-const types = await mcp.get_types();
+**Getting all available types:**
 
-// Create a custom type
-await mcp.create_type({
-  name: "recipe",
-  base_type: "documents",
-  description: "Cooking recipes and instructions"
-});
+Run `get_types` to see default and custom types (not sessions/dailies).
 
-// Update type description
-await mcp.update_type({
-  name: "recipe",
-  description: "Detailed cooking recipes with ingredients and steps"
-});
+**Creating a custom type:**
 
-// Change item type (within same base_type)
-const result = await mcp.change_item_type({
-  from_type: "docs",
-  from_id: 123,
-  to_type: "knowledge"
-});
-console.log(`Item moved to ${result.to_type} with new ID: ${result.newId}`);
+Use `create_type` with:
+- name: "recipe" (lowercase, no spaces)
+- base_type: "documents" or "tasks"
+- description: "Cooking recipes and instructions"
 
-// Delete a custom type (only if no items exist)
-await mcp.delete_type({
-  name: "recipe"
-});
-```
+**Updating type description:**
 
-## Application State
+Use `update_type` with:
+- name: "recipe"
+- description: "Detailed cooking recipes with ingredients and steps"
 
-```javascript
-// Get current application state
-const state = await mcp.get_current_state();
-console.log("Current state:", state.content);
+**Changing item type:**
 
-// Update application state
-await mcp.update_current_state({
-  content: "Project Phase: Development\nCurrent Sprint: 4\nTeam Size: 5"
-});
+Use `change_item_type` to move items between types (same base_type only):
+- from_type: "docs"
+- from_id: 123
+- to_type: "knowledge"
 
-// Use state to persist information across sessions
-const appState = await mcp.get_current_state();
-if (!appState.content) {
-  // Initialize state for first time
-  await mcp.update_current_state({
-    content: "Initialized: " + new Date().toISOString()
-  });
-}
-```
+This creates a new item with a new ID and updates all references.
+
+**Deleting a custom type:**
+
+Use `delete_type` with:
+- name: "recipe" (only works if no items exist)
+
+## Application State (Essential for AI Continuity)
+
+**Why is this critical?**
+
+When an AI conversation ends, all context is lost. The current_state is your lifeline for continuity - it's how the next AI knows what was happening.
+
+**Starting a new session:**
+
+Always check the current state first:
+1. Use `get_current_state` to see what was happening
+2. Review active issues and blockers
+3. Continue from where the last session left off
+
+**During your work:**
+
+Update the state when:
+- You complete a major task
+- You encounter a blocker
+- You make an important decision
+- You discover something the next AI needs to know
+
+**Ending your session:**
+
+**CRITICAL**: Always update the state before ending:
+
+Use `update_current_state` with:
+- content: A comprehensive summary including:
+  - What you worked on
+  - What you completed
+  - Any blockers or issues
+  - Next steps for the next AI
+  - Important context or decisions
+- updated_by: "ai-finish" (or your session identifier)
+- tags: ["session-end", "v0.7.8", etc.]
+- related: IDs of items you worked on
+
+**Example workflow:**
+
+Start of session:
+1. `get_current_state` - See previous context
+2. `get_items({ type: "issues", statuses: ["Open", "In Progress"] })` - Check active work
+3. `create_item({ type: "sessions", ... })` - Start work session
+
+End of session:
+1. `update_item({ type: "sessions", ... })` - Update your session
+2. `update_current_state({ content: "...", updated_by: "ai-finish" })` - Save context
+3. `create_item({ type: "dailies", ... })` - Create daily summary if needed
+
+## Error Handling
+
+**All MCP operations may return errors.**
+
+
+Common errors:
+- `Item not found` - Invalid ID or type
+- `Validation failed` - Missing required fields
+- `Type mismatch` - Can't change between different base types
+- `Duplicate entry` - Daily summary already exists for date

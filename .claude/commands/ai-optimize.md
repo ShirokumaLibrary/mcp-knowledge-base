@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-Note: Respond to the user in their language.
+@.claude/commands/LANG.markdown
 
 <ultrathink>
 The user wants to optimize a document for AI readability. I need to:

@@ -18,6 +18,8 @@ Examples:
 
 ## Task
 
+@.claude/commands/LANG.markdown
+
 **Like someone with memory disorder checking their fundamental notes**
 
 ### 1. Project Rules and Methodology

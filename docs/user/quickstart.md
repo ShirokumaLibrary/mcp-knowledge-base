@@ -1,44 +1,64 @@
 # Quick Start Guide
 
-This guide explains how to quickly get started with Shirokuma MCP Knowledge Base.
+> Last Updated: 2025-08-03 (v0.7.8)
+
+Get started with Shirokuma MCP Knowledge Base in 5 minutes.
 
 ## Prerequisites
 
 - Node.js 18 or higher
-- npm or yarn
-- MCP-compatible client (Claude Desktop, etc.)
+- npm (comes with Node.js)
+- Claude Desktop or other MCP-compatible client
 
 ## Installation
 
-### 1. Clone the Repository
+### Option 1: Global Installation (Recommended)
 
 ```bash
-git clone https://github.com/your-repo/shirokuma-mcp-knowledge-base.git
-cd shirokuma-mcp-knowledge-base
+# Install globally
+sudo npm install -g @shirokuma-library/mcp-knowledge-base
+
+# Verify installation
+shirokuma-mcp-knowledge-base --help
 ```
 
-### 2. Install Dependencies
+### Option 2: Local Installation
 
 ```bash
+# Clone repository
+git clone https://github.com/ShirokumaLibrary/mcp-knowledge-base.git
+cd mcp-knowledge-base
+
+# Install and build
 npm install
-```
-
-### 3. Build
-
-```bash
 npm run build
 ```
 
-### 4. MCP Configuration
+## Configuration
 
-Add the following to your MCP client configuration file (e.g., `claude_desktop_config.json` for Claude Desktop):
+### For Global Installation
+
+Add to your Claude Desktop configuration:
 
 ```json
 {
   "mcpServers": {
-    "shirokuma": {
+    "shirokuma-knowledge-base": {
+      "command": "shirokuma-mcp-knowledge-base",
+      "args": ["--data", ".database"]
+    }
+  }
+}
+```
+
+### For Local Installation
+
+```json
+{
+  "mcpServers": {
+    "shirokuma-knowledge-base": {
       "command": "node",
-      "args": ["/path/to/shirokuma-mcp-knowledge-base/dist/server.js"]
+      "args": ["/path/to/mcp-knowledge-base/dist/index.js"]
     }
   }
 }
@@ -48,61 +68,96 @@ Add the following to your MCP client configuration file (e.g., `claude_desktop_c
 
 ### 1. Create Your First Issue
 
-```typescript
-// MCP tool invocation
-create_item({
-  type: "issues",
-  title: "First Issue",
-  content: "This is my first issue",
-  tags: ["bug", "high-priority"]
-})
-```
+In Claude, ask to create an issue:
+
+"Create an issue titled 'Set up authentication' with high priority"
+
+Or use the tool directly:
+- Tool: `create_item`
+- Parameters:
+  - type: "issues"
+  - title: "Set up authentication"
+  - content: "Implement OAuth2 authentication"
+  - status: "Open"
+  - priority: "high"
+  - tags: ["auth", "feature"]
 
 ### 2. Search for Items
 
-```typescript
-// Search by tag
-search_items_by_tag({
-  tag: "bug"
-})
+Search by tag:
+- Tool: `search_items_by_tag`
+- Parameters:
+  - tag: "auth"
 
-// Full-text search
-search_items({
-  query: "first"
-})
-```
+Full-text search:
+- Tool: `search_items`
+- Parameters:
+  - query: "authentication"
 
-### 3. Record a Session
+### 3. Record a Work Session
 
-```typescript
-// Start a work session
-create_item({
-  type: "sessions",
-  title: "Development Work",
-  content: "Started implementing new feature"
-})
-```
+- Tool: `create_item`
+- Parameters:
+  - type: "sessions"
+  - title: "Working on authentication"
+  - content: "Started OAuth2 implementation"
+  - category: "development"
 
-## Next Steps
+## Key Features to Explore
 
-- [Usage Guide](usage.md) - More detailed usage instructions
-- [API Reference](api-reference.md) - Complete API specification
-- [FAQ](faq.md) - Frequently asked questions
+### Semantic Code Search
+
+1. Index your codebase:
+   - Tool: `index_codebase`
+
+2. Search with natural language:
+   - Tool: `search_code`
+   - query: "authentication middleware"
+
+### Daily Summaries
+
+Track daily progress:
+- Tool: `create_item`
+- type: "dailies"
+- date: "2025-08-03"
+- title: "Completed authentication module"
+
+### Custom Types
+
+Create types for your workflow:
+- Tool: `create_type`
+- name: "decisions"
+- base_type: "documents"
+- description: "Architecture decision records"
 
 ## Troubleshooting
 
-### If you encounter database errors
+### Database Issues
 
+Rebuild the database:
 ```bash
+# Global installation
+shirokuma-mcp-knowledge-base-rebuild
+
+# Local installation
 npm run rebuild-db
 ```
 
-### If files are not found
+### Custom Data Location
 
-Specify the data directory with an environment variable:
-
+Set environment variable:
 ```bash
-export MCP_DATABASE_PATH=/path/to/your/data
+export DATABASE_ROOT="/path/to/your/data"
 ```
 
-For more details, see the [FAQ](faq.md).
+### Common Issues
+
+- **"Database locked"**: Another process is using the database
+- **"Table not found"**: Run the rebuild command
+- **"Permission denied"**: Check file permissions on data directory
+
+## Next Steps
+
+- [Usage Guide](usage.md) - Detailed examples
+- [API Reference](api-reference.md) - Complete tool reference
+- [FAQ](faq.md) - Common questions

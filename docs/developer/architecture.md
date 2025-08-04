@@ -6,9 +6,10 @@ Shirokuma MCP Knowledge Base is a Model Context Protocol (MCP) server that provi
 
 ### Key Features
 - **Unified Content Management**: Issues, Plans, Documents, and Knowledge entries
-- **Work Session Tracking**: Daily work activities and summaries
+- **Work Session Tracking**: Daily work activities and summaries (built-in types)
+- **Dynamic Type System**: Create custom types inheriting from tasks or documents
 - **Tag-based Organization**: Cross-content type tagging and search
-- **Custom Workflow**: Configurable status system for Issues and Plans
+- **Custom Workflow**: Configurable status system for task-based types
 - **Consistent Field Naming**: All entity types use `content` field for multi-line text
 
 ## Recent Improvements (2025-07-24)
@@ -72,6 +73,47 @@ src/
     ├── logger.ts           # Logging configuration
     └── markdown-parser.ts  # Markdown/YAML parsing
 ```
+
+## Type System Architecture
+
+### Type Categories
+
+The system supports three distinct categories of content types:
+
+#### 1. Built-in Types (Cannot be deleted, Special handling)
+- **sessions** - Work session records with timestamp-based IDs (YYYY-MM-DD-HH.MM.SS.sss)
+- **dailies** - Daily summaries with date-based IDs (YYYY-MM-DD), one per day limit
+
+These types:
+- Cannot be deleted via `delete_type`
+- Have special ID generation logic
+- Are NOT returned by `get_types` API
+- Have special validation and handling in ItemRepository
+
+#### 2. Default Types (Pre-configured at initialization, CAN be deleted)
+- **issues** - Bug tracking and task management (base_type: tasks)
+- **plans** - Project planning with timelines (base_type: tasks)
+- **docs** - Technical documentation (base_type: documents)
+- **knowledge** - Knowledge base articles (base_type: documents)
+
+These types:
+- Are created during database initialization
+- CAN be deleted if no items exist
+- Are returned by `get_types` API
+- Follow standard ID generation (sequential numeric)
+
+#### 3. Custom Types (User-created via create_type)
+- Created dynamically via `create_type` API
+- Must inherit from either "tasks" or "documents" base_type
+- Can be updated (description only) via `update_type`
+- Can be deleted via `delete_type` if no items exist
+
+### Type Management APIs
+- `get_types` - Returns all default and custom types (NOT sessions/dailies)
+- `create_type` - Create new custom type
+- `update_type` - Update type description
+- `delete_type` - Delete type (only if no items exist, cannot delete sessions/dailies)
+- `change_item_type` - Move items between types with same base_type
 
 ## Database Architecture
 

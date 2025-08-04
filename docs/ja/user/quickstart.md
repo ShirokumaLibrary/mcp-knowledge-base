@@ -50,54 +50,51 @@ Claude Desktopの場合（`claude_desktop_config.json`）：
 
 ### 1. 最初のイシューを作成
 
-```typescript
-// MCPツール呼び出し
-create_item({
-  type: "issues",
-  title: "最初のイシュー",
-  content: "これは最初のイシューです",
-  tags: ["bug", "high-priority"]
-})
-```
+Claudeで以下のように依頼します：
+
+「'認証システムの実装'というタイトルで、優先度が高いイシューを作成してください」
+
+またはツールを直接使用：
+- ツール: `create_item`
+- パラメータ:
+  - type: "issues"
+  - title: "認証システムの実装"
+  - content: "OAuth2認証を実装する"
+  - status: "Open"
+  - priority: "high"
+  - tags: ["auth", "feature"]
 
 ### 2. アイテムの検索
 
-タグで検索：
-```typescript
-search_items_by_tag({
-  tag: "bug"
-})
-```
+**タグで検索：**
+- ツール: `search_items_by_tag`
+- パラメータ:
+  - tag: "auth"
 
-全文検索：
-```typescript
-search_items({
-  query: "最初の"
-})
-```
+**全文検索：**
+- ツール: `search_items`
+- パラメータ:
+  - query: "認証"
 
 ### 3. セッションの記録
 
 作業セッションを開始：
-```typescript
-create_item({
-  type: "sessions",
-  title: "開発作業",
-  content: "新機能の実装を開始"
-})
-```
+- ツール: `create_item`
+- パラメータ:
+  - type: "sessions"
+  - title: "認証機能の作業"
+  - content: "OAuth2実装を開始"
+  - category: "development"
 
 ### 4. デイリーサマリーの作成
 
 その日の作業をまとめる：
-```typescript
-create_item({
-  type: "dailies",
-  date: "2025-01-29",
-  title: "本日の成果",
-  content: "- バグ修正完了\n- 新機能の設計"
-})
-```
+- ツール: `create_item`
+- パラメータ:
+  - type: "dailies"
+  - date: "2025-08-03"（必須、1日1つまで）
+  - title: "認証モジュール完成"
+  - content: "デイリーサマリーの内容（マークダウン形式）"
 
 ## よく使うコマンド
 

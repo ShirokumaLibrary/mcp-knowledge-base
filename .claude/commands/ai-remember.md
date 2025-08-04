@@ -19,6 +19,8 @@ Examples:
 
 ## Task
 
+@.claude/commands/LANG.markdown
+
 **Add to Memory Bank immediately - like someone with memory disorder taking notes!**
 
 ### 1. Parse Input

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Database Rebuild**: Fixed db_metadata version not updating during rebuild (Issue #79)
+  - Added schema_version update in rebuild-db.ts
+  - Ensures database version is correctly tracked after rebuild
+- **Global Command**: Fixed shirokuma-mcp-knowledge-base-rebuild command not working (Issue #80)
+  - Corrected process.argv[1] check logic for global installation
+  - Command now works properly when installed globally
+- **Version Field**: Fixed missing version field implementation in MCP handlers (Issue #81)
+  - Added version field support in create/update operations
+  - Version information now properly saved and retrieved
+
 ## [0.7.8] - 2025-08-04
 
 ### Changed

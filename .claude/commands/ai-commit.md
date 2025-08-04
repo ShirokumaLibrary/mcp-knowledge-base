@@ -12,7 +12,7 @@ description: Commit changes following project guidelines and handle releases
 
 ## Task
 
-**Note: Respond to the user in their language**
+@.claude/commands/LANG.markdown
 
 <ultrathink>
 I need to:

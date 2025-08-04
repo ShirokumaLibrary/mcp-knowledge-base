@@ -8,48 +8,42 @@ Shirokuma MCPナレッジベースは、Model Context Protocol (MCP)を通じて
 
 ### エンティティタイプ
 
-システムは以下のベースエンティティタイプをサポートします：
+**ビルトインタイプ**（削除不可、get_typesに表示されない）：
+- **Sessions（セッション）**: タイムスタンプベースID（YYYY-MM-DD-HH.MM.SS.sss）の作業記録
+- **Dailies（デイリー）**: 日付ベースID（YYYY-MM-DD）の日次サマリー、1日1件まで
 
-- **Issues（イシュー）**: バグレポートとタスク追跡
-- **Plans（プラン）**: プロジェクト計画と管理
-- **Documents（ドキュメント）**: 一般的なドキュメンテーション
-- **Knowledge（ナレッジ）**: ナレッジベース記事
-- **Work Sessions（ワークセッション）**: 時間追跡された作業記録
-- **Daily Summaries（デイリーサマリー）**: 日々の活動サマリー
+**デフォルトタイプ**（初期設定済み、削除可能）：
+- **Issues（イシュー）**: バグレポート、タスク管理
+- **Plans（プラン）**: プロジェクト計画、マイルストーン
+- **Docs（ドキュメント）**: 技術文書、ガイド
+- **Knowledge（ナレッジ）**: ナレッジベース、ベストプラクティス
 
-カスタムタイプはこれらのベースタイプに基づいて作成できます。
+**カスタムタイプ**（create_typeで作成）：
+- ユーザーが作成する任意のタイプ（例：decisions、meetings、research）
+- 「tasks」（ステータス・優先度付き）または「documents」（コンテンツ中心）を継承
 
 ### 共通プロパティ
 
-全エンティティは以下の共通プロパティを共有します：
+すべてのアイテムには以下の情報が含まれます：
 
-```typescript
-interface BaseEntity {
-  id: number | string;
-  title: string;
-  tags?: string[];
-  created_at: string;
-  updated_at: string;
-}
-```
+- **id**: アイテムの一意な識別子
+- **title**: アイテムのタイトル
+- **tags**: タグのリスト（オプション）
+- **created_at**: 作成日時
+- **updated_at**: 更新日時
 
-### タスクベースエンティティ（Issues、Plans）
+### タスクベースアイテム（Issues、Plans）
 
-タスクベースエンティティには追加のプロパティがあります：
+タスクベースのアイテムには、共通プロパティに加えて以下の情報が含まれます：
 
-```typescript
-interface TaskEntity extends BaseEntity {
-  content?: string;
-  description?: string;
-  priority?: 'high' | 'medium' | 'low';
-  status?: string;
-  status_id?: number;
-  start_date?: string;
-  end_date?: string;
-  related_tasks?: string[];
-  related_documents?: string[];
-}
-```
+- **content**: 詳細な内容（オプション）
+- **description**: 簡潔な説明（オプション）
+- **priority**: 優先度（high、medium、low）
+- **status**: ステータス名
+- **start_date**: 開始日（YYYY-MM-DD形式）
+- **end_date**: 終了日（YYYY-MM-DD形式）
+- **related_tasks**: 関連タスクIDのリスト
+- **related_documents**: 関連ドキュメントIDのリスト
 
 ### ドキュメントベースエンティティ（Documents、Knowledge）
 

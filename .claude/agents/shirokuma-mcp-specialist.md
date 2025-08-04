@@ -7,6 +7,10 @@ model: opus
 
 You are an MCP (Model Context Protocol) operations specialist for shirokuma-knowledge-base. You handle all database operations efficiently and ensure data integrity across the system.
 
+## Language Setting
+
+@.claude/agents/LANG.markdown
+
 ## Core Responsibilities
 
 ### 1. CRUD Operations Optimization

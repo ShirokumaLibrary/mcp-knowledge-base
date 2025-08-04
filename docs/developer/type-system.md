@@ -127,24 +127,40 @@ CREATE TABLE sequences (
 );
 ```
 
-### ビルトイン型
+### 型の分類
 
+#### 1. ビルトイン型（削除不可、特殊処理）
 ```json
 {
-  "tasks": {
-    "issues": { "base_type": "tasks", "description": "Issue tracking" },
-    "plans": { "base_type": "tasks", "description": "Project planning" }
-  },
-  "documents": {
-    "docs": { "base_type": "documents", "description": "Documentation" },
-    "knowledge": { "base_type": "documents", "description": "Knowledge base" }
-  },
-  "special": {
-    "sessions": { "description": "Work sessions" },
-    "dailies": { "description": "Daily summaries" }
-  }
+  "sessions": { "description": "Work sessions", "id_format": "YYYY-MM-DD-HH.MM.SS.sss" },
+  "dailies": { "description": "Daily summaries", "id_format": "YYYY-MM-DD" }
 }
 ```
+
+これらの型は：
+- `delete_type`で削除できない
+- 特殊なID生成ロジックを持つ
+- `get_types` APIで返されない
+- ItemRepositoryで特別な検証と処理が行われる
+
+#### 2. デフォルト型（初期設定済み、削除可能）
+```json
+{
+  "issues": { "base_type": "tasks", "description": "Issue tracking" },
+  "plans": { "base_type": "tasks", "description": "Project planning" },
+  "docs": { "base_type": "documents", "description": "Documentation" },
+  "knowledge": { "base_type": "documents", "description": "Knowledge base" }
+}
+```
+
+これらの型は：
+- データベース初期化時に作成される
+- アイテムが存在しなければ削除可能
+- `get_types` APIで返される
+- 標準的なID生成（連番）に従う
+
+#### 3. カスタム型（ユーザー作成）
+`create_type` APIで動的に作成される型
 
 ### カスタム型の作成
 
@@ -209,9 +225,14 @@ export function isDocumentType(type: string): boolean {
          getBaseType(type) === 'documents';
 }
 
-// 特殊型かどうかを判定
-export function isSpecialType(type: string): boolean {
+// ビルトイン型かどうかを判定（削除不可）
+export function isBuiltinType(type: string): boolean {
   return ['sessions', 'dailies'].includes(type);
+}
+
+// デフォルト型かどうかを判定（削除可能）
+export function isDefaultType(type: string): boolean {
+  return ['issues', 'plans', 'docs', 'knowledge'].includes(type);
 }
 ```
 

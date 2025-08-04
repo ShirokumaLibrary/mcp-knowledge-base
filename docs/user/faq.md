@@ -9,13 +9,18 @@ A: It's a knowledge management system that implements MCP (Model Context Protoco
 ### Q: What types of data can I manage?
 
 A: You can manage the following types of data:
+
+**Built-in types** (cannot be deleted):
+- **Sessions**: Work session records with timestamp-based IDs
+- **Dailies**: Daily summaries with date-based IDs (one per day)
+
+**Default types** (pre-configured, can be deleted):
 - **Issues**: Bug and issue tracking
 - **Plans**: Project plans and tasks
 - **Docs**: Technical documents and guides
 - **Knowledge**: Knowledge base articles
-- **Sessions**: Work session records
-- **Dailies**: Daily summaries
-- **Custom types**: Your own content types
+
+**Custom types**: Create your own content types using `create_type`
 
 ### Q: Where is the data stored?
 
@@ -75,7 +80,7 @@ A: Please check:
 ### Q: Markdown files not recognized
 
 A: Check the file format:
-- Filename: `{type}-{id}.md` (e.g., `issues-1.md`)
+- Filename: `{type}-{id}.md` (e.g., `issues-1.md`, `2025-08-03-10.30.00.123.md` for sessions)
 - Frontmatter: JSON format with required fields
 - Encoding: UTF-8
 

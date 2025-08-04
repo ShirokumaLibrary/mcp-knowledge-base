@@ -20,7 +20,7 @@ argument-hint: "[test-number or phase]"
 
 ## Task
 
-Note: Respond to the user in their language.
+@.claude/commands/LANG.markdown
 
 The user wants to run MCP functional tests. I need to:
 1. Check prerequisites (MCP server availability, data directory)

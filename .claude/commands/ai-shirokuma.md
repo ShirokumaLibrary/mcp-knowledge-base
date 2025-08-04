@@ -20,7 +20,7 @@ Examples:
 
 ## Task
 
-Note: Respond to the user in their language.
+@.claude/commands/LANG.markdown
 
 Analyze the check type requested: $ARGUMENTS
 

@@ -12,7 +12,7 @@ argument-hint: "<command-name> <description>"
 
 ## Task
 
-Note: Respond to the user in their language.
+@.claude/commands/LANG.markdown
 
 <ultrathink>
 The user wants to create a new slash command. I need to:
@@ -27,7 +27,10 @@ Reference documentation: https://docs.anthropic.com/en/docs/claude-code/slash-co
 Create a new slash command file based on the following Claude Code specifications.
 
 **IMPORTANT**: 
-1. Always include "Note: Respond to the user in their language." in the Task section of the created command.
+1. Always include the following in the Task section of the created command:
+   ```
+   @.claude/commands/LANG.markdown
+   ```
 2. For internationalization, use placeholder notation `[text]` for any user-facing text that should be translated.
 3. Structure content in English but mark translatable strings clearly.
 

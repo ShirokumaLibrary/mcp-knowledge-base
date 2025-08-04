@@ -1,26 +1,34 @@
 # Shirokuma MCP Knowledge Base
 
-> ⚠️ **Project Under Development**  
-> This project is under active development and specifications/APIs may change significantly without notice.
-
-**Model Context Protocol (MCP) server for comprehensive knowledge management including issues, plans, documents, and work sessions.**
+**Model Context Protocol (MCP) server for comprehensive knowledge management with AI-optimized dual-storage architecture.**
 
 📦 **npm**: [@shirokuma-library/mcp-knowledge-base](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base)  
-🐙 **GitHub**: [ShirokumaLibrary/mcp-knowledge-base](https://github.com/ShirokumaLibrary/mcp-knowledge-base)
+🐙 **GitHub**: [ShirokumaLibrary/mcp-knowledge-base](https://github.com/ShirokumaLibrary/mcp-knowledge-base)  
+🚀 **Current Version**: 0.7.8
 
-## Core Design Philosophy
+## 🎯 Core Features
 
-**⚠️ All information stored in this system is structured for AI processing, not human readability.**
-- Minimal redundant descriptions
-- Structure-first data with high information density
-- Design optimized for efficient AI reference and search
+- **Dual Storage Architecture**: Markdown files for persistence + SQLite for search
+- **AI-Optimized Design**: Structured for AI processing with high information density
+- **Semantic Code Search**: Natural language search through your codebase
+- **Unified Content Management**: Issues, plans, documents, knowledge, sessions, and daily summaries
+- **Dynamic Type System**: Create custom content types to extend functionality
+- **Version Tracking**: Track versions for all content items
+- **Cross-Content Relations**: Link related items across different types
 
-## Installation
+## 📦 Installation
 
 ### Global Installation (Recommended)
 
 ```bash
+# Install globally
 sudo npm install -g @shirokuma-library/mcp-knowledge-base
+
+# Update to latest version
+sudo npm update -g @shirokuma-library/mcp-knowledge-base
+
+# Install specific version
+sudo npm install -g @shirokuma-library/mcp-knowledge-base@0.7.8
 ```
 
 ### Local Installation
@@ -29,192 +37,195 @@ sudo npm install -g @shirokuma-library/mcp-knowledge-base
 npm install @shirokuma-library/mcp-knowledge-base
 ```
 
-### Updating
-
-To update the global installation to the latest version:
-
-```bash
-sudo npm update -g @shirokuma-library/mcp-knowledge-base
-```
-
-Or to install a specific version:
-
-```bash
-npm install -g @shirokuma-library/mcp-knowledge-base@0.7.1
-```
-
-## Usage
+## 🚀 Quick Start
 
 ### Command Line Interface
 
-After global installation:
-
 ```bash
-# Start MCP server
+# Start MCP server (default: .database directory)
 shirokuma-mcp-knowledge-base
-
-# Show help
-shirokuma-mcp-knowledge-base --help
 
 # Use custom data directory
 shirokuma-mcp-knowledge-base --data /path/to/data
 
 # Rebuild database from markdown files
-shirokuma-mcp-knowledge-base --rebuild
+shirokuma-mcp-knowledge-base-rebuild
 
-# Run with MCP inspector
+# Run with MCP Inspector for debugging
 shirokuma-mcp-knowledge-base --inspect
+
+# Show all options
+shirokuma-mcp-knowledge-base --help
 ```
 
-### As MCP Server
+### MCP Client Configuration
 
-Configure in your MCP client settings:
+#### Claude Desktop (Recommended)
+
+Add to your Claude Desktop configuration:
 
 ```json
 {
   "mcpServers": {
-    "shirokuma-kb": {
-      "command": "shirokuma-mcp-knowledge-base"
-    }
-  }
-}
-```
-
-With custom data directory:
-
-```json
-{
-  "mcpServers": {
-    "shirokuma-kb": {
+    "shirokuma-knowledge-base": {
       "command": "shirokuma-mcp-knowledge-base",
-      "args": ["--data", "/path/to/your/data"]
+      "args": ["--data", ".database"]
     }
   }
 }
 ```
 
-## Overview
-
-This MCP server provides a unified knowledge base system that manages Issues, Plans, Documents, Knowledge entries, and Work Sessions for development projects.
-
-- **Unified Knowledge Base**: Manage all content types in one place
-- **Tag-based Organization**: Flexible tagging system across all content types
-- **Markdown Storage**: Human-readable files with metadata
-- **Cross-content Search**: Find related information across different content types
-
-## Features
-
-- **Issue Management**: Track bugs, features, and tasks with priority and status
-- **Plan Management**: Manage project plans with date ranges and milestones
-- **Document Management**: Store and organize project documentation
-- **Knowledge Management**: Capture and share team knowledge
-- **Work Sessions**: Record daily work activities and progress
-- **Daily Summaries**: Create summaries of daily achievements
-- **Tag System**: Organize and search content across all types
-- **Status Management**: Customizable workflow statuses
-- **Unified Content Field**: All entity types use consistent `content` field for multi-line text
-- **Dynamic Type System**: Create custom document types to extend the knowledge base
-- **Plural File Naming**: Consistent plural naming convention for all entity files
-
-## Documentation
-
-Comprehensive documentation is available in the [`docs/`](docs/) directory:
-
-### 📚 For Users
-- [Quick Start Guide](docs/user/quickstart.md) - Get started quickly
-- [Installation Guide](docs/user/installation.md) - Detailed setup instructions
-- [Usage Guide](docs/user/usage.md) - How to use all features
-- [API Reference](docs/user/api-reference.md) - Complete tool reference
-- [FAQ](docs/user/faq.md) - Frequently asked questions
-
-### 🛠️ For Developers
-- [Architecture](docs/developer/architecture.md) - System design and structure
-- [Development Setup](docs/developer/setup.md) - Setting up development environment
-- [Contributing Guide](docs/developer/contributing.md) - How to contribute
-- [Testing Guide](docs/developer/testing-guide.md) - Running and writing tests
-
-### 🇯🇵 日本語ドキュメント
-- [クイックスタート](docs/ja/user/quickstart.md)
-- [インストールガイド](docs/ja/user/installation.md)
-- [使い方ガイド](docs/ja/user/usage.md)
-- [FAQ](docs/ja/user/faq.md)
-
-For complete documentation index, see [docs/README.md](docs/README.md)
-
-## Requirements
-
-- Node.js 18+
-
-## Database Maintenance
-
-### Rebuilding the Database
-
-If the SQLite search database becomes corrupted, out of sync, or when updating to a new version with database schema changes:
+#### Environment Variables
 
 ```bash
+# Optional: Custom database location
+export DATABASE_ROOT="/path/to/data"
+
+# Optional: Logging level
+export LOG_LEVEL="info"  # debug, info, warn, error
+
+# Optional: Response language (for Claude AI integration)
+export SHIROKUMA_LANG="Japanese"  # English (default), Japanese
+```
+
+## 📊 Content Types
+
+### Special Types (Built-in, Cannot be deleted)
+
+| Type | Purpose | Key Features |
+|------|---------|-------------|
+| **sessions** | Work session logs | Timestamp-based ID (YYYY-MM-DD-HH.MM.SS.sss), progress tracking |
+| **dailies** | Daily summaries | Date-based ID (YYYY-MM-DD), one per day limit |
+
+### Default Types (Pre-configured, Can be deleted)
+
+| Type | Purpose | Key Features |
+|------|---------|-------------|
+| **issues** | Bug tracking, tasks | Status, priority, version tracking |
+| **plans** | Project planning | Timelines, milestones, dependencies |
+| **docs** | Technical documentation | Structured content, cross-references |
+| **knowledge** | How-to guides, best practices | Searchable knowledge base |
+
+### Custom Types
+
+You can create custom types to fit your workflow. For example, you might create:
+- `decisions` - For architecture decision records
+- `meetings` - For meeting notes
+- `research` - For research findings
+
+Each custom type inherits from either "tasks" (with status/priority) or "documents" (content-focused).
+
+## 🔧 Available Tools
+
+### Content Management
+- **create_item** - Create issues, plans, docs, knowledge, sessions, or dailies
+- **get_items** - Retrieve items with filtering by type, status, dates
+- **update_item** - Update existing items
+- **delete_item** - Delete items
+- **search_items** - Full-text search across all content
+- **search_items_by_tag** - Find items with specific tags
+
+### Code Search
+- **index_codebase** - Index your code for semantic search
+- **search_code** - Search code using natural language
+- **get_related_files** - Find files related to a specific file
+- **get_index_status** - Check indexing status
+
+### Organization
+- **create_type** - Create custom content types
+- **get_types** - List all available types
+- **create_tag** - Create new tags
+- **get_tags** - List all tags with usage counts
+
+### State Management
+- **get_current_state** - Retrieve persistent application state
+- **update_current_state** - Save state for continuity between sessions
+
+## 📚 Documentation
+
+### For Users
+- [API Reference](docs/user/api-reference.md) - Complete MCP tools reference
+- [Quick Start](docs/user/quickstart.md) - Get started in 5 minutes
+- [Usage Examples](docs/user/usage.md) - Common patterns and examples
+- [Installation Guide](docs/user/installation.md) - Detailed setup instructions
+- [FAQ](docs/user/faq.md) - Frequently asked questions
+
+### For Developers
+- [Architecture](docs/developer/architecture.md) - System design and implementation
+- [Development Setup](docs/developer/setup.md) - Development environment setup
+- [Testing Guide](docs/developer/testing-guide.md) - Test strategies and practices
+- [Contributing](docs/developer/contributing.md) - Contribution guidelines
+- [Type System](docs/developer/type-system.md) - Dynamic type system details
+
+### 日本語ドキュメント
+- [README](docs/ja/README.md) - プロジェクト概要
+- [API リファレンス](docs/ja/user/api-reference.md) - API 完全ガイド
+- [クイックスタート](docs/ja/user/quickstart.md) - 5分で始める
+- [インストール](docs/ja/user/installation.md) - セットアップ手順
+
+## 💻 Requirements
+
+- Node.js 18 or higher
+- npm or yarn
+- SQLite3 (included via better-sqlite3)
+
+## 🔨 Maintenance & Migration
+
+### Database Rebuild
+
+Rebuild the SQLite database from markdown files:
+
+```bash
+# Global command (v0.7.8+)
+shirokuma-mcp-knowledge-base-rebuild
+
+# Or via npm script
 npm run rebuild-db
 ```
 
-> ⚠️ **Important**: When updating to a new version, it's recommended to run `rebuild-db` as the database schema may have changed.
+**When to rebuild:**
+- After version updates with schema changes
+- If search results seem incorrect
+- Database corruption or sync issues
 
-This command will:
-- Back up the existing database (if present)
-- Create a fresh SQLite database with the latest schema
-- Scan all markdown files in the data directory
-- Restore all data including custom statuses
-- Rebuild search indexes for all content types
-
-The rebuild process preserves:
-- All issues, plans, documents, and knowledge entries
-- Work sessions and daily summaries
-- Custom status definitions (beyond the default ones)
-- All tags and relationships
+**What it preserves:**
+- All markdown content files
+- Custom types and statuses
+- Tags and relationships
+- File indexes (will re-index)
 
 ### Data Migration
 
-When upgrading from older versions, you may need to migrate your data to the latest format:
+For upgrading from older versions:
 
 ```bash
-# Migrate related_documents/related_tasks to unified related field
+# Migrate to unified related field format
 shirokuma-mcp-knowledge-base-migrate-related
 
-# Skip backup files
+# Skip backup creation
 shirokuma-mcp-knowledge-base-migrate-related --no-backup
 ```
 
-This migration:
-- Converts old `related_documents` and `related_tasks` fields to the unified `related` field
-- Creates `.bak` backup files by default
-- Updates all markdown files in your data directory
-- Is safe to run multiple times (idempotent)
 
-## Documentation
+## 👩‍💻 For Developers
 
-### User Documentation
-- [API Reference](docs/user/api-reference.md) - Complete API documentation for MCP tools
-- [User Guide](docs/user/usage-guide.md) - Getting started and basic usage
-- [Configuration Guide](docs/user/configuration.md) - Environment variables and settings
+If you want to contribute or modify the code, see our [Developer Documentation](docs/developer/setup.md).
 
-### 日本語ドキュメント
-- [日本語版 README](docs/ja/README.md) - プロジェクト概要
-- [ユーザーガイド](docs/ja/user-guide.md) - 基本的な使い方
-- [設定ガイド](docs/ja/configuration.md) - 環境変数と設定
+## 🤝 Contributing
 
+We welcome contributions! Please see our [Contributing Guide](docs/developer/contributing.md) if you'd like to help improve this project.
 
+## 📝 License
 
-## Contributing
+MIT License - Copyright (c) 2025 Shirokuma Library
 
-Contributions are welcome! Please see our [Contributing Guide](https://github.com/ShirokumaLibrary/mcp-knowledge-base/blob/main/docs/developer/contributing.md) for details.
+## 🔗 Links
 
-## Issues & Support
+- 📦 [npm Package](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base)
+- 🐛 [Issue Tracker](https://github.com/ShirokumaLibrary/mcp-knowledge-base/issues)
+- 📖 [Changelog](CHANGELOG.md)
+- 🗺️ [Roadmap](https://github.com/ShirokumaLibrary/mcp-knowledge-base/projects)
 
-- 🐛 [Report Issues](https://github.com/ShirokumaLibrary/mcp-knowledge-base/issues)
-- 📖 [Wiki](https://github.com/ShirokumaLibrary/mcp-knowledge-base/wiki)
+---
 
-## License
-
-MIT License
-
-Copyright (c) 2025 Shirokuma Library
-
-Contact: shirokuma@gadget.to
+**Contact**: shirokuma@gadget.to

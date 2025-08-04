@@ -12,6 +12,8 @@ allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-
 
 ## Task
 
+@.claude/commands/LANG.markdown
+
 **Check your current work status - like checking your notes with memory disorder**
 
 ### 1. Get Current State

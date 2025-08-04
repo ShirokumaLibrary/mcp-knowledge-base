@@ -1,121 +1,161 @@
-# Shirokuma MCP Knowledge Base - Developer Documentation
+# Shirokuma MCP Knowledge Base - Documentation
 
-This directory contains comprehensive documentation for developers working on the Shirokuma MCP Knowledge Base project.
+> Last Updated: 2025-08-03 (v0.7.8)
 
-## 📚 Documentation Index
+Comprehensive documentation for users and developers of the Shirokuma MCP Knowledge Base.
 
-### Core Development Documentation
-- [Architecture](architecture.md) - System design and implementation details
-- [Development Guide](development.md) - Development setup and guidelines
-- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
-- [Testing Guide](testing-guide.md) - Testing strategies and practices
-- [E2E Testing Guide](e2e-testing-guide.md) - End-to-end testing with Playwright
+## 📚 Documentation Structure
 
-### Technical References
-- [API Documentation](api-documentation.md) - Internal API documentation
-- [Database Schema](database-schema.md) - SQLite and file storage structure
-- [Performance Guide](performance-optimization.md) - Performance tuning and optimization
-- [Security Guide](security-guide.md) - Security best practices
+### 👥 User Documentation
 
-### Guides and Examples
-- [Examples](examples.md) - Code examples and usage patterns
-- [Upgrade Guide](UPGRADE.md) - Migration instructions between versions
-- [Troubleshooting](troubleshooting.md) - Common issues and solutions
-- [FAQ](FAQ.md) - Frequently asked questions
+**English:**
+- [API Reference](user/api-reference.md) - Complete MCP tools reference
+- [Quick Start Guide](user/quickstart.md) - Get started in 5 minutes
+- [Usage Guide](user/usage.md) - Practical examples and patterns
+- [Installation Guide](user/installation.md) - Detailed setup instructions
+- [FAQ](user/faq.md) - Frequently asked questions
 
-### User Documentation
-User-facing documentation is located in:
-- [User Documentation](user/) - English user documentation
-- [日本語ドキュメント](ja/) - Japanese documentation
+**日本語 (Japanese):**
+- [README](ja/README.md) - プロジェクト概要
+- [API リファレンス](ja/user/api-reference.md) - MCP ツール完全ガイド
+- [クイックスタート](ja/user/quickstart.md) - 5分で始める
+- [インストールガイド](ja/user/installation.md) - 詳細なセットアップ手順
+- [使い方ガイド](ja/user/usage.md) - 実用的な例とパターン
+- [FAQ](ja/user/faq.md) - よくある質問
 
-## 🔧 Development Quick Start
+### 🛠️ Developer Documentation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ShirokumaLibrary/mcp-knowledge-base.git
-   cd mcp-knowledge-base
-   ```
+**Architecture & Design:**
+- [Architecture Overview](developer/architecture.md) - System design and structure
+- [Database Design](developer/database-design.md) - SQLite schema and storage
+- [Type System](developer/type-system.md) - Dynamic type system implementation
+- [API Architecture](developer/api-architecture.md) - MCP API design patterns
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+**Development:**
+- [Development Setup](developer/setup.md) - Environment setup guide
+- [Testing Guide](developer/testing-guide.md) - Unit and integration testing
+- [E2E Testing](developer/e2e-testing.md) - End-to-end testing with Playwright
+- [Contributing](developer/contributing.md) - Contribution guidelines
+- [Debugging Guide](developer/debugging.md) - Debugging tips and tools
 
-3. **Run tests**
-   ```bash
-   npm test              # Unit tests
-   npm run test:e2e      # E2E tests
-   npm run test:coverage # Coverage report
-   ```
+**Advanced Topics:**
+- [Performance](developer/performance.md) - Optimization strategies
+- [Security](developer/security.md) - Security best practices
+- [Migration Guide](developer/migration.md) - Version migration instructions
+- [Versioning](developer/versioning.md) - Version management strategy
 
-4. **Build the project**
-   ```bash
-   npm run build         # Production build
-   npm run build:dev     # Development build
-   ```
+### 📁 Additional Resources
 
-5. **Development mode**
-   ```bash
-   npm run dev           # Run with tsx
-   npm run inspect       # Debug with MCP Inspector
-   ```
+**Examples:**
+- [Type Usage Examples](examples/type-usage-examples.md) - Custom type patterns
+- [Field-Specific Search](field-specific-search.md) - Advanced search techniques
 
-## 📂 Documentation Structure
+**Maintenance:**
+- [Test Environment](TEST_ENVIRONMENT.md) - Test setup and configuration
+- [Upgrade Guide](UPGRADE.md) - Version upgrade instructions
+- [API Documentation](API.md) - Internal API reference
 
-```
-docs/
-├── README.md                 # This file (developer index)
-├── architecture.md          # System architecture
-├── development.md           # Development guide
-├── testing-guide.md         # Testing strategies
-├── examples.md              # Usage examples
-├── CONTRIBUTING.md          # Contribution guidelines
-├── user/                    # User documentation
-│   ├── api-reference.md     # MCP tools API
-│   ├── usage-guide.md       # Getting started
-│   └── configuration.md     # Configuration
-└── ja/                      # Japanese translations
-    ├── README.md
-    ├── user-guide.md
-    └── configuration.md
-```
+**Internal Documentation:**
+- [Internal Docs](internal/) - Team-specific documentation
+- [Release Notes](releases/) - Version history and migration guides
 
-## 🤝 Contributing to Documentation
+## 🚀 Quick Links
 
-When contributing to documentation:
+### For New Users
+1. Start with [Quick Start Guide](user/quickstart.md)
+2. Review [API Reference](user/api-reference.md)
+3. Explore [Usage Examples](user/usage.md)
 
-1. Follow the existing structure and formatting
-2. Keep language clear and concise
-3. Include code examples where appropriate
-4. Update both English and Japanese versions if possible
-5. Test all code examples before submitting
+### For Developers
+1. Set up with [Development Setup](developer/setup.md)
+2. Understand [Architecture](developer/architecture.md)
+3. Follow [Testing Guide](developer/testing-guide.md)
+
+### For Contributors
+1. Read [Contributing Guidelines](developer/contributing.md)
+2. Check [Type System](developer/type-system.md)
+3. Review [API Architecture](developer/api-architecture.md)
+
+## 🔍 Finding Documentation
+
+### By Topic
+
+**Getting Started:**
+- Installation → [user/installation.md](user/installation.md)
+- First steps → [user/quickstart.md](user/quickstart.md)
+- Examples → [user/usage.md](user/usage.md)
+
+**API & Features:**
+- MCP Tools → [user/api-reference.md](user/api-reference.md)
+- Code Search → [user/usage.md#code-search](user/usage.md#code-search)
+- Custom Types → [developer/type-system.md](developer/type-system.md)
+
+**Development:**
+- Architecture → [developer/architecture.md](developer/architecture.md)
+- Testing → [developer/testing-guide.md](developer/testing-guide.md)
+- Contributing → [developer/contributing.md](developer/contributing.md)
+
+**Troubleshooting:**
+- Common issues → [user/faq.md](user/faq.md)
+- Debugging → [developer/debugging.md](developer/debugging.md)
+- Upgrades → [UPGRADE.md](UPGRADE.md)
 
 ## 📝 Documentation Standards
 
-- Use Markdown for all documentation
-- Include a table of contents for long documents
-- Use code blocks with appropriate language highlighting
-- Keep line length under 120 characters
-- Use semantic commit messages for documentation changes
-- Follow the project's TypeScript and coding conventions
+### Writing Guidelines
 
-## 🧪 Test Coverage Status
+1. **Structure**
+   - Start with "Last Updated" timestamp
+   - Include clear headings and subheadings
+   - Add code examples for all features
+   - Use tables for complex comparisons
 
-- **Overall Coverage**: 79.3%
-- **Functions Coverage**: 80.33% ✅
-- **Total Tests**: 952 (all passing)
-- **Test Suites**: 50
+2. **Code Examples**
+   - Use realistic, practical examples
+   - Include error handling where appropriate
+   - Show both simple and advanced usage
+   - Test all examples before committing
 
-See [Testing Guide](testing-guide.md) for detailed testing documentation.
+3. **Language**
+   - Keep explanations concise and clear
+   - Define technical terms on first use
+   - Use active voice
+   - Maintain consistent terminology
 
-## 🔗 External Resources
+4. **Formatting**
+   - Use proper Markdown syntax
+   - Highlight important notes with `> Note:`
+   - Use emoji sparingly for section headers
+   - Keep line length under 120 characters
 
-- [MCP SDK Documentation](https://modelcontextprotocol.io)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-- [SQLite Documentation](https://www.sqlite.org/docs.html)
-- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
-- [Playwright Documentation](https://playwright.dev/docs/intro)
+## 📊 Project Status
 
-## 📄 License
+### Current Version
+- **Latest Release**: v0.7.8
+- **npm Package**: [@shirokuma-library/mcp-knowledge-base](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base)
 
-All documentation is licensed under the same MIT License as the project.
+### Test Coverage
+- **Overall**: ~80%
+- **Critical paths**: 100%
+- **Test suites**: 50+
+- **Total tests**: 950+
+
+See [Testing Guide](developer/testing-guide.md) for details.
+
+## 🔗 Resources
+
+### External Links
+- [Model Context Protocol](https://modelcontextprotocol.io) - MCP specification
+- [GitHub Repository](https://github.com/ShirokumaLibrary/mcp-knowledge-base) - Source code
+- [npm Package](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base) - Latest releases
+- [Issue Tracker](https://github.com/ShirokumaLibrary/mcp-knowledge-base/issues) - Bug reports
+
+### Technologies Used
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [SQLite](https://www.sqlite.org/) - Embedded database
+- [Jest](https://jestjs.io/) - Testing framework
+- [Playwright](https://playwright.dev/) - E2E testing
+
+---
+
+**License**: MIT | **Contact**: shirokuma@gadget.to

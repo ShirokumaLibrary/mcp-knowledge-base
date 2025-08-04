@@ -12,7 +12,7 @@ description: Update test code and test commands to match the latest specificatio
 
 ## Task
 
-Note: Respond to the user in their language.
+@.claude/commands/LANG.markdown
 
 <ultrathink>
 Before updating tests, I need to:
