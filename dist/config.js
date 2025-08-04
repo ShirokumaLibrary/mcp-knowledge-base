@@ -27,7 +27,7 @@ export function getConfig() {
             level: process.env.MCP_LOG_LEVEL || 'info',
             enabled: process.env.MCP_LOGGING_ENABLED !== 'false',
             logDir: process.env.MCP_LOG_DIR || path.join(process.cwd(), 'logs')
-        }
+        },
     };
 }
 export function contentPath(dataDir) {

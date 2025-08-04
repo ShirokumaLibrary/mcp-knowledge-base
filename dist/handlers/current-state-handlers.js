@@ -110,7 +110,8 @@ export class CurrentStateHandlers {
                     await this.tagRepo.ensureTagsExist(params.tags);
                     this.logger.info(`Registered ${params.tags.length} tags`);
                 }
-                catch (error) {
+                catch (tagError) {
+                    this.logger.error('Failed to register tags', tagError);
                     throw new McpError(ErrorCode.InternalError, `Failed to register tags: ${params.tags.join(', ')}. ` +
                         'Please check if the tag names are valid (alphanumeric, hyphens, underscores only) and try again.');
                 }
