@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.11] - 2025-08-06
+
+### Fixed
+- **Rebuild Command**: Fixed global command execution and schema version update issues (Issues #99, #100)
+  - Added support for shirokuma-mcp-knowledge-base-rebuild global command execution
+  - Database rebuild now properly updates schema_version in db_metadata table
+  - Resolved version mismatch errors after rebuild operations
+
+### Changed
+- **Package Scripts**: Cleaned up package.json scripts
+  - Removed 6 unused/duplicate commands for better maintainability
+  - Added global command test scripts for development
+
 ## [0.7.10] - 2025-08-05
 
 ### Fixed
