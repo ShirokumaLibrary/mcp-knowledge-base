@@ -113,7 +113,24 @@ export class ItemRepository {
           value = item.tags || JSON.parse(fieldDef.default_value || '[]');
           break;
         case 'start_date':
-          value = item.start_date || fieldDef.default_value;
+          if (item.start_date) {
+            value = item.start_date;
+          } else if (item.type === 'sessions' || item.type === 'dailies') {
+            // IDから日付を抽出
+            if (item.type === 'dailies') {
+              // dailiesのIDは日付形式のため、バリデーション後そのまま使用
+              const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(item.id);
+              value = isValidDate ? item.id : fieldDef.default_value;
+            } else if (item.type === 'sessions') {
+              // sessionsのIDから日付部分を抽出
+              const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
+              value = dateMatch ? dateMatch[1] : fieldDef.default_value;
+            } else {
+              value = fieldDef.default_value;
+            }
+          } else {
+            value = fieldDef.default_value;
+          }
           break;
         case 'end_date':
           value = item.end_date || fieldDef.default_value;
@@ -221,7 +238,26 @@ export class ItemRepository {
       priority: (metadata.priority === 'high' || metadata.priority === 'medium' || metadata.priority === 'low' ? metadata.priority : 'medium') as 'high' | 'medium' | 'low',
       status: statusName,
       status_id: Number(statusId),
-      start_date: metadata.start_date ? String(metadata.start_date) : null,
+      start_date: (() => {
+        // 既存のstart_dateがある場合はそれを使用
+        if (metadata.start_date) return String(metadata.start_date);
+        
+        // sessions/dailiesの場合、IDから日付を抽出
+        if (type === 'sessions' || type === 'dailies') {
+          if (type === 'dailies') {
+            // dailiesのIDは日付そのもの（例：2024-01-01）
+            // バリデーション: YYYY-MM-DD形式かチェック
+            const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(item.id);
+            return isValidDate ? item.id : null;
+          } else if (type === 'sessions') {
+            // sessionsのIDは日時形式（例：2024-01-01-14.30.00.000）
+            const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
+            if (dateMatch) return dateMatch[1];
+          }
+        }
+        
+        return null;
+      })(),
       end_date: metadata.end_date ? String(metadata.end_date) : null,
       start_time: metadata.start_time ? String(metadata.start_time) : null,
       tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
@@ -234,7 +270,7 @@ export class ItemRepository {
 
     // Add date field for sessions and dailies
     if (type === 'sessions' || type === 'dailies') {
-      (unifiedItem as any).date = metadata.start_date || null;
+      (unifiedItem as any).date = unifiedItem.start_date;
     }
 
     return unifiedItem;
