@@ -8,6 +8,7 @@ import { globSync } from 'glob';
 import { existsSync, statSync, readFileSync } from 'fs';
 import { FileIssueDatabase } from './database/index.js';
 import { parseMarkdown } from './utils/markdown-parser.js';
+import { getProgramVersion, setDbVersion } from './utils/db-version-utils.js';
 async function dropAllTables(db) {
     console.log('🗑️  Dropping all tables...');
     const tablesToDrop = [
@@ -242,6 +243,9 @@ async function rebuildDatabase() {
         console.log('\n📝 Writing migrated data back to Markdown files...');
         await writeMigratedDataBack(fullDb, allTypes);
     }
+    const programVersion = await getProgramVersion();
+    await setDbVersion(db, programVersion);
+    console.log(`\n📌 Updated database schema version to ${programVersion}`);
     console.log('\n✨ Database rebuild successful!');
     console.log('\n💡 Tip: Connection was preserved - no need to restart MCP server.');
     console.log('💡 For forced clean rebuild, delete the database file first: rm [path]/search.db');
@@ -355,10 +359,16 @@ export async function rebuildFromMarkdown(dbPath) {
         totalSynced += count;
         console.log(`  ✅ ${type}: ${count} items`);
     }
+    const db = fullDb.getDatabase();
+    const programVersion = await getProgramVersion();
+    await setDbVersion(db, programVersion);
     console.log(`\n✅ Database rebuild complete! Total items: ${totalSynced}`);
+    console.log(`📌 Database schema version: ${programVersion}`);
+    await fullDb.close();
 }
-const isMainModule = process.argv[1] &&
-    (process.argv[1].endsWith('rebuild-db.js') || process.argv[1].endsWith('rebuild-db.ts'));
+const isMainModule = process.argv[1] && (process.argv[1].endsWith('rebuild-db.js') ||
+    process.argv[1].endsWith('rebuild-db.ts') ||
+    process.argv[1].includes('shirokuma-mcp-knowledge-base-rebuild'));
 if (isMainModule) {
     rebuildDatabase().catch(error => {
         console.error('❌ Database rebuild failed:', error);

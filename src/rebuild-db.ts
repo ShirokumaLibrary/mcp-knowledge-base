@@ -20,6 +20,7 @@ import { globSync } from 'glob';
 import { existsSync, statSync, readFileSync } from 'fs';
 import { FileIssueDatabase } from './database/index.js';
 import { parseMarkdown } from './utils/markdown-parser.js';
+import { getProgramVersion, setDbVersion } from './utils/db-version-utils.js';
 
 async function dropAllTables(db: any): Promise<void> {
   console.log('🗑️  Dropping all tables...');
@@ -311,7 +312,7 @@ async function rebuildDatabase() {
     
     if (maxFileId > maxId) {
       console.log(`  ⚠️  Warning: Found file ${type}-${maxFileId}.md but max ID in DB is ${maxId}`);
-      console.log(`     This suggests some files were not imported during rebuild`);
+      console.log('     This suggests some files were not imported during rebuild');
     }
 
     // Use the higher value between DB max ID and file max ID
@@ -349,6 +350,11 @@ async function rebuildDatabase() {
     console.log('\n📝 Writing migrated data back to Markdown files...');
     await writeMigratedDataBack(fullDb, allTypes);
   }
+
+  // Update database schema version
+  const programVersion = await getProgramVersion();
+  await setDbVersion(db, programVersion);
+  console.log(`\n📌 Updated database schema version to ${programVersion}`);
 
   console.log('\n✨ Database rebuild successful!');
   console.log('\n💡 Tip: Connection was preserved - no need to restart MCP server.');
@@ -505,13 +511,32 @@ export async function rebuildFromMarkdown(dbPath: string): Promise<void> {
     console.log(`  ✅ ${type}: ${count} items`);
   }
 
+  // Update database schema version
+  const db = fullDb.getDatabase();
+  const programVersion = await getProgramVersion();
+  await setDbVersion(db, programVersion);
+  
   console.log(`\n✅ Database rebuild complete! Total items: ${totalSynced}`);
+  console.log(`📌 Database schema version: ${programVersion}`);
+  
+  await fullDb.close();
 }
 
 // Run rebuild if executed directly
 // Check if this file is being run directly (not imported)
-const isMainModule = process.argv[1] && 
-  (process.argv[1].endsWith('rebuild-db.js') || process.argv[1].endsWith('rebuild-db.ts'));
+// Support multiple execution scenarios:
+// 1. Direct execution: node dist/rebuild-db.js or tsx src/rebuild-db.ts
+// 2. Global command: shirokuma-mcp-knowledge-base-rebuild
+// 3. Via npm/package.json bin
+const isMainModule = process.argv[1] && (
+  process.argv[1].endsWith('rebuild-db.js') ||
+  process.argv[1].endsWith('rebuild-db.ts') ||
+  process.argv[1].includes('shirokuma-mcp-knowledge-base-rebuild')
+);
+
+// Alternative: Use import.meta.url for more reliable detection in ESM
+// However, for backward compatibility with the current approach, we'll enhance the check above
+
 if (isMainModule) {
   rebuildDatabase().catch(error => {
     console.error('❌ Database rebuild failed:', error);
