@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.10] - 2025-08-05
+
+### Fixed
+- **Date Filtering**: Fixed date extraction for sessions and dailies types (Issue #93)
+  - Sessions now properly extract date from timestamp IDs (YYYY-MM-DD-HH.MM.SS.sss)
+  - Dailies correctly use their date-based IDs (YYYY-MM-DD)
+  - Date range filtering now works correctly for both types
+  - Added comprehensive tests for date extraction edge cases
+
 ## [0.7.9] - 2025-08-04
 
 ### Fixed
