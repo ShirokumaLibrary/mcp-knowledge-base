@@ -67,7 +67,25 @@ export class ItemRepository {
                     value = item.tags || JSON.parse(fieldDef.default_value || '[]');
                     break;
                 case 'start_date':
-                    value = item.start_date || fieldDef.default_value;
+                    if (item.start_date) {
+                        value = item.start_date;
+                    }
+                    else if (item.type === 'sessions' || item.type === 'dailies') {
+                        if (item.type === 'dailies') {
+                            const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(item.id);
+                            value = isValidDate ? item.id : fieldDef.default_value;
+                        }
+                        else if (item.type === 'sessions') {
+                            const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
+                            value = dateMatch ? dateMatch[1] : fieldDef.default_value;
+                        }
+                        else {
+                            value = fieldDef.default_value;
+                        }
+                    }
+                    else {
+                        value = fieldDef.default_value;
+                    }
                     break;
                 case 'end_date':
                     value = item.end_date || fieldDef.default_value;
@@ -140,7 +158,22 @@ export class ItemRepository {
             priority: (metadata.priority === 'high' || metadata.priority === 'medium' || metadata.priority === 'low' ? metadata.priority : 'medium'),
             status: statusName,
             status_id: Number(statusId),
-            start_date: metadata.start_date ? String(metadata.start_date) : null,
+            start_date: (() => {
+                if (metadata.start_date)
+                    return String(metadata.start_date);
+                if (type === 'sessions' || type === 'dailies') {
+                    if (type === 'dailies') {
+                        const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(item.id);
+                        return isValidDate ? item.id : null;
+                    }
+                    else if (type === 'sessions') {
+                        const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
+                        if (dateMatch)
+                            return dateMatch[1];
+                    }
+                }
+                return null;
+            })(),
             end_date: metadata.end_date ? String(metadata.end_date) : null,
             start_time: metadata.start_time ? String(metadata.start_time) : null,
             tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
@@ -151,7 +184,7 @@ export class ItemRepository {
             updated_at: String(metadata.updated_at || metadata.created_at || new Date().toISOString())
         };
         if (type === 'sessions' || type === 'dailies') {
-            unifiedItem.date = metadata.start_date || null;
+            unifiedItem.date = unifiedItem.start_date;
         }
         return unifiedItem;
     }
