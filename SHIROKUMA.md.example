@@ -1,4 +1,4 @@
-# SHIROKUMA.md (Simplified Version)
+# SHIROKUMA.md
 
 ## Language
 **Language: Check SHIROKUMA_LANG environment variable (default: English if not set)**
@@ -56,7 +56,17 @@ AI Pair Programming with shirokuma-knowledge-base MCP - Core Principles
 | **methodology-keeper** | Quality guardian | Ensure best practices |
 | **issue-manager** | Issue tracking | Task management |
 | **knowledge-curator** | Knowledge organization | Document learning |
-| **session-automator** | Workflow automation | Start/end sessions |
+
+## 🗂️ Specialized Types
+
+Besides the core specialist agents, SHIROKUMA uses specialized data types:
+
+| Type | Purpose | Created By |
+|------|---------|------------|
+| **test_results** | Test execution outputs | tester agent only |
+| **handovers** | Agent-to-agent communication | any agent |
+
+These enable structured workflow between agents while maintaining clear boundaries.
 
 ### 🧠 Memory Preservation and Recovery with mcp-specialist
 
@@ -119,7 +129,6 @@ For comprehensive documentation, consult specialist agents:
 - **Development Methods** → Ask `shirokuma-methodology-keeper`  
 - **Issue Management** → Ask `shirokuma-issue-manager`
 - **Knowledge Organization** → Ask `shirokuma-knowledge-curator`
-- **Session Workflows** → Ask `shirokuma-session-automator`
 
 ## ⚡ Essential MCP Operations
 

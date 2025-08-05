@@ -299,7 +299,6 @@ Instead of command-line options, provide natural language instructions to guide 
 1. **With issue-manager**: Get issue details, update status
 2. **With mcp-specialist**: Store and retrieve artifacts
 3. **With methodology-keeper**: Ensure process compliance
-4. **With session-automator**: Track workflow progress
 
 ### Success Criteria
 

@@ -33,6 +33,8 @@ Analyze $ARGUMENTS to determine:
 - Starts with "decision:" → decisions
 - Starts with "issue:" or contains "error/bug/problem" → issues
 - Starts with "learn:" or contains "understand/realized" → knowledge
+- Starts with "test:" or contains "test result/coverage" → test_results
+- Starts with "handover:" or contains "pass to/for reviewer" → handovers
 - Default → Quick note in current_state
 
 ### 2. Create Appropriate Record
@@ -135,6 +137,39 @@ Else:
   - title: (extract key learning)
   - content: (full explanation)
   - tags: ["quick-record", "learned", (relevant topic tags)]
+
+#### For Test Results:
+# Note: In most cases, test results should be created by the tester agent
+# This is for quick recording when main agent runs tests directly
+Execute: `mcp__shirokuma-knowledge-base__create_item`
+- type: "test_results"
+- title: "Test Results: (extract test area) - " + current_date
+- content: |
+    ## Test Summary
+    (extract test results)
+    
+    ## Details
+    (full test output or summary)
+- tags: ["#test-result", "quick-record", (test type)]
+- related: (link to relevant issue if mentioned)
+
+#### For Handovers:
+# For passing information to another agent
+Execute: `mcp__shirokuma-knowledge-base__create_item`
+- type: "handovers"
+- title: "Handover: main → (target agent): (topic)"
+- content: |
+    ## Context
+    (what was done)
+    
+    ## For (target agent)
+    (what needs to be done)
+    
+    ## Important Notes
+    (key points to consider)
+- status: "Open"
+- tags: ["#handover", "quick-record", (relevant tags)]
+- related: (link to relevant items)
 
 ### 3. Update current_state
 First execute: `mcp__shirokuma-knowledge-base__get_current_state`

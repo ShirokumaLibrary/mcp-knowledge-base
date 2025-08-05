@@ -1,6 +1,6 @@
 ---
 description: End work session following SHIROKUMA.md methodology
-allowed-tools: Task
+allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__update_current_state, mcp__shirokuma-knowledge-base__search_items, Bash
 ---
 
 # ai-finish - End AI Pair Programming Session
@@ -17,53 +17,111 @@ End work session and leave comprehensive records for the next AI session.
 
 @.claude/agents/LANG.markdown
 
-### Execute Session End
+### Session End Procedure
 
-Use the specialized session management agent to handle all session closure operations.
+This command properly closes the current AI session with complete handover and context preservation.
 
+#### 1. Session Validation
+
+- Parse current_state using `mcp__shirokuma-knowledge-base__get_current_state()`
+- Look for "## Active Session" section
+- **If no active session**: Notify user and exit gracefully
+- **If exists**: Extract session ID from "**Session ID**: sessions-XXXX" line
+- Get session details using `mcp__shirokuma-knowledge-base__get_item_detail` with extracted session ID
+
+#### 2. Memory Bank Collection
+
+Gather all items created/updated during session:
+- Search for items created after session start time using `mcp__shirokuma-knowledge-base__search_items`
+- Include decisions, issues, knowledge items
+- Compile comprehensive list with references
+
+#### 3. Todo Review
+
+Review todo completion status:
+- Display current todo list
+- Ask user to confirm completed items
+- For incomplete items, ask for notes/reasons
+- Update todo statuses accordingly
+
+#### 4. Work Summary Generation
+
+Create comprehensive summary including:
+- Session duration calculation
+- List of completed todos
+- Created/updated items with references
+- Key decisions made
+- Technical achievements
+
+Format example:
+```markdown
+## 📊 Session Summary
+Duration: X hours Y minutes
+
+### Completed Tasks:
+- ✓ [Task description] (issues-XX)
+
+### Created/Updated:
+- issues-YY: [Title]
+- knowledge-ZZ: [Title]
+
+### Incomplete Tasks:
+- ⏸ [Task] - [Reason/Note]
+
+### Next Session:
+- Continue with [specific items]
+- Consider [recommendations]
 ```
-Task: Use shirokuma-session-automator to properly close the current AI session
-Purpose: Ensure complete handover and context preservation for next session
-Operations Required:
-  1. Retrieve active session from current_state
-  2. Compile comprehensive work summary
-  3. Review and update todo completion status
-  4. Update session with end time and achievements
-  5. Delegate daily summary update to shirokuma-daily-reporter:
-     - Aggregate all today's sessions
-     - Calculate total work time
-     - Highlight key achievements
-     - Create progress visualization
-     - Update or create daily summary
-  6. Prepare handover notes in current_state
-  7. Remove active session marker
-  8. Display final summary to user
-```
 
-### Expected Behavior
+#### 5. Session Update
 
-The session-automator agent will:
-- Generate complete summary of all work done
-- Handle todo review with completion status
-- Update all necessary records (session, daily, current_state)
-- Ensure no context is lost for next AI
-- Provide clear handover documentation
-- Display meaningful closure summary to user
+Update session item with `mcp__shirokuma-knowledge-base__update_item`:
+- Add end time to description
+- Update content with summary of achievements
+- Add all related item references
+- Include final todo status
 
-### Special Handling
+#### 6. State Handover
 
-The agent should handle these cases gracefully:
-- No active session found
-- Incomplete todos requiring notes
-- Daily summary creation if needed
-- Error recovery without data loss
+Update current_state using `mcp__shirokuma-knowledge-base__update_current_state` to ensure clean handover:
+- **Remove** "## Active Session" section completely
+- **Add session summary** to "## Recent Context" section:
+  ```markdown
+  ## Recent Context
+  ### Last Session ([session-id])
+  - Duration: X hours Y minutes
+  - Completed: [brief summary]
+  - Working on: [issue-id]
+  ```
+- **Update "## Next Priorities"** based on incomplete todos
+- Include any blockers or considerations for next AI
 
-### Success Criteria
+#### 7. Final Display
 
-A successful session closure includes:
-- All work properly documented
-- Clear next steps identified
-- State ready for next session
-- User receives comprehensive summary
+Show user a complete summary as formatted in step 4.
 
-This command delegates all complex logic to the specialized agent, maintaining clean separation of concerns.
+### Best Practices
+
+1. **Complete Documentation**
+   - Ensure all work is properly documented
+   - Clear next steps identified
+   - State ready for next session
+
+2. **User Confirmation**
+   - Get user confirmation on todo completion
+   - Allow notes for incomplete items
+   - Ensure nothing is lost
+
+3. **Error Recovery**
+   - Handle missing session gracefully
+   - Provide manual alternatives if needed
+   - Never lose work data
+
+### MCP Permissions
+
+As the main agent executing this command, you have permissions to:
+- **Update**: sessions, current_state  
+- **Read**: all types
+- **Create**: knowledge, handovers (if needed)
+
+Note: Follow the tag rules in @.claude/agents/MCP_RULES.markdown

@@ -16,17 +16,14 @@ This directory contains custom agents for Claude Code that are integrated with t
 Please report a new bug. Authentication feature throws an error during login.
 ```
 
-### 2. shirokuma-daily-reporter
-**Purpose**: Create and update daily reports
-- Aggregate session information
-- Automatic work time calculation
-- Highlight achievements
-- Visualize progress
+### 2. shirokuma-daily-reporter [DEPRECATED]
+**Purpose**: [DEPRECATED - Dailies type will be removed]
+- ~~Aggregate session information~~
+- ~~Automatic work time calculation~~
+- ~~Highlight achievements~~
+- ~~Visualize progress~~
 
-**Example usage**:
-```
-Please summarize today's work and update the daily report
-```
+**Note**: The dailies type is being removed. Session information is sufficient for tracking work history.
 
 ### 3. shirokuma-knowledge-curator
 **Purpose**: Organize and systematize technical knowledge
@@ -40,17 +37,14 @@ Please summarize today's work and update the daily report
 Please record type-safe error handling patterns in TypeScript as knowledge
 ```
 
-### 4. shirokuma-session-automator
-**Purpose**: Automate AI session management
-- Streamline /ai-start and /ai-finish processing
-- Automatic context restoration
-- Regular progress recording
-- Error recovery
+### 4. shirokuma-session-automator [DEPRECATED]
+**Purpose**: [DEPRECATED - Use /ai-start and /ai-finish commands directly]
+- ~~Streamline /ai-start and /ai-finish processing~~
+- ~~Automatic context restoration~~
+- ~~Regular progress recording~~
+- ~~Error recovery~~
 
-**Example usage**:
-```
-Please prepare to start a session
-```
+**Note**: This agent's functionality has been moved to the main agent's /ai-start and /ai-finish commands. No longer need to use Task tool to delegate.
 
 ### 5. shirokuma-mcp-specialist
 **Purpose**: Expert in MCP operations and data management

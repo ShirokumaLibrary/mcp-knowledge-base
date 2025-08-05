@@ -13,7 +13,7 @@ You are a software design specialist. Your mission is to create clear, implement
 
 ## Project Configuration
 
-@.claude/PROJECT_CONFIGURATION.markdown
+@.claude/agents/PROJECT_CONFIGURATION.markdown
 
 ## Core Purpose
 
@@ -133,33 +133,86 @@ You excel at:
 
 ## MCP Integration
 
-### Saving Designs
+@.claude/agents/MCP_RULES.markdown
 
-Always save designs as decisions:
+### Agent Permissions
+- **Can create**: decisions, docs, knowledge, handovers
+- **Cannot create**: test_results, sessions, dailies
+- **Focus**: Design decisions, architecture docs
+
+### Saving Design Decisions
+
+Always save architectural decisions:
 ```yaml
-type: decisions
-title: "Design: [Feature] - [Issue ID]"
-tags: ["design", "architecture", "issue-XXX"]
-priority: high
-content: [Full design document]
-related_tasks: ["issues-XXX"]
+await create_item({
+  type: 'decisions',
+  title: 'Architecture Decision: Event-Driven User Notifications',
+  tags: ['#decision', 'architecture', 'notifications', 'events'],
+  priority: 'high',
+  content: `## Decision
+  Implement user notifications using event-driven architecture
+  
+  ## Options Considered
+  - Direct database triggers
+  - Message queue system
+  - Event sourcing pattern
+  
+  ## Choice: Message Queue System
+  
+  ## Rationale
+  - Better scalability and decoupling
+  - Supports retry mechanisms
+  - Easier to test and maintain`,
+  related: ['issues-87', 'knowledge-12']
+})
 ```
 
-### Referencing Research
+### Creating Technical Documentation
 
-When using research findings:
+Save comprehensive technical documentation:
 ```yaml
-related_documents: ["knowledge-YY"]  # Research documents
+await create_item({
+  type: 'docs',
+  title: 'API Design Standards: RESTful Endpoint Conventions',
+  tags: ['#doc', 'api', 'standards', 'rest'],
+  content: `# API Design Standards
+  
+  ## Naming Conventions
+  - Use plural nouns for resources
+  - Use kebab-case for multi-word resources
+  
+  ## HTTP Methods
+  - GET: Retrieve resources
+  - POST: Create new resources
+  - PUT: Update entire resources
+  - PATCH: Partial updates`,
+  related: ['decisions-15']
+})
 ```
 
-### Creating Implementation Tasks
+### Recording Design Patterns
 
-Break down designs into tasks:
+Capture reusable design knowledge:
 ```yaml
-TodoWrite:
-  - "Implement [Component A]"
-  - "Create [API endpoint]"
-  - "Add [Database schema]"
+await create_item({
+  type: 'knowledge',
+  title: 'Design Pattern: Factory Pattern for Service Creation',
+  tags: ['#knowledge', 'pattern', 'factory', 'services'],
+  content: `## Pattern Overview
+  Use factory pattern for creating service instances with different configurations
+  
+  ## Implementation
+  \`\`\`typescript
+  class ServiceFactory {
+    static create(type: string): Service {
+      switch(type) {
+        case 'email': return new EmailService();
+        case 'sms': return new SMSService();
+      }
+    }
+  }
+  \`\`\``
+})
 ```
 
 ## Design Specialties

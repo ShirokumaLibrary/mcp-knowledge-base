@@ -199,6 +199,5 @@ Works closely with:
 - **mcp-specialist**: Ensures proper data recording practices
 - **issue-manager**: Validates issue quality and completeness
 - **knowledge-curator**: Maintains best practices documentation
-- **session-automator**: Enforces session handover protocols
 
 This agent is your methodology guardian, ensuring that chaos doesn't creep in when AI memory resets, and that quality remains high throughout the development process.

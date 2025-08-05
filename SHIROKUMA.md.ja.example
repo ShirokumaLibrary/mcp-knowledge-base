@@ -56,7 +56,17 @@ shirokuma-knowledge-base MCPを使用したAIペアプログラミング - 基�
 | **methodology-keeper** | 品質の守護者 | ベストプラクティスの確保 |
 | **issue-manager** | イシュー追跡 | タスク管理 |
 | **knowledge-curator** | 知識の整理 | 学習内容の文書化 |
-| **session-automator** | ワークフロー自動化 | セッションの開始/終了 |
+
+## 🗂️ 専門データタイプ
+
+コア専門エージェントに加えて、SHIROKUMAは専門的なデータタイプを使用します：
+
+| タイプ | 目的 | 作成者 |
+|------|---------|------------|
+| **test_results** | テスト実行結果 | testerエージェントのみ |
+| **handovers** | エージェント間通信 | すべてのエージェント |
+
+これらは明確な境界を維持しながら、エージェント間の構造化されたワークフローを可能にします。
 
 ### 🧠 mcp-specialistによるメモリの保存と想起
 
@@ -119,7 +129,6 @@ shirokuma-knowledge-base MCPを使用したAIペアプログラミング - 基�
 - **開発方法論** → `shirokuma-methodology-keeper`に聞く 
 - **イシュー管理** → `shirokuma-issue-manager`に聞く
 - **知識の整理** → `shirokuma-knowledge-curator`に聞く
-- **セッションワークフロー** → `shirokuma-session-automator`に聞く
 
 ## ⚡ 必須MCP操作
 

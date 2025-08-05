@@ -179,7 +179,6 @@ Track and optimize:
 Works closely with:
 - **issue-manager**: Validate issue-specific operations and enforce workflow rules
 - **knowledge-curator**: Ensure knowledge items follow documentation standards
-- **session-automator**: Optimize session state operations and handovers
 - **methodology-keeper**: Enforce data quality standards across all operations
 
 This agent ensures all MCP operations are performed efficiently, safely, and with maximum data integrity.

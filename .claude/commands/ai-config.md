@@ -16,7 +16,7 @@ Actions:
 
 ### Purpose
 
-This command analyzes the current project structure and generates or updates the `.claude/PROJECT_CONFIGURATION.markdown` file, which contains comprehensive project-specific settings and patterns for all AI agents.
+This command analyzes the current project structure and generates or updates the `.claude/agents/PROJECT_CONFIGURATION.markdown` file, which contains comprehensive project-specific settings and patterns for all AI agents.
 
 ### Workflow
 
@@ -27,7 +27,7 @@ This command analyzes the current project structure and generates or updates the
 3. Identify conventions and patterns
 4. Find MCP instance if exists
 5. Generate configuration file
-6. Save to .claude/PROJECT_CONFIGURATION.markdown
+6. Save to .claude/agents/PROJECT_CONFIGURATION.markdown
 ```
 
 #### Update Configuration
@@ -42,7 +42,7 @@ This command analyzes the current project structure and generates or updates the
 #### Validate Configuration
 ```yaml
 1. Check configuration exists
-   - Verify .claude/PROJECT_CONFIGURATION.markdown exists
+   - Verify .claude/agents/PROJECT_CONFIGURATION.markdown exists
    - Check YAML syntax is valid
    - Ensure required sections present
 
@@ -162,3 +162,66 @@ development_principles:
 - Agent compatibility verified
 
 This command ensures all AI agents have accurate project context for optimal performance.
+
+### Generic Project Template
+
+For new projects or manual configuration, use this comprehensive template:
+
+```yaml
+# Generic Project Configuration Template
+# Save as: .claude/agents/PROJECT_CONFIGURATION.markdown
+
+project:
+  name: "PROJECT_NAME"
+  description: "Brief project description"
+  version: "0.1.0"
+  language_env: "LANGUAGE_ENV_VAR"  # Optional environment variable for language
+  
+references:
+  methodology_file: "README.md"  # Or your main docs
+  project_instructions: "CONTRIBUTING.md"  # Or your guidelines
+  
+conventions:
+  # Commands - Update these based on your project
+  test_command: "# TODO: Add test command"
+  lint_command: "# TODO: Add lint command"
+  build_command: "# TODO: Add build command"
+  # Type checking may be included in build process or as separate command
+  
+  # Naming conventions
+  file_naming: "kebab-case"  # or camelCase, PascalCase, snake_case
+  
+  # Code style
+  indent_style: "space"  # or tab
+  indent_size: 2  # or 4
+  quote_style: "single"  # or double
+
+tech_stack:
+  language: "Unknown"  # Update with actual language
+  runtime: "Unknown"  # Update with runtime
+  package_manager: "Unknown"  # npm, pip, cargo, etc.
+  frameworks: []  # Add frameworks as discovered
+
+quality_standards:
+  review_threshold: 85
+  test_coverage_target: 80
+  max_complexity: 10
+  
+development_principles:
+  - "Clean Code"
+  - "SOLID Principles"
+  - "Test-Driven Development"
+  - "Documentation First"
+  - "# TODO: Add project-specific principles"
+```
+
+#### Template Usage
+
+1. Run `/ai-config generate` to auto-detect your project settings
+2. Or manually create `.claude/agents/PROJECT_CONFIGURATION.markdown` with the template
+3. Replace all `# TODO:` items with actual values
+4. Update placeholders like `PROJECT_NAME` and `Unknown`
+5. Add project-specific sections as needed
+6. Run `/ai-config validate` to check configuration
+
+The AI agents will gracefully handle TODO items and provide guidance when commands are needed but not yet configured.

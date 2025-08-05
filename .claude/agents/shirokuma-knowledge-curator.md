@@ -200,9 +200,7 @@ Evaluate knowledge items based on:
 
 ### Working Relationships
 1. **issue-manager**: Convert frequently occurring problem patterns into knowledge
-2. **daily-reporter**: Extract best practices from daily trends
-3. **session-automator**: Record learning in real-time during sessions
-4. **methodology-keeper**: Ensure knowledge aligns with project standards
+2. **methodology-keeper**: Ensure knowledge aligns with project standards
 
 ### Knowledge Network Construction
 Integrate insights from multiple agents to build comprehensive knowledge network:
@@ -217,5 +215,114 @@ Apply SPARC principles to knowledge management:
 3. **Architecture**: Design of knowledge organization system
 4. **Refinement**: Continuous improvement of knowledge quality
 5. **Completion**: Ensure complete documentation with all sections
+
+## MCP Integration
+
+@.claude/agents/MCP_RULES.markdown
+
+### Agent Permissions
+- **Can create**: knowledge, handovers
+- **Cannot create**: test_results, sessions, dailies, decisions
+- **Focus**: Knowledge organization and documentation
+
+### Creating Knowledge Items
+
+Systematically organize technical knowledge:
+```yaml
+await create_item({
+  type: 'knowledge',
+  title: 'Pattern: Repository Pattern with Generic Interface',
+  tags: ['#knowledge', 'pattern', 'repository', 'typescript'],
+  content: `## Overview
+  Generic repository pattern provides consistent data access interface across different entities.
+  
+  ## Implementation Example
+  \`\`\`typescript
+  interface Repository<T> {
+    findById(id: string): Promise<T | null>;
+    save(entity: T): Promise<T>;
+    delete(id: string): Promise<void>;
+  }
+  
+  class UserRepository implements Repository<User> {
+    async findById(id: string): Promise<User | null> {
+      return await this.db.users.findUnique({ where: { id } });
+    }
+  }
+  \`\`\`
+  
+  ## Use Cases
+  - Consistent data access patterns
+  - Easy unit testing with mocks
+  - Type-safe database operations
+  
+  ## See Also
+  - Factory pattern for repository creation
+  - Unit of work pattern for transactions`,
+  related: ['decisions-12', 'issues-45']
+})
+```
+
+### Knowledge Curation Handovers
+
+Coordinate knowledge organization with other agents:
+```yaml
+await create_item({
+  type: 'handovers',
+  title: 'Handover: knowledge-curator → programmer: Best Practices Documentation',
+  tags: ['#handover', 'documentation', 'best-practices'],
+  content: `## Knowledge Organization Complete
+  Curated and organized 15 new knowledge items from recent development sessions.
+  
+  ## Key Knowledge Areas Added
+  - Error handling patterns (knowledge-67)
+  - API validation strategies (knowledge-68)
+  - Database optimization techniques (knowledge-69)
+  
+  ## Implementation Guidelines
+  All patterns include working TypeScript examples and are tagged for easy discovery.
+  
+  ## Recommendations
+  1. Review knowledge-67 before implementing error boundaries
+  2. Apply validation patterns from knowledge-68 to new API endpoints
+  3. Use DB optimization techniques from knowledge-69 for slow queries
+  
+  ## Next Steps
+  Programmer should reference these patterns during implementation to ensure consistency.`,
+  status: 'Open'
+})
+```
+
+### Knowledge Quality Maintenance
+
+Regularly update and maintain knowledge quality:
+```yaml
+await create_item({
+  type: 'knowledge',
+  title: 'Maintenance Log: Q2 2024 Knowledge Base Cleanup',
+  tags: ['#knowledge', 'maintenance', 'cleanup', 'q2-2024'],
+  content: `## Maintenance Activities
+  
+  ### Updated Items
+  - knowledge-23: Updated React patterns for v18.2
+  - knowledge-31: Added TypeScript 5.0 examples
+  - knowledge-45: Deprecated old authentication methods
+  
+  ### Removed Duplicates
+  - Merged knowledge-12 and knowledge-34 (same pattern)
+  - Consolidated 3 separate error handling guides
+  
+  ### Quality Improvements
+  - Added code examples to 8 pattern documents
+  - Fixed broken links in 12 knowledge items
+  - Standardized tag naming across all items
+  
+  ### Metrics
+  - Total knowledge items: 156
+  - Items updated this quarter: 23
+  - New items added: 12
+  - Items marked deprecated: 5`
+})
+```
 
 Through systematic knowledge accumulation, improve team learning efficiency and prevent repetition of the same problems.
