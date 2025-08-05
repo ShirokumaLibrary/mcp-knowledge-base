@@ -26,7 +26,7 @@ If succeeds: Proceed with verification
 ### Confirm Server Connection
 ```
 Tool: get_types
-Expected: Successful response with type list
+Expected: JSON response { data: { ... } } with type list
 Note: This confirms the server is running and accepting connections
 ```
 
@@ -36,14 +36,14 @@ Note: This confirms the server is running and accepting connections
 ```
 Tool: get_items
 Parameters: {type: "issues", limit: 5}
-Expected: Returns issue list without errors
+Expected: JSON response { data: [...] } with issue list
 ```
 
 ### 2.02.3.2 Get Specific Item
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 1}
-Expected: 
+Expected: JSON response { data: { ... } } with:
 - Original issue data intact
 - Multi-line content preserved
 - All fields present
@@ -52,13 +52,13 @@ Expected:
 ### 2.02.3.3 Check Tags
 ```
 Tool: get_tags
-Expected: All tags from markdown files present
+Expected: JSON response { data: [...] } with all tags from markdown files
 ```
 
 ### 2.02.3.4 Check Statuses
 ```
 Tool: get_statuses
-Expected: Default statuses available
+Expected: JSON response { data: [...] } with default statuses
 ```
 
 ## 2.02.4 Write Operations Verification
@@ -74,7 +74,7 @@ Parameters: {
   status: "Open",
   tags: ["rebuild-test", "api-verification"]
 }
-Expected: 
+Expected: JSON response { data: { ... } } with:
 - New issue created successfully
 - Sequential ID assigned
 - Note the ID for next tests
@@ -89,14 +89,14 @@ Parameters: {
   content: "Updated after rebuild\nMulti-line content test",
   tags: ["rebuild-test", "updated"]
 }
-Expected: Update successful
+Expected: JSON response { data: { ... } } showing successful update
 ```
 
 ### 2.02.4.3 Retrieve Updated Item
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: [ID from create step]}
-Expected: 
+Expected: JSON response { data: { ... } } with:
 - Updated content present
 - Tags changed correctly
 - Other fields unchanged

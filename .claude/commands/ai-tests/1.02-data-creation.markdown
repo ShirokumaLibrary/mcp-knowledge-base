@@ -15,11 +15,11 @@ Parameters: {
   status: "Open",
   tags: ["bug", "authentication", "urgent"]
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- related: array (unified list of all related items)
-- related_tasks: array (for backward compatibility)
-- related_documents: array (for backward compatibility)
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.related: array (unified list of all related items)
+- data.related_tasks: array (for backward compatibility)
+- data.related_documents: array (for backward compatibility)
 ```
 
 ### Issue 2 - Issue without tags
@@ -32,12 +32,12 @@ Parameters: {
   priority: "medium",
   status: "Open"
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- related: empty array
-- related_tasks: empty array (for backward compatibility)
-- related_documents: empty array (for backward compatibility)
-- tags: empty array (auto-initialized)
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.related: empty array
+- data.related_tasks: empty array (for backward compatibility)
+- data.related_documents: empty array (for backward compatibility)
+- data.tags: empty array (auto-initialized)
 ```
 
 ### Issue 3 - Issue with different status
@@ -51,10 +51,10 @@ Parameters: {
   status: "In Progress",
   tags: ["feature", "ui", "enhancement"]
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- status: "In Progress"
-- related: empty array
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.status: "In Progress"
+- data.related: empty array
 ```
 
 ### Issue 4 - Issue with description field
@@ -69,10 +69,10 @@ Parameters: {
   status: "Open",
   tags: ["bug", "memory", "performance"]
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- description: "Background worker process consumes increasing memory over time"
-- related: empty array
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.description: "Background worker process consumes increasing memory over time"
+- data.related: empty array
 ```
 
 ### Issue 5 - Issue with related tasks and documents
@@ -88,11 +88,11 @@ Parameters: {
   related_tasks: ["issues-1", "issues-4"],
   related_documents: ["docs-1", "knowledge-1"]
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- related: ["issues-1", "issues-4", "docs-1", "knowledge-1"] (merged array)
-- related_tasks: ["issues-1", "issues-4"]
-- related_documents: ["docs-1", "knowledge-1"]
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.related: ["issues-1", "issues-4", "docs-1", "knowledge-1"] (merged array)
+- data.related_tasks: ["issues-1", "issues-4"]
+- data.related_documents: ["docs-1", "knowledge-1"]
 ```
 
 ### Issue 6 - Issue with version field
@@ -107,10 +107,10 @@ Parameters: {
   tags: ["release", "planning"],
   version: "0.8.0"
 }
-Expected: Success with response containing:
-- id: string (auto-generated)
-- version: "0.8.0"
-- related: empty array
+Expected: Success with JSON response { data: { ... } } containing:
+- data.id: string (auto-generated)
+- data.version: "0.8.0"
+- data.related: empty array
 ```
 
 ## Test 2.2: Plan Creation
@@ -128,7 +128,7 @@ Parameters: {
   end_date: "2025-03-31",
   tags: ["roadmap", "q1-2025", "planning"]
 }
-Expected: Success with id: "1"
+Expected: Success with JSON response { data: { id: "1", ... } }
 ```
 
 ## Test 2.3: Document Creation
@@ -142,7 +142,7 @@ Parameters: {
   content: "# API Authentication\n\n## Overview\nThis guide explains how to authenticate with our API.\n\n## Authentication Methods\n\n### 1. API Key Authentication\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\n### 2. OAuth 2.0\nFor third-party applications, we support OAuth 2.0 flow.\n\n## Rate Limiting\n- 1000 requests per hour\n- 100 requests per minute",
   tags: ["api", "authentication", "guide"]
 }
-Expected: Success with id: "1"
+Expected: Success with JSON response { data: { id: "1", ... } }
 ```
 
 ## Test 2.4: Knowledge Base Creation
@@ -156,7 +156,7 @@ Parameters: {
   content: "# Docker Best Practices\n\n## 1. Keep Images Small\n- Use alpine-based images\n- Multi-stage builds\n- Remove unnecessary files\n\n## 2. Security\n- Don't run as root\n- Scan for vulnerabilities\n- Use secrets management\n\n## 3. Performance\n- Layer caching\n- Minimize layer count\n- Use .dockerignore",
   tags: ["docker", "best-practices", "devops"]
 }
-Expected: Success with id: "1"
+Expected: Success with JSON response { data: { id: "1", ... } }
 ```
 
 ## Test 2.5: Session Creation
@@ -170,7 +170,7 @@ Parameters: {
   tags: ["bugfix", "authentication"],
   related_tasks: ["issues-1"]
 }
-Expected: Success with timestamp-based ID
+Expected: Success with JSON response { data: { id: timestamp-based, ... } }
 ```
 
 ## Test 2.6: Daily Summary Creation
@@ -183,5 +183,5 @@ Parameters: {
   content: "## Completed Today\n- Fixed authentication bug (Issue #1)\n- Started dark mode implementation\n- Updated API documentation\n\n## In Progress\n- Performance optimization\n- Memory leak investigation\n\n## Blockers\n- Need design approval for dark mode UI",
   tags: ["daily", "progress"]
 }
-Expected: Success with date-based ID
+Expected: Success with JSON response { data: { id: date-based, ... } }
 ```

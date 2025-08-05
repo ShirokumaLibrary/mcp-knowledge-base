@@ -14,12 +14,15 @@ Expected: Database file copied successfully
 ```
 Tool: get_items
 Parameters: {type: "issues", includeClosedStatuses: true}
+Expected: JSON response { data: [...] }
 Note: Record count and IDs
 
 Tool: get_tags
+Expected: JSON response { data: [...] }
 Note: Record all tags
 
 Tool: get_types
+Expected: JSON response { data: { ... } }
 Note: Record custom types
 ```
 

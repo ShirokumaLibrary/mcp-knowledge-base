@@ -16,11 +16,11 @@ Parameters: {
   tags: ["development", "morning"],
   related: ["issues-1", "issues-2"]
 }
-Expected: Success with:
-- id: timestamp ID (YYYY-MM-DD-HH.MM.SS.sss)
-- related: ["issues-1", "issues-2"] (unified field)
-- related_tasks: ["issues-1", "issues-2"] (backward compatibility)
-- related_documents: [] (backward compatibility)
+Expected: JSON response { data: { ... } } containing:
+- data.id: timestamp ID (YYYY-MM-DD-HH.MM.SS.sss)
+- data.related: ["issues-1", "issues-2"] (unified field)
+- data.related_tasks: ["issues-1", "issues-2"] (backward compatibility)
+- data.related_documents: [] (backward compatibility)
 ```
 
 ### Create Session with Custom DateTime
@@ -33,7 +33,7 @@ Parameters: {
   datetime: "2025-01-14T15:30:00",
   tags: ["review"]
 }
-Expected: Success with custom timestamp
+Expected: JSON response { data: { ... } } with custom timestamp ID
 ```
 
 ## Test 6.2: Session Retrieval
@@ -44,7 +44,7 @@ Tool: get_items
 Parameters: {
   type: "sessions"
 }
-Expected: Array of today's sessions
+Expected: JSON response { data: [...] } containing today's sessions
 ```
 
 ### Get Sessions by Date Range
@@ -55,7 +55,7 @@ Parameters: {
   start_date: "2025-01-14",
   end_date: "2025-01-15"
 }
-Expected: Sessions within date range
+Expected: JSON response { data: [...] } containing sessions within date range
 ```
 
 ### Get Latest Session
@@ -65,7 +65,7 @@ Parameters: {
   type: "sessions",
   limit: 1
 }
-Expected: Most recent session created
+Expected: JSON response { data: [...] } with most recent session
 ```
 
 ### Get Session Detail
@@ -75,7 +75,7 @@ Parameters: {
   type: "sessions",
   id: "<session-id-from-creation>"
 }
-Expected: Full session object
+Expected: JSON response { data: { ... } } with full session object
 ```
 
 ## Test 6.3: Session Updates
@@ -88,7 +88,7 @@ Parameters: {
   id: "<session-id>",
   content: "## Tasks Completed\n- Fixed authentication bug\n- Added unit tests\n- Updated documentation\n- Added integration tests\n\n## Notes\n- All tests passing\n- Ready for deployment"
 }
-Expected: Updated session
+Expected: JSON response { data: { ... } } with updated session content
 ```
 
 ### Add Tags to Session
@@ -99,7 +99,7 @@ Parameters: {
   id: "<session-id>",
   tags: ["development", "morning", "completed"]
 }
-Expected: Updated session with new tags
+Expected: JSON response { data: { ... } } with updated tags
 ```
 
 ## Test 6.4: Session Search
@@ -108,12 +108,12 @@ Expected: Updated session with new tags
 ```
 Tool: search_sessions_by_tag (DEPRECATED - use search_items_by_tag)
 Parameters: {tag: "development"}
-Expected: Sessions with "development" tag
+Expected: JSON response { data: [...] } containing sessions with "development" tag
 ```
 
 ### Search Sessions by Tag (Alternative)
 ```
 Tool: search_items_by_tag
 Parameters: {tag: "development", types: ["sessions"]}
-Expected: Sessions with "development" tag
+Expected: JSON response { data: [...] } containing sessions with "development" tag
 ```

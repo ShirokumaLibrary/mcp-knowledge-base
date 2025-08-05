@@ -7,7 +7,7 @@ Test tag management and search capabilities.
 ### Verify Tags Were Auto-Created
 ```
 Tool: get_tags
-Expected: Array containing all unique tags from created items:
+Expected: JSON response { data: [...] } containing all unique tags from created items:
 - "bug", "authentication", "urgent", "feature", "ui", "enhancement",
 - "memory", "performance", "documentation", "api", "roadmap",
 - "q1-2025", "planning", "guide", "docker", "best-practices",
@@ -20,21 +20,21 @@ Expected: Array containing all unique tags from created items:
 ```
 Tool: search_items_by_tag
 Parameters: {tag: "bug"}
-Expected: Items with "bug" tag (issues 1 and 4)
+Expected: JSON response { data: { tasks: { issues: [...] } } } with items having "bug" tag
 ```
 
 ### Search by Non-existent Tag
 ```
 Tool: search_items_by_tag
 Parameters: {tag: "nonexistent"}
-Expected: Empty result
+Expected: JSON response { data: { tasks: {}, documents: {} } }
 ```
 
 ### Search with Type Filter
 ```
 Tool: search_items_by_tag
 Parameters: {tag: "api", types: ["docs", "issues"]}
-Expected: Only docs and issues with "api" tag
+Expected: JSON response { data: { tasks: { issues: [...] }, documents: { docs: [...] } } } containing only items with "api" tag
 ```
 
 ## Test 4.3: Tag Management
@@ -43,7 +43,7 @@ Expected: Only docs and issues with "api" tag
 ```
 Tool: create_tag
 Parameters: {name: "security"}
-Expected: Success message
+Expected: JSON response { data: { name: "security" }, message: "Tag created successfully" }
 ```
 
 ### Create Duplicate Tag
@@ -57,7 +57,7 @@ Expected: Error "Tag 'bug' already exists"
 ```
 Tool: search_tags
 Parameters: {pattern: "auth"}
-Expected: Tags containing "auth" (authentication)
+Expected: JSON response { data: [...] } with tags containing "auth"
 ```
 
 ### Delete Tag

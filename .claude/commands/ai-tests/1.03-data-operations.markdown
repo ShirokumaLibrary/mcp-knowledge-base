@@ -8,14 +8,14 @@ Test read and update operations on created data.
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 1}
-Expected: Full issue object with all fields
+Expected: JSON response { data: { ... } } with full issue object
 ```
 
 ### Get Plan Details
 ```
 Tool: get_item_detail
 Parameters: {type: "plans", id: 1}
-Expected: Full plan object with start_date and end_date
+Expected: JSON response { data: { ... } } with full plan object including start_date and end_date
 ```
 
 ### Get Non-existent Item
@@ -31,14 +31,14 @@ Expected: Error "issues with ID 999 not found. Use 'get_items' with type='issues
 ```
 Tool: get_items
 Parameters: {type: "issues", statuses: ["Open"]}
-Expected: Array of issues with status "Open"
+Expected: JSON response { data: [...] } with array of issues having status "Open"
 ```
 
 ### List All Issues Including Closed
 ```
 Tool: get_items
 Parameters: {type: "issues", includeClosedStatuses: true}
-Expected: Array of all issues including closed ones
+Expected: JSON response { data: [...] } with array of all issues including closed ones
 ```
 
 ### List with Date Range
@@ -49,7 +49,7 @@ Parameters: {
   start_date: "2025-01-01",
   end_date: "2025-12-31"
 }
-Expected: Plans within date range
+Expected: JSON response { data: [...] } with plans within date range
 ```
 
 ## Test 3.3: Update Operations
@@ -62,7 +62,7 @@ Parameters: {
   id: 1,
   status: "In Progress"
 }
-Expected: Updated issue with new status
+Expected: JSON response { data: { ... } } with updated issue showing new status
 ```
 
 ### Update Issue Priority and Tags
@@ -74,7 +74,7 @@ Parameters: {
   priority: "high",
   tags: ["performance", "critical", "backend"]
 }
-Expected: Updated issue with new priority and tags
+Expected: JSON response { data: { ... } } with updated issue showing new priority and tags
 ```
 
 ### Partial Update (Description Only)
@@ -85,7 +85,7 @@ Parameters: {
   id: 3,
   description: "Dark mode feature request from multiple users"
 }
-Expected: Updated issue with new description, other fields unchanged
+Expected: JSON response { data: { ... } } with updated issue showing new description, other fields unchanged
 ```
 
 ### Update with Invalid Status
@@ -109,10 +109,10 @@ Parameters: {
   id: 2,
   related: ["issues-1", "issues-3", "docs-1"]
 }
-Expected: Updated issue with:
-- related: ["issues-1", "issues-3", "docs-1"]
-- related_tasks: ["issues-1", "issues-3"] (auto-populated for backward compatibility)
-- related_documents: ["docs-1"] (auto-populated for backward compatibility)
+Expected: JSON response { data: { ... } } with updated issue containing:
+- data.related: ["issues-1", "issues-3", "docs-1"]
+- data.related_tasks: ["issues-1", "issues-3"] (auto-populated for backward compatibility)
+- data.related_documents: ["docs-1"] (auto-populated for backward compatibility)
 ```
 
 ### Add Related Items (Using Legacy Fields - Still Supported)
@@ -124,9 +124,9 @@ Parameters: {
   related_tasks: ["issues-1", "issues-3"],
   related_documents: ["docs-1"]
 }
-Expected: Updated issue with:
-- related: ["issues-1", "issues-3", "docs-1"] (auto-populated from legacy fields)
-- related_tasks: ["issues-1", "issues-3"]
+Expected: JSON response { data: { ... } } with updated issue containing:
+- data.related: ["issues-1", "issues-3", "docs-1"] (auto-populated from legacy fields)
+- data.related_tasks: ["issues-1", "issues-3"]
 - related_documents: ["docs-1"]
 ```
 

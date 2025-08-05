@@ -8,7 +8,7 @@ Test deletion operations and cascading effects.
 ```
 Tool: delete_item
 Parameters: {type: "issues", id: 4}
-Expected: Success message
+Expected: JSON response { data: "issues ID 4 deleted" }
 ```
 
 ### Verify Deletion
@@ -31,7 +31,7 @@ Expected: Error "issues with ID 999 not found"
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 5}
-Expected: Still contains "issues-4" in related_tasks (orphaned reference)
+Expected: JSON response { data: { ... } } with data.related_tasks still containing "issues-4" (orphaned reference)
 ```
 
 ## Test 9.3: Tag Deletion Effects
@@ -40,18 +40,18 @@ Expected: Still contains "issues-4" in related_tasks (orphaned reference)
 ```
 Tool: delete_tag
 Parameters: {name: "api"}
-Expected: Success
+Expected: JSON response { data: "Tag 'api' deleted" }
 ```
 
 ### Verify Tag Removed from Items
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 5}
-Expected: Item without "api" tag
+Expected: JSON response { data: { ... } } with data.tags not containing "api"
 
 Tool: get_item_detail
 Parameters: {type: "docs", id: 1}
-Expected: Document without "api" tag
+Expected: JSON response { data: { ... } } with data.tags not containing "api"
 ```
 
 ## Test 9.4: Session Deletion
@@ -60,7 +60,7 @@ Expected: Document without "api" tag
 ```
 Tool: delete_item
 Parameters: {type: "sessions", id: "<session-id>"}
-Expected: Success or appropriate error
+Expected: JSON response { data: "sessions ID <session-id> deleted" } or error
 ```
 
 ## Test 9.5: Summary Deletion
@@ -69,7 +69,7 @@ Expected: Success or appropriate error
 ```
 Tool: delete_item
 Parameters: {type: "dailies", id: "2025-01-14"}
-Expected: Success
+Expected: JSON response { data: "dailies ID 2025-01-14 deleted" }
 ```
 
 ### Verify Summary Deleted

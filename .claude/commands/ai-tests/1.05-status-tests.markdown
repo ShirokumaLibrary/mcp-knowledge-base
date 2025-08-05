@@ -7,7 +7,7 @@ Test status filtering and usage.
 ### Get All Statuses
 ```
 Tool: get_statuses
-Expected: Markdown table with default statuses and is_closed flags
+Expected: JSON response { data: [...] } with default statuses containing id, name, and is_closed fields
 ```
 
 ## Test 5.2: Status Filtering
@@ -16,21 +16,21 @@ Expected: Markdown table with default statuses and is_closed flags
 ```
 Tool: get_items
 Parameters: {type: "issues"}
-Expected: Only issues with non-closed statuses
+Expected: JSON response { data: [...] } containing only issues with non-closed statuses
 ```
 
 ### Get All Items Including Closed
 ```
 Tool: get_items
 Parameters: {type: "issues", includeClosedStatuses: true}
-Expected: All issues regardless of status
+Expected: JSON response { data: [...] } containing all issues regardless of status
 ```
 
 ### Filter by Specific Status
 ```
 Tool: get_items
 Parameters: {type: "issues", statuses: ["Open"]}
-Expected: Only issues with "Open" status
+Expected: JSON response { data: [...] } containing only issues with "Open" status
 ```
 
 ### Filter by Multiple Statuses
@@ -40,7 +40,7 @@ Parameters: {
   type: "issues",
   statuses: ["Open", "In Progress"]
 }
-Expected: Issues with either status
+Expected: JSON response { data: [...] } containing issues with either status
 ```
 
 ## Test 5.3: Status Updates
@@ -53,18 +53,18 @@ Parameters: {
   id: 3,
   status: "Closed"
 }
-Expected: Success, issue marked as closed
+Expected: JSON response { data: { ... } } with status: "Closed"
 ```
 
 ### Verify Closed Item Filtering
 ```
 Tool: get_items
 Parameters: {type: "issues"}
-Expected: Issue 3 not included (closed)
+Expected: JSON response { data: [...] } without Issue 3 (closed)
 
 Tool: get_items
 Parameters: {type: "issues", includeClosedStatuses: true}
-Expected: Issue 3 included
+Expected: JSON response { data: [...] } including Issue 3
 ```
 
 ## Test 5.4: Status Management Operations

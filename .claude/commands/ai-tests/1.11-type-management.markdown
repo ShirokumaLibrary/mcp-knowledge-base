@@ -7,7 +7,7 @@ Test dynamic type system and custom types.
 ### List All Types
 ```
 Tool: get_types
-Expected: List showing:
+Expected: JSON response { data: { ... } } showing:
 - tasks: issues, plans
 - documents: docs, knowledge
 - special: sessions, dailies
@@ -17,7 +17,7 @@ Expected: List showing:
 ```
 Tool: get_types
 Parameters: {include_definitions: true}
-Expected: Full type definitions with supported fields
+Expected: JSON response { data: { ... } } with full type definitions and supported fields
 ```
 
 ## Test 11.2: Create Custom Types
@@ -30,7 +30,7 @@ Parameters: {
   base_type: "tasks",
   description: "Dedicated bug tracking type"
 }
-Expected: Success
+Expected: JSON response { data: { ... } } with created type
 ```
 
 ### Create Custom Document Type
@@ -41,7 +41,7 @@ Parameters: {
   base_type: "documents",
   description: "Step-by-step tutorial documents"
 }
-Expected: Success
+Expected: JSON response { data: { ... } } with created type
 ```
 
 ### Create Type with Invalid Base
@@ -77,7 +77,7 @@ Parameters: {
   status: "Open",
   tags: ["custom", "bug"]
 }
-Expected: Success with id "1"
+Expected: JSON response { data: { id: "1", ... } }
 ```
 
 ### Create Tutorial Document
@@ -89,18 +89,18 @@ Parameters: {
   content: "# Getting Started\n\n## Step 1\nFirst step here\n\n## Step 2\nSecond step here",
   tags: ["tutorial", "beginner"]
 }
-Expected: Success with id "1"
+Expected: JSON response { data: { id: "1", ... } }
 ```
 
 ### List Custom Type Items
 ```
 Tool: get_items
 Parameters: {type: "bugs"}
-Expected: Array with created bug
+Expected: JSON response { data: [...] } with created bug
 
 Tool: get_items
 Parameters: {type: "tutorials"}
-Expected: Array with created tutorial
+Expected: JSON response { data: [...] } with created tutorial
 ```
 
 ## Test 11.4: Type Management
@@ -112,7 +112,7 @@ Parameters: {
   name: "bugs",
   description: "Critical bug tracking with enhanced priority"
 }
-Expected: Success
+Expected: JSON response { data: { ... } } with updated type
 ```
 
 ### Delete Empty Type
@@ -129,11 +129,11 @@ Parameters: {
   name: "temp_type",
   base_type: "documents"
 }
-Expected: Success
+Expected: JSON response { data: { ... } } with created type
 
 Tool: delete_type
 Parameters: {name: "temp_type"}
-Expected: Success - no items exist
+Expected: JSON response { data: "Type 'temp_type' deleted" } - no items exist
 ```
 
 ## Test 11.5: Type Validation
