@@ -1,173 +1,125 @@
 ---
-allowed-tools: Read, Write, MultiEdit, Edit, Grep, Bash(npm test:*), mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__index_codebase, mcp__shirokuma-knowledge-base__search_code, mcp__shirokuma-knowledge-base__get_index_status
-description: Update test code and test commands to match the latest specifications
+allowed-tools: Read, Write, MultiEdit, Edit, Grep, Bash(npm test:*), mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__index_codebase, mcp__shirokuma-knowledge-base__search_code, mcp__shirokuma-knowledge-base__get_index_status, Task
+description: Update test code to match the latest implementation
 ---
 
-# ai-update-tests - Update tests to match current implementation
+# ai-update-tests - Update test code to match current implementation
 
 ## Usage
 ```
-/ai-update-tests
+/ai-update-tests         # Update all failing tests
+/ai-update-tests unit    # Update unit tests only
+/ai-update-tests int     # Update integration tests only
 ```
 
 ## Task
 
 @.claude/agents/LANG.markdown
 
-<ultrathink>
-Before updating tests, I need to:
-1. Check if codebase index is up-to-date for efficient searching
-2. Understand what test files exist and their current state
-3. Run the tests to see what's failing
-4. Compare test expectations with actual API behavior
-5. Identify both test specification files (.claude/commands/ai-tests/*.markdown) and actual test code files (src/**/*.test.ts)
-6. Update both types of files to match current implementation
-</ultrathink>
+Analyze the current system implementation and update test code files to match the latest API behavior.
 
-Analyze the current system implementation and update both test specifications AND test code files to match:
+### 1. Preparation
 
-### 1. Discover Current Specifications
-
-#### A. Index Preparation
+#### A. Index Status Check
 ```
 [Checking]: Index status with get_index_status
 [Updating]: If needed, run index_codebase to refresh
 ```
 
-#### B. Discovery Process
-- Execute actual API calls to understand current behavior
-- Use semantic search to find related test files and implementations
-- Compare with existing test expectations
-- Identify discrepancies between tests and reality
+#### B. Test Discovery
+- Identify test files: `src/**/*.test.ts`, `tests/**/*.test.ts`
+- Run tests to find failures: `npm test`
+- Categorize failures by type (unit vs integration)
 
 ### 2. Analysis Approach
-```
-[Discovering]: Current API behavior
-[Comparing]: Test expectations vs actual responses
-[Identifying]: Outdated patterns and deprecated features
-```
+
+For failing tests:
+1. **Identify Root Cause**
+   - API response format changes
+   - Field name changes (e.g., `related_tasks` → `related`)
+   - Validation rule updates
+   - Error message format changes
+
+2. **Use Semantic Search**
+   - Search for failing method implementations in TypeScript files
+   - Find deprecated field patterns like "related_tasks" or "related_documents"
+   - Locate test assertions that need updating (e.g., "expect.*toBe.*created")
+   - Use mcp__shirokuma-knowledge-base__search_code for semantic search
+
+3. **Verify Against Implementation**
+   - Compare test expectations with actual code
+   - Check for deprecated patterns
+   - Identify missing test coverage
 
 ### 3. Update Strategy
-- **Schema-driven**: Extract actual response schemas from live API
-- **Example-driven**: Use real API responses as test fixtures
-- **Error-driven**: Run tests and fix failures based on actual errors
-- **Documentation-driven**: Update based on current tool definitions
-- **Search-driven**: Use semantic search to find related code and tests
-  - `search_code({ query: "test assertion [feature]", fileTypes: ["ts"] })`
-  - `search_code({ query: "[API method] implementation", fileTypes: ["ts"] })`
 
-### 4. Key Areas to Check
-- API response formats (structure, field names, data types)
-- Required vs optional parameters
-- Error message formats
-- Validation rules
-- Default values
-- Edge case behaviors
+#### For Test Code Files (src/**/*.test.ts)
 
-### 5. Update Process
+1. **Automated Fixes**
+   - Field consolidation: `related_tasks` + `related_documents` → `related`
+   - Response format updates: plain text → JSON
+   - Error message updates for AI-friendly format
 
-<ultrathink>
-The update process should cover both test specifications and actual test code:
-- Test specifications: .claude/commands/ai-tests/*.markdown files
-- Test code: src/**/*.test.ts files
-Both need to be synchronized with the current implementation
-</ultrathink>
+2. **Manual Review Required**
+   - New validation rules
+   - Breaking API changes
+   - Complex business logic changes
 
-#### A. Test Specification Files (.claude/commands/ai-tests/*.markdown)
-1. Update markdown test descriptions to match current API behavior
-2. Fix expected request/response formats in documentation
-3. Update example scenarios and edge cases
+3. **Common Patterns to Update**
+   - **Field consolidation**: Change separate `related_tasks` and `related_documents` to unified `related` field
+   - **Response format**: Update plain text responses to JSON format with message and id
+   - **Error messages**: Update to AI-friendly format with clear instructions
+   - **Validation rules**: Adjust for new required/optional parameters
 
-#### B. Test Code Files (src/**/*.test.ts)
-1. Run current tests to identify failures: `npm test`
-2. For each failing test:
-   - Use semantic search to find the implementation: `search_code({ query: "[failing method]", fileTypes: ["ts"] })`
-   - Call actual APIs to get expected behavior
-   - Update test assertions to match actual responses
-   - Fix mock data and fixtures
-   - Update error expectations
-3. Search for outdated patterns using semantic search:
-   - `search_code({ query: "related_tasks OR related_documents", fileTypes: ["ts"] })` → Find field consolidation needs
-   - `search_code({ query: "expect.*toBe.*created", fileTypes: ["test.ts"] })` → Find response format changes
-   - `search_code({ query: "throw.*Error OR reject", fileTypes: ["ts"] })` → Find error handling patterns
-4. Ensure backwards compatibility where needed
-5. Add tests for new features discovered
+### 4. Delegation to Specialists
 
-#### C. Common Updates Needed
-- Response format changes (e.g., plain text → JSON)
-- Field consolidations (e.g., `related_tasks` + `related_documents` → `related`)
-- New required/optional parameters
-- Updated error message formats
-- Schema validation changes
+**For comprehensive test updates**:
+- Use Task tool to delegate to shirokuma-tester agent
+- Provide list of failing tests and error details
+- Agent will update test code to match current implementation
 
-### 6. Validation
-```
-[Testing]: Run updated tests
-[Verifying]: All tests pass with current implementation
-[Documenting]: Changes made and reasons
-```
+**For API test validation**:
+- Use Task tool to delegate to mcp-api-tester agent
+- Request execution of specific test phases
+- Agent will validate current API behavior against specifications
+
+### 5. Validation
+
+After updates:
+1. Run all tests: `npm test`
+2. Check coverage: `npm run test:coverage`
+3. Verify no regressions
+4. Document changes made
 
 ### Output Format
 
-<ultrathink>
-The output should clearly show what files were updated and why, distinguishing between test specifications and test code
-</ultrathink>
-
 ```
-[Analysis Started]
-- Index status: [up-to-date/outdated - X files indexed]
-- Test specification files found: X
-- Test code files found: Y
-- Current test failures: Z
+[Analysis Complete]
+- Tests analyzed: X files
+- Failures found: Y tests
+- Updates made: Z changes
 
-[Test Specifications Updated] (.claude/commands/ai-tests/*.markdown)
-- File: [filename] - [specific updates to documentation]
-- Reason: [why the change was needed]
+[Test Results]
+✅ Unit tests: X/Y passing
+✅ Integration tests: X/Y passing
+✅ Coverage maintained: XX%
 
-[Test Code Updated] (src/**/*.test.ts)
-- File: [filename] - [specific code changes]
-- Changed: [old assertion] → [new assertion]
-- Reason: [API behavior change detected]
-
-[Validation Complete]
-- All tests passing: ✓/✗
-- Test specifications aligned: ✓/✗
-- Coverage maintained: ✓/✗
+[Changes Summary]
+- Field consolidation: X updates
+- Response format: Y updates
+- Error messages: Z updates
 ```
 
-### Examples of Common Fixes
+### Notes
 
-<ultrathink>
-I should provide concrete examples of the types of changes that might be needed
-</ultrathink>
+- **API Test Specifications** are now managed by mcp-api-tester agent
+  - Location: `.claude/agents/mcp-api-tester-tests/*.markdown`
+  - Use `/ai-tests` command to execute them
+  
+- **Code Tests** remain in the codebase
+  - Location: `src/**/*.test.ts`, `tests/**/*.test.ts`
+  - This command focuses on updating these files
 
-1. **Response Format Change**
-   ```typescript
-   // Before: Plain text response
-   expect(result).toBe('Item created');
-   
-   // After: JSON response
-   expect(result).toEqual({ message: 'Item created', id: expect.any(Number) });
-   ```
-
-2. **Field Consolidation**
-   ```typescript
-   // Before: Separate fields
-   expect(item.related_tasks).toEqual(['issues-1']);
-   expect(item.related_documents).toEqual(['docs-1']);
-   
-   // After: Unified field
-   expect(item.related).toEqual(['issues-1', 'docs-1']);
-   ```
-
-3. **Error Message Updates**
-   ```typescript
-   // Before: Generic error
-   expect(error.message).toBe('Invalid request');
-   
-   // After: AI-friendly error with instructions
-   expect(error.message).toContain('do not exist');
-   expect(error.message).toContain('Please create these items first');
-   ```
-
-This command ensures both test documentation and test code stay synchronized with the evolving API implementation.
+- **Backwards Compatibility**
+  - Maintain support for both old and new field names where possible
+  - Add deprecation warnings for old patterns

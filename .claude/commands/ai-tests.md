@@ -1,6 +1,6 @@
 ---
 description: Run MCP functional tests for validation
-allowed-tools: mcp__test-knowledge-base__*, Bash(ls:*), Read
+allowed-tools: Task
 argument-hint: "[test-number or phase]"
 ---
 
@@ -8,111 +8,55 @@ argument-hint: "[test-number or phase]"
 
 ## Usage
 ```
-/ai-tests                   # Run all tests
-/ai-tests 1.01             # Run specific test
-/ai-tests phase1           # Run Phase 1 tests
-/ai-tests phase2           # Run Phase 2 tests
+/ai-tests           # Run all tests
+/ai-tests 1.01      # Run specific test
+/ai-tests phase1    # Run Phase 1 tests (1.01-1.15)
+/ai-tests phase2    # Run Phase 2 tests (2.01-2.02)
 ```
-
-## Context
-- MCP server status: !`ls -la .shirokuma/data/ 2>/dev/null || echo "Data directory not found"`
-- Database status: !`ls -la .shirokuma/data/search.db 2>/dev/null || echo "Database not found"`
 
 ## Task
 
 @.claude/agents/LANG.markdown
 
-The user wants to run MCP functional tests. I need to:
-1. Check prerequisites (MCP server availability, data directory)
-2. Parse arguments to determine which tests to run
-3. Execute tests systematically and record results
-4. Report comprehensive results with pass/fail status
+Coordinate MCP API functional test execution through the specialist agent.
 
-Execute systematic validation tests for MCP server functions through the MCP protocol.
+### Test Orchestration
 
-### Prerequisites Check
-1. Verify MCP server (`test-knowledge-base`) is available
-2. Check data directory (`.shirokuma/data/`) - should be empty for clean test
-3. Confirm all `mcp__test-knowledge-base__*` tools are available
+The system delegates test execution to the @agent-mcp-api-tester specialist agent.
 
-### Test Execution
+Parse user arguments:
+- No arguments → phase1 (default)
+- Test number (e.g., "1.01") → specific test
+- "phase1" → tests 1.01-1.15
+- "phase2" → tests 2.01-2.02
 
-I need to parse the user's arguments to determine the test scope:
-- If specific test number provided, run only that test
-- If phase specified, run all tests in that phase
-- If no arguments, default to all Phase 1 tests
+### Specialist Agent
 
-Parse arguments:
-- No arguments: Run all Phase 1 tests
-- Test number (e.g., "1.01"): Run specific test
-- "phase1": Run tests 1.01-1.15
-- "phase2": Run tests 2.01-2.02
+**mcp-api-tester** - MCP API test execution specialist
+- Executes systematic functional tests
+- Validates MCP server API behavior
+- Uses test-knowledge-base instance exclusively
+- Generates comprehensive test reports
 
-#### Phase 1: Core Functionality Tests
-1.01. [Initial State Verification](.claude/commands/ai-tests/1.01-initial-state.markdown)
-1.02. [Data Creation Tests](.claude/commands/ai-tests/1.02-data-creation.markdown)
-1.03. [Data Retrieval & Update Tests](.claude/commands/ai-tests/1.03-data-operations.markdown)
-1.04. [Tag Functionality Tests](.claude/commands/ai-tests/1.04-tag-tests.markdown)
-1.05. [Status Management Tests](.claude/commands/ai-tests/1.05-status-tests.markdown)
-1.06. [Session Management Tests](.claude/commands/ai-tests/1.06-session-tests.markdown)
-1.07. [Daily Summary Tests](.claude/commands/ai-tests/1.07-summary-tests.markdown)
-1.08. [Comprehensive Verification](.claude/commands/ai-tests/1.08-verification.markdown)
-1.09. [Data Deletion Tests](.claude/commands/ai-tests/1.09-deletion-tests.markdown)
-1.10. [Edge Cases and Additional Tests](.claude/commands/ai-tests/1.10-edge-cases.markdown)
-1.11. [Type Management Tests](.claude/commands/ai-tests/1.11-type-management.markdown)
-1.12. [Current State Management Tests](.claude/commands/ai-tests/1.12-current-state.markdown)
-1.13. [Item Type Change Tests](.claude/commands/ai-tests/1.13-type-change.markdown)
-1.14. [Field Validation Tests](.claude/commands/ai-tests/1.14-field-validation.markdown)
-1.15. [File Indexing Tests](.claude/commands/ai-tests/1.15-file-indexing.markdown)
+The specialist autonomously handles:
+- Test specification location
+- Sequential test execution
+- Failure handling and continuation
+- Result compilation and reporting
 
-#### Phase 2: Database Rebuild Tests
-2.01. [Database Rebuild and SQLite Verification](.claude/commands/ai-tests/2.01-rebuild-tests.markdown)
-2.02. [Post-Rebuild API Verification](.claude/commands/ai-tests/2.02-post-rebuild-verification.markdown)
+### Workflow
 
-### Test Process
-For each test:
-1. Display: "[Running Test X.XX]: [Test Name]"
-2. Execute test steps
-3. Record actual results
-4. Compare with expected outcomes
-5. Report: "✅ [Passed]" or "❌ [Failed]: reason"
+1. Receive test request from user
+2. Delegate execution to mcp-api-tester specialist
+3. Display the comprehensive report returned by the specialist
 
-### Success Criteria
-- All CRUD operations work correctly
-- Error cases return meaningful messages
-- Multi-line content preserved exactly
-- Tags auto-register on item creation
-- Status filtering works (default excludes closed)
-- Unicode/special characters handled properly
-- Custom types validate correctly
-- Related items stored as JSON arrays
-- File indexing works for git repositories
-- Semantic code search returns relevant results
+### Expected Output
 
-### Result Reporting Format
-```
-📊 [Test Results Summary]
-[Phase 1]: X/15 [tests passed]
-[Phase 2]: X/2 [tests passed]
+The specialist will provide:
+- Test-by-test results (✅ passed / ❌ failed)
+- Summary statistics (X/15 tests passed)
+- Detailed failure reasons
 
-[Details]:
-✅ 1.01 Initial State - [Passed]
-❌ 1.02 Data Creation - [Failed]: specific error
-...
+### Important Note
 
-[Overall Result]: [All tests passed] / [X tests failed]
-```
-
-### Error Handling
-- If test fails, continue with next test
-- Record all errors for final summary
-- Note any blocking issues that prevent further tests
-
-### Important Notes
-- Phase 2: Safe rebuild (v0.7.5+) does NOT require server restart
-- Phase 2: Traditional rebuild requires server restart between 2.01 and 2.02
-- For content tests, verify multi-line preservation
-- Test with clean data directory when possible
-- Note: get_items now returns ListItem (lightweight) instead of full UnifiedItem
-  - Only includes: id, type, title, description, status, priority, tags, updated_at
-  - Use get_item_detail for full content
+If mcp-api-tester agent type is not registered, delegate to general-purpose agent with instructions to follow mcp-api-tester specifications.
