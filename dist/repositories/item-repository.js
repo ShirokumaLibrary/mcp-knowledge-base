@@ -159,8 +159,9 @@ export class ItemRepository {
             status: statusName,
             status_id: Number(statusId),
             start_date: (() => {
-                if (metadata.start_date)
+                if (metadata.start_date) {
                     return String(metadata.start_date);
+                }
                 if (type === 'sessions' || type === 'dailies') {
                     if (type === 'dailies') {
                         const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(item.id);
@@ -168,8 +169,9 @@ export class ItemRepository {
                     }
                     else if (type === 'sessions') {
                         const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
-                        if (dateMatch)
+                        if (dateMatch) {
                             return dateMatch[1];
+                        }
                     }
                 }
                 return null;

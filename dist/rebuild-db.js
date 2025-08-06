@@ -218,7 +218,7 @@ async function rebuildDatabase() {
         }
         if (maxFileId > maxId) {
             console.log(`  ⚠️  Warning: Found file ${type}-${maxFileId}.md but max ID in DB is ${maxId}`);
-            console.log(`     This suggests some files were not imported during rebuild`);
+            console.log('     This suggests some files were not imported during rebuild');
         }
         const sequenceValue = Math.max(maxId, maxFileId);
         await db.runAsync('UPDATE sequences SET current_value = ? WHERE type = ?', [sequenceValue, type]);

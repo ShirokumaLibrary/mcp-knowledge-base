@@ -28,6 +28,13 @@ export class BaseRepository {
         const row = await this.db.getAsync('SELECT type FROM sequences WHERE type = ?', [sequenceName]);
         return row?.type || null;
     }
+    async getCurrentSequenceValue(sequenceName) {
+        const row = await this.db.getAsync('SELECT current_value FROM sequences WHERE type = ?', [sequenceName]);
+        if (!row) {
+            throw new Error(`Sequence not found for type: ${sequenceName}`);
+        }
+        return row.current_value;
+    }
     async getNextSequenceValue(sequenceName) {
         try {
             await this.db.runAsync('UPDATE sequences SET current_value = current_value + 1 WHERE type = ?', [sequenceName]);

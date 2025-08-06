@@ -52,7 +52,7 @@ export async function checkDatabaseVersion(db, logger) {
         throw new VersionMismatchError({
             programVersion,
             dbVersion: '<0.7.5',
-            message: `This database appears to be from a version older than 0.7.5.\n` +
+            message: 'This database appears to be from a version older than 0.7.5.\n' +
                 `Current program version is ${programVersion}.\n` +
                 'Please rebuild the database using: npm run rebuild:mcp'
         });
@@ -65,7 +65,7 @@ export async function checkDatabaseVersion(db, logger) {
         throw new VersionMismatchError({
             programVersion,
             dbVersion: 'unknown',
-            message: `Database version is not set.\n` +
+            message: 'Database version is not set.\n' +
                 `Current program version is ${programVersion}.\n` +
                 'Please rebuild the database using: npm run rebuild:mcp'
         });
