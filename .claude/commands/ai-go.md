@@ -29,8 +29,41 @@ Execute development workflow autonomously, solving problems independently until 
 **MAX_ITERATIONS = 3 per phase**
 - Design phase: Maximum 3 review-improve cycles
 - Implementation phase: Maximum 3 review-fix cycles
-- Error recovery: Maximum 2 retries per error type
+- Error recovery: Maximum 2 retries per error type with checkpoint recovery
 - Clear completion after task success or iteration limit
+- Automatic checkpoint creation before each major phase
+- Rollback capability on critical failures
+
+### Pre-flight Check Phase
+
+**Environment Health Verification** (Before Starting Work):
+```yaml
+Pre-flight Checks:
+1. Build Status Check:
+   - Run: npm run build
+   - Threshold: 0 errors allowed
+   - Action: If errors > threshold → Show issues and ask user to proceed/abort
+
+2. Test Status Check:
+   - Run: npm test
+   - Record: Baseline failure count
+   - Action: If failures > 5 → Warn user about existing issues
+
+3. Lint Status Check:
+   - Run: npm run lint:errors
+   - Threshold: 10 errors (configurable)
+   - Action: If errors > threshold → Suggest fixing first
+
+4. Checkpoint Creation:
+   - Git status capture
+   - Create recovery checkpoint
+   - Save session state to MCP
+   
+5. User Decision Point:
+   - Show health report
+   - If issues found → "Continue anyway? (y/n)"
+   - User can abort to fix issues first
+```
 
 ### Automatic Workflow Detection
 
@@ -60,33 +93,55 @@ The system executes all tasks autonomously with built-in quality assurance:
 #### 1. Design Phase with Auto-Review
 ```yaml
 Design Loop (Bounded):
-1. Designer creates initial design
-2. Automatic design review by Reviewer
+1. @agent-shirokuma-designer creates initial design
+2. Automatic design review by @agent-shirokuma-reviewer
 3. If review finds issues AND iterations < 3:
    - Generate specific improvement suggestions
-   - Designer automatically applies improvements
+   - @agent-shirokuma-designer automatically applies improvements
    - Increment iteration counter
    - Return to step 2
 4. Stop after: design approved OR 3 iterations reached
 5. Report outcome clearly to user
 ```
 
-#### 2. Implementation Phase
+#### 2. Implementation Phase (Parallel Execution)
 ```yaml
-Implementation:
-1. Programmer implements based on approved design
-2. Tester creates comprehensive test suite (parallel)
-3. Both work from the same design document
-4. Automatic coordination without user input
+Parallel Implementation with Synchronization:
+1. Load shared design document (MCP decisions-XX)
+2. Start parallel execution:
+   
+   Promise.allSettled([
+     @agent-shirokuma-programmer: {
+       - Load design from decisions-XX
+       - Implement solution
+       - Handle partial failures
+       - Save progress to knowledge-XX
+     },
+     @agent-shirokuma-tester: {
+       - Load same design document
+       - Create comprehensive tests
+       - Generate test scenarios
+       - Save to test-results-XX
+     }
+   ])
+   
+3. Synchronization and Error Handling:
+   - Both succeed → Continue to review
+   - @agent-shirokuma-programmer fails, @agent-shirokuma-tester succeeds → Save tests, retry implementation
+   - @agent-shirokuma-programmer succeeds, @agent-shirokuma-tester fails → Save code, generate basic tests
+   - Both fail → Review design, consider rollback
+   
+4. Timeout: 30 minutes with AbortController
+5. Progress tracking via MCP handovers
 ```
 
 #### 3. Code Review with Auto-Fix
 ```yaml
 Review Loop (Bounded):
-1. Reviewer examines implementation and tests
+1. @agent-shirokuma-reviewer examines implementation and tests
 2. If issues found AND iterations < 3:
    - Generate specific fix instructions
-   - Programmer/Tester automatically apply fixes
+   - @agent-shirokuma-programmer/@agent-shirokuma-tester automatically apply fixes
    - Increment iteration counter
    - Return to step 1
 3. Stop after: quality met OR 3 iterations reached
@@ -145,15 +200,15 @@ The following changes require explicit user confirmation:
 
 ```mermaid
 graph TB
-    A[Issue/Request] --> B[Designer]
+    A[Issue/Request] --> B[@agent-shirokuma-designer]
     B --> C{decisions-XX}
     
     C --> D[Design Review Loop]
     D --> |Improvements| B
     D --> |Approved| E[Implementation]
     
-    E --> F[Programmer]
-    E --> G[Tester]
+    E --> F[@agent-shirokuma-programmer]
+    E --> G[@agent-shirokuma-tester]
     
     F --> H{knowledge-XX}
     G --> I{test-results-XX}
@@ -168,30 +223,74 @@ graph TB
 
 All loops execute automatically without user intervention.
 
-### Error Handling
+### Quality Gates
 
-The system handles all errors autonomously:
+**Mandatory Quality Checks** (Cannot Skip):
+```yaml
+Quality Gate Requirements:
+1. Build Verification:
+   - Must pass: npm run build
+   - Zero errors allowed
+   - Auto-fix attempts: 3
+   
+2. Test Verification:
+   - Must pass: npm test
+   - No new failures allowed
+   - Coverage threshold: Configurable (default 80%)
+   
+3. Lint Check:
+   - Must pass: npm run lint:errors
+   - Maximum 10 errors (configurable)
+   - Auto-fix with eslint --fix
+   
+4. Code Review:
+   - Automatic review by @agent-shirokuma-reviewer
+   - Maximum 3 fix iterations
+   - Must address all critical issues
+
+Gate Failure Handling:
+- Attempt auto-fix (up to 3 times)
+- If still failing → Rollback to checkpoint
+- Report specific issues to user
+- Never commit broken code
+```
+
+### Error Handling and Recovery
+
+The system handles all errors with checkpoint-based recovery:
 
 ```yaml
-Bounded Error Recovery (Max 2 retries per error):
-1. Agent failure → Retry up to 2 times with different approach
-2. Review rejection → Apply feedback, retry up to 2 times
-3. Test failure → Fix implementation, retry up to 2 times
-4. Design issues → Iterate with improvements (within 3-iteration limit)
-5. After retry limit → Report status and stop gracefully
+Enhanced Error Recovery with Checkpoints:
+1. Checkpoint Management:
+   - Create before each phase
+   - Save git state (stash or commit)
+   - Record MCP session state
+   - Enable rollback on failure
 
-Error Resolution Strategy:
-- Analyze error root cause
-- Generate solution hypothesis
-- Apply fix automatically (within retry limit)
-- Verify fix worked
-- Stop if retry limit reached
+2. Recovery Strategy (Max 2 retries):
+   - Agent failure → Rollback, retry with different approach
+   - Review rejection → Apply feedback from checkpoint
+   - Test failure → Fix from last good state
+   - Design issues → Iterate within limits
+   - Critical failure → Full rollback to initial checkpoint
 
-User Escalation (Last Resort):
-- Clear problem description
-- What was tried
-- Specific help needed
-- Suggested solutions for user to choose
+3. Partial Success Handling:
+   - Save successful components
+   - Retry only failed parts
+   - Combine results after recovery
+   - Report partial completion if needed
+
+4. Session Continuity:
+   - Save work session to MCP
+   - Enable resume with: /ai-go --resume [session-id]
+   - Restore from checkpoint
+   - Continue from last successful phase
+
+User Escalation (After Recovery Attempts):
+- Show checkpoint history
+- Explain recovery attempts
+- Offer rollback options
+- Provide manual fix instructions
 ```
 
 ### Examples
@@ -277,7 +376,7 @@ This command transforms AI from an assistant into an autonomous developer that t
 **After completing the specified task:**
 1. Display clear completion message
 2. Show what was accomplished
-3. Update issue status to 'Closed' (if applicable)
+3. Update issue status to 'Review' (requires user approval for closure)
 4. STOP - Do not continue to other tasks
 5. Wait for new user instructions
 
@@ -303,4 +402,70 @@ Examples:
 
 To see available issues, use: /ai-issue
 ```
+
+### Zero Configuration Philosophy
+
+**No options. No flags. Just intelligence.**
+
+The ai-go command automatically determines the best approach based on:
+- Task type and complexity
+- Current codebase state
+- Historical patterns
+- Risk assessment
+
+Everything that was previously an option is now intelligently decided:
+
+```yaml
+Automatic Decisions:
+1. Strategy Selection:
+   - Bug fixes → Careful mode with comprehensive testing
+   - New features → Balanced approach with design focus
+   - Documentation → Fast mode with minimal overhead
+   - Refactoring → Safe mode with extensive validation
+
+2. Pre-flight Handling:
+   - Few errors (<5) → Auto-fix and continue
+   - Many errors → Fix critical ones first
+   - Critical errors → Request user confirmation
+
+3. Checkpoint Management:
+   - Always creates safe checkpoints
+   - Automatic rollback on failure
+   - Smart recovery from interruptions
+
+4. Session Continuity:
+   - Detects interrupted tasks automatically
+   - Resumes from last known good state
+   - No manual session ID needed
+
+5. Risk Assessment:
+   - Security changes → Extra validation
+   - Large changes (>20 files) → Phased approach
+   - Breaking changes → User confirmation required
+```
+
+### How It Works
+
+```typescript
+// Internal logic (not user-visible)
+function executeTask(input: string) {
+  const task = analyzeTask(input);
+  const strategy = determineOptimalStrategy(task);
+  const risks = assessRisks(task);
+  
+  // All decisions made automatically
+  if (hasInterruptedSession(task)) {
+    resumeFromCheckpoint();
+  }
+  
+  if (needsPreflightFix()) {
+    autoFixCriticalIssues();
+  }
+  
+  // Execute with optimal settings
+  runWithStrategy(strategy);
+}
+```
+
+**The AI handles everything. You just specify what you want done.**
 

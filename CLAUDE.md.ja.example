@@ -1,8 +1,8 @@
 # CLAUDE.md.ja.example
 
 ## Language
-**Language: SHIROKUMA_LANG環境変数をチェック（設定されていない場合のデフォルト: English）**
-**Note: SHIROKUMA_LANGまたはユーザーの言語で指定された言語で応答**
+
+@.claude/agents/LANG.markdown
 
 このファイルは、Claude Code (claude.ai/code) がこのリポジトリで作業する際のプロジェクト固有情報を提供します。
 
