@@ -227,7 +227,10 @@ export class ValidationUtils {
         grouped.set(type, []);
       }
 
-      grouped.get(type)!.push(numId);
+      const group = grouped.get(type);
+      if (group) {
+        group.push(numId);
+      }
     }
 
     return grouped;
@@ -351,7 +354,7 @@ export class SchemaBuilders {
    * @ai-intent Build entity creation schema
    * @ai-pattern Common create operation fields
    */
-  static createSchema(additionalFields: z.ZodRawShape = {}) {
+  static createSchema(additionalFields: z.ZodRawShape = {}): z.ZodObject<z.ZodRawShape> {
     return z.object({
       title: CommonValidators.nonEmptyString,
       description: CommonValidators.optionalString,
@@ -364,7 +367,7 @@ export class SchemaBuilders {
    * @ai-intent Build entity update schema
    * @ai-pattern All fields optional for partial updates
    */
-  static updateSchema(additionalFields: z.ZodRawShape = {}) {
+  static updateSchema(additionalFields: z.ZodRawShape = {}): z.ZodObject<z.ZodRawShape> {
     return z.object({
       title: CommonValidators.optionalString,
       description: CommonValidators.optionalString,
@@ -377,7 +380,7 @@ export class SchemaBuilders {
    * @ai-intent Build search schema
    * @ai-pattern Common search parameters
    */
-  static searchSchema(additionalFields: z.ZodRawShape = {}) {
+  static searchSchema(additionalFields: z.ZodRawShape = {}): z.ZodObject<z.ZodRawShape> {
     return z.object({
       query: CommonValidators.optionalString,
       tags: CommonValidators.tagArray,
@@ -391,7 +394,7 @@ export class SchemaBuilders {
    * @ai-intent Build date range schema
    * @ai-pattern Common date filtering
    */
-  static dateRangeSchema(additionalFields: z.ZodRawShape = {}) {
+  static dateRangeSchema(additionalFields: z.ZodRawShape = {}): z.ZodEffects<z.ZodObject<z.ZodRawShape>> {
     return z.object({
       start_date: CommonValidators.optionalDateString,
       end_date: CommonValidators.optionalDateString,

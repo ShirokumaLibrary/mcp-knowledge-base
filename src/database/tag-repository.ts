@@ -144,7 +144,7 @@ export class TagRepository extends BaseRepository {
     );
 
     // Check if the tag was actually inserted
-    if ((result as any).changes === 0) {
+    if ((result as { changes?: number }).changes === 0) {
       // Tag already existed
       throw new Error(`Tag "${trimmedName}" already exists`);
     }
@@ -176,7 +176,7 @@ export class TagRepository extends BaseRepository {
       [id]  // @ai-logic: 'id' parameter is actually tag name
     );
 
-    return (result as any).changes! > 0;
+    return ((result as { changes?: number }).changes ?? 0) > 0;
   }
 
   /**

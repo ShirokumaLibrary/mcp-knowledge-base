@@ -85,7 +85,7 @@ function tokenize(query: string): Token[] {
       fullMatch,
       negation,      // Group 1: optional negation prefix
       field,         // Group 2: field name
-      fieldValueFull,// Group 3: full field value (with quotes if present)
+      _fieldValueFull,// Group 3: full field value (with quotes if present)
       quotedValue,   // Group 4: quoted field value content
       unquotedValue, // Group 5: unquoted field value
       quotedTerm,    // Group 6: quoted term (no field)

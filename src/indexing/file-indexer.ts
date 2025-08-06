@@ -12,6 +12,7 @@ import { execSync } from 'child_process';
 import { minimatch } from 'minimatch';
 import { pipeline } from '@xenova/transformers';
 import { config as appConfig } from '../config.js';
+import { createLogger } from '../utils/logger.js';
 
 /**
  * File indexing configuration
@@ -88,8 +89,9 @@ const DEFAULT_CONFIG = {
 export class FileIndexer {
   private db: Database.Database;
   private config: Required<IndexConfig>;
-  private embedder?: any; // @xenova/transformers pipeline type
+  private embedder?: unknown; // @xenova/transformers pipeline type
   private initialized = false;
+  private logger = createLogger('FileIndexer');
 
   constructor(config: IndexConfig) {
     this.config = {
@@ -182,7 +184,7 @@ export class FileIndexer {
         .split('\n')
         .filter(file => file.length > 0)
         .filter(file => this.shouldIndexFile(file));
-    } catch (error) {
+    } catch {
       // Not a git repository or git command failed
       throw new Error('Not a git repository. File indexing works with git-managed files only.');
     }
@@ -274,7 +276,7 @@ export class FileIndexer {
       throw new Error('Embedder not initialized');
     }
 
-    const output = await this.embedder(text, {
+    const output = await (this.embedder as (text: string, options: { pooling: string; normalize: boolean }) => Promise<{ data: Float32Array }>)(text, {
       pooling: 'mean',
       normalize: true
     });
@@ -380,7 +382,7 @@ export class FileIndexer {
       try {
         await this.indexFile(file);
       } catch (error) {
-        console.error(`Error indexing ${file}:`, error);
+        this.logger.error(`Error indexing ${file}:`, error);
       }
     }
   }
@@ -409,7 +411,7 @@ export class FileIndexer {
     }
 
     if (deletedCount > 0) {
-      console.log(`Cleaned up ${deletedCount} deleted files from index`);
+      this.logger.info(`Cleaned up ${deletedCount} deleted files from index`);
     }
   }
 

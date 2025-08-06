@@ -139,7 +139,7 @@ export class IssueTrackerServer {
     this.setupToolHandlers();
 
     // @ai-critical: Global error handler prevents server crashes
-    this.server.onerror = (error) => {
+    this.server.onerror = (_error) => {
       // Silently handle errors to avoid stdio pollution
       // TODO: Write to log file instead
     };
@@ -152,13 +152,13 @@ export class IssueTrackerServer {
     });
   }
 
-  private setupToolHandlers() {
+  private setupToolHandlers(): void {
     // Set up tool listing and request handlers
     this.setupToolList();
     this.setupCallHandlers();
   }
 
-  private setupToolList() {
+  private setupToolList(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return { tools: toolDefinitions };
     });
@@ -171,7 +171,7 @@ export class IssueTrackerServer {
    * @ai-critical All tool calls go through here - must be bulletproof
    * @ai-why Centralized error handling ensures consistent error responses
    */
-  private setupCallHandlers() {
+  private setupCallHandlers(): void {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
         return await this.handleToolCall(request.params.name, request.params.arguments);
@@ -262,7 +262,7 @@ export class IssueTrackerServer {
         return await this.fileIndexHandlers.createHandlers().get_related_files(validated);
       }
       case 'get_index_status': {
-        return await this.fileIndexHandlers.createHandlers().get_index_status();
+        return await this.fileIndexHandlers.createHandlers().get_index_status({});
       }
 
       default:
@@ -270,7 +270,7 @@ export class IssueTrackerServer {
     }
   }
 
-  async run() {
+  async run(): Promise<void> {
     await this.db.initialize();
 
     // Check database version compatibility
@@ -358,7 +358,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   guardStdio();
 
   const server = new IssueTrackerServer();
-  server.run().catch((error) => {
+  server.run().catch((_error) => {
     // Silently handle errors to avoid stdio pollution
     // TODO: Write to log file instead
     process.exit(1);

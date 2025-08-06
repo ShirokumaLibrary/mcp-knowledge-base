@@ -6,7 +6,8 @@
  */
 
 // Base handler
-export { BaseHandler, ToolResponse } from './base-handler.js';
+export { BaseHandler } from './base-handler.js';
+export type { ToolResponse } from '../types/mcp-types.js';
 
 // Current handlers
 export { StatusHandlers } from './status-handlers.js';

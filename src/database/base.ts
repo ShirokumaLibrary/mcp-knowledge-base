@@ -533,6 +533,7 @@ export class DatabaseConnection {
         { name: 'description', type: 'string', required: false, default: '', desc: 'Brief description' },
         { name: 'version', type: 'string', required: false, default: '', desc: 'Version information' },
         { name: 'tags', type: 'tags', required: false, default: '[]', desc: 'Tags for categorization' },
+        { name: 'related', type: 'related', required: false, default: '[]', desc: 'All related items (unified field)' },
         { name: 'created_at', type: 'date', required: true, default: '', desc: 'Creation timestamp' },
         { name: 'updated_at', type: 'date', required: true, default: '', desc: 'Last update timestamp' }
       ]},
@@ -601,9 +602,9 @@ export class DatabaseConnection {
     try {
       await this.db.runAsync('ALTER TABLE statuses ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP');
       this.logger.debug('Added updated_at column to statuses table');
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Column already exists, which is fine
-      if (!err.message.includes('duplicate column name')) {
+      if (err instanceof Error && !err.message.includes('duplicate column name')) {
         this.logger.error('Error adding updated_at to statuses:', err);
       }
     }
@@ -612,9 +613,9 @@ export class DatabaseConnection {
     try {
       await this.db.runAsync('ALTER TABLE items ADD COLUMN version TEXT');
       this.logger.debug('Added version column to items table');
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Column already exists, which is fine
-      if (!err.message.includes('duplicate column name')) {
+      if (err instanceof Error && !err.message.includes('duplicate column name')) {
         this.logger.error('Error adding version to items:', err);
       }
     }

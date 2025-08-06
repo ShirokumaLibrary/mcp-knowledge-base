@@ -15,6 +15,16 @@ import { tmpdir } from 'os';
 
 // Mock config to avoid environment dependency in tests
 jest.mock('../config.js', () => ({
+  getConfig: () => ({
+    database: {
+      path: '.shirokuma/data'
+    },
+    logging: {
+      enabled: false,
+      level: 'error',
+      logDir: './logs'
+    }
+  }),
   config: {
     database: {
       path: '.shirokuma/data'

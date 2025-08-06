@@ -16,6 +16,16 @@ import { FileIndexHandlers } from './file-index-handlers.js';
 
 // Mock config to use test directory
 jest.mock('../config.js', () => ({
+  getConfig: () => ({
+    database: {
+      path: '.shirokuma/data'
+    },
+    logging: {
+      enabled: false,
+      level: 'error',
+      logDir: './logs'
+    }
+  }),
   config: {
     database: {
       path: '.shirokuma/data'
@@ -69,7 +79,7 @@ describe('FileIndexHandlers', () => {
     execSync('git config user.name "Test User"');
 
     // Create handlers
-    handlers = new FileIndexHandlers({} as any); // Mock database
+    handlers = new FileIndexHandlers({} as unknown); // Mock database
     handlerMap = handlers.createHandlers();
   });
 
@@ -233,7 +243,7 @@ function validateEmail(email) {
 
       // Create fresh handlers
       await handlers.cleanup();
-      handlers = new FileIndexHandlers({} as any);
+      handlers = new FileIndexHandlers({} as unknown);
       handlerMap = handlers.createHandlers();
 
       await expect(handlerMap.search_code({ query: 'test' }))
@@ -292,7 +302,7 @@ function calculateTax(amount) {
 
       // Create fresh handlers
       await handlers.cleanup();
-      handlers = new FileIndexHandlers({} as any);
+      handlers = new FileIndexHandlers({} as unknown);
       handlerMap = handlers.createHandlers();
 
       await expect(handlerMap.get_related_files({ file: 'auth.js' }))

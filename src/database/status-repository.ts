@@ -122,7 +122,10 @@ export class StatusRepository extends BaseRepository<StatusEntity, number> {
       [name, is_closed ? 1 : 0, now, now]
     );
 
-    const id = (result as any).lastID!;
+    const id = (result as { lastID?: number }).lastID;
+    if (!id) {
+      throw new Error('Failed to get ID of created status');
+    }
     const created = await this.findById(id);
 
     if (!created) {

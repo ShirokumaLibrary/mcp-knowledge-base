@@ -11,7 +11,7 @@ import type { FileIssueDatabase } from '../database/index.js';
 import { TypeRepository } from '../database/type-repository.js';
 import { createLogger } from '../utils/logger.js';
 import { cleanString } from '../utils/string-utils.js';
-import { normalizeVersion } from '../utils/version-utils.js';
+import { normalizeVersion, denormalizeVersion } from '../utils/version-utils.js';
 import type {
   UnifiedItem,
   CreateItemParams,
@@ -368,7 +368,7 @@ export class ItemRepository {
     }
 
     // Validate date formats and validity
-    const validateDate = (dateStr: string | undefined, fieldName: string) => {
+    const validateDate = (dateStr: string | undefined, fieldName: string): void => {
       if (!dateStr) {
         return;
       }
@@ -527,7 +527,7 @@ export class ItemRepository {
     }
 
     // Validate related fields don't contain empty strings
-    const validateRelatedArray = (arr: string[] | undefined, fieldName: string) => {
+    const validateRelatedArray = (arr: string[] | undefined, fieldName: string): void => {
       if (arr && arr.some(item => item === '')) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -540,30 +540,25 @@ export class ItemRepository {
     validateRelatedArray(params.related_documents, 'related_documents');
     validateRelatedArray(params.related, 'related');
 
-    // Validate version format if provided
+    // Validate version format if provided - allow flexible formats
     if (params.version !== undefined && params.version !== null && params.version !== '') {
-      if (!/^\d+\.\d+\.\d+$/.test(params.version)) {
+      // Allow various version formats: X.Y.Z, vX.Y.Z, X.Y.Z-beta, etc.
+      // Just ensure it's not empty and doesn't contain dangerous characters
+      if (!/^[\w\d\.\-_]+$/.test(params.version)) {
         throw new McpError(
           ErrorCode.InvalidRequest,
-          'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")'
+          'Version must contain only alphanumeric characters, dots, dashes, and underscores'
         );
       }
 
-      // Check for overflow (max 99999 per segment)
-      const parts = params.version.split('.');
-      const [major, minor, patch] = parts.map(p => parseInt(p, 10));
-      if (major > 99999 || minor > 99999 || patch > 99999) {
-        throw new McpError(
-          ErrorCode.InvalidRequest,
-          'Version numbers must not exceed 99999 (e.g., "99999.99999.99999" is the maximum)'
-        );
-      }
+      // No overflow check needed for flexible version formats
     }
 
     // Remove duplicates from related arrays
     const uniqueRelatedTasks = params.related_tasks ? [...new Set(params.related_tasks)] : [];
     const uniqueRelatedDocuments = params.related_documents ? [...new Set(params.related_documents)] : [];
-    const uniqueRelated = [...new Set([...uniqueRelatedTasks, ...uniqueRelatedDocuments])];
+    const paramsRelated = params.related ? [...new Set(params.related)] : [];
+    const uniqueRelated = [...new Set([...paramsRelated, ...uniqueRelatedTasks, ...uniqueRelatedDocuments])];
 
     // Validate and clean tags - filter out empty or whitespace-only tags
     const cleanedTags = (params.tags || [])
@@ -683,7 +678,7 @@ export class ItemRepository {
     }
 
     // Validate date formats and validity
-    const validateDate = (dateStr: string | undefined, fieldName: string) => {
+    const validateDate = (dateStr: string | undefined, fieldName: string): void => {
       if (!dateStr) {
         return;
       }
@@ -714,7 +709,7 @@ export class ItemRepository {
     validateDate(params.end_date || undefined, 'end_date');
 
     // Validate related fields don't contain empty strings
-    const validateRelatedArray = (arr: string[] | undefined, fieldName: string) => {
+    const validateRelatedArray = (arr: string[] | undefined, fieldName: string): void => {
       if (arr && arr.some(item => item === '')) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -742,24 +737,18 @@ export class ItemRepository {
       );
     }
 
-    // Validate version format if provided
+    // Validate version format if provided - allow flexible formats
     if (params.version !== undefined && params.version !== null && params.version !== '') {
-      if (!/^\d+\.\d+\.\d+$/.test(params.version)) {
+      // Allow various version formats: X.Y.Z, vX.Y.Z, X.Y.Z-beta, etc.
+      // Just ensure it's not empty and doesn't contain dangerous characters
+      if (!/^[\w\d\.\-_]+$/.test(params.version)) {
         throw new McpError(
           ErrorCode.InvalidRequest,
-          'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")'
+          'Version must contain only alphanumeric characters, dots, dashes, and underscores'
         );
       }
 
-      // Check for overflow (max 99999 per segment)
-      const parts = params.version.split('.');
-      const [major, minor, patch] = parts.map(p => parseInt(p, 10));
-      if (major > 99999 || minor > 99999 || patch > 99999) {
-        throw new McpError(
-          ErrorCode.InvalidRequest,
-          'Version numbers must not exceed 99999 (e.g., "99999.99999.99999" is the maximum)'
-        );
-      }
+      // No overflow check needed for flexible version formats
     }
 
     // Remove duplicates from related arrays
@@ -769,6 +758,22 @@ export class ItemRepository {
     const uniqueRelatedDocuments = params.related_documents !== undefined
       ? [...new Set(params.related_documents)]
       : current.related_documents;
+
+    // Handle related field update
+    let uniqueRelated: string[];
+    if (params.related !== undefined) {
+      // If related is explicitly provided, use it
+      uniqueRelated = [...new Set(params.related)];
+    } else if (params.related_tasks !== undefined || params.related_documents !== undefined) {
+      // If only related_tasks or related_documents are provided, merge them
+      uniqueRelated = [...new Set([
+        ...(uniqueRelatedTasks || []),
+        ...(uniqueRelatedDocuments || [])
+      ])];
+    } else {
+      // Keep current related if nothing is provided
+      uniqueRelated = current.related;
+    }
 
     // Validate and clean tags if provided
     const cleanedTags = params.tags !== undefined
@@ -780,12 +785,13 @@ export class ItemRepository {
       ...current,
       title: cleanedTitle !== undefined ? cleanedTitle : current.title,
       description: params.description !== undefined ? params.description : current.description,
-      version: params.version !== undefined ? params.version : current.version,
+      version: 'version' in params ? params.version : current.version,
       content: params.content !== undefined ? params.content : current.content,
       priority: params.priority !== undefined ? params.priority : current.priority,
       start_date: params.start_date !== undefined ? params.start_date : current.start_date,
       end_date: params.end_date !== undefined ? params.end_date : current.end_date,
       tags: cleanedTags,
+      related: uniqueRelated,
       related_tasks: uniqueRelatedTasks,
       related_documents: uniqueRelatedDocuments,
       updated_at: new Date().toISOString()
@@ -805,11 +811,7 @@ export class ItemRepository {
       updated.status_id = status.id;
     }
 
-    // Update related field
-    updated.related = [
-      ...(updated.related_tasks || []),
-      ...(updated.related_documents || [])
-    ];
+    // The related field is already properly set in the updated object above
 
     // Save to storage
     const config = this.getStorageConfig(type);
@@ -907,7 +909,7 @@ export class ItemRepository {
     let query = `
       SELECT i.type, i.id, i.title, i.description, i.priority, 
              i.tags, i.updated_at, s.name as status_name,
-             i.start_date
+             i.start_date, i.version
       FROM items i
       LEFT JOIN statuses s ON i.status_id = s.id
       WHERE i.type = ?
@@ -970,7 +972,7 @@ export class ItemRepository {
     let query = `
       SELECT DISTINCT i.type, i.id, i.title, i.description, i.priority, 
              i.tags, i.updated_at, s.name as status_name,
-             i.start_date
+             i.start_date, i.version
       FROM items i
       JOIN item_tags it ON i.type = it.item_type AND i.id = it.item_id
       JOIN tags t ON it.tag_id = t.id
@@ -1083,15 +1085,20 @@ export class ItemRepository {
    * @ai-intent Convert database row to ListItem (lightweight for list views)
    */
   private rowToListItem(row: Partial<ItemRow>): ListItem {
+    // Validate required fields
+    if (!row.id || !row.type || !row.title || !row.updated_at) {
+      throw new Error('Missing required fields in item row');
+    }
+
     const tags = row.tags ? JSON.parse(row.tags) : [];
 
     const item: ListItem = {
-      id: row.id!,
-      type: row.type!,
-      title: row.title!,
+      id: row.id,
+      type: row.type,
+      title: row.title,
       description: row.description || undefined,
       tags,
-      updated_at: row.updated_at!
+      updated_at: row.updated_at
     };
 
     // Add optional fields
@@ -1101,6 +1108,10 @@ export class ItemRepository {
 
     if (row.priority) {
       item.priority = row.priority as 'high' | 'medium' | 'low';
+    }
+
+    if (row.version) {
+      item.version = denormalizeVersion(row.version) || row.version;
     }
 
     // Add date field for sessions and dailies

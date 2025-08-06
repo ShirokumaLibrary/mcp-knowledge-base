@@ -47,7 +47,6 @@ export class FullTextSearchRepository {
 
     // Build FTS5 query with support for field-specific searches
     const trimmedQuery = query.trim();
-    let ftsQuery: string;
 
     if (!trimmedQuery) {
       throw new Error('Search query cannot be empty');
@@ -56,7 +55,7 @@ export class FullTextSearchRepository {
     // Always use the advanced parser for consistent behavior
     // The parser now handles simple queries, field-specific searches, and boolean operators
     const parsed = parseSearchQuery(trimmedQuery);
-    ftsQuery = toFTS5Query(parsed);
+    const ftsQuery = toFTS5Query(parsed);
 
     // If the FTS query is empty after parsing, throw an error
     if (!ftsQuery) {
@@ -130,7 +129,6 @@ export class FullTextSearchRepository {
 
     // Build prefix query for FTS5
     const trimmedQuery = query.trim();
-    let ftsQuery: string;
 
     if (!trimmedQuery) {
       return []; // Return empty suggestions for empty query
@@ -161,18 +159,18 @@ export class FullTextSearchRepository {
     const modifiedExpression = addPrefixToRightmostTerm(parsed.expression);
     const modifiedParsed = { ...parsed, expression: modifiedExpression };
 
-    ftsQuery = toFTS5Query(modifiedParsed);
+    const prefixFtsQuery = toFTS5Query(modifiedParsed);
 
     // Build type filter
     let typeFilter = '';
     // @ai-any-deliberate: SQLite params array - mixed types for query parameters
 
-    let params: (string | number)[] = [ftsQuery, limit];
+    let params: (string | number)[] = [prefixFtsQuery, limit];
 
     if (options?.types && options.types.length > 0) {
       const placeholders = options.types.map(() => '?').join(',');
       typeFilter = `AND items.type IN (${placeholders})`;
-      params = [ftsQuery, ...options.types, limit];
+      params = [prefixFtsQuery, ...options.types, limit];
     }
 
     const sql = `

@@ -132,4 +132,183 @@ describe('Version Field Implementation', () => {
     // When version is not specified, it's saved as empty value and parsed as null
     expect(metadata.version).toBe(null);
   });
+
+  it('should handle various version formats', async () => {
+    const versions = [
+      'v1.0.0',
+      '2.1.3-beta',
+      '0.7.11',
+      '2024.01.15',
+      'release-3.0',
+      '1.0.0-alpha.1'
+    ];
+
+    for (const version of versions) {
+      const params: CreateItemParams = {
+        type: 'issues',
+        title: `Issue with version ${version}`,
+        content: 'Testing version formats',
+        priority: 'low',
+        status: 'Open',
+        version: version,
+        tags: ['version-test']
+      };
+
+      const item = await itemRepo.createItem(params);
+      expect(item.version).toBe(version);
+
+      // Verify retrieval
+      const retrieved = await itemRepo.getItem('issues', item.id);
+      expect(retrieved!.version).toBe(version);
+    }
+  });
+
+  it('should preserve version during partial updates', async () => {
+    const params: CreateItemParams = {
+      type: 'docs',
+      title: 'Doc with Version',
+      content: 'Initial content',
+      version: '1.5.0',
+      tags: ['test']
+    };
+
+    const created = await itemRepo.createItem(params);
+    
+    // Update other fields without touching version
+    const updated = await itemRepo.updateItem({
+      type: 'docs',
+      id: created.id,
+      title: 'Updated Title',
+      content: 'Updated content'
+    });
+
+    expect(updated!.version).toBe('1.5.0'); // Version should be preserved
+    expect(updated!.title).toBe('Updated Title');
+  });
+
+  it('should clear version when explicitly set to null', async () => {
+    const params: CreateItemParams = {
+      type: 'knowledge',
+      title: 'Knowledge with Version',
+      content: 'Content',
+      version: '3.0.0',
+      tags: []
+    };
+
+    const created = await itemRepo.createItem(params);
+    expect(created.version).toBe('3.0.0');
+
+    // Clear version by setting to undefined
+    const updated = await itemRepo.updateItem({
+      type: 'knowledge',
+      id: created.id,
+      version: undefined
+    });
+
+    expect(updated!.version).toBeUndefined();
+  });
+
+  it('should handle version in different item types', async () => {
+    const itemTypes = [
+      { type: 'issues', status: 'Open', priority: 'high' as const },
+      { type: 'plans', status: 'Open', priority: 'medium' as const },
+      { type: 'docs' },
+      { type: 'knowledge' }
+    ];
+
+    for (const itemType of itemTypes) {
+      const params: CreateItemParams = {
+        type: itemType.type,
+        title: `${itemType.type} with version`,
+        content: 'Testing version across types',
+        version: '1.0.0',
+        tags: ['test'],
+        ...(itemType.status && { status: itemType.status }),
+        ...(itemType.priority && { priority: itemType.priority })
+      };
+
+      const item = await itemRepo.createItem(params);
+      expect(item.version).toBe('1.0.0');
+      expect(item.type).toBe(itemType.type);
+    }
+  });
+
+  it('should include version in search results', async () => {
+    // Create items with versions
+    await itemRepo.createItem({
+      type: 'issues',
+      title: 'Issue with Version',
+      content: 'Searchable content',
+      priority: 'high',
+      status: 'Open',
+      version: '2.0.0',
+      tags: ['searchme']
+    });
+
+    await itemRepo.createItem({
+      type: 'docs',
+      title: 'Doc with Version',
+      content: 'Searchable content',
+      version: '3.0.0',
+      tags: ['searchme']
+    });
+
+    // Search by tag
+    const results = await itemRepo.searchItemsByTag('searchme');
+    
+    // Check that version is included in results
+    const issueResult = results.find(r => r.type === 'issues');
+    const docResult = results.find(r => r.type === 'docs');
+    
+    expect(issueResult).toBeDefined();
+    expect(issueResult!.version).toBe('2.0.0');
+    expect(docResult).toBeDefined();
+    expect(docResult!.version).toBe('3.0.0');
+  });
+
+  it('should handle version in list operations', async () => {
+    // Create multiple items with versions
+    await itemRepo.createItem({
+      type: 'issues',
+      title: 'Issue 1',
+      content: 'Content 1',
+      priority: 'high',
+      status: 'Open',
+      version: '1.0.0',
+      tags: []
+    });
+
+    await itemRepo.createItem({
+      type: 'issues',
+      title: 'Issue 2',
+      content: 'Content 2',
+      priority: 'medium',
+      status: 'Open',
+      version: '2.0.0',
+      tags: []
+    });
+
+    await itemRepo.createItem({
+      type: 'issues',
+      title: 'Issue 3',
+      content: 'Content 3',
+      priority: 'low',
+      status: 'Open',
+      tags: []
+      // No version
+    });
+
+    // Get all items
+    const items = await itemRepo.getItems('issues');
+    
+    expect(items.length).toBeGreaterThanOrEqual(3);
+    
+    const issue1 = items.find(i => i.title === 'Issue 1');
+    const issue2 = items.find(i => i.title === 'Issue 2');
+    const issue3 = items.find(i => i.title === 'Issue 3');
+    
+    expect(issue1!.version).toBe('1.0.0');
+    expect(issue2!.version).toBe('2.0.0');
+    expect(issue3!.version).toBeUndefined();
+  });
 });

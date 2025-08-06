@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -58,7 +59,7 @@ function mergeRelatedArrays(relatedDocs: string, relatedTasks: string): string {
     const tasks = JSON.parse(relatedTasks);
     const merged = [...tasks, ...docs];
     return JSON.stringify(merged);
-  } catch (e) {
+  } catch {
     // If parsing fails, try to merge as strings
     const docsContent = relatedDocs.replace(/^\[/, '').replace(/\]$/, '');
     const tasksContent = relatedTasks.replace(/^\[/, '').replace(/\]$/, '');
@@ -159,7 +160,7 @@ async function migrateFile(file: string, createBackup: boolean): Promise<Migrati
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const createBackup = !args.includes('--no-backup');
   const dataDir = process.env.MCP_DATABASE_PATH || '.shirokuma/data';

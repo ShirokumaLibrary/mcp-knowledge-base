@@ -93,9 +93,9 @@ export class SearchRepository extends BaseRepository {
         tags: searchRow.tags ? JSON.parse(String(searchRow.tags)) : []
       } as SearchRow;
 
-      const type = String(searchRow.type);
+      const type = String(searchRow.type) as keyof GroupedSearchResult;
       if (type in grouped) {
-        (grouped as any)[type].push(item);
+        grouped[type].push(item);
       }
     }
 

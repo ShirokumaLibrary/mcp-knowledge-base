@@ -1,4 +1,4 @@
-import { DatabaseConnection } from './base.js';
+import { DatabaseConnection, Database } from './base.js';
 import { ItemRepository } from '../repositories/item-repository.js';
 import { StatusRepository } from './status-repository.js';
 import { TagRepository } from './tag-repository.js';
@@ -8,8 +8,8 @@ import { TypeRepository } from './type-repository.js';
 import { getConfig } from '../config.js';
 import { ensureInitialized } from '../utils/decorators.js';
 import { Session, Daily } from '../types/complete-domain-types.js';
-import type { Issue, Plan, Document } from '../types/domain-types.js';
-import type { ListItem } from '../types/unified-types.js';
+import type { Issue, Plan, Document, Status, Tag } from '../types/domain-types.js';
+import type { ListItem, UnifiedItem } from '../types/unified-types.js';
 import * as path from 'path';
 import { globSync } from 'glob';
 import { statSync } from 'fs';
@@ -135,7 +135,7 @@ export class FileIssueDatabase {
    * @ai-intent Expose database connection
    * @ai-why TypeRepository needs direct database access
    */
-  getDatabase() {
+  getDatabase(): Database {
     return this.connection.getDatabase();
   }
 
@@ -143,7 +143,7 @@ export class FileIssueDatabase {
    * @ai-intent Get ItemRepository for direct access
    * @ai-why UnifiedHandlers need direct access to ItemRepository
    */
-  getItemRepository() {
+  getItemRepository(): ItemRepository {
     return this.itemRepo;
   }
 
@@ -151,7 +151,7 @@ export class FileIssueDatabase {
    * @ai-intent Get TagRepository for direct access
    * @ai-why CurrentStateHandlers needs access for tag registration
    */
-  getTagRepository() {
+  getTagRepository(): TagRepository {
     return this.tagRepo;
   }
 
@@ -159,7 +159,7 @@ export class FileIssueDatabase {
    * @ai-intent Get TypeRepository for direct access
    * @ai-why Type management tests need direct access
    */
-  getTypeRepository() {
+  getTypeRepository(): TypeRepository {
     return this.typeRepo;
   }
 
@@ -167,7 +167,7 @@ export class FileIssueDatabase {
    * @ai-intent Get FullTextSearchRepository for search operations
    * @ai-why Search handlers need direct access
    */
-  getFullTextSearchRepository() {
+  getFullTextSearchRepository(): FullTextSearchRepository {
     return this.fullTextSearchRepo;
   }
 
@@ -226,81 +226,76 @@ export class FileIssueDatabase {
   private async performAutoRebuild(): Promise<void> {
     // Do not output anything during auto-rebuild to avoid breaking MCP protocol
     // MCP uses stdio for communication, any output breaks the protocol
-    try {
-      // Scan for types and register them
-      const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
-        const stat = statSync(dir);
-        const dirName = path.basename(dir);
+    // Scan for types and register them
+    const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
+      const stat = statSync(dir);
+      const dirName = path.basename(dir);
 
-        if (!stat.isDirectory() || dirName === 'search.db') {
-          return false;
-        }
-
-        return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
-      });
-
-      const typeMapping: Record<string, 'tasks' | 'documents'> = {
-        issues: 'tasks',
-        plans: 'tasks',
-        docs: 'documents',
-        knowledge: 'documents',
-        decisions: 'documents',
-        features: 'documents'
-      };
-
-      const existingTypes = await this.typeRepo.getAllTypes();
-      const existingTypeNames = new Set(existingTypes.map(t => t.type));
-
-      for (const dir of dirs) {
-        const typeName = path.basename(dir);
-        const baseType = typeMapping[typeName] || 'documents';
-
-        if (!existingTypeNames.has(typeName)) {
-          await this.typeRepo.createType(typeName, baseType);
-          // Silent - no output during MCP operation
-        }
+      if (!stat.isDirectory() || dirName === 'search.db') {
+        return false;
       }
 
-      // Rebuild all types including special ones
-      const allTypes = await this.typeRepo.getAllTypes();
-      allTypes.push({ type: 'sessions', base_type: 'sessions' });
-      allTypes.push({ type: 'dailies', base_type: 'documents' });
+      return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
+    });
 
-      let totalSynced = 0;
-      for (const typeInfo of allTypes) {
-        const type = typeInfo.type;
-        const count = await this.itemRepo.rebuildFromMarkdown(type);
-        totalSynced += count;
+    const typeMapping: Record<string, 'tasks' | 'documents'> = {
+      issues: 'tasks',
+      plans: 'tasks',
+      docs: 'documents',
+      knowledge: 'documents',
+      decisions: 'documents',
+      features: 'documents'
+    };
+
+    const existingTypes = await this.typeRepo.getAllTypes();
+    const existingTypeNames = new Set(existingTypes.map(t => t.type));
+
+    for (const dir of dirs) {
+      const typeName = path.basename(dir);
+      const baseType = typeMapping[typeName] || 'documents';
+
+      if (!existingTypeNames.has(typeName)) {
+        await this.typeRepo.createType(typeName, baseType);
         // Silent - no output during MCP operation
       }
-
-      // Auto-rebuild complete - no output to avoid breaking MCP protocol
-
-      // Clear the rebuild flag
-      const db = this.connection.getDatabase();
-      await db.runAsync(
-        'DELETE FROM db_metadata WHERE key = ?',
-        ['needs_rebuild']
-      );
-    } catch (error) {
-      // Re-throw error without logging to avoid breaking MCP protocol
-      throw error;
     }
+
+    // Rebuild all types including special ones
+    const allTypes = await this.typeRepo.getAllTypes();
+    allTypes.push({ type: 'sessions', base_type: 'sessions' });
+    allTypes.push({ type: 'dailies', base_type: 'documents' });
+
+    let _totalSynced = 0;
+    for (const typeInfo of allTypes) {
+      const type = typeInfo.type;
+      const count = await this.itemRepo.rebuildFromMarkdown(type);
+      _totalSynced += count;  // Keep track for potential future logging
+      // Silent - no output during MCP operation
+    }
+
+    // Auto-rebuild complete - no output to avoid breaking MCP protocol
+
+    // Clear the rebuild flag
+    const db = this.connection.getDatabase();
+    await db.runAsync(
+      'DELETE FROM db_metadata WHERE key = ?',
+      ['needs_rebuild']
+    );
   }
 
   // Status methods
   @ensureInitialized
-  async getAllStatuses() {
+  async getAllStatuses(): Promise<Status[]> {
     return this.statusRepo.getAllStatuses();
   }
 
-  async getAllStatusesAsync() {
+  async getAllStatusesAsync(): Promise<Status[]> {
     return this.getAllStatuses();
   }
 
   // Legacy status methods for tests
   @ensureInitialized
-  async createStatus(name: string) {
+  async createStatus(name: string): Promise<Status> {
     const statuses = await this.statusRepo.getAllStatuses();
     const existing = statuses.find(s => s.name === name);
     if (existing) {
@@ -311,28 +306,28 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async updateStatus(_id: number, _name: string) {
+  async updateStatus(_id: number, _name: string): Promise<boolean> {
     return true;
   }
 
   @ensureInitialized
-  async deleteStatus(_id: number) {
+  async deleteStatus(_id: number): Promise<boolean> {
     return true;
   }
 
   // Tag methods
   @ensureInitialized
-  async getAllTags() {
+  async getAllTags(): Promise<Tag[]> {
     return this.tagRepo.getAllTags();
   }
 
   @ensureInitialized
-  async getOrCreateTagId(tagName: string) {
+  async getOrCreateTagId(tagName: string): Promise<number> {
     return this.tagRepo.getOrCreateTagId(tagName);
   }
 
   @ensureInitialized
-  async createTag(name: string) {
+  async createTag(name: string): Promise<{ id: number; name: string }> {
     const trimmedName = name.trim();
     if (trimmedName.length === 0) {
       throw new Error('Tag name cannot be empty or whitespace only');
@@ -343,12 +338,12 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async deleteTag(name: string) {
+  async deleteTag(name: string): Promise<boolean> {
     return this.tagRepo.deleteTag(name);
   }
 
   @ensureInitialized
-  async searchTagsByPattern(pattern: string) {
+  async searchTagsByPattern(pattern: string): Promise<Tag[]> {
     return this.tagRepo.searchTagsByPattern(pattern);
   }
 
@@ -366,7 +361,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<UnifiedItem> {
     return this.itemRepo.createItem({
       type,
       title,
@@ -383,7 +378,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getTask(type: string, id: number) {
+  async getTask(type: string, id: number): Promise<UnifiedItem | null> {
     return this.itemRepo.getItem(type, String(id));
   }
 
@@ -401,7 +396,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<UnifiedItem | null> {
     return this.itemRepo.updateItem({
       type,
       id: String(id),
@@ -419,32 +414,32 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async deleteTask(type: string, id: number) {
+  async deleteTask(type: string, id: number): Promise<boolean> {
     return this.itemRepo.deleteItem(type, String(id));
   }
 
   @ensureInitialized
-  async getAllTasksSummary(type: string, includeClosedStatuses?: boolean, statuses?: string[]) {
+  async getAllTasksSummary(type: string, includeClosedStatuses?: boolean, statuses?: string[]): Promise<ListItem[]> {
     return this.itemRepo.getItems(type, includeClosedStatuses, statuses);
   }
 
   @ensureInitialized
-  async searchTasksByTag(tag: string) {
+  async searchTasksByTag(tag: string): Promise<ListItem[]> {
     return this.itemRepo.searchItemsByTag(tag, ['issues', 'plans']);
   }
 
   @ensureInitialized
-  async getTags() {
+  async getTags(): Promise<Tag[]> {
     return this.tagRepo.getAllTags();
   }
 
   @ensureInitialized
-  async searchTags(pattern: string) {
+  async searchTags(pattern: string): Promise<Tag[]> {
     return this.tagRepo.searchTagsByPattern(pattern);
   }
 
   @ensureInitialized
-  async searchAllByTag(tag: string) {
+  async searchAllByTag(tag: string): Promise<GroupedItems> {
     const items = await this.itemRepo.searchItemsByTag(tag);
 
     // Group by type for backward compatibility
@@ -476,7 +471,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async searchAll(query: string) {
+  async searchAll(query: string): Promise<GroupedItems> {
     const items = await this.searchRepo.searchContent(query);
 
     // Group by type for backward compatibility
@@ -520,7 +515,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Issue> {
     const item = await this.itemRepo.createItem({
       type: 'issues',
       title,
@@ -554,7 +549,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getIssue(id: number) {
+  async getIssue(id: number): Promise<Issue | null> {
     const item = await this.itemRepo.getItem('issues', String(id));
     if (!item) {
       return null;
@@ -590,7 +585,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Issue | null> {
     const item = await this.itemRepo.updateItem({
       type: 'issues',
       id: String(id),
@@ -628,12 +623,12 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async deleteIssue(id: number) {
+  async deleteIssue(id: number): Promise<boolean> {
     return this.itemRepo.deleteItem('issues', String(id));
   }
 
   @ensureInitialized
-  async getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]) {
+  async getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content' | 'related_tasks' | 'related_documents'>[]> {
     // Convert status IDs to names for backward compatibility
     let statuses: string[] | undefined;
     if (statusIds && statusIds.length > 0) {
@@ -647,7 +642,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async searchIssuesByTag(tag: string) {
+  async searchIssuesByTag(tag: string): Promise<Issue[]> {
     const items = await this.itemRepo.searchItemsByTag(tag, ['issues']);
     return items.map(item => this.listItemToFullIssue(item));
   }
@@ -665,7 +660,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Plan> {
     const item = await this.itemRepo.createItem({
       type: 'plans',
       title,
@@ -698,7 +693,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getPlan(id: number) {
+  async getPlan(id: number): Promise<Plan | null> {
     const item = await this.itemRepo.getItem('plans', String(id));
     if (!item) {
       return null;
@@ -734,7 +729,7 @@ export class FileIssueDatabase {
     end_date?: string | null,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Plan | null> {
     const item = await this.itemRepo.updateItem({
       type: 'plans',
       id: String(id),
@@ -772,12 +767,12 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async deletePlan(id: number) {
+  async deletePlan(id: number): Promise<boolean> {
     return this.itemRepo.deleteItem('plans', String(id));
   }
 
   @ensureInitialized
-  async getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]) {
+  async getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content' | 'related_tasks' | 'related_documents'>[]> {
     // Convert status IDs to names for backward compatibility
     let statuses: string[] | undefined;
     if (statusIds && statusIds.length > 0) {
@@ -791,14 +786,14 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async searchPlansByTag(tag: string) {
+  async searchPlansByTag(tag: string): Promise<Issue[]> {
     const items = await this.itemRepo.searchItemsByTag(tag, ['plans']);
     return items.map(item => this.listItemToFullIssue(item));
   }
 
   // Document methods (delegate to ItemRepository)
   @ensureInitialized
-  async getAllDocuments(type?: string) {
+  async getAllDocuments(type?: string): Promise<Document[]> {
     if (!type) {
       // Get both docs and knowledge
       const docs = await this.itemRepo.getItems('docs');
@@ -811,7 +806,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getDocument(type: string, id: number) {
+  async getDocument(type: string, id: number): Promise<Document | null> {
     const item = await this.itemRepo.getItem(type, String(id));
     if (!item) {
       return null;
@@ -840,7 +835,7 @@ export class FileIssueDatabase {
     description?: string,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Document> {
     const item = await this.itemRepo.createItem({
       type,
       title,
@@ -853,10 +848,10 @@ export class FileIssueDatabase {
 
     return {
       type: item.type,
-      id: item.id,
+      id: parseInt(item.id),
       title: item.title,
       description: item.description,
-      content: item.content,
+      content: item.content || '',
       tags: item.tags,
       related_tasks: item.related_tasks,
       related_documents: item.related_documents,
@@ -875,7 +870,7 @@ export class FileIssueDatabase {
     description?: string,
     related_tasks?: string[],
     related_documents?: string[]
-  ) {
+  ): Promise<Document | null> {
     const item = await this.itemRepo.updateItem({
       type,
       id: String(id),
@@ -888,25 +883,37 @@ export class FileIssueDatabase {
     });
 
     if (!item) {
-      return false;
+      return null;
     }
-    return true;
+
+    return {
+      type: item.type,
+      id: parseInt(item.id),
+      title: item.title,
+      description: item.description,
+      content: item.content || '',
+      tags: item.tags,
+      related_tasks: item.related_tasks,
+      related_documents: item.related_documents,
+      created_at: item.created_at,
+      updated_at: item.updated_at
+    };
   }
 
   @ensureInitialized
-  async deleteDocument(type: string, id: number) {
+  async deleteDocument(type: string, id: number): Promise<boolean> {
     return this.itemRepo.deleteItem(type, String(id));
   }
 
   @ensureInitialized
-  async searchDocumentsByTag(tag: string, type?: string) {
+  async searchDocumentsByTag(tag: string, type?: string): Promise<Document[]> {
     const types = type ? [type] : ['docs', 'knowledge'];
     const items = await this.itemRepo.searchItemsByTag(tag, types);
     return items.map(item => this.listItemToDocument(item));
   }
 
   @ensureInitialized
-  async getAllDocumentsSummary(type?: string) {
+  async getAllDocumentsSummary(type?: string): Promise<Omit<Document, 'content' | 'related_tasks' | 'related_documents'>[]> {
     if (!type) {
       const docs = await this.itemRepo.getItems('docs');
       const knowledge = await this.itemRepo.getItems('knowledge');
@@ -935,39 +942,47 @@ export class FileIssueDatabase {
 
   // Type methods
   @ensureInitialized
-  async getAllTypes() {
-    return this.typeRepo.getAllTypes();
+  async getAllTypes(): Promise<{ type: string; base_type: string }[]> {
+    const types = await this.typeRepo.getAllTypes();
+    return types.map(t => ({ type: t.type, base_type: t.base_type }));
   }
 
   @ensureInitialized
-  async createType(name: string, baseType?: 'tasks' | 'documents') {
+  async createType(name: string, baseType?: 'tasks' | 'documents'): Promise<void> {
     return this.typeRepo.createType(name, baseType);
   }
 
   @ensureInitialized
-  async deleteType(name: string) {
-    return this.typeRepo.deleteType(name);
+  async deleteType(name: string): Promise<boolean> {
+    await this.typeRepo.deleteType(name);
+    return true;
   }
 
   @ensureInitialized
-  async getBaseType(name: string) {
+  async getBaseType(name: string): Promise<string | null> {
     return this.typeRepo.getBaseType(name);
   }
 
   // Search methods
   @ensureInitialized
-  async searchContent(query: string) {
-    return this.searchRepo.searchContent(query);
+  async searchContent(query: string): Promise<ListItem[]> {
+    const searchRows = await this.searchRepo.searchContent(query);
+    return searchRows.map(row => ({
+      ...row,
+      id: String(row.id),
+      priority: row.priority as 'high' | 'medium' | 'low' | undefined,
+      tags: Array.isArray(row.tags) ? row.tags : []
+    }));
   }
 
   // Legacy item methods
   @ensureInitialized
-  async getItems(type: string) {
+  async getItems(type: string): Promise<ListItem[]> {
     return this.itemRepo.getItems(type);
   }
 
   @ensureInitialized
-  async getTypes() {
+  async getTypes(): Promise<GroupedTypes> {
     const types = await this.typeRepo.getAllTypes();
 
     // Group by base_type for backward compatibility
@@ -1065,10 +1080,10 @@ export class FileIssueDatabase {
   /**
    * @ai-intent Clean up resources
    */
-  async close() {
+  async close(): Promise<void> {
     try {
       await this.connection.close();
-    } catch (error) {
+    } catch {
       // Log but don't throw - tests need cleanup to complete
     }
   }

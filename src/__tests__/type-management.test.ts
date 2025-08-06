@@ -294,7 +294,7 @@ describe('Type Management', () => {
       const item = await db.createDocument('recipe', 'Chocolate Cake', 'A delicious chocolate cake recipe', ['dessert', 'baking']);
       
       expect(item.type).toBe('recipe');
-      expect(item.id).toBe('1');
+      expect(item.id).toBe(1);
       expect(item.title).toBe('Chocolate Cake');
       
       // Verify file was created in type-specific subdirectory

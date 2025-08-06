@@ -11,6 +11,7 @@ import { TypeRepository } from '../database/type-repository.js';
 import type { FileIssueDatabase } from '../database.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { UnifiedItem, ListItem } from '../types/unified-types.js';
+import { createLogger } from '../utils/logger.js';
 
 // Import schemas
 import {
@@ -27,7 +28,8 @@ import {
  * @ai-pattern Factory function returns handler map
  * @ai-flow Initialize repository -> Create handlers -> Return tool definitions
  */
-export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
+export function createUnifiedHandlers(fileDb: FileIssueDatabase): Record<string, (params: unknown) => Promise<unknown>> {
+  const logger = createLogger('UnifiedHandlers');
   // Get repositories from FileIssueDatabase
   const itemRepository = fileDb.getItemRepository();
   const typeRepository = new TypeRepository(fileDb);
@@ -84,7 +86,7 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
   async function handleCreateItem(params: z.infer<typeof CreateItemParams>): Promise<UnifiedItem> {
     // Debug logging for version field
     if (params.version) {
-      console.log('unified-handlers: Received version field', { type: params.type, version: params.version });
+      logger.debug('Received version field', { type: params.type, version: params.version });
     }
     return itemRepository.createItem(params);
   }
@@ -199,14 +201,14 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase) {
     return result;
   }
 
-  // Return handler map
+  // Return handler map with type wrappers
   return {
-    get_items: handleGetItems,
-    get_item_detail: handleGetItemDetail,
-    create_item: handleCreateItem,
-    update_item: handleUpdateItem,
-    delete_item: handleDeleteItem,
-    search_items_by_tag: handleSearchItemsByTag
+    get_items: (params: unknown) => handleGetItems(params as z.infer<typeof GetItemsParams>),
+    get_item_detail: (params: unknown) => handleGetItemDetail(params as z.infer<typeof GetItemDetailParams>),
+    create_item: (params: unknown) => handleCreateItem(params as z.infer<typeof CreateItemParams>),
+    update_item: (params: unknown) => handleUpdateItem(params as z.infer<typeof UpdateItemParams>),
+    delete_item: (params: unknown) => handleDeleteItem(params as z.infer<typeof DeleteItemParams>),
+    search_items_by_tag: (params: unknown) => handleSearchItemsByTag(params as z.infer<typeof SearchItemsByTagParams>)
   };
 }
 

@@ -7,6 +7,7 @@
 import { z } from 'zod';
 import type { FileIssueDatabase } from '../database/index.js';
 import type { FullTextSearchRepository } from '../database/fulltext-search-repository.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 import { createLogger } from '../utils/logger.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
@@ -53,7 +54,7 @@ export class SearchHandlers {
    * @ai-flow 1. Validate params -> 2. Execute search -> 3. Hydrate results
    * @ai-error-handling Returns empty array on search failure
    */
-  async searchItems(params: unknown) {
+  async searchItems(params: unknown): Promise<ToolResponse> {
     try {
       const validated = searchItemsSchema.parse(params);
 
@@ -130,7 +131,7 @@ export class SearchHandlers {
    * @ai-intent Get search suggestions for autocomplete
    * @ai-flow 1. Validate params -> 2. Get suggestions
    */
-  async searchSuggest(params: unknown) {
+  async searchSuggest(params: unknown): Promise<ToolResponse> {
     try {
       const validated = searchSuggestSchema.parse(params);
 

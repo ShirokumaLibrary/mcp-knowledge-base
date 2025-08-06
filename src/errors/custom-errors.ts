@@ -105,7 +105,7 @@ export class ValidationError extends BaseError {
     const errors = error.errors.map((e) => ({
       field: e.path.join('.'),
       message: e.message,
-      value: (e as any).received || undefined
+      value: (e as { received?: unknown }).received || undefined
     }));
 
     return new ValidationError(

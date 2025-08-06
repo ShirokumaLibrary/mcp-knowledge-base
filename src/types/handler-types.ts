@@ -124,7 +124,7 @@ export interface DateRangeArgs {
  * @ai-usage Server maintains map for routing
  * @ai-critical Keys must match MCP tool names
  */
-export type ToolHandlerMap = Map<string, Handler<any, any>>;
+export type ToolHandlerMap = Map<string, Handler<unknown, unknown>>;
 
 /**
  * @ai-intent Utility for converting errors to McpError

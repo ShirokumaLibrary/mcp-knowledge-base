@@ -7,6 +7,7 @@
  */
 
 import type { BaseHandler} from './base-handler.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 import { z } from 'zod';
 
 /**
@@ -29,15 +30,15 @@ export class HandlerPatterns {
       delete: (id: number | string) => Promise<boolean>;
     },
     schemas: {
-      create: z.ZodSchema<any>;
-      update: z.ZodSchema<any>;
-      delete: z.ZodSchema<any>;
+      create: z.ZodSchema<unknown>;
+      update: z.ZodSchema<unknown>;
+      delete: z.ZodSchema<unknown>;
     },
     formatters?: {
       list?: (items: T[]) => string;
       detail?: (item: T) => string;
     }
-  ) {
+  ): Record<string, (args: unknown) => Promise<ToolResponse>> {
     return {
       /**
        * @ai-intent Handle list operation
@@ -125,11 +126,12 @@ export class HandlerPatterns {
         schemas.update,
         async (args) => {
           handler.ensureDatabase();
-          const updated = await operations.update(args.id, args);
+          const typedArgs = args as { id: string | number; [key: string]: unknown };
+          const updated = await operations.update(typedArgs.id, typedArgs);
 
           if (!updated) {
             return handler.createErrorResponse(
-              `${entityName} with ID ${args.id} not found`
+              `${entityName} with ID ${typedArgs.id} not found`
             );
           }
 
@@ -149,17 +151,18 @@ export class HandlerPatterns {
         schemas.delete,
         async (args) => {
           handler.ensureDatabase();
-          const deleted = await operations.delete(args.id);
+          const typedArgs = args as { id: string | number };
+          const deleted = await operations.delete(typedArgs.id);
 
           if (!deleted) {
             return handler.createErrorResponse(
-              `${entityName} with ID ${args.id} not found or cannot be deleted`
+              `${entityName} with ID ${typedArgs.id} not found or cannot be deleted`
             );
           }
 
           return handler.createResponse(
             `## ${entityName} Deleted\n\n` +
-            `Successfully deleted ${entityName.toLowerCase()} with ID ${args.id}`
+            `Successfully deleted ${entityName.toLowerCase()} with ID ${typedArgs.id}`
           );
         }
       )
@@ -174,15 +177,16 @@ export class HandlerPatterns {
     handler: BaseHandler,
     entityName: string,
     searchOperation: (query: string, filters?: unknown) => Promise<T[]>,
-    schema: z.ZodSchema<any>,
+    schema: z.ZodSchema<unknown>,
     formatter?: (items: T[]) => string
-  ) {
+  ): (args: unknown) => Promise<ToolResponse> {
     return handler.wrapHandler(
       `search ${entityName}s`,
       schema,
       async (args) => {
         handler.ensureDatabase();
-        const results = await searchOperation(args.query, args);
+        const typedArgs = args as { query: string; [key: string]: unknown };
+        const results = await searchOperation(typedArgs.query, typedArgs);
 
         if (results.length === 0) {
           return handler.createResponse(
@@ -217,7 +221,7 @@ export class HandlerPatterns {
     entityName: string,
     searchByTag: (tag: string) => Promise<T[]>,
     formatter: (items: T[]) => string
-  ) {
+  ): (args: unknown) => Promise<ToolResponse> {
     return handler.wrapHandler(
       `search ${entityName}s by tag`,
       z.object({ tag: z.string() }),
@@ -247,7 +251,7 @@ export class HandlerPatterns {
     batchOperation: (items: T[]) => Promise<R[]>,
     schema: z.ZodSchema<{ items: T[] }>,
     formatter: (results: R[]) => string
-  ) {
+  ): (args: unknown) => Promise<ToolResponse> {
     return handler.wrapHandler(
       operationName,
       schema,
@@ -273,7 +277,7 @@ export class HandlerPatterns {
     entityName: string,
     operation: (startDate?: string, endDate?: string) => Promise<T[]>,
     formatter: (items: T[]) => string
-  ) {
+  ): (args: unknown) => Promise<ToolResponse> {
     return handler.wrapHandler(
       `get ${entityName}s by date`,
       z.object({
@@ -331,7 +335,7 @@ export class ResponsePatterns {
    * @ai-intent Format item list as markdown table
    * @ai-pattern Table format for structured data
    */
-  static formatAsTable<T extends Record<string, any>>(
+  static formatAsTable<T extends Record<string, unknown>>(
     items: T[],
     columns: Array<{
       key: keyof T;
@@ -370,13 +374,13 @@ export class ResponsePatterns {
    * @ai-intent Format items as grouped list
    * @ai-pattern Group items by a field
    */
-  static formatGroupedList<T extends Record<string, any>>(
+  static formatGroupedList<T extends Record<string, unknown>>(
     items: T[],
     groupBy: keyof T,
     itemFormatter: (item: T) => string,
     title?: string
   ): string {
-    const groups = new Map<any, T[]>();
+    const groups = new Map<unknown, T[]>();
 
     // @ai-logic: Group items
     for (const item of items) {
@@ -384,7 +388,10 @@ export class ResponsePatterns {
       if (!groups.has(key)) {
         groups.set(key, []);
       }
-      groups.get(key)!.push(item);
+      const group = groups.get(key);
+      if (group) {
+        group.push(item);
+      }
     }
 
     const lines: string[] = [];

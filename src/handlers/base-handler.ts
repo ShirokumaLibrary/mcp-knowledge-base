@@ -12,17 +12,9 @@ import { McpError } from '@modelcontextprotocol/sdk/types.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import type { IDatabase } from '../database/interfaces/repository-interfaces.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 
-/**
- * @ai-intent Standard tool response structure
- * @ai-pattern MCP protocol response format
- */
-export interface ToolResponse {
-  content: Array<{
-    type: 'text';
-    text: string;
-  }>;
-}
+// ToolResponse is imported from mcp-types.js for consistency
 
 /**
  * @ai-intent Handler method signature

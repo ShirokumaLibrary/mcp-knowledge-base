@@ -8,6 +8,7 @@
 import { BaseRepository } from './base-repository.js';
 import type { Database } from './base.js';
 import type { DatabaseRow } from './types/database-types.js';
+import { createLogger } from '../utils/logger.js';
 import {
   type UnifiedItem,
   // type ItemRow,
@@ -42,6 +43,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
   private tagRepository: TagRepository;
   private dataDir: string;
   private knownTypes: Map<string, SimpleTypeDefinition>;
+  protected logger = createLogger('ItemRepository');
 
   constructor(
     db: Database,
@@ -70,8 +72,9 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
 
   private async getType(typeName: string): Promise<SimpleTypeDefinition | null> {
     // Check known types first
-    if (this.knownTypes.has(typeName)) {
-      return this.knownTypes.get(typeName)!;
+    const knownType = this.knownTypes.get(typeName);
+    if (knownType) {
+      return knownType;
     }
 
     // Check database for custom types
@@ -221,8 +224,8 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     if (data.version) {
       this.logger.debug('Creating item with version', { type, id, version: data.version });
     }
-    console.log('[DEBUG] createItem - data.version:', data.version);
-    console.log('[DEBUG] createItem - item.version:', item.version);
+    this.logger.debug('createItem - data.version:', data.version);
+    this.logger.debug('createItem - item.version:', item.version);
 
     // Save to markdown
     await this.saveToMarkdown(item);
@@ -340,7 +343,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
       ...existing,
       title: params.title ?? existing.title,
       description: params.description !== undefined ? params.description : existing.description,
-      version: params.version !== undefined ? params.version : existing.version,
+      version: 'version' in params ? params.version : existing.version,
       content: params.content ?? existing.content,
       priority: params.priority ?? existing.priority,
       status_id: statusId,
@@ -518,7 +521,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
 
     // Convert rows to items
     const items: UnifiedItem[] = [];
-    for (const row of rows as any[]) {
+    for (const row of rows as DatabaseRow[]) {
       const item = await this.getById(String(row.type), String(row.id));
       if (item) {
         items.push(item);
@@ -565,7 +568,7 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
    */
   private generateSessionId(): string {
     const now = new Date();
-    const pad = (n: number, width: number) => n.toString().padStart(width, '0');
+    const pad = (n: number, width: number): string => n.toString().padStart(width, '0');
 
     return `${now.getFullYear()}-${pad(now.getMonth() + 1, 2)}-${pad(now.getDate(), 2)}-` +
            `${pad(now.getHours(), 2)}.${pad(now.getMinutes(), 2)}.${pad(now.getSeconds(), 2)}.` +
@@ -643,14 +646,14 @@ export class ItemRepository extends BaseRepository<UnifiedItem, string> {
     if (item.description) {
       metadata.description = item.description;
     }
-    console.log('[DEBUG] saveToMarkdown - item.version:', item.version);
+    this.logger.debug('saveToMarkdown - item.version:', item.version);
     if (item.version) {
       metadata.version = item.version;
       this.logger.debug('Adding version to metadata', { type: item.type, id: item.id, version: item.version });
-      console.log('[DEBUG] saveToMarkdown - metadata after adding version:', metadata);
+      this.logger.debug('saveToMarkdown - metadata after adding version:', metadata);
     } else {
       this.logger.debug('No version field in item', { type: item.type, id: item.id });
-      console.log('[DEBUG] saveToMarkdown - No version field in item');
+      this.logger.debug('saveToMarkdown - No version field in item');
     }
     if (item.start_date) {
       metadata.start_date = item.start_date;

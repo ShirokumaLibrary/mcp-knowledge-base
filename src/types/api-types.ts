@@ -206,7 +206,7 @@ export const ApiTypeGuards = {
       typeof value === 'object' &&
       value !== null &&
       'content' in value &&
-      Array.isArray((value as any).content)
+      Array.isArray((value as { content: unknown }).content)
     );
   },
 
@@ -215,7 +215,7 @@ export const ApiTypeGuards = {
       typeof value === 'object' &&
       value !== null &&
       'error' in value &&
-      typeof (value as any).error === 'object'
+      typeof (value as { error: unknown }).error === 'object'
     );
   },
 

@@ -3,12 +3,12 @@
  * @ai-pattern Test file-based state operations
  */
 
-// @ts-nocheck
 import { CurrentStateHandlers } from './current-state-handlers.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { tmpdir } from 'os';
 import { McpError } from '@modelcontextprotocol/sdk/types.js';
+import type { ToolResponse } from '../types/mcp-types.js';
 
 // Mock logger to prevent errors in test
 jest.mock('../utils/logger.js', () => ({
@@ -39,7 +39,7 @@ describe('CurrentStateHandlers', () => {
 
   describe('handleGetCurrentState', () => {
     it('should return empty string when file does not exist', async () => {
-      const result = await handlers.handleGetCurrentState();
+      const result: ToolResponse = await handlers.handleGetCurrentState();
 
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
@@ -52,7 +52,7 @@ describe('CurrentStateHandlers', () => {
       const testContent = 'Test state content';
       await fs.writeFile(filePath, testContent, 'utf-8');
 
-      const result = await handlers.handleGetCurrentState();
+      const result: ToolResponse = await handlers.handleGetCurrentState();
 
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
@@ -78,7 +78,7 @@ This is the actual content`;
 
       await fs.writeFile(filePath, yamlContent, 'utf-8');
 
-      const result = await handlers.handleGetCurrentState();
+      const result: ToolResponse = await handlers.handleGetCurrentState();
 
       // Parse the JSON response
       const parsed = JSON.parse(result.content[0].text);
@@ -95,7 +95,7 @@ This is the actual content`;
       try {
         await handlers.handleGetCurrentState();
         // Should not reach here
-        expect.fail('Should have thrown an error');
+        throw new Error('Should have thrown an error');
       } catch (error) {
         expect(error).toBeInstanceOf(McpError);
         expect((error as McpError).message).toContain('Failed to read current state');
@@ -110,7 +110,7 @@ This is the actual content`;
     it('should create file with content when it does not exist', async () => {
       const newContent = 'New state content';
 
-      const result = await handlers.handleUpdateCurrentState({
+      const result: ToolResponse = await handlers.handleUpdateCurrentState({
         content: newContent
       });
 
@@ -133,7 +133,7 @@ This is the actual content`;
       await fs.writeFile(filePath, 'Old content', 'utf-8');
 
       const newContent = 'Updated state content';
-      const result = await handlers.handleUpdateCurrentState({
+      const result: ToolResponse = await handlers.handleUpdateCurrentState({
         content: newContent
       });
 
@@ -152,7 +152,7 @@ This is the actual content`;
     });
 
     it('should handle empty content', async () => {
-      const result = await handlers.handleUpdateCurrentState({
+      const result: ToolResponse = await handlers.handleUpdateCurrentState({
         content: ''
       });
 
@@ -173,7 +173,7 @@ This is the actual content`;
     it('should validate parameters', async () => {
       try {
         // Pass invalid parameters (missing content)
-        await handlers.handleUpdateCurrentState({});
+        await handlers.handleUpdateCurrentState({} as { content: string });
         expect.fail('Should have thrown validation error');
       } catch (error) {
         expect(error).toBeDefined();
@@ -188,7 +188,7 @@ This is the actual content`;
         await handlers.handleUpdateCurrentState({
           content: 'Test content'
         });
-        expect.fail('Should have thrown an error');
+        throw new Error('Should have thrown an error');
       } catch (error) {
         expect(error).toBeInstanceOf(McpError);
         expect((error as McpError).message).toContain('Failed to update current state');
@@ -199,7 +199,7 @@ This is the actual content`;
     });
 
     it('should handle metadata fields', async () => {
-      const result = await handlers.handleUpdateCurrentState({
+      const result: ToolResponse = await handlers.handleUpdateCurrentState({
         content: 'Test content',
         related: ['issues-1', 'docs-2'],
         tags: ['important', 'milestone'],
@@ -225,7 +225,7 @@ This is the actual content`;
       const nestedDir = path.join(testDir, 'nested', 'path');
       const nestedHandlers = new CurrentStateHandlers(nestedDir);
 
-      const result = await nestedHandlers.handleUpdateCurrentState({
+      const result: ToolResponse = await nestedHandlers.handleUpdateCurrentState({
         content: 'Test content in nested directory'
       });
 

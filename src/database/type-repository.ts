@@ -56,7 +56,7 @@ export class TypeRepository {
   /**
    * @ai-intent Get types grouped by base type
    */
-  async getTypes(): Promise<{ tasks: Array<any>, documents: Array<any> }> {
+  async getTypes(): Promise<{ tasks: Array<{ type: string; base_type: string; description?: string }>, documents: Array<{ type: string; base_type: string; description?: string }> }> {
     const allTypes = await this.getAllTypes();
     const result = {
       tasks: allTypes.filter(t => t.base_type === 'tasks'),

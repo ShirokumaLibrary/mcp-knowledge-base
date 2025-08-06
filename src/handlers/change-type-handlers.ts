@@ -36,7 +36,7 @@ export class ChangeTypeHandlers {
     try {
       // Workaround: The changeItemType method exists but is not recognized
       // Call it directly without type checking
-      const result = await (itemRepository as any).changeItemType(from_type, from_id, to_type);
+      const result = await (itemRepository as unknown as { changeItemType: (from: string, id: string, to: string) => Promise<{ success: boolean; error?: string; new_id?: string }> }).changeItemType(from_type, String(from_id), to_type);
 
       if (!result.success) {
         throw new McpError(
@@ -52,9 +52,7 @@ export class ChangeTypeHandlers {
 
 Item successfully migrated:
 - From: ${from_type}-${from_id}
-- To: ${to_type}-${result.newId}
-
-${result.relatedUpdates ? `\nRelated items updated: ${result.relatedUpdates}` : ''}
+- To: ${to_type}-${result.new_id}
 
 Note: The original item has been deleted.`
         }]

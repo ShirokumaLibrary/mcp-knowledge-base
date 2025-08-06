@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 /**
  * @ai-context Database rebuild utility that preserves connection
@@ -61,7 +62,7 @@ async function dropAllTables(db: any): Promise<void> {
   }
 }
 
-async function rebuildDatabase() {
+async function rebuildDatabase(): Promise<void> {
   const databasePath = process.env.MCP_DATABASE_PATH || path.join(process.cwd(), '.shirokuma', 'data');
   const dbPath = path.join(databasePath, 'search.db');
 

@@ -25,7 +25,7 @@ export abstract class BaseError extends Error {
     Error.captureStackTrace(this, this.constructor);  // @ai-why: Clean stack traces
   }
 
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       code: this.code,

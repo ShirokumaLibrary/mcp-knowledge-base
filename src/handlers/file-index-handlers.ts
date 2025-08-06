@@ -8,6 +8,7 @@ import { FileIndexer } from '../indexing/file-indexer.js';
 import { join } from 'path';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { config } from '../config.js';
+import { createLogger } from '../utils/logger.js';
 
 /**
  * Schema definitions for file indexing tools
@@ -37,6 +38,7 @@ export const fileIndexSchemas = {
  */
 export class FileIndexHandlers {
   private indexers: Map<string, FileIndexer> = new Map();
+  private logger = createLogger('FileIndexHandlers');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(private database: any) {}
@@ -57,9 +59,10 @@ export class FileIndexHandlers {
   /**
    * Create handlers map
    */
-  createHandlers() {
+  createHandlers(): Record<string, (args: unknown) => Promise<{ content: { type: 'text'; text: string }[] }>> {
     return {
-      index_codebase: async (args: z.infer<typeof fileIndexSchemas.index_codebase>) => {
+      index_codebase: async (_args: unknown) => {
+        const _typedArgs = _args as z.infer<typeof fileIndexSchemas.index_codebase>;
         const projectPath = process.cwd();
 
         const indexer = this.getIndexer(projectPath);
@@ -77,7 +80,7 @@ export class FileIndexHandlers {
 
           // Log progress every 10 files
           if (current % 10 === 0 || current === totalFiles) {
-            console.error(`Indexing progress: ${current}/${totalFiles} files`);
+            this.logger.info(`Indexing progress: ${current}/${totalFiles} files`);
           }
         });
 
@@ -101,7 +104,8 @@ The codebase is now indexed and ready for semantic search.`
         };
       },
 
-      search_code: async (args: z.infer<typeof fileIndexSchemas.search_code>) => {
+      search_code: async (_args: unknown) => {
+        const args = _args as z.infer<typeof fileIndexSchemas.search_code>;
         const projectPath = process.cwd();
         const indexPath = join(config.database.path, 'index.db');
 
@@ -147,7 +151,8 @@ The codebase is now indexed and ready for semantic search.`
         };
       },
 
-      get_related_files: async (args: z.infer<typeof fileIndexSchemas.get_related_files>) => {
+      get_related_files: async (_args: unknown) => {
+        const args = _args as z.infer<typeof fileIndexSchemas.get_related_files>;
         const projectPath = process.cwd();
         const indexPath = join(config.database.path, 'index.db');
 
@@ -232,7 +237,7 @@ The codebase is now indexed and ready for semantic search.`
         };
       },
 
-      get_index_status: async () => {
+      get_index_status: async (_args: unknown) => {
         const projectPath = process.cwd();
         const indexPath = join(config.database.path, 'index.db');
 
