@@ -40,9 +40,13 @@ AI Pair Programming with shirokuma-knowledge-base MCP - Core Principles
 # Start your session
 /ai-start                  # Restore context and begin work
 
-# During work
-/ai-remember               # Record decisions (with validation option)
-/ai-check validate         # Check items needing validation
+# Manage issues
+/ai-issue                  # List open issues
+/ai-issue "bug description" # Create new issue
+/ai-issue 103              # View issue details
+
+# Execute work
+/ai-go                     # Work on selected issue
 
 # End your session  
 /ai-finish                 # Save context and handover
