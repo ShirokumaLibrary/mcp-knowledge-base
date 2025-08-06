@@ -22,7 +22,15 @@ Execute development workflow autonomously, solving problems independently until 
 1. **AI solves problems independently** - No user interaction unless absolutely necessary
 2. **Continuous improvement loop** - Design → Review → Improve until optimal
 3. **Self-healing workflow** - Automatically retry and fix issues
-4. **Zero user burden** - All decisions made autonomously
+4. **User-controlled autonomy** - Bounded iteration with clear completion
+
+### Iteration Limits for Bounded Autonomy
+
+**MAX_ITERATIONS = 3 per phase**
+- Design phase: Maximum 3 review-improve cycles
+- Implementation phase: Maximum 3 review-fix cycles
+- Error recovery: Maximum 2 retries per error type
+- Clear completion after task success or iteration limit
 
 ### Automatic Workflow Detection
 
@@ -51,15 +59,16 @@ The system executes all tasks autonomously with built-in quality assurance:
 
 #### 1. Design Phase with Auto-Review
 ```yaml
-Design Loop:
+Design Loop (Bounded):
 1. Designer creates initial design
 2. Automatic design review by Reviewer
-3. If review finds issues:
+3. If review finds issues AND iterations < 3:
    - Generate specific improvement suggestions
    - Designer automatically applies improvements
+   - Increment iteration counter
    - Return to step 2
-4. Continue until design is optimal
-5. No user intervention needed
+4. Stop after: design approved OR 3 iterations reached
+5. Report outcome clearly to user
 ```
 
 #### 2. Implementation Phase
@@ -73,14 +82,15 @@ Implementation:
 
 #### 3. Code Review with Auto-Fix
 ```yaml
-Review Loop:
+Review Loop (Bounded):
 1. Reviewer examines implementation and tests
-2. If issues found:
+2. If issues found AND iterations < 3:
    - Generate specific fix instructions
    - Programmer/Tester automatically apply fixes
+   - Increment iteration counter
    - Return to step 1
-3. Continue until code meets quality standards
-4. No manual approval needed
+3. Stop after: quality met OR 3 iterations reached
+4. Report final status to user
 ```
 
 ### Specialist Agents
@@ -105,11 +115,11 @@ Autonomous Flow:
 2. Check existing work to avoid duplication
 3. Execute iterative development:
    
-   Design Phase:
-   - Create design → Review → Improve → Repeat until optimal
+   Design Phase (Max 3 iterations):
+   - Create design → Review → Improve → Stop at success or limit
    
-   Implementation Phase:
-   - Implement + Test (parallel) → Review → Fix → Repeat until perfect
+   Implementation Phase (Max 3 iterations):
+   - Implement + Test (parallel) → Review → Fix → Stop at success or limit
    
 4. Update all tracking automatically
 5. Only escalate if truly stuck after multiple attempts
@@ -119,7 +129,17 @@ Autonomous Flow:
 - No user interaction during execution
 - Automatic retry with improvements
 - Self-correcting based on review feedback
-- Unlimited iteration until quality standards met
+- Maximum 3 iterations per phase (design/implementation)
+- Clear completion after task success or iteration limit
+
+### Critical Changes Requiring User Approval
+
+The following changes require explicit user confirmation:
+1. **Database schema modifications** - Altering tables or migrations
+2. **External API integrations** - Adding new third-party services
+3. **Security-critical code** - Authentication, authorization, encryption
+4. **Breaking changes** - API changes, data format modifications
+5. **Destructive operations** - Data deletion, irreversible changes
 
 ### MCP Data Flow
 
@@ -153,19 +173,19 @@ All loops execute automatically without user intervention.
 The system handles all errors autonomously:
 
 ```yaml
-Autonomous Error Recovery:
-1. Agent failure → Automatically retry with different approach
-2. Review rejection → Apply feedback and retry
-3. Test failure → Fix implementation and retry
-4. Design issues → Iterate with improvements
-5. Only after exhausting all options → Escalate to user
+Bounded Error Recovery (Max 2 retries per error):
+1. Agent failure → Retry up to 2 times with different approach
+2. Review rejection → Apply feedback, retry up to 2 times
+3. Test failure → Fix implementation, retry up to 2 times
+4. Design issues → Iterate with improvements (within 3-iteration limit)
+5. After retry limit → Report status and stop gracefully
 
 Error Resolution Strategy:
 - Analyze error root cause
 - Generate solution hypothesis
-- Apply fix automatically
+- Apply fix automatically (within retry limit)
 - Verify fix worked
-- Continue workflow
+- Stop if retry limit reached
 
 User Escalation (Last Resort):
 - Clear problem description
@@ -217,32 +237,70 @@ This command transforms AI from an assistant into an autonomous developer that t
    - No options or flags needed
    - Iterate until success
 
-2. **Design Review Loop**
+2. **Design Review Loop (Bounded)**
    ```
-   while not optimal:
+   iterations = 0
+   while iterations < 3:
      design = create_design()
      feedback = review_design(design)
      if feedback.has_improvements:
        apply_improvements(feedback)
+       iterations += 1
      else:
        break
+   report_completion(design, iterations)
    ```
 
-3. **Code Review Loop**
+3. **Code Review Loop (Bounded)**
    ```
-   while not perfect:
+   iterations = 0
+   while iterations < 3:
      code = implement_solution()
-     tests = create_tests()
+     tests = create_tests()  # Note: Shares iteration counter in parallel
      feedback = review_all(code, tests)
      if feedback.has_issues:
        apply_fixes(feedback)
+       iterations += 1
      else:
        break
+   report_completion(code, tests, iterations)
    ```
 
 4. **Error Recovery**
    - Never give up on first failure
-   - Try different approaches
+   - Try different approaches (max 2 retries)
    - Learn from each attempt
-   - Only escalate after exhausting options
+   - Stop gracefully after retry limit
+
+### Task Completion Behavior
+
+**After completing the specified task:**
+1. Display clear completion message
+2. Show what was accomplished
+3. Update issue status to 'Closed' (if applicable)
+4. STOP - Do not continue to other tasks
+5. Wait for new user instructions
+
+**Completion Message Format:**
+```
+✅ Task Complete: [issue-id or description]
+
+Accomplished:
+- [List of completed items]
+
+Status: Task successfully completed in [X] iterations
+```
+
+### Handling No Parameters
+
+When `/ai-go` is called without parameters:
+```
+Usage: /ai-go [issue-id or instruction]
+
+Examples:
+- /ai-go issues-123
+- /ai-go "implement authentication"
+
+To see available issues, use: /ai-issue
+```
 
