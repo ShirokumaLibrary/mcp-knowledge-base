@@ -18,9 +18,7 @@ Parameters: {
 }
 Expected: JSON response { data: { ... } } containing:
 - data.id: timestamp ID (YYYY-MM-DD-HH.MM.SS.sss)
-- data.related: ["issues-1", "issues-2"] (unified field)
-- data.related_tasks: ["issues-1", "issues-2"] (backward compatibility)
-- data.related_documents: [] (backward compatibility)
+- data.related: ["issues-1", "issues-2"]
 ```
 
 ### Create Session with Custom DateTime

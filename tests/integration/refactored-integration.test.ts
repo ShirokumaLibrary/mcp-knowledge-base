@@ -125,12 +125,12 @@ describe('Refactored MCP Integration Tests', () => {
       const doc = await client.callTool('create_item',
         TestDataBuilder.createDocument('docs', {
           title: 'Related Documentation',
-          related_documents: [`knowledge-${knowledge.id}`]
+          related: [`knowledge-${knowledge.id}`]
         })
       );
       cleanup.trackItem('docs', doc.id);
       
-      TestAssertions.assertRelationships(doc, [], [`knowledge-${knowledge.id}`]);
+      TestAssertions.assertRelationships(doc, [`knowledge-${knowledge.id}`]);
     });
   });
 
@@ -161,14 +161,12 @@ describe('Refactored MCP Integration Tests', () => {
       const updatedPlan = await client.callTool('update_item', {
         type: 'plans',
         id: plan.id,
-        related_tasks: [`issues-${issue1.id}`, `issues-${issue2.id}`],
-        related_documents: [`docs-${doc.id}`]
+        related: [`issues-${issue1.id}`, `issues-${issue2.id}`, `docs-${doc.id}`]
       });
       
       TestAssertions.assertRelationships(
         updatedPlan,
-        [`issues-${issue1.id}`, `issues-${issue2.id}`],
-        [`docs-${doc.id}`]
+        [`issues-${issue1.id}`, `issues-${issue2.id}`, `docs-${doc.id}`]
       );
     });
 

@@ -4,8 +4,7 @@ export const CreateSessionSchema = z.object({
     title: z.string().min(1, 'Session title is required'),
     description: z.string().optional(),
     content: z.string().optional(),
-    related_tasks: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
+    related: z.array(z.string()).optional(),
     tags: z.array(z.string()).default([]),
     datetime: z.string().optional()
 }).strict();
@@ -14,8 +13,7 @@ export const UpdateSessionSchema = z.object({
     title: z.string().min(1).optional(),
     description: z.string().optional(),
     content: z.string().optional(),
-    related_tasks: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
+    related: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional()
 }).strict();
 export const CreateDailySchema = z.object({
@@ -23,8 +21,7 @@ export const CreateDailySchema = z.object({
     title: z.string().min(1, 'Title is required'),
     description: z.string().optional(),
     content: z.string().min(1, 'Content is required'),
-    related_tasks: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
+    related: z.array(z.string()).optional(),
     tags: z.array(z.string()).default([])
 }).strict();
 export const UpdateDailySchema = z.object({
@@ -32,8 +29,7 @@ export const UpdateDailySchema = z.object({
     title: z.string().min(1).optional(),
     description: z.string().optional(),
     content: z.string().min(1).optional(),
-    related_tasks: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
+    related: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional()
 }).strict();
 export const SearchSessionsByTagSchema = z.object({

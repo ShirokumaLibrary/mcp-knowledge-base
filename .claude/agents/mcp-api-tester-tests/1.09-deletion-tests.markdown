@@ -31,7 +31,7 @@ Expected: Error "issues with ID 999 not found"
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: 5}
-Expected: JSON response { data: { ... } } with data.related_tasks still containing "issues-4" (orphaned reference)
+Expected: JSON response { data: { ... } } with data.related still containing "issues-4" (orphaned reference)
 ```
 
 ## Test 9.3: Tag Deletion Effects

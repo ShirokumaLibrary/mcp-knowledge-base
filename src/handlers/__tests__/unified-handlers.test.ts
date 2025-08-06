@@ -601,9 +601,7 @@ describe('UnifiedHandlers', () => {
         tags: ['test'],
         related: [],
         start_date: '2025-01-01',
-        end_date: '2025-12-31',
-        related_documents: [],
-        related_tasks: []
+        end_date: '2025-12-31'
       });
 
       expect(created.title).toBe('Valid Issue');
@@ -620,9 +618,7 @@ describe('UnifiedHandlers', () => {
         tags: ['updated'],
         related: [],
         start_date: null,
-        end_date: null,
-        related_documents: [],
-        related_tasks: []
+        end_date: null
       });
 
       // Get with all valid parameters

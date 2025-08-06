@@ -147,7 +147,6 @@ describe('SessionHandlers', () => {
         undefined,
         undefined,  // datetime parameter
         undefined,
-        undefined,
         undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
@@ -175,7 +174,6 @@ describe('SessionHandlers', () => {
         '2025-01-26-17.00.00.000',
         undefined,  // datetime parameter
         undefined,
-        undefined,
         undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
@@ -201,7 +199,6 @@ describe('SessionHandlers', () => {
         ['work', 'important'],
         undefined,
         undefined,  // datetime parameter
-        undefined,
         undefined,
         undefined  // description parameter
       );
@@ -229,7 +226,6 @@ describe('SessionHandlers', () => {
         [],  // Default empty array for tags
         undefined,
         customDatetime,
-        undefined,
         undefined,
         undefined  // description parameter
       );
@@ -261,7 +257,6 @@ describe('SessionHandlers', () => {
         'Updated content',
         ['updated'],
         undefined,
-        undefined,
         undefined  // description parameter
       );
       const responseData = JSON.parse(result.content[0].text);
@@ -285,7 +280,6 @@ describe('SessionHandlers', () => {
         '2025-01-26-17.00.00.000',
         undefined,
         'Updated content only',
-        undefined,
         undefined,
         undefined,
         undefined  // description parameter

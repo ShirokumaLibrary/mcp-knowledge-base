@@ -40,9 +40,8 @@ export interface Session {
   title: string;        // @ai-validation: Required session name
   description?: string; // @ai-intent: One-line description for list views
   content?: string;     // @ai-logic: Work details and extended notes/logs
-  related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
-  related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags?: string[];      // @ai-pattern: Categorization
+  related?: string[];   // @ai-pattern: Unified related items field
   date: string;         // @ai-pattern: YYYY-MM-DD format
   startTime?: string;   // @ai-pattern: HH:MM:SS format
   endTime?: string;     // @ai-pattern: HH:MM:SS format
@@ -63,9 +62,8 @@ export interface Daily {
   title: string;        // @ai-validation: Required summary title
   description?: string; // @ai-intent: One-line description for list views
   content: string;      // @ai-validation: Required summary text
-  related_tasks?: string[];      // @ai-relationship: Task IDs as ["issues-1", "plans-2"]
-  related_documents?: string[];  // @ai-relationship: Document IDs as ["docs-1", "knowledge-2"]
   tags: string[];       // @ai-pattern: Day-level categorization
+  related?: string[];   // @ai-pattern: Unified related items field
   createdAt: string;    // @ai-pattern: ISO 8601 creation time
   updatedAt?: string;   // @ai-pattern: ISO 8601 modification time
 }

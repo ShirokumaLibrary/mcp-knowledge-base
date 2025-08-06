@@ -18,8 +18,6 @@ Parameters: {
 Expected: Success with JSON response { data: { ... } } containing:
 - data.id: string (auto-generated)
 - data.related: array (unified list of all related items)
-- data.related_tasks: array (for backward compatibility)
-- data.related_documents: array (for backward compatibility)
 ```
 
 ### Issue 2 - Issue without tags
@@ -35,8 +33,6 @@ Parameters: {
 Expected: Success with JSON response { data: { ... } } containing:
 - data.id: string (auto-generated)
 - data.related: empty array
-- data.related_tasks: empty array (for backward compatibility)
-- data.related_documents: empty array (for backward compatibility)
 - data.tags: empty array (auto-initialized)
 ```
 
@@ -75,7 +71,7 @@ Expected: Success with JSON response { data: { ... } } containing:
 - data.related: empty array
 ```
 
-### Issue 5 - Issue with related tasks and documents
+### Issue 5 - Issue with related items
 ```
 Tool: create_item
 Parameters: {
@@ -85,14 +81,11 @@ Parameters: {
   priority: "medium",
   status: "Open",
   tags: ["documentation", "api"],
-  related_tasks: ["issues-1", "issues-4"],
-  related_documents: ["docs-1", "knowledge-1"]
+  related: ["issues-1", "issues-4", "docs-1", "knowledge-1"]
 }
 Expected: Success with JSON response { data: { ... } } containing:
 - data.id: string (auto-generated)
-- data.related: ["issues-1", "issues-4", "docs-1", "knowledge-1"] (merged array)
-- data.related_tasks: ["issues-1", "issues-4"]
-- data.related_documents: ["docs-1", "knowledge-1"]
+- data.related: ["issues-1", "issues-4", "docs-1", "knowledge-1"]
 ```
 
 ### Issue 6 - Issue with version field
@@ -168,7 +161,7 @@ Parameters: {
   title: "Bug Fix Session - Authentication",
   content: "Working on authentication bug fix:\n- Investigated special character handling\n- Found issue in password validation regex\n- Implemented fix and added tests\n- Ready for code review",
   tags: ["bugfix", "authentication"],
-  related_tasks: ["issues-1"]
+  related: ["issues-1"]
 }
 Expected: Success with JSON response { data: { id: timestamp-based, ... } }
 ```

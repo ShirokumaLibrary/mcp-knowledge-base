@@ -90,8 +90,7 @@ export interface ITaskRepository {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Issue | Plan>;
   updateTask(
     type: string,
@@ -104,8 +103,7 @@ export interface ITaskRepository {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<boolean>;
   deleteTask(type: string, id: number): Promise<boolean>;
   searchTasksByTag(type: string, tag: string): Promise<Array<Issue | Plan>>;
@@ -127,8 +125,7 @@ export interface IDocumentRepository {
     content: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Document>;
   updateDocument(
     type: string,
@@ -137,8 +134,7 @@ export interface IDocumentRepository {
     content?: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<boolean>;
   deleteDocument(type: string, id: number): Promise<boolean>;
   searchDocumentsByTag(tag: string, type?: string): Promise<Document[]>;
@@ -256,8 +252,7 @@ export interface IDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Issue | Plan>;
   updateTask(
     type: string,
@@ -270,8 +265,7 @@ export interface IDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<boolean>;
   deleteTask(type: string, id: number): Promise<boolean>;
   searchTasksByTag(type: string, tag: string): Promise<Array<Issue | Plan>>;
@@ -286,8 +280,7 @@ export interface IDatabase {
     content: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Document>;
   updateDocument(
     type: string,
@@ -296,8 +289,7 @@ export interface IDatabase {
     content?: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<boolean>;
   deleteDocument(type: string, id: number): Promise<boolean>;
   searchDocumentsByTag(tag: string, type?: string): Promise<Document[]>;

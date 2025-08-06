@@ -20,8 +20,7 @@ export const CreateSessionSchema = z.object({
   title: z.string().min(1, 'Session title is required'),
   description: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().optional(),  // @ai-logic: Work details and notes
-  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+  related: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2", "docs-1", "knowledge-2"]
   tags: z.array(z.string()).default([]),  // @ai-default: Empty array
   datetime: z.string().optional()  // @ai-logic: ISO 8601 datetime for past data migration
 }).strict();
@@ -38,8 +37,7 @@ export const UpdateSessionSchema = z.object({
   title: z.string().min(1).optional(),  // @ai-validation: Non-empty if provided
   description: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().optional(),  // @ai-logic: Work details and notes
-  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+  related: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2", "docs-1", "knowledge-2"]
   tags: z.array(z.string()).optional()
 }).strict();
 
@@ -55,8 +53,7 @@ export const CreateDailySchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().min(1, 'Content is required'),  // @ai-validation: Non-empty summary
-  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+  related: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2", "docs-1", "knowledge-2"]
   tags: z.array(z.string()).default([])
 }).strict();
 
@@ -72,8 +69,7 @@ export const UpdateDailySchema = z.object({
   title: z.string().min(1).optional(),    // @ai-bug: Can't clear with empty string
   description: z.string().optional(),  // @ai-intent: One-line description for list views
   content: z.string().min(1).optional(),  // @ai-bug: Can't clear with empty string
-  related_tasks: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2"]
-  related_documents: z.array(z.string()).optional(), // @ai-pattern: ["docs-1", "knowledge-2"]
+  related: z.array(z.string()).optional(), // @ai-pattern: ["issues-1", "plans-2", "docs-1", "knowledge-2"]
   tags: z.array(z.string()).optional()
 }).strict();
 

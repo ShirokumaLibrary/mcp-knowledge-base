@@ -91,7 +91,7 @@ describe('Validation Edge Cases', () => {
   });
 
   describe('Duplicate Related Items', () => {
-    it('should handle duplicate items in related_tasks gracefully', async () => {
+    it('should handle duplicate items in related field gracefully', async () => {
       const created = await db.createTask(
         'issues', 
         'Test Issue', 
@@ -106,7 +106,7 @@ describe('Validation Edge Cases', () => {
       );
       
       // Should store without duplicates
-      expect(created.related_tasks).toEqual(['issues-1', 'issues-2']);
+      expect(created.related).toEqual(['issues-1', 'issues-2']);
     });
 
     it('should handle duplicate items when updating', async () => {
@@ -127,7 +127,7 @@ describe('Validation Edge Cases', () => {
       );
       
       // Should remove duplicates
-      expect(updated?.related_tasks).toEqual(['issues-10', 'issues-20']);
+      expect(updated?.related).toEqual(['issues-10', 'issues-20']);
     });
 
     it('should silently remove duplicates when updating', async () => {
@@ -160,7 +160,7 @@ describe('Validation Edge Cases', () => {
       );
       
       // Should have unique items only
-      expect(updated?.related_tasks).toEqual(['issues-10', 'issues-20']);
+      expect(updated?.related).toEqual(['issues-10', 'issues-20']);
     });
   });
 
@@ -324,26 +324,26 @@ describe('Validation Edge Cases', () => {
   });
 
   describe('Self-Reference Validation', () => {
-    it('should reject self-reference in related_tasks', async () => {
+    it('should reject self-reference in related field', async () => {
       const created = await db.createTask('issues', 'Test Issue', 'Content');
       
       await expect(
         db.getItemRepository().updateItem({ 
           type: 'issues',
           id: created.id,
-          related_tasks: [`issues-${created.id}`] 
+          related: [`issues-${created.id}`] 
         })
       ).rejects.toThrow('Items cannot reference themselves');
     });
 
-    it('should reject self-reference in related_documents', async () => {
+    it('should reject self-reference in related field for documents', async () => {
       const created = await db.createDocument('docs', 'Test Doc', 'Content');
       
       await expect(
         db.getItemRepository().updateItem({ 
           type: 'docs',
           id: created.id,
-          related_documents: [`docs-${created.id}`] 
+          related: [`docs-${created.id}`] 
         })
       ).rejects.toThrow('Items cannot reference themselves');
     });
@@ -355,8 +355,7 @@ describe('Validation Edge Cases', () => {
         db.getItemRepository().updateItem({ 
           type: 'issues',
           id: created.id,
-          related_tasks: ['issues-1', `issues-${created.id}`],
-          related_documents: ['docs-1']
+          related: ['issues-1', `issues-${created.id}`, 'docs-1']
         })
       ).rejects.toThrow('Items cannot reference themselves');
     });
@@ -394,15 +393,15 @@ describe('Validation Edge Cases', () => {
   });
 
   describe('Related Fields Validation', () => {
-    it('should reject empty strings in related_tasks array', async () => {
+    it('should reject empty strings in related array', async () => {
       await expect(
         db.createTask('issues', 'Test Issue', 'Test content', 'medium', undefined, [], undefined, undefined, undefined, ['issues-1', '', 'plans-1'])
       ).rejects.toThrow('Related items cannot contain empty strings');
     });
 
-    it('should reject empty strings in related_documents array', async () => {
+    it('should reject empty strings in related array (from documents)', async () => {
       await expect(
-        db.createTask('issues', 'Test Issue', 'Test content', 'medium', undefined, [], undefined, undefined, undefined, undefined, ['docs-1', '', 'knowledge-1'])
+        db.createTask('issues', 'Test Issue', 'Test content', 'medium', undefined, [], undefined, undefined, undefined, ['docs-1', '', 'knowledge-1'])
       ).rejects.toThrow('Related items cannot contain empty strings');
     });
 
@@ -422,12 +421,12 @@ describe('Validation Edge Cases', () => {
           undefined, // description
           undefined, // start_date
           undefined, // end_date
-          ['issues-2', '', 'plans-1'] // related_tasks
+          ['issues-2', '', 'plans-1'] // related
         )
       ).rejects.toThrow('Related items cannot contain empty strings');
     });
 
-    it('should reject empty strings in related_documents when updating', async () => {
+    it('should reject empty strings in related when updating (from documents)', async () => {
       // First create an item
       const created = await db.createTask('issues', 'Test Issue', 'Test content');
 
@@ -444,8 +443,7 @@ describe('Validation Edge Cases', () => {
           undefined, // description
           undefined, // start_date
           undefined, // end_date
-          undefined, // related_tasks
-          ['docs-1', '', 'knowledge-1'] // related_documents
+          ['docs-1', '', 'knowledge-1'] // related
         )
       ).rejects.toThrow('Related items cannot contain empty strings');
     });

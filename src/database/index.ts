@@ -71,7 +71,7 @@ export class FileIssueDatabase {
   /**
    * Convert ListItem to legacy Issue format
    */
-  private listItemToIssue(item: ListItem): Omit<Issue, 'content' | 'related_tasks' | 'related_documents'> {
+  private listItemToIssue(item: ListItem): Omit<Issue, 'content'> {
     return {
       id: parseInt(item.id),
       title: item.title,
@@ -82,7 +82,8 @@ export class FileIssueDatabase {
       end_date: null,
       tags: item.tags,
       created_at: item.updated_at,
-      updated_at: item.updated_at
+      updated_at: item.updated_at,
+      related: []
     };
   }
 
@@ -92,9 +93,7 @@ export class FileIssueDatabase {
   private listItemToFullIssue(item: ListItem): Issue {
     return {
       ...this.listItemToIssue(item),
-      content: '',
-      related_tasks: [],
-      related_documents: []
+      content: ''
     };
   }
 
@@ -109,8 +108,6 @@ export class FileIssueDatabase {
       description: item.description,
       content: '',
       tags: item.tags,
-      related_tasks: [],
-      related_documents: [],
       created_at: item.updated_at,
       updated_at: item.updated_at
     };
@@ -359,8 +356,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<UnifiedItem> {
     return this.itemRepo.createItem({
       type,
@@ -372,8 +368,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
   }
 
@@ -394,8 +389,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<UnifiedItem | null> {
     return this.itemRepo.updateItem({
       type,
@@ -408,8 +402,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
   }
 
@@ -513,8 +506,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Issue> {
     const item = await this.itemRepo.createItem({
       type: 'issues',
@@ -526,8 +518,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
 
     // Convert to Issue format for backward compatibility
@@ -541,8 +532,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -565,8 +555,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -583,8 +572,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Issue | null> {
     const item = await this.itemRepo.updateItem({
       type: 'issues',
@@ -597,8 +585,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
 
     if (!item) {
@@ -615,8 +602,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -628,7 +614,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content' | 'related_tasks' | 'related_documents'>[]> {
+  async getAllIssuesSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content'>[]> {
     // Convert status IDs to names for backward compatibility
     let statuses: string[] | undefined;
     if (statusIds && statusIds.length > 0) {
@@ -658,8 +644,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Plan> {
     const item = await this.itemRepo.createItem({
       type: 'plans',
@@ -671,8 +656,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
 
     return {
@@ -685,8 +669,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -709,8 +692,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -727,8 +709,7 @@ export class FileIssueDatabase {
     description?: string,
     start_date?: string | null,
     end_date?: string | null,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Plan | null> {
     const item = await this.itemRepo.updateItem({
       type: 'plans',
@@ -741,8 +722,7 @@ export class FileIssueDatabase {
       description,
       start_date: start_date || undefined,
       end_date: end_date || undefined,
-      related_tasks,
-      related_documents
+      related
     });
 
     if (!item) {
@@ -759,8 +739,7 @@ export class FileIssueDatabase {
       tags: item.tags,
       start_date: item.start_date,
       end_date: item.end_date,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -772,7 +751,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content' | 'related_tasks' | 'related_documents'>[]> {
+  async getAllPlansSummary(includeClosedStatuses?: boolean, statusIds?: number[]): Promise<Omit<Issue, 'content'>[]> {
     // Convert status IDs to names for backward compatibility
     let statuses: string[] | undefined;
     if (statusIds && statusIds.length > 0) {
@@ -819,8 +798,7 @@ export class FileIssueDatabase {
       description: item.description,
       content: item.content,
       tags: item.tags,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -833,8 +811,7 @@ export class FileIssueDatabase {
     content: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Document> {
     const item = await this.itemRepo.createItem({
       type,
@@ -842,8 +819,7 @@ export class FileIssueDatabase {
       content,
       tags,
       description,
-      related_tasks,
-      related_documents
+      related
     });
 
     return {
@@ -853,8 +829,7 @@ export class FileIssueDatabase {
       description: item.description,
       content: item.content || '',
       tags: item.tags,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -868,8 +843,7 @@ export class FileIssueDatabase {
     content?: string,
     tags?: string[],
     description?: string,
-    related_tasks?: string[],
-    related_documents?: string[]
+    related?: string[]
   ): Promise<Document | null> {
     const item = await this.itemRepo.updateItem({
       type,
@@ -878,8 +852,7 @@ export class FileIssueDatabase {
       content,
       tags,
       description,
-      related_tasks,
-      related_documents
+      related
     });
 
     if (!item) {
@@ -893,8 +866,7 @@ export class FileIssueDatabase {
       description: item.description,
       content: item.content || '',
       tags: item.tags,
-      related_tasks: item.related_tasks,
-      related_documents: item.related_documents,
+      related: item.related,
       created_at: item.created_at,
       updated_at: item.updated_at
     };
@@ -913,7 +885,7 @@ export class FileIssueDatabase {
   }
 
   @ensureInitialized
-  async getAllDocumentsSummary(type?: string): Promise<Omit<Document, 'content' | 'related_tasks' | 'related_documents'>[]> {
+  async getAllDocumentsSummary(type?: string): Promise<Omit<Document, 'content'>[]> {
     if (!type) {
       const docs = await this.itemRepo.getItems('docs');
       const knowledge = await this.itemRepo.getItems('knowledge');
@@ -1018,8 +990,7 @@ export class FileIssueDatabase {
       description: row.description || undefined,
       content: row.content || undefined,
       tags: row.tags ? JSON.parse(row.tags) : [],
-      related_tasks: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('issues-') || r.startsWith('plans-')) : undefined,
-      related_documents: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('docs-') || r.startsWith('knowledge-')) : undefined,
+      related: row.related ? JSON.parse(row.related) : undefined,
       date: row.start_date || row.id.split('-').slice(0, 3).join('-'),
       startTime: row.start_time || undefined,
       createdAt: row.created_at,
@@ -1044,8 +1015,7 @@ export class FileIssueDatabase {
       description: row.description || undefined,
       content: row.content || undefined,
       tags: row.tags ? JSON.parse(row.tags) : [],
-      related_tasks: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('issues-') || r.startsWith('plans-')) : undefined,
-      related_documents: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('docs-') || r.startsWith('knowledge-')) : undefined,
+      related: row.related ? JSON.parse(row.related) : undefined,
       date: row.start_date || row.id.split('-').slice(0, 3).join('-'),
       startTime: row.start_time || undefined,
       createdAt: row.created_at,
@@ -1070,8 +1040,7 @@ export class FileIssueDatabase {
       description: row.description || undefined,
       content: row.content || '',
       tags: row.tags ? JSON.parse(row.tags) : [],
-      related_tasks: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('issues-') || r.startsWith('plans-')) : [],
-      related_documents: row.related ? JSON.parse(row.related).filter((r: string) => r.startsWith('docs-') || r.startsWith('knowledge-')) : [],
+      related: row.related ? JSON.parse(row.related) : [],
       createdAt: row.created_at,
       updatedAt: row.updated_at || undefined
     }));

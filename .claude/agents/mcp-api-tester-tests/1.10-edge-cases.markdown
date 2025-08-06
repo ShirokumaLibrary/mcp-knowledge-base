@@ -128,8 +128,7 @@ Parameters: {
   title: "Many Relations Test",
   content: "Test",
   priority: "low",
-  related_tasks: ["issues-1", "issues-2", "issues-3", "plans-1"],
-  related_documents: ["docs-1", "knowledge-1", "knowledge-2"]
+  related: ["issues-1", "issues-2", "issues-3", "plans-1", "docs-1", "knowledge-1", "knowledge-2"]
 }
-Expected: JSON response { data: { ... } } with merged related field
+Expected: JSON response { data: { ... } } with related field containing all items
 ```

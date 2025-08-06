@@ -1,4 +1,5 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 import { CreateSessionSchema, UpdateSessionSchema, SearchSessionsByTagSchema, GetSessionsSchema, GetSessionDetailSchema } from '../schemas/session-schemas.js';
 import { createLogger } from '../utils/logger.js';
 export class SessionHandlers {
@@ -10,8 +11,9 @@ export class SessionHandlers {
     }
     async handleCreateSession(args) {
         try {
-            const validatedArgs = CreateSessionSchema.parse(args);
-            const session = await this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.id, validatedArgs.datetime, validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description);
+            const cleanArgs = checkLegacyFields(args, { logger: this.logger, source: 'session-create' });
+            const validatedArgs = CreateSessionSchema.parse(cleanArgs);
+            const session = await this.sessionManager.createSession(validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.id, validatedArgs.datetime, validatedArgs.related, validatedArgs.description);
             return {
                 content: [
                     {
@@ -31,8 +33,9 @@ export class SessionHandlers {
     }
     async handleUpdateSession(args) {
         try {
-            const validatedArgs = UpdateSessionSchema.parse(args);
-            const session = await this.sessionManager.updateSession(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description);
+            const cleanArgs = checkLegacyFields(args, { logger: this.logger, source: 'session-update' });
+            const validatedArgs = UpdateSessionSchema.parse(cleanArgs);
+            const session = await this.sessionManager.updateSession(validatedArgs.id, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related, validatedArgs.description);
             return {
                 content: [
                     {

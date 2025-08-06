@@ -9,6 +9,7 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { SessionManager } from '../session-manager.js';
 import type { ToolResponse } from '../types/mcp-types.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 import {
   CreateSessionSchema,
   UpdateSessionSchema,
@@ -46,15 +47,16 @@ export class SessionHandlers {
    */
   async handleCreateSession(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = CreateSessionSchema.parse(args);  // @ai-critical: Validates required fields
+      // Check and potentially transform legacy fields
+      const cleanArgs = checkLegacyFields(args as Record<string, unknown>, { logger: this.logger, source: 'session-create' });
+      const validatedArgs = CreateSessionSchema.parse(cleanArgs);  // @ai-critical: Validates required fields
       const session = await this.sessionManager.createSession(
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
         validatedArgs.id,  // @ai-logic: Optional custom ID
         validatedArgs.datetime,  // @ai-logic: Optional datetime for past data migration
-        validatedArgs.related_tasks,
-        validatedArgs.related_documents,
+        validatedArgs.related,
         validatedArgs.description  // @ai-intent: One-line description for list views
       );
 
@@ -88,14 +90,15 @@ export class SessionHandlers {
    */
   async handleUpdateSession(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = UpdateSessionSchema.parse(args);
+      // Check and potentially transform legacy fields
+      const cleanArgs = checkLegacyFields(args as Record<string, unknown>, { logger: this.logger, source: 'session-update' });
+      const validatedArgs = UpdateSessionSchema.parse(cleanArgs);
       const session = await this.sessionManager.updateSession(
         validatedArgs.id,        // @ai-critical: Required for lookup
         validatedArgs.title,
         validatedArgs.content,
         validatedArgs.tags,
-        validatedArgs.related_tasks,
-        validatedArgs.related_documents,
+        validatedArgs.related,
         validatedArgs.description  // @ai-intent: One-line description for list views
       );
 

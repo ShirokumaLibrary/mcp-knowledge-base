@@ -142,11 +142,9 @@ export class ItemRepository {
           value = item.related || JSON.parse(fieldDef.default_value || '[]');
           break;
         case 'related_tasks':
-          value = item.related_tasks || JSON.parse(fieldDef.default_value || '[]');
-          break;
         case 'related_documents':
-          value = item.related_documents || JSON.parse(fieldDef.default_value || '[]');
-          break;
+          // Legacy fields - skip completely
+          continue;
         case 'created_at':
           value = item.created_at;
           break;
@@ -193,17 +191,11 @@ export class ItemRepository {
       start_time?: unknown;
       tags?: unknown;
       related?: unknown;
-      related_tasks?: unknown;
-      related_documents?: unknown;
       created_at?: unknown;
       updated_at?: unknown;
     }
     const metadata = item.metadata as ItemMetadata;
     const related = (Array.isArray(metadata.related) ? metadata.related : []) as string[];
-
-    // Use specific related fields if available, otherwise derive from related
-    const related_tasks = (Array.isArray(metadata.related_tasks) ? metadata.related_tasks : related.filter((r: string) => r.match(/^(issues|plans)-/))) as string[];
-    const related_documents = (Array.isArray(metadata.related_documents) ? metadata.related_documents : related.filter((r: string) => r.match(/^(docs|knowledge)-/))) as string[];
 
     // Get status info
     const statuses = await this.statusRepo.getAllStatuses();
@@ -266,8 +258,6 @@ export class ItemRepository {
       start_time: metadata.start_time ? String(metadata.start_time) : null,
       tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
       related,
-      related_tasks,
-      related_documents,
       created_at: String(metadata.created_at || new Date().toISOString()),
       updated_at: String(metadata.updated_at || metadata.created_at || new Date().toISOString())
     };
@@ -536,8 +526,6 @@ export class ItemRepository {
       }
     };
 
-    validateRelatedArray(params.related_tasks, 'related_tasks');
-    validateRelatedArray(params.related_documents, 'related_documents');
     validateRelatedArray(params.related, 'related');
 
     // Validate version format if provided - allow flexible formats
@@ -554,11 +542,8 @@ export class ItemRepository {
       // No overflow check needed for flexible version formats
     }
 
-    // Remove duplicates from related arrays
-    const uniqueRelatedTasks = params.related_tasks ? [...new Set(params.related_tasks)] : [];
-    const uniqueRelatedDocuments = params.related_documents ? [...new Set(params.related_documents)] : [];
-    const paramsRelated = params.related ? [...new Set(params.related)] : [];
-    const uniqueRelated = [...new Set([...paramsRelated, ...uniqueRelatedTasks, ...uniqueRelatedDocuments])];
+    // Remove duplicates from related array
+    const uniqueRelated = params.related ? [...new Set(params.related)] : [];
 
     // Validate and clean tags - filter out empty or whitespace-only tags
     const cleanedTags = (params.tags || [])
@@ -581,8 +566,6 @@ export class ItemRepository {
       start_time: null,
       tags: cleanedTags,
       related: uniqueRelated,
-      related_tasks: uniqueRelatedTasks,
-      related_documents: uniqueRelatedDocuments,
       created_at: createdAt,
       updated_at: createdAt
     };
@@ -718,17 +701,11 @@ export class ItemRepository {
       }
     };
 
-    validateRelatedArray(params.related_tasks, 'related_tasks');
-    validateRelatedArray(params.related_documents, 'related_documents');
     validateRelatedArray(params.related, 'related');
 
     // Check for self-reference
     const currentItemRef = `${type}-${id}`;
-    const allRelated = [
-      ...(params.related_tasks || []),
-      ...(params.related_documents || []),
-      ...(params.related || [])
-    ];
+    const allRelated = params.related || [];
 
     if (allRelated.includes(currentItemRef)) {
       throw new McpError(
@@ -751,29 +728,10 @@ export class ItemRepository {
       // No overflow check needed for flexible version formats
     }
 
-    // Remove duplicates from related arrays
-    const uniqueRelatedTasks = params.related_tasks !== undefined
-      ? [...new Set(params.related_tasks)]
-      : current.related_tasks;
-    const uniqueRelatedDocuments = params.related_documents !== undefined
-      ? [...new Set(params.related_documents)]
-      : current.related_documents;
-
-    // Handle related field update
-    let uniqueRelated: string[];
-    if (params.related !== undefined) {
-      // If related is explicitly provided, use it
-      uniqueRelated = [...new Set(params.related)];
-    } else if (params.related_tasks !== undefined || params.related_documents !== undefined) {
-      // If only related_tasks or related_documents are provided, merge them
-      uniqueRelated = [...new Set([
-        ...(uniqueRelatedTasks || []),
-        ...(uniqueRelatedDocuments || [])
-      ])];
-    } else {
-      // Keep current related if nothing is provided
-      uniqueRelated = current.related;
-    }
+    // Remove duplicates from related array
+    const uniqueRelated = params.related !== undefined
+      ? [...new Set(params.related)]
+      : current.related;
 
     // Validate and clean tags if provided
     const cleanedTags = params.tags !== undefined
@@ -792,8 +750,6 @@ export class ItemRepository {
       end_date: params.end_date !== undefined ? params.end_date : current.end_date,
       tags: cleanedTags,
       related: uniqueRelated,
-      related_tasks: uniqueRelatedTasks,
-      related_documents: uniqueRelatedDocuments,
       updated_at: new Date().toISOString()
     };
 

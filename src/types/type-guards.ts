@@ -77,9 +77,7 @@ export function isIssue(value: unknown): value is Issue {
     (obj.status === undefined || typeof obj.status === 'string') &&
     (obj.description === undefined || typeof obj.description === 'string') &&
     (obj.start_date === undefined || obj.start_date === null || typeof obj.start_date === 'string') &&
-    (obj.end_date === undefined || obj.end_date === null || typeof obj.end_date === 'string') &&
-    (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-    (obj.related_documents === undefined || Array.isArray(obj.related_documents))
+    (obj.end_date === undefined || obj.end_date === null || typeof obj.end_date === 'string')
   );
 }
 
@@ -106,9 +104,7 @@ export function isPlan(value: unknown): value is Plan {
     (obj.end_date === null || typeof obj.end_date === 'string') &&
     (obj.tags === undefined || Array.isArray(obj.tags)) &&
     (obj.status === undefined || typeof obj.status === 'string') &&
-    (obj.description === undefined || typeof obj.description === 'string') &&
-    (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-    (obj.related_documents === undefined || Array.isArray(obj.related_documents))
+    (obj.description === undefined || typeof obj.description === 'string')
   );
 }
 
@@ -132,9 +128,7 @@ export function isDocument(value: unknown): value is Document {
     Array.isArray(obj.tags) &&
     typeof obj.created_at === 'string' &&
     typeof obj.updated_at === 'string' &&
-    (obj.description === undefined || typeof obj.description === 'string') &&
-    (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-    (obj.related_documents === undefined || Array.isArray(obj.related_documents))
+    (obj.description === undefined || typeof obj.description === 'string')
   );
 }
 
@@ -161,9 +155,7 @@ export function isSession(value: unknown): value is Session {
     (obj.startTime === undefined || typeof obj.startTime === 'string') &&
     (obj.endTime === undefined || typeof obj.endTime === 'string') &&
     (obj.summary === undefined || typeof obj.summary === 'string') &&
-    (obj.updatedAt === undefined || typeof obj.updatedAt === 'string') &&
-    (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-    (obj.related_documents === undefined || Array.isArray(obj.related_documents))
+    (obj.updatedAt === undefined || typeof obj.updatedAt === 'string')
   );
 }
 
@@ -186,9 +178,7 @@ export function isDaily(value: unknown): value is Daily {
     typeof obj.content === 'string' &&
     Array.isArray(obj.tags) &&
     typeof obj.createdAt === 'string' &&
-    (obj.updatedAt === undefined || typeof obj.updatedAt === 'string') &&
-    (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-    (obj.related_documents === undefined || Array.isArray(obj.related_documents))
+    (obj.updatedAt === undefined || typeof obj.updatedAt === 'string')
   );
 }
 

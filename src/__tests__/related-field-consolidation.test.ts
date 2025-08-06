@@ -1,7 +1,7 @@
 /**
- * @ai-context Test suite for related field consolidation
- * @ai-pattern Tests backward compatibility and field migration
- * @ai-critical Ensures related_tasks/related_documents work alongside related field
+ * @ai-context Test suite for unified related field
+ * @ai-pattern Tests unified related field functionality
+ * @ai-critical Ensures unified related field works correctly
  */
 
 import { FileIssueDatabase } from '../database/index.js';
@@ -10,7 +10,7 @@ import path from 'path';
 import os from 'os';
 import { promises as fs } from 'fs';
 
-describe('Related Field Consolidation', () => {
+describe('Unified Related Field', () => {
   let testDataDir: string;
   let database: FileIssueDatabase;
   let handlers: ReturnType<typeof createUnifiedHandlers>;
@@ -44,22 +44,21 @@ describe('Related Field Consolidation', () => {
     }
   });
 
-  describe('Backward Compatibility', () => {
-    it('should accept related_tasks and related_documents in create_item', async () => {
+  describe('Basic Functionality', () => {
+    it('should accept unified related field in create_item', async () => {
       const issue = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
-        content: 'Content',
+        content: 'Test content',
         status: 'Open',
         priority: 'high',
-        related_tasks: ['plans-1', 'issues-2'],
-        related_documents: ['docs-1', 'knowledge-1']
+        related: ['plans-1', 'issues-2', 'docs-1', 'knowledge-1']
       });
 
       expect(issue).toBeDefined();
       expect(issue.id).toBeDefined();
       
-      // Verify that fields are stored in the unified related field
+      // Verify that fields are stored correctly
       const retrieved = await handlers.get_item_detail({
         type: 'issues',
         id: parseInt(issue.id)
@@ -70,8 +69,8 @@ describe('Related Field Consolidation', () => {
       );
     });
 
-    it('should accept related_tasks and related_documents in update_item', async () => {
-      const issue = await handlers.create_item({
+    it('should accept unified related field in update_item', async () => {
+      const created = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
@@ -81,9 +80,8 @@ describe('Related Field Consolidation', () => {
 
       const updated = await handlers.update_item({
         type: 'issues',
-        id: parseInt(issue.id),
-        related_tasks: ['plans-10'],
-        related_documents: ['docs-20']
+        id: parseInt(created.id),
+        related: ['plans-10', 'docs-20']
       });
 
       expect(updated.related).toEqual(
@@ -91,39 +89,37 @@ describe('Related Field Consolidation', () => {
       );
     });
 
-    it('should handle only related field', async () => {
+    it('should handle empty related field', async () => {
       const issue = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
         status: 'Open',
         priority: 'low',
-        related: ['issues-1', 'docs-2', 'plans-3']
+        related: []
       });
 
-      expect(issue.related).toEqual(['issues-1', 'docs-2', 'plans-3']);
+      expect(issue.related).toEqual([]);
     });
 
-    it('should merge all three fields when provided together', async () => {
+    it('should handle multiple types in related field', async () => {
       const issue = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
         status: 'Open',
         priority: 'high',
-        related: ['existing-1'],
-        related_tasks: ['issues-100'],
-        related_documents: ['docs-200']
+        related: ['issues-1', 'plans-2', 'docs-3', 'knowledge-4']
       });
 
-      // All three should be merged
+      // All types should be preserved
       expect(issue.related).toEqual(
-        expect.arrayContaining(['existing-1', 'issues-100', 'docs-200'])
+        expect.arrayContaining(['issues-1', 'plans-2', 'docs-3', 'knowledge-4'])
       );
     });
   });
 
-  describe('Field Priority and Deduplication', () => {
+  describe('Deduplication', () => {
     it('should deduplicate related items', async () => {
       const issue = await handlers.create_item({
         type: 'issues',
@@ -131,9 +127,7 @@ describe('Related Field Consolidation', () => {
         content: 'Content',
         status: 'Open',
         priority: 'medium',
-        related: ['issues-1', 'docs-1'],
-        related_tasks: ['issues-1'], // Duplicate
-        related_documents: ['docs-1'] // Duplicate
+        related: ['issues-1', 'docs-1', 'issues-1', 'docs-1'] // Duplicates
       });
 
       // Should not have duplicates
@@ -143,174 +137,183 @@ describe('Related Field Consolidation', () => {
       expect(issue.related.filter(r => r === 'docs-1')).toHaveLength(1);
     });
 
-    it('should preserve order when merging fields', async () => {
+    it('should preserve order in related field', async () => {
       const issue = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
         status: 'Open',
         priority: 'low',
-        related: ['a-1', 'b-2'],
-        related_tasks: ['c-3', 'd-4'],
-        related_documents: ['e-5', 'f-6']
+        related: ['a-1', 'b-2', 'c-3', 'd-4', 'e-5', 'f-6']
       });
 
-      // Order should be preserved: related, then tasks, then documents
+      // Order should be preserved
       expect(issue.related).toBeDefined();
-      expect(issue.related).toContain('a-1');
-      expect(issue.related).toContain('c-3');
-      expect(issue.related).toContain('e-5');
+      expect(issue.related).toEqual(['a-1', 'b-2', 'c-3', 'd-4', 'e-5', 'f-6']);
     });
   });
 
-  describe('Update Operations', () => {
-    it('should replace all related items on update', async () => {
-      const issue = await handlers.create_item({
-        type: 'issues',
-        title: 'Test Issue',
-        content: 'Content',
-        status: 'Open',
-        priority: 'high',
-        related: ['old-1', 'old-2']
-      });
-
-      const updated = await handlers.update_item({
-        type: 'issues',
-        id: parseInt(issue.id),
-        related: ['new-1', 'new-2']
-      });
-
-      expect(updated.related).toEqual(['new-1', 'new-2']);
-      expect(updated.related).not.toContain('old-1');
-      expect(updated.related).not.toContain('old-2');
-    });
-
-    it('should clear related items when setting empty array', async () => {
-      const issue = await handlers.create_item({
+  describe('Update Scenarios', () => {
+    it('should replace related field on update', async () => {
+      const created = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
         status: 'Open',
         priority: 'medium',
-        related: ['item-1', 'item-2']
+        related: ['old-1', 'old-2']
       });
 
       const updated = await handlers.update_item({
         type: 'issues',
-        id: parseInt(issue.id),
-        related: []
+        id: parseInt(created.id),
+        related: ['new-1', 'new-2', 'new-3']
       });
 
-      expect(updated.related).toEqual([]);
+      expect(updated.related).toEqual(['new-1', 'new-2', 'new-3']);
+      expect(updated.related).not.toContain('old-1');
+      expect(updated.related).not.toContain('old-2');
     });
 
-    it('should not modify related items when not specified in update', async () => {
-      const issue = await handlers.create_item({
+    it('should clear related field when updated with empty array', async () => {
+      const created = await handlers.create_item({
         type: 'issues',
         title: 'Test Issue',
         content: 'Content',
         status: 'Open',
         priority: 'low',
-        related: ['keep-1', 'keep-2']
+        related: ['item-1', 'item-2']
       });
 
       const updated = await handlers.update_item({
         type: 'issues',
-        id: parseInt(issue.id),
-        title: 'Updated Title'
+        id: parseInt(created.id),
+        related: []
       });
 
-      expect(updated.title).toBe('Updated Title');
-      expect(updated.related).toEqual(['keep-1', 'keep-2']);
+      expect(updated.related).toEqual([]);
     });
   });
 
   describe('Different Item Types', () => {
-    it('should handle related fields for documents', async () => {
+    it('should handle related field for documents', async () => {
       const doc = await handlers.create_item({
         type: 'docs',
         title: 'Test Document',
         content: 'Document content',
-        related: ['issues-1', 'knowledge-2'],
-        related_documents: ['docs-3'] // Should work for backward compatibility
+        related: ['issues-5', 'knowledge-10']
       });
 
-      expect(doc.related).toEqual(
-        expect.arrayContaining(['issues-1', 'knowledge-2', 'docs-3'])
-      );
+      expect(doc.related).toEqual(['issues-5', 'knowledge-10']);
     });
 
-    it('should handle related fields for plans', async () => {
+    it('should handle related field for plans', async () => {
       const plan = await handlers.create_item({
         type: 'plans',
         title: 'Test Plan',
         content: 'Plan content',
         status: 'Open',
         priority: 'high',
-        related_tasks: ['issues-10', 'plans-20']
+        related: ['issues-1', 'issues-2', 'docs-3']
       });
 
-      expect(plan.related).toEqual(
-        expect.arrayContaining(['issues-10', 'plans-20'])
-      );
+      expect(plan.related).toEqual(['issues-1', 'issues-2', 'docs-3']);
     });
 
-    it('should handle related fields for knowledge items', async () => {
+    it('should handle related field for knowledge items', async () => {
       const knowledge = await handlers.create_item({
         type: 'knowledge',
         title: 'Test Knowledge',
         content: 'Knowledge content',
-        related_documents: ['docs-100', 'knowledge-200']
+        related: ['docs-100', 'knowledge-200']
       });
 
-      expect(knowledge.related).toEqual(
-        expect.arrayContaining(['docs-100', 'knowledge-200'])
-      );
+      expect(knowledge.related).toEqual(['docs-100', 'knowledge-200']);
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle null or undefined related fields', async () => {
-      const issue = await handlers.create_item({
-        type: 'issues',
-        title: 'Test Issue',
-        content: 'Content',
-        status: 'Open',
-        priority: 'medium'
-        // No related fields specified
-      });
+  describe('Parallel Operations', () => {
+    it('should handle concurrent creates with related fields', async () => {
+      const createPromises = Array.from({ length: 3 }, (_, i) => 
+        handlers.create_item({
+          type: 'issues',
+          title: `Issue ${i}`,
+          content: `Content ${i}`,
+          status: 'Open',
+          priority: 'medium',
+          related: [`docs-${i}`, `knowledge-${i+10}`]
+        })
+      );
 
-      expect(issue.related).toEqual([]);
-    });
-
-    it('should handle invalid related item references gracefully', async () => {
-      const issue = await handlers.create_item({
-        type: 'issues',
-        title: 'Test Issue',
-        content: 'Content',
-        status: 'Open',
-        priority: 'low',
-        related: ['invalid--item', '123-invalid', 'valid-1']
-      });
-
-      // Should store all items, validation happens at retrieval
-      expect(issue.related).toContain('valid-1');
-    });
-
-    it('should handle very long related lists', async () => {
-      const manyRelated = Array.from({ length: 100 }, (_, i) => `item-${i}`);
+      const results = await Promise.all(createPromises);
       
-      const issue = await handlers.create_item({
+      results.forEach((issue, i) => {
+        expect(issue.related).toContain(`docs-${i}`);
+        expect(issue.related).toContain(`knowledge-${i+10}`);
+      });
+    });
+
+    it('should handle concurrent updates to related field', async () => {
+      const issue1 = await handlers.create_item({
         type: 'issues',
-        title: 'Test Issue',
-        content: 'Content',
+        title: 'Issue 1',
+        content: 'Content 1',
         status: 'Open',
         priority: 'high',
-        related: manyRelated
+        related: ['docs-3']
       });
 
-      expect(issue.related).toHaveLength(100);
-      expect(issue.related).toEqual(manyRelated);
+      const issue2 = await handlers.create_item({
+        type: 'issues',
+        title: 'Issue 2',
+        content: 'Content 2',
+        status: 'Open',
+        priority: 'medium',
+        related: ['issues-10', 'plans-20']
+      });
+
+      const issue3 = await handlers.create_item({
+        type: 'issues',
+        title: 'Issue 3',
+        content: 'Content 3',
+        status: 'Open',
+        priority: 'low',
+        related: ['docs-100', 'knowledge-200']
+      });
+
+      // Verify all created correctly
+      expect(issue1.related).toEqual(['docs-3']);
+      expect(issue2.related).toEqual(['issues-10', 'plans-20']);
+      expect(issue3.related).toEqual(['docs-100', 'knowledge-200']);
+
+      // Update them concurrently
+      const updatePromises = [
+        handlers.update_item({
+          type: 'issues',
+          id: parseInt(issue1.id),
+          related: [`issues-${issue2.id}`, `issues-${issue3.id}`]
+        }),
+        handlers.update_item({
+          type: 'issues',
+          id: parseInt(issue2.id),
+          related: [`issues-${issue1.id}`, `issues-${issue3.id}`]
+        }),
+        handlers.update_item({
+          type: 'issues',
+          id: parseInt(issue3.id),
+          related: [`issues-${issue1.id}`, `issues-${issue2.id}`]
+        })
+      ];
+
+      const [updated1, updated2, updated3] = await Promise.all(updatePromises);
+
+      // Verify cross-references
+      expect(updated1.related).toContain(`issues-${issue2.id}`);
+      expect(updated1.related).toContain(`issues-${issue3.id}`);
+      expect(updated2.related).toContain(`issues-${issue1.id}`);
+      expect(updated2.related).toContain(`issues-${issue3.id}`);
+      expect(updated3.related).toContain(`issues-${issue1.id}`);
+      expect(updated3.related).toContain(`issues-${issue2.id}`);
     });
   });
 });

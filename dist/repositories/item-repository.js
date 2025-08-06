@@ -97,11 +97,8 @@ export class ItemRepository {
                     value = item.related || JSON.parse(fieldDef.default_value || '[]');
                     break;
                 case 'related_tasks':
-                    value = item.related_tasks || JSON.parse(fieldDef.default_value || '[]');
-                    break;
                 case 'related_documents':
-                    value = item.related_documents || JSON.parse(fieldDef.default_value || '[]');
-                    break;
+                    continue;
                 case 'created_at':
                     value = item.created_at;
                     break;
@@ -125,8 +122,6 @@ export class ItemRepository {
     async storageItemToUnifiedItem(item, type, statusName) {
         const metadata = item.metadata;
         const related = (Array.isArray(metadata.related) ? metadata.related : []);
-        const related_tasks = (Array.isArray(metadata.related_tasks) ? metadata.related_tasks : related.filter((r) => r.match(/^(issues|plans)-/)));
-        const related_documents = (Array.isArray(metadata.related_documents) ? metadata.related_documents : related.filter((r) => r.match(/^(docs|knowledge)-/)));
         const statuses = await this.statusRepo.getAllStatuses();
         let statusId = Number(metadata.status_id || 1);
         if (!statusName) {
@@ -180,8 +175,6 @@ export class ItemRepository {
             start_time: metadata.start_time ? String(metadata.start_time) : null,
             tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
             related,
-            related_tasks,
-            related_documents,
             created_at: String(metadata.created_at || new Date().toISOString()),
             updated_at: String(metadata.updated_at || metadata.created_at || new Date().toISOString())
         };
@@ -338,18 +331,13 @@ export class ItemRepository {
                 throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`);
             }
         };
-        validateRelatedArray(params.related_tasks, 'related_tasks');
-        validateRelatedArray(params.related_documents, 'related_documents');
         validateRelatedArray(params.related, 'related');
         if (params.version !== undefined && params.version !== null && params.version !== '') {
             if (!/^[\w\d\.\-_]+$/.test(params.version)) {
                 throw new McpError(ErrorCode.InvalidRequest, 'Version must contain only alphanumeric characters, dots, dashes, and underscores');
             }
         }
-        const uniqueRelatedTasks = params.related_tasks ? [...new Set(params.related_tasks)] : [];
-        const uniqueRelatedDocuments = params.related_documents ? [...new Set(params.related_documents)] : [];
-        const paramsRelated = params.related ? [...new Set(params.related)] : [];
-        const uniqueRelated = [...new Set([...paramsRelated, ...uniqueRelatedTasks, ...uniqueRelatedDocuments])];
+        const uniqueRelated = params.related ? [...new Set(params.related)] : [];
         const cleanedTags = (params.tags || [])
             .map(tag => cleanString(tag))
             .filter(tag => tag.length > 0);
@@ -368,8 +356,6 @@ export class ItemRepository {
             start_time: null,
             tags: cleanedTags,
             related: uniqueRelated,
-            related_tasks: uniqueRelatedTasks,
-            related_documents: uniqueRelatedDocuments,
             created_at: createdAt,
             updated_at: createdAt
         };
@@ -444,15 +430,9 @@ export class ItemRepository {
                 throw new McpError(ErrorCode.InvalidRequest, `Related items cannot contain empty strings in ${fieldName}. Use format like ["issues-1", "plans-2"] with valid type-id references.`);
             }
         };
-        validateRelatedArray(params.related_tasks, 'related_tasks');
-        validateRelatedArray(params.related_documents, 'related_documents');
         validateRelatedArray(params.related, 'related');
         const currentItemRef = `${type}-${id}`;
-        const allRelated = [
-            ...(params.related_tasks || []),
-            ...(params.related_documents || []),
-            ...(params.related || [])
-        ];
+        const allRelated = params.related || [];
         if (allRelated.includes(currentItemRef)) {
             throw new McpError(ErrorCode.InvalidRequest, 'Items cannot reference themselves');
         }
@@ -461,25 +441,9 @@ export class ItemRepository {
                 throw new McpError(ErrorCode.InvalidRequest, 'Version must contain only alphanumeric characters, dots, dashes, and underscores');
             }
         }
-        const uniqueRelatedTasks = params.related_tasks !== undefined
-            ? [...new Set(params.related_tasks)]
-            : current.related_tasks;
-        const uniqueRelatedDocuments = params.related_documents !== undefined
-            ? [...new Set(params.related_documents)]
-            : current.related_documents;
-        let uniqueRelated;
-        if (params.related !== undefined) {
-            uniqueRelated = [...new Set(params.related)];
-        }
-        else if (params.related_tasks !== undefined || params.related_documents !== undefined) {
-            uniqueRelated = [...new Set([
-                    ...(uniqueRelatedTasks || []),
-                    ...(uniqueRelatedDocuments || [])
-                ])];
-        }
-        else {
-            uniqueRelated = current.related;
-        }
+        const uniqueRelated = params.related !== undefined
+            ? [...new Set(params.related)]
+            : current.related;
         const cleanedTags = params.tags !== undefined
             ? params.tags.map(tag => cleanString(tag)).filter(tag => tag.length > 0)
             : current.tags;
@@ -494,8 +458,6 @@ export class ItemRepository {
             end_date: params.end_date !== undefined ? params.end_date : current.end_date,
             tags: cleanedTags,
             related: uniqueRelated,
-            related_tasks: uniqueRelatedTasks,
-            related_documents: uniqueRelatedDocuments,
             updated_at: new Date().toISOString()
         };
         if (params.status !== undefined) {

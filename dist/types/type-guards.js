@@ -29,9 +29,7 @@ export function isIssue(value) {
         (obj.status === undefined || typeof obj.status === 'string') &&
         (obj.description === undefined || typeof obj.description === 'string') &&
         (obj.start_date === undefined || obj.start_date === null || typeof obj.start_date === 'string') &&
-        (obj.end_date === undefined || obj.end_date === null || typeof obj.end_date === 'string') &&
-        (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-        (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
+        (obj.end_date === undefined || obj.end_date === null || typeof obj.end_date === 'string'));
 }
 export function isPlan(value) {
     if (typeof value !== 'object' || value === null) {
@@ -48,9 +46,7 @@ export function isPlan(value) {
         (obj.end_date === null || typeof obj.end_date === 'string') &&
         (obj.tags === undefined || Array.isArray(obj.tags)) &&
         (obj.status === undefined || typeof obj.status === 'string') &&
-        (obj.description === undefined || typeof obj.description === 'string') &&
-        (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-        (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
+        (obj.description === undefined || typeof obj.description === 'string'));
 }
 export function isDocument(value) {
     if (typeof value !== 'object' || value === null) {
@@ -64,9 +60,7 @@ export function isDocument(value) {
         Array.isArray(obj.tags) &&
         typeof obj.created_at === 'string' &&
         typeof obj.updated_at === 'string' &&
-        (obj.description === undefined || typeof obj.description === 'string') &&
-        (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-        (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
+        (obj.description === undefined || typeof obj.description === 'string'));
 }
 export function isSession(value) {
     if (typeof value !== 'object' || value === null) {
@@ -83,9 +77,7 @@ export function isSession(value) {
         (obj.startTime === undefined || typeof obj.startTime === 'string') &&
         (obj.endTime === undefined || typeof obj.endTime === 'string') &&
         (obj.summary === undefined || typeof obj.summary === 'string') &&
-        (obj.updatedAt === undefined || typeof obj.updatedAt === 'string') &&
-        (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-        (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
+        (obj.updatedAt === undefined || typeof obj.updatedAt === 'string'));
 }
 export function isDaily(value) {
     if (typeof value !== 'object' || value === null) {
@@ -98,9 +90,7 @@ export function isDaily(value) {
         typeof obj.content === 'string' &&
         Array.isArray(obj.tags) &&
         typeof obj.createdAt === 'string' &&
-        (obj.updatedAt === undefined || typeof obj.updatedAt === 'string') &&
-        (obj.related_tasks === undefined || Array.isArray(obj.related_tasks)) &&
-        (obj.related_documents === undefined || Array.isArray(obj.related_documents)));
+        (obj.updatedAt === undefined || typeof obj.updatedAt === 'string'));
 }
 export function isTag(value) {
     return (typeof value === 'object' &&

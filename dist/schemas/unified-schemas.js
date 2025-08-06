@@ -26,8 +26,6 @@ export const CreateItemParams = z.object({
     start_date: z.string().optional(),
     end_date: z.string().optional(),
     start_time: z.string().optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional(),
     datetime: z.string().optional(),
     date: z.string().optional(),
     id: z.string()
@@ -41,7 +39,10 @@ export const CreateItemParams = z.object({
         message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional()
-}).strict();
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});
 export const UpdateItemParams = z.object({
     type: ItemTypeSchema,
     id: z.union([z.string(), z.number()]),
@@ -55,10 +56,11 @@ export const UpdateItemParams = z.object({
     related: z.array(z.string()).optional(),
     start_date: z.string().nullable().optional(),
     end_date: z.string().nullable().optional(),
-    start_time: z.string().optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional()
-}).strict();
+    start_time: z.string().optional()
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});
 export const DeleteItemParams = z.object({
     type: ItemTypeSchema,
     id: z.union([z.string(), z.number()])
@@ -80,8 +82,6 @@ export const CreateSessionParams = z.object({
     content: z.string().optional(),
     category: z.string().optional(),
     tags: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional(),
     datetime: z.string().optional(),
     id: z.string()
         .refine((val) => {
@@ -94,16 +94,20 @@ export const CreateSessionParams = z.object({
         message: 'Invalid ID format: must not contain path traversal patterns'
     })
         .optional()
-}).strict();
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});
 export const UpdateSessionParams = z.object({
     id: z.string(),
     title: z.string().optional(),
     content: z.string().optional(),
     category: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional()
-}).strict();
+    tags: z.array(z.string()).optional()
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});
 export const SearchSessionsByTagParams = z.object({
     tag: z.string().min(1)
 }).strict();
@@ -118,15 +122,17 @@ export const CreateSummaryParams = z.object({
     date: z.string(),
     title: z.string().min(1),
     content: z.string(),
-    tags: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional()
-}).strict();
+    tags: z.array(z.string()).optional()
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});
 export const UpdateSummaryParams = z.object({
     date: z.string(),
     title: z.string().optional(),
     content: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    related_documents: z.array(z.string()).optional(),
-    related_tasks: z.array(z.string()).optional()
-}).strict();
+    tags: z.array(z.string()).optional()
+}).strict()
+    .refine((data) => !('related_documents' in data) && !('related_tasks' in data), {
+    message: 'Legacy fields (related_documents/related_tasks) are not allowed. Use "related" field instead. Run "npm run migrate:related" to migrate existing data.'
+});

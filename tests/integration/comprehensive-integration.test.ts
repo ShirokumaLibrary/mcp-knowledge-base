@@ -214,8 +214,7 @@ describe('Comprehensive MCP Integration Tests', () => {
       const updatedPlan = await callTool('update_item', {
         type: 'plans',
         id: project.id,
-        related_tasks: issues.map(i => `issues-${i.id}`),
-        related_documents: docs.map(d => `docs-${d.id}`)
+        related: [...issues.map(i => `issues-${i.id}`), ...docs.map(d => `docs-${d.id}`)]
       });
 
       // 5. Verify relationships
@@ -223,8 +222,7 @@ describe('Comprehensive MCP Integration Tests', () => {
         type: 'plans',
         id: project.id
       });
-      expect(planDetail.related_tasks).toHaveLength(4);
-      expect(planDetail.related_documents).toHaveLength(2);
+      expect(planDetail.related).toHaveLength(6);
 
       // 6. Search by tag across types
       const searchResult = await callTool('search_items_by_tag', {
@@ -256,10 +254,9 @@ describe('Comprehensive MCP Integration Tests', () => {
         title: 'Sprint Planning Meeting',
         content: '## Meeting Notes\n\n- Reviewed project plan\n- Assigned tasks\n- Set milestones',
         tags: ['product', 'planning'],
-        related_tasks: [`plans-${project.id}`, `issues-${issues[0].id}`],
-        related_documents: [`docs-${docs[0].id}`]
+        related: [`plans-${project.id}`, `issues-${issues[0].id}`, `docs-${docs[0].id}`]
       });
-      expect(session.related_tasks).toHaveLength(2);
+      expect(session.related).toHaveLength(3);
 
       // 9. Create daily summary
       const today = new Date().toISOString().split('T')[0];
@@ -269,10 +266,9 @@ describe('Comprehensive MCP Integration Tests', () => {
         title: 'Product Launch Planning',
         content: '## Today\'s Progress\n\n- Completed UI mockups\n- Started API implementation\n- Created documentation structure',
         tags: ['product', 'daily-update'],
-        related_tasks: [`plans-${project.id}`],
-        related_documents: docs.map(d => `docs-${d.id}`)
+        related: [`plans-${project.id}`, ...docs.map(d => `docs-${d.id}`)]
       });
-      expect(summary.related_documents).toHaveLength(2);
+      expect(summary.related).toHaveLength(3);
     });
 
     test('Knowledge Base Building Workflow', async () => {
@@ -308,7 +304,7 @@ This guide covers the system architecture.
         title: 'API Reference',
         content: '# API Reference\n\n## Endpoints\n- GET /api/items\n- POST /api/items',
         tags: ['api', 'reference'],
-        related_documents: [`knowledge-${guide.id}`]
+        related: [`knowledge-${guide.id}`]
       });
       createdItems.push({ type: 'docs', id: apiDoc.id });
 
@@ -318,7 +314,7 @@ This guide covers the system architecture.
         title: 'Troubleshooting Guide',
         content: '# Common Issues\n\n## Database Connection\n- Check credentials\n- Verify network',
         tags: ['troubleshooting', 'guide'],
-        related_documents: [`knowledge-${guide.id}`, `docs-${apiDoc.id}`]
+        related: [`knowledge-${guide.id}`, `docs-${apiDoc.id}`]
       });
       knowledgeItems.push(troubleshooting);
       createdItems.push({ type: 'knowledge', id: troubleshooting.id });
@@ -327,7 +323,7 @@ This guide covers the system architecture.
       await callTool('update_item', {
         type: 'knowledge',
         id: guide.id,
-        related_documents: [`docs-${apiDoc.id}`, `knowledge-${troubleshooting.id}`]
+        related: [`docs-${apiDoc.id}`, `knowledge-${troubleshooting.id}`]
       });
 
       // 5. Search for guides
@@ -345,7 +341,7 @@ This guide covers the system architecture.
         priority: 'medium',
         status: 'Open',
         tags: ['documentation', 'architecture'],
-        related_documents: [`knowledge-${guide.id}`]
+        related: [`knowledge-${guide.id}`]
       });
       createdItems.push({ type: 'issues', id: issue.id });
 
@@ -354,7 +350,7 @@ This guide covers the system architecture.
         type: 'issues',
         id: issue.id
       });
-      expect(issueDetail.related_documents).toContain(`knowledge-${guide.id}`);
+      expect(issueDetail.related).toContain(`knowledge-${guide.id}`);
     });
 
     test('Tag Taxonomy Management', async () => {
@@ -553,7 +549,7 @@ This guide covers the system architecture.
         content: 'This references a document',
         priority: 'medium',
         status: 'Open',
-        related_documents: [`docs-${doc.id}`]
+        related: [`docs-${doc.id}`]
       });
       createdItems.push({ type: 'issues', id: issue.id });
 
@@ -569,7 +565,7 @@ This guide covers the system architecture.
         type: 'issues',
         id: issue.id
       });
-      expect(issueDetail.related_documents).toContain(`docs-${doc.id}`);
+      expect(issueDetail.related).toContain(`docs-${doc.id}`);
 
       // 4. Test data consistency with concurrent updates
       const testItem = await callTool('create_item', {
@@ -728,8 +724,7 @@ This guide covers the system architecture.
         content: 'Some refs are valid, some are not',
         priority: 'medium',
         status: 'Open',
-        related_tasks: ['issues-999999', 'plans-888888'],
-        related_documents: ['docs-777777', 'knowledge-666666']
+        related: ['issues-999999', 'plans-888888', 'docs-777777', 'knowledge-666666']
       });
       createdItems.push({ type: 'plans', id: mixedRefs.id });
 

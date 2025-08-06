@@ -25,7 +25,7 @@ export class SessionManager {
         const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
         return `${year}-${month}-${day}-${hours}.${minutes}.${seconds}.${milliseconds}`;
     }
-    async createSession(title, content, tags, id, datetime, related_tasks, related_documents, description) {
+    async createSession(title, content, tags, id, datetime, related, description) {
         const sessionDate = datetime ? new Date(datetime) : new Date();
         const date = sessionDate.toISOString().split('T')[0];
         if (id) {
@@ -45,15 +45,14 @@ export class SessionManager {
             description,
             content,
             tags,
-            related_tasks,
-            related_documents,
+            related,
             date,
             createdAt: sessionDate.toISOString()
         };
         await this.repository.saveSession(session);
         return session;
     }
-    async updateSession(id, title, content, tags, related_tasks, related_documents, description) {
+    async updateSession(id, title, content, tags, related, description) {
         const session = await this.repository.getSessionDetail(id);
         if (!session) {
             throw new Error(`Session ${id} not found`);
@@ -64,8 +63,7 @@ export class SessionManager {
             description: description !== undefined ? description : session.description,
             content: content !== undefined ? content : session.content,
             tags: tags !== undefined ? tags : session.tags,
-            related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
-            related_documents: related_documents !== undefined ? related_documents : session.related_documents,
+            related: related !== undefined ? related : session.related,
             updatedAt: new Date().toISOString()
         };
         await this.repository.saveSession(updatedSession);
@@ -83,7 +81,7 @@ export class SessionManager {
         sessions.sort((a, b) => a.id.localeCompare(b.id));
         return sessions[sessions.length - 1];
     }
-    async createDaily(date, title, content, tags = [], related_tasks, related_documents, description) {
+    async createDaily(date, title, content, tags = [], related, description) {
         const now = new Date().toISOString();
         const summary = {
             date,
@@ -91,14 +89,13 @@ export class SessionManager {
             description,
             content,
             tags,
-            related_tasks: related_tasks || [],
-            related_documents: related_documents || [],
+            related,
             createdAt: now
         };
         await this.repository.saveDaily(summary);
         return summary;
     }
-    async updateDaily(date, title, content, tags, related_tasks, related_documents, description) {
+    async updateDaily(date, title, content, tags, related, description) {
         const existing = await this.repository.loadDaily(date);
         if (!existing) {
             throw new Error(`Daily summary for ${date} not found`);
@@ -109,8 +106,7 @@ export class SessionManager {
             description: description !== undefined ? description : existing.description,
             content: content !== undefined ? content : existing.content,
             tags: tags !== undefined ? tags : existing.tags,
-            related_tasks: related_tasks !== undefined ? related_tasks : existing.related_tasks,
-            related_documents: related_documents !== undefined ? related_documents : existing.related_documents,
+            related: related !== undefined ? related : existing.related,
             updatedAt: new Date().toISOString()
         };
         await this.repository.updateDaily(updated);

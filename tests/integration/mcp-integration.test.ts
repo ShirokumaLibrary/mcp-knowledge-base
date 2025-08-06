@@ -461,8 +461,7 @@ describe('MCP Server Integration Tests', () => {
         type: 'plans',
         title: 'Plan with Invalid Refs',
         content: 'Testing invalid references',
-        related_tasks: ['issues-99999', 'plans-88888'],
-        related_documents: ['docs-77777', 'knowledge-66666']
+        related: ['issues-99999', 'plans-88888', 'docs-77777', 'knowledge-66666']
       });
       
       // Should create successfully but with invalid refs
@@ -474,7 +473,7 @@ describe('MCP Server Integration Tests', () => {
         type: 'plans',
         id: item.id
       });
-      expect(detail.related_tasks).toEqual(['issues-99999', 'plans-88888']);
+      expect(detail.related).toEqual(['issues-99999', 'plans-88888', 'docs-77777', 'knowledge-66666']);
     });
 
     test('should handle duplicate tag creation', async () => {
@@ -634,8 +633,7 @@ describe('MCP Server Integration Tests', () => {
         content: 'Testing related items',
         priority: 'medium',
         status: 'In Progress',
-        related_tasks: ['issues-1', 'issues-2'],
-        related_documents: ['docs-1', 'knowledge-1']
+        related: ['issues-1', 'issues-2', 'docs-1', 'knowledge-1']
       });
       createdItems.push({ type: 'plans', id: plan.id });
 
@@ -644,8 +642,7 @@ describe('MCP Server Integration Tests', () => {
         type: 'plans',
         id: plan.id
       });
-      expect(detail.related_tasks).toEqual(['issues-1', 'issues-2']);
-      expect(detail.related_documents).toEqual(['docs-1', 'knowledge-1']);
+      expect(detail.related).toEqual(['issues-1', 'issues-2', 'docs-1', 'knowledge-1']);
     });
   });
 });

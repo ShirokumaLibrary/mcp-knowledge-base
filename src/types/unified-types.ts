@@ -18,8 +18,6 @@ export interface BaseItem {
   version?: string;        // Version information (e.g. "0.7.5", "v1.2.0")
   tags: string[];
   related: string[];       // ["type-id", ...] format
-  related_tasks?: string[];    // Backward compatibility
-  related_documents?: string[]; // Backward compatibility
   created_at: string;
   updated_at: string;
 }
@@ -171,8 +169,6 @@ export interface CreateItemParams {
   version?: string;       // Version information (e.g. "0.7.5", "v1.2.0")
   tags?: string[];
   related?: string[];
-  related_tasks?: string[];
-  related_documents?: string[];
   // Session-specific fields
   datetime?: string;      // ISO 8601 datetime for sessions (past data migration)
   id?: string;           // Custom ID for sessions
@@ -198,8 +194,6 @@ export interface UpdateItemParams {
   version?: string;
   tags?: string[];
   related?: string[];
-  related_tasks?: string[];
-  related_documents?: string[];
 }
 
 /**

@@ -1,4 +1,5 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 import { CreateDailySchema, UpdateDailySchema, GetDailySummariesSchema, GetDailyDetailSchema } from '../schemas/session-schemas.js';
 import { createLogger } from '../utils/logger.js';
 export class SummaryHandlers {
@@ -10,8 +11,9 @@ export class SummaryHandlers {
     }
     async handleCreateDaily(args) {
         try {
-            const validatedArgs = CreateDailySchema.parse(args);
-            const summary = await this.sessionManager.createDaily(validatedArgs.date, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description);
+            const cleanArgs = checkLegacyFields(args, { logger: this.logger, source: 'daily-create' });
+            const validatedArgs = CreateDailySchema.parse(cleanArgs);
+            const summary = await this.sessionManager.createDaily(validatedArgs.date, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related, validatedArgs.description);
             return {
                 content: [
                     {
@@ -34,8 +36,9 @@ export class SummaryHandlers {
     }
     async handleUpdateDaily(args) {
         try {
-            const validatedArgs = UpdateDailySchema.parse(args);
-            const summary = await this.sessionManager.updateDaily(validatedArgs.date, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related_tasks, validatedArgs.related_documents, validatedArgs.description);
+            const cleanArgs = checkLegacyFields(args, { logger: this.logger, source: 'daily-update' });
+            const validatedArgs = UpdateDailySchema.parse(cleanArgs);
+            const summary = await this.sessionManager.updateDaily(validatedArgs.date, validatedArgs.title, validatedArgs.content, validatedArgs.tags, validatedArgs.related, validatedArgs.description);
             return {
                 content: [
                     {

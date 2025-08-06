@@ -101,7 +101,7 @@ Expected: Error "Unknown status: 'InvalidStatus'"
 
 ## Test 3.4: Related Fields Update
 
-### Add Related Items (Using New Unified Field)
+### Add Related Items (Using Unified Field)
 ```
 Tool: update_item
 Parameters: {
@@ -111,11 +111,9 @@ Parameters: {
 }
 Expected: JSON response { data: { ... } } with updated issue containing:
 - data.related: ["issues-1", "issues-3", "docs-1"]
-- data.related_tasks: ["issues-1", "issues-3"] (auto-populated for backward compatibility)
-- data.related_documents: ["docs-1"] (auto-populated for backward compatibility)
 ```
 
-### Add Related Items (Using Legacy Fields - Still Supported)
+### Test Legacy Fields Rejection
 ```
 Tool: update_item
 Parameters: {
@@ -124,13 +122,10 @@ Parameters: {
   related_tasks: ["issues-1", "issues-3"],
   related_documents: ["docs-1"]
 }
-Expected: JSON response { data: { ... } } with updated issue containing:
-- data.related: ["issues-1", "issues-3", "docs-1"] (auto-populated from legacy fields)
-- data.related_tasks: ["issues-1", "issues-3"]
-- related_documents: ["docs-1"]
+Expected: Error "Field 'related_tasks' is not allowed. Use 'related' field instead."
 ```
 
-### Self-reference Test (Using New Field)
+### Self-reference Test (Using Unified Field)
 ```
 Tool: update_item
 Parameters: {
@@ -141,7 +136,7 @@ Parameters: {
 Expected: Error about self-reference
 ```
 
-### Self-reference Test (Using Legacy Field)
+### Test Legacy Field Rejection (related_tasks)
 ```
 Tool: update_item
 Parameters: {
@@ -149,5 +144,5 @@ Parameters: {
   id: 1,
   related_tasks: ["issues-1"]
 }
-Expected: Error about self-reference
+Expected: Error "Field 'related_tasks' is not allowed. Use 'related' field instead."
 ```

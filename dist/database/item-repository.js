@@ -568,8 +568,7 @@ export class ItemRepository extends BaseRepository {
                 tags: originalItem.tags,
                 start_date: originalItem.start_date || undefined,
                 end_date: originalItem.end_date || undefined,
-                related_tasks: originalItem.related_tasks,
-                related_documents: originalItem.related_documents
+                related: originalItem.related
             });
             const oldReference = `${fromType}-${fromId}`;
             const newReference = `${toType}-${newItem.id}`;

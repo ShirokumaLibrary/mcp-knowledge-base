@@ -112,8 +112,6 @@ export interface CreateSessionOptions {
   category?: string;
   id?: string;                     // @ai-logic: Custom ID override
   datetime?: string;               // @ai-logic: For importing past data
-  related_tasks?: string[];
-  related_documents?: string[];
 }
 
 /**
@@ -126,8 +124,6 @@ export interface CreateSummaryOptions {
   title: string;
   content: string;
   tags?: string[];
-  related_tasks?: string[];
-  related_documents?: string[];
 }
 
 /**

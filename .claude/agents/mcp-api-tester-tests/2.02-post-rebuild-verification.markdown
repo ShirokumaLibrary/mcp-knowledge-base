@@ -179,8 +179,7 @@ Parameters: {
   content: "Testing related items",
   priority: "low",
   status: "Open",
-  related_tasks: ["issues-1", "issues-2"],
-  related_documents: ["docs-1"]
+  related: ["issues-1", "issues-2", "docs-1"]
 }
 Expected: Created with relations intact
 ```
@@ -189,7 +188,7 @@ Expected: Created with relations intact
 ```
 Tool: get_item_detail
 Parameters: {type: "issues", id: [ID from previous step]}
-Expected: Related items arrays preserved
+Expected: Related items array preserved
 ```
 
 ## 2.02.9 Final Verification

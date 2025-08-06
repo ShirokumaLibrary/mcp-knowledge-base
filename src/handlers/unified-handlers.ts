@@ -12,6 +12,7 @@ import type { FileIssueDatabase } from '../database.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { UnifiedItem, ListItem } from '../types/unified-types.js';
 import { createLogger } from '../utils/logger.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 
 // Import schemas
 import {
@@ -84,11 +85,14 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase): Record<string,
    * @ai-flow 1. Validate params -> 2. Create item -> 3. Return created item
    */
   async function handleCreateItem(params: z.infer<typeof CreateItemParams>): Promise<UnifiedItem> {
+    // Check and potentially transform legacy fields
+    const cleanParams = checkLegacyFields(params, { logger, source: 'api' }) as z.infer<typeof CreateItemParams>;
+    
     // Debug logging for version field
-    if (params.version) {
-      logger.debug('Received version field', { type: params.type, version: params.version });
+    if (cleanParams.version) {
+      logger.debug('Received version field', { type: cleanParams.type, version: cleanParams.version });
     }
-    return itemRepository.createItem(params);
+    return itemRepository.createItem(cleanParams);
   }
 
   /**
@@ -96,9 +100,11 @@ export function createUnifiedHandlers(fileDb: FileIssueDatabase): Record<string,
    * @ai-flow 1. Validate params -> 2. Update item -> 3. Return updated or throw
    */
   async function handleUpdateItem(params: z.infer<typeof UpdateItemParams>): Promise<UnifiedItem> {
-    const { type, id, ...updateData } = params;
+    // Check and potentially transform legacy fields
+    const cleanParams = checkLegacyFields(params, { logger, source: 'api' }) as z.infer<typeof UpdateItemParams>;
+    const { type, id, ...updateData } = cleanParams;
 
-    const updated = await itemRepository.updateItem({ type, id: String(id), ...updateData });
+    const updated = await itemRepository.updateItem({ type: type as string, id: String(id), ...updateData });
     if (!updated) {
       throw new McpError(
         ErrorCode.InvalidRequest,
@@ -306,16 +312,6 @@ export const unifiedTools: Tool[] = [
           items: { type: 'string' },
           description: 'Array of tag names'
         },
-        related_documents: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
-        },
-        related_tasks: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
-        },
         start_date: {
           type: 'string',
           description: 'Start date in YYYY-MM-DD format (for tasks types)'
@@ -384,16 +380,6 @@ export const unifiedTools: Tool[] = [
           type: 'array',
           items: { type: 'string' },
           description: 'New array of tag names'
-        },
-        related_documents: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
-        },
-        related_tasks: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
         },
         start_date: {
           type: ['string', 'null'],

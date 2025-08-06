@@ -73,8 +73,7 @@ describe('ItemRepository', () => {
         tags: ['bug', 'urgent'],
         start_date: '2024-01-01',
         end_date: '2024-01-31',
-        related_tasks: ['plans-1'],
-        related_documents: ['docs-1']
+        related: ['plans-1', 'docs-1']
       };
 
       const item = await itemRepo.createItem(params);
@@ -89,8 +88,7 @@ describe('ItemRepository', () => {
       expect(item.tags).toEqual(['bug', 'urgent']);
       expect(item.start_date).toBe('2024-01-01');
       expect(item.end_date).toBe('2024-01-31');
-      expect(item.related_tasks).toEqual(['plans-1']);
-      expect(item.related_documents).toEqual(['docs-1']);
+      expect(item.related).toEqual(['plans-1', 'docs-1']);
       expect(item.id).toMatch(/^\d+$/); // Should be numeric string
       expect(item.created_at).toBeDefined();
       expect(item.updated_at).toBeDefined();
@@ -124,8 +122,7 @@ describe('ItemRepository', () => {
       expect(item.priority).toBe('medium'); // Default
       expect(item.status).toBe('Open'); // Default
       expect(item.tags).toEqual([]);
-      expect(item.related_tasks).toEqual([]);
-      expect(item.related_documents).toEqual([]);
+      expect(item.related).toEqual([]);
     });
 
     it('should create a document type item', async () => {
@@ -409,8 +406,7 @@ describe('ItemRepository', () => {
         tags: ['updated', 'modified'],
         start_date: '2024-02-01',
         end_date: '2024-02-28',
-        related_tasks: ['plans-1'],
-        related_documents: ['docs-1']
+        related: ['plans-1', 'docs-1']
       });
 
       expect(updated).toBeDefined();
@@ -423,8 +419,7 @@ describe('ItemRepository', () => {
       expect(updated?.tags).toEqual(['updated', 'modified']);
       expect(updated?.start_date).toBe('2024-02-01');
       expect(updated?.end_date).toBe('2024-02-28');
-      expect(updated?.related_tasks).toEqual(['plans-1']);
-      expect(updated?.related_documents).toEqual(['docs-1']);
+      expect(updated?.related).toEqual(['plans-1', 'docs-1']);
       expect(updated?.updated_at).not.toBe(created.updated_at);
     });
 

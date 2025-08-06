@@ -33,7 +33,7 @@ mcp__test-knowledge-base__create_item({
   "content": "This plan references the issue",
   "priority": "medium",
   "status": "Open",
-  "related_tasks": ["issues-{ISSUE_ID}"]
+  "related": ["issues-{ISSUE_ID}"]
 })
 ```
 **Expected**: Plan created with related task reference
@@ -79,14 +79,14 @@ mcp__test-knowledge-base__get_item_detail({
 - Tags: ["conversion-test"]
 
 ## 1.13.5 Verify Related Items Updated
-**Test**: Check plan's related tasks
+**Test**: Check plan's related items
 ```
 mcp__test-knowledge-base__get_item_detail({
   "type": "plans",
   "id": {PLAN_ID}
 })
 ```
-**Expected**: related_tasks contains "bugs-{BUG_ID}" instead of "issues-{ISSUE_ID}"
+**Expected**: related contains "bugs-{BUG_ID}" instead of "issues-{ISSUE_ID}"
 
 ## 1.13.6 Test Document Type Change
 **Test**: Create and change document type

@@ -31,12 +31,6 @@ export class MarkdownTransformers {
         if (issue.related && Array.isArray(issue.related)) {
             issue.related.forEach((item) => relatedItems.add(item));
         }
-        if (issue.related_tasks && issue.related_tasks.length > 0) {
-            issue.related_tasks.forEach(item => relatedItems.add(item));
-        }
-        if (issue.related_documents && issue.related_documents.length > 0) {
-            issue.related_documents.forEach(item => relatedItems.add(item));
-        }
         if (relatedItems.size > 0) {
             lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
         }
@@ -66,12 +60,6 @@ export class MarkdownTransformers {
         if (plan.related && Array.isArray(plan.related)) {
             plan.related.forEach((item) => relatedItems.add(item));
         }
-        if (plan.related_tasks && plan.related_tasks.length > 0) {
-            plan.related_tasks.forEach(item => relatedItems.add(item));
-        }
-        if (plan.related_documents && plan.related_documents.length > 0) {
-            plan.related_documents.forEach(item => relatedItems.add(item));
-        }
         if (relatedItems.size > 0) {
             lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
         }
@@ -97,12 +85,6 @@ export class MarkdownTransformers {
         const relatedItems = new Set();
         if (doc.related && Array.isArray(doc.related)) {
             doc.related.forEach((item) => relatedItems.add(item));
-        }
-        if (doc.related_tasks && doc.related_tasks.length > 0) {
-            doc.related_tasks.forEach(item => relatedItems.add(item));
-        }
-        if (doc.related_documents && doc.related_documents.length > 0) {
-            doc.related_documents.forEach(item => relatedItems.add(item));
         }
         if (relatedItems.size > 0) {
             lines.push('## Related Items', '', Array.from(relatedItems).map(ref => `- ${ref}`).join('\n'), '');
@@ -132,11 +114,8 @@ export class MarkdownTransformers {
         if (session.tags && session.tags.length > 0) {
             lines.push('## Tags', '', session.tags.map(tag => `- ${tag}`).join('\n'), '');
         }
-        if (session.related_tasks && session.related_tasks.length > 0) {
-            lines.push('## Related Tasks', '', session.related_tasks.map(ref => `- ${ref}`).join('\n'), '');
-        }
-        if (session.related_documents && session.related_documents.length > 0) {
-            lines.push('## Related Documents', '', session.related_documents.map(ref => `- ${ref}`).join('\n'), '');
+        if (session.related && session.related.length > 0) {
+            lines.push('## Related Items', '', session.related.map((ref) => `- ${ref}`).join('\n'), '');
         }
         return lines.join('\n');
     }

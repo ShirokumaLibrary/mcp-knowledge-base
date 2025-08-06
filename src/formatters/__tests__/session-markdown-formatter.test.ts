@@ -34,8 +34,7 @@ describe('SessionMarkdownFormatter', () => {
         title: 'Complete Session',
         description: 'A session with all fields',
         tags: ['work', 'typescript'],
-        related_tasks: ['issue-1', 'plan-2'],
-        related_documents: ['doc-1', 'knowledge-2'],
+        related: ['issue-1', 'plan-2', 'doc-1', 'knowledge-2'],
         date: '2025-01-29',
         createdAt: '2025-01-29T10:00:00Z',
         updatedAt: '2025-01-29T11:00:00Z',
@@ -46,8 +45,7 @@ describe('SessionMarkdownFormatter', () => {
       
       expect(markdown).toContain('description: "A session with all fields"');
       expect(markdown).toContain('tags: ["work", "typescript"]');
-      expect(markdown).toContain('related_tasks: ["issue-1", "plan-2"]');
-      expect(markdown).toContain('related_documents: ["doc-1", "knowledge-2"]');
+      expect(markdown).toContain('related: ["issue-1", "plan-2", "doc-1", "knowledge-2"]');
       expect(markdown).toContain('updatedAt: 2025-01-29T11:00:00Z');
     });
 
@@ -74,8 +72,7 @@ describe('SessionMarkdownFormatter', () => {
         id: 'session-000',
         title: 'Empty Arrays',
         tags: [],
-        related_tasks: [],
-        related_documents: [],
+        related: [],
         date: '2025-01-29',
         createdAt: '2025-01-29T10:00:00Z',
         content: 'Content'
@@ -84,8 +81,7 @@ describe('SessionMarkdownFormatter', () => {
       const markdown = formatter.generateSessionMarkdown(session);
       
       expect(markdown).not.toContain('tags:');
-      expect(markdown).not.toContain('related_tasks:');
-      expect(markdown).not.toContain('related_documents:');
+      expect(markdown).not.toContain('related: []');
     });
   });
 
@@ -135,8 +131,7 @@ id: session-456
 title: "Complete Session"
 description: "A session with all fields"
 tags: ["work", "typescript"]
-related_tasks: ["issue-1", "plan-2"]
-related_documents: ["doc-1", "knowledge-2"]
+related: ["issue-1", "plan-2", "doc-1", "knowledge-2"]
 date: 2025-01-29
 createdAt: 2025-01-29T10:00:00Z
 updatedAt: 2025-01-29T11:00:00Z
@@ -151,8 +146,7 @@ Content here`;
         title: 'Complete Session',
         description: 'A session with all fields',
         tags: ['work', 'typescript'],
-        related_tasks: ['issue-1', 'plan-2'],
-        related_documents: ['doc-1', 'knowledge-2'],
+        related: ['issue-1', 'plan-2', 'doc-1', 'knowledge-2'],
         date: '2025-01-29',
         createdAt: '2025-01-29T10:00:00Z',
         updatedAt: '2025-01-29T11:00:00Z',
@@ -198,7 +192,7 @@ Content`;
 id: session-789
 title: "Test Session"
 tags: []
-related_tasks: []
+related: []
 date: 2025-01-29
 createdAt: 2025-01-29T10:00:00Z
 ---
@@ -208,7 +202,7 @@ Content`;
       const session = formatter.parseSessionFromMarkdown(markdown, 'session-789', '2025-01-29');
       
       expect(session.tags).toBeUndefined(); // Empty arrays become undefined
-      expect(session.related_tasks).toBeUndefined();
+      expect(session.related).toBeUndefined();
     });
   });
 
@@ -219,8 +213,7 @@ Content`;
         title: 'Daily Summary for 2025-01-29',
         content: 'Summary content here',
         tags: ['summary', 'work'],
-        related_tasks: ['issue-1'],
-        related_documents: ['doc-1'],
+        related: ['issue-1', 'doc-1'],
         createdAt: '2025-01-29T23:59:59Z',
         updatedAt: '2025-01-29T23:59:59Z'
       };
@@ -247,8 +240,7 @@ Content`;
       const markdown = formatter.generateDailyMarkdown(daily);
       
       expect(markdown).not.toContain('tags:');
-      expect(markdown).not.toContain('related_tasks:');
-      expect(markdown).not.toContain('related_documents:');
+      expect(markdown).not.toContain('related: []');
       expect(markdown).not.toContain('updatedAt:');
     });
   });
@@ -259,8 +251,7 @@ Content`;
 title: "Daily Summary for 2025-01-29"
 date: 2025-01-29
 tags: ["summary", "work"]
-related_tasks: ["issue-1"]
-related_documents: ["doc-1"]
+related: ["issue-1", "doc-1"]
 createdAt: 2025-01-29T23:59:59Z
 updatedAt: 2025-01-29T23:59:59Z
 ---
@@ -277,8 +268,7 @@ Summary content here`;
       // The parser doesn't remove the visual title in this case
       expect(daily?.content).toContain('Summary content here');
       expect(daily?.tags).toEqual(['summary', 'work']);
-      expect(daily?.related_tasks).toEqual(['issue-1']);
-      expect(daily?.related_documents).toEqual(['doc-1']);
+      expect(daily?.related).toEqual(['issue-1', 'doc-1']);
       expect(daily?.createdAt).toBe('2025-01-29T23:59:59Z');
       expect(daily?.updatedAt).toBe('2025-01-29T23:59:59Z');
     });
@@ -313,7 +303,7 @@ Content`;
 title: "Daily Summary"
 date: 2025-01-29
 tags: []
-related_tasks: []
+related: []
 createdAt: 2025-01-29T23:59:59Z
 ---
 
@@ -325,7 +315,7 @@ Content`;
       
       expect(daily).not.toBeNull();
       expect(daily?.tags).toEqual([]); // Empty arrays are preserved as empty arrays
-      expect(daily?.related_tasks).toEqual([]);
+      expect(daily?.related).toEqual([]);
     });
   });
 });

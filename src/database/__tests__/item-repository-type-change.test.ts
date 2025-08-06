@@ -109,13 +109,13 @@ describe('ItemRepository - Type Change', () => {
         type: 'bugs',
         title: 'Test Issue',
         content: 'Issue content',
+        description: undefined,
         priority: 'high',
         status: 'Open',
         tags: ['test'],
         start_date: undefined,
         end_date: undefined,
-        related_tasks: undefined,
-        related_documents: undefined
+        related: []
       });
 
       // Verify delete was called

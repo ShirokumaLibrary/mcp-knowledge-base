@@ -80,8 +80,7 @@ export class SessionManager {
     tags?: string[],
     id?: string,  // @ai-logic: Custom ID for imports
     datetime?: string,  // @ai-logic: Custom datetime for past data migration (ISO 8601 format)
-    related_tasks?: string[],
-    related_documents?: string[],
+    related?: string[],
     description?: string  // @ai-intent: One-line description for list views
   ): Promise<Session> {
     const sessionDate = datetime ? new Date(datetime) : new Date();
@@ -109,8 +108,7 @@ export class SessionManager {
       description,
       content,
       tags,
-      related_tasks,
-      related_documents,
+      related,
       date,
       createdAt: sessionDate.toISOString()  // @ai-pattern: ISO 8601 timestamp
     };
@@ -132,8 +130,7 @@ export class SessionManager {
     title?: string,
     content?: string,
     tags?: string[],
-    related_tasks?: string[],
-    related_documents?: string[],
+    related?: string[],
     description?: string  // @ai-intent: One-line description for list views
   ): Promise<Session> {
     // @ai-logic: Use getSessionDetail to find session in any date directory
@@ -149,8 +146,7 @@ export class SessionManager {
       description: description !== undefined ? description : session.description,
       content: content !== undefined ? content : session.content,
       tags: tags !== undefined ? tags : session.tags,
-      related_tasks: related_tasks !== undefined ? related_tasks : session.related_tasks,
-      related_documents: related_documents !== undefined ? related_documents : session.related_documents,
+      related: related !== undefined ? related : session.related,
       updatedAt: new Date().toISOString()  // @ai-logic: Track modification time
     };
 
@@ -200,7 +196,7 @@ export class SessionManager {
    * @ai-critical One summary per date - overwrites existing
    * @ai-return Complete summary object
    */
-  async createDaily(date: string, title: string, content: string, tags: string[] = [], related_tasks?: string[], related_documents?: string[], description?: string): Promise<Daily> {
+  async createDaily(date: string, title: string, content: string, tags: string[] = [], related?: string[], description?: string): Promise<Daily> {
     const now = new Date().toISOString();
     const summary: Daily = {
       date,      // @ai-critical: Primary key for summaries
@@ -208,8 +204,7 @@ export class SessionManager {
       description,
       content,   // @ai-logic: Main summary text
       tags,
-      related_tasks: related_tasks || [],
-      related_documents: related_documents || [],
+      related,
       createdAt: now
     };
 
@@ -225,7 +220,7 @@ export class SessionManager {
    * @ai-bug Empty string updates ignored due to || operator
    * @ai-return Updated summary object
    */
-  async updateDaily(date: string, title?: string, content?: string, tags?: string[], related_tasks?: string[], related_documents?: string[], description?: string): Promise<Daily> {
+  async updateDaily(date: string, title?: string, content?: string, tags?: string[], related?: string[], description?: string): Promise<Daily> {
     const existing = await this.repository.loadDaily(date);
     if (!existing) {
       throw new Error(`Daily summary for ${date} not found`);
@@ -238,8 +233,7 @@ export class SessionManager {
       description: description !== undefined ? description : existing.description,
       content: content !== undefined ? content : existing.content,
       tags: tags !== undefined ? tags : existing.tags,
-      related_tasks: related_tasks !== undefined ? related_tasks : existing.related_tasks,
-      related_documents: related_documents !== undefined ? related_documents : existing.related_documents,
+      related: related !== undefined ? related : existing.related,
       updatedAt: new Date().toISOString()
     };
 

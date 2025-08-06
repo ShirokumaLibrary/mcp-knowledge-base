@@ -12,7 +12,7 @@ Expected: 5 issues total
 Validation:
 - Each item should have exactly these fields: id, type, title, description, status, priority, tags, updated_at
 - NO content field should be present
-- NO start_date, end_date, related_tasks, related_documents fields
+- NO start_date, end_date, related fields
 
 Tool: get_items
 Parameters: {type: "plans"}

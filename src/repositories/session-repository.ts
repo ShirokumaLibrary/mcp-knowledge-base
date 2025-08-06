@@ -31,8 +31,6 @@ export class SessionRepository {
       title: session.title,
       description: session.description || '',
       tags: session.tags || [],
-      related_tasks: session.related_tasks || [],
-      related_documents: session.related_documents || [],
       date: session.date,
       start_time: session.startTime || '',
       created_at: session.createdAt,
@@ -55,8 +53,6 @@ export class SessionRepository {
       title?: unknown;
       description?: unknown;
       tags?: unknown;
-      related_tasks?: unknown;
-      related_documents?: unknown;
       start_time?: unknown;
       created_at?: unknown;
       updated_at?: unknown;
@@ -69,8 +65,6 @@ export class SessionRepository {
       description: metadata.description ? String(metadata.description) : undefined,
       content: item.content || undefined,
       tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
-      related_tasks: Array.isArray(metadata.related_tasks) ? metadata.related_tasks.map(t => String(t)) : undefined,
-      related_documents: Array.isArray(metadata.related_documents) ? metadata.related_documents.map(t => String(t)) : undefined,
       date,
       startTime: metadata.start_time ? String(metadata.start_time) : undefined,
       createdAt: String(metadata.created_at || new Date().toISOString()),
@@ -86,8 +80,6 @@ export class SessionRepository {
       title: daily.title,
       description: daily.description || '',
       tags: daily.tags || [],
-      related_tasks: daily.related_tasks || [],
-      related_documents: daily.related_documents || [],
       created_at: daily.createdAt,
       updated_at: daily.updatedAt || daily.createdAt
     };
@@ -108,8 +100,6 @@ export class SessionRepository {
       title?: unknown;
       description?: unknown;
       tags?: unknown;
-      related_tasks?: unknown;
-      related_documents?: unknown;
       created_at?: unknown;
       updated_at?: unknown;
     }
@@ -121,8 +111,6 @@ export class SessionRepository {
       description: metadata.description ? String(metadata.description) : undefined,
       content: item.content,
       tags: Array.isArray(metadata.tags) ? metadata.tags.map(t => String(t)) : [],
-      related_tasks: Array.isArray(metadata.related_tasks) ? metadata.related_tasks.map(t => String(t)) : [],
-      related_documents: Array.isArray(metadata.related_documents) ? metadata.related_documents.map(t => String(t)) : [],
       createdAt: String(metadata.created_at || new Date().toISOString()),
       updatedAt: metadata.updated_at ? String(metadata.updated_at) : undefined
     };

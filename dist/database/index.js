@@ -42,15 +42,14 @@ export class FileIssueDatabase {
             end_date: null,
             tags: item.tags,
             created_at: item.updated_at,
-            updated_at: item.updated_at
+            updated_at: item.updated_at,
+            related: []
         };
     }
     listItemToFullIssue(item) {
         return {
             ...this.listItemToIssue(item),
-            content: '',
-            related_tasks: [],
-            related_documents: []
+            content: ''
         };
     }
     listItemToDocument(item) {
@@ -61,8 +60,6 @@ export class FileIssueDatabase {
             description: item.description,
             content: '',
             tags: item.tags,
-            related_tasks: [],
-            related_documents: [],
             created_at: item.updated_at,
             updated_at: item.updated_at
         };
@@ -202,7 +199,7 @@ export class FileIssueDatabase {
     async searchTagsByPattern(pattern) {
         return this.tagRepo.searchTagsByPattern(pattern);
     }
-    async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async createTask(type, title, content, priority, status, tags, description, start_date, end_date, related) {
         return this.itemRepo.createItem({
             type,
             title,
@@ -213,14 +210,13 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
     }
     async getTask(type, id) {
         return this.itemRepo.getItem(type, String(id));
     }
-    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async updateTask(type, id, title, content, priority, status, tags, description, start_date, end_date, related) {
         return this.itemRepo.updateItem({
             type,
             id: String(id),
@@ -232,8 +228,7 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
     }
     async deleteTask(type, id) {
@@ -303,7 +298,7 @@ export class FileIssueDatabase {
         }
         return grouped;
     }
-    async createIssue(title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async createIssue(title, content, priority, status, tags, description, start_date, end_date, related) {
         const item = await this.itemRepo.createItem({
             type: 'issues',
             title,
@@ -314,8 +309,7 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
         return {
             id: parseInt(item.id),
@@ -327,8 +321,7 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
@@ -348,13 +341,12 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
     }
-    async updateIssue(id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async updateIssue(id, title, content, priority, status, tags, description, start_date, end_date, related) {
         const item = await this.itemRepo.updateItem({
             type: 'issues',
             id: String(id),
@@ -366,8 +358,7 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
         if (!item) {
             return null;
@@ -382,8 +373,7 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
@@ -406,7 +396,7 @@ export class FileIssueDatabase {
         const items = await this.itemRepo.searchItemsByTag(tag, ['issues']);
         return items.map(item => this.listItemToFullIssue(item));
     }
-    async createPlan(title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async createPlan(title, content, priority, status, tags, description, start_date, end_date, related) {
         const item = await this.itemRepo.createItem({
             type: 'plans',
             title,
@@ -417,8 +407,7 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
         return {
             id: parseInt(item.id),
@@ -430,8 +419,7 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
@@ -451,13 +439,12 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
     }
-    async updatePlan(id, title, content, priority, status, tags, description, start_date, end_date, related_tasks, related_documents) {
+    async updatePlan(id, title, content, priority, status, tags, description, start_date, end_date, related) {
         const item = await this.itemRepo.updateItem({
             type: 'plans',
             id: String(id),
@@ -469,8 +456,7 @@ export class FileIssueDatabase {
             description,
             start_date: start_date || undefined,
             end_date: end_date || undefined,
-            related_tasks,
-            related_documents
+            related
         });
         if (!item) {
             return null;
@@ -485,8 +471,7 @@ export class FileIssueDatabase {
             tags: item.tags,
             start_date: item.start_date,
             end_date: item.end_date,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
@@ -530,21 +515,19 @@ export class FileIssueDatabase {
             description: item.description,
             content: item.content,
             tags: item.tags,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
     }
-    async createDocument(type, title, content, tags, description, related_tasks, related_documents) {
+    async createDocument(type, title, content, tags, description, related) {
         const item = await this.itemRepo.createItem({
             type,
             title,
             content,
             tags,
             description,
-            related_tasks,
-            related_documents
+            related
         });
         return {
             type: item.type,
@@ -553,13 +536,12 @@ export class FileIssueDatabase {
             description: item.description,
             content: item.content || '',
             tags: item.tags,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
     }
-    async updateDocument(type, id, title, content, tags, description, related_tasks, related_documents) {
+    async updateDocument(type, id, title, content, tags, description, related) {
         const item = await this.itemRepo.updateItem({
             type,
             id: String(id),
@@ -567,8 +549,7 @@ export class FileIssueDatabase {
             content,
             tags,
             description,
-            related_tasks,
-            related_documents
+            related
         });
         if (!item) {
             return null;
@@ -580,8 +561,7 @@ export class FileIssueDatabase {
             description: item.description,
             content: item.content || '',
             tags: item.tags,
-            related_tasks: item.related_tasks,
-            related_documents: item.related_documents,
+            related: item.related,
             created_at: item.created_at,
             updated_at: item.updated_at
         };
@@ -668,8 +648,7 @@ export class FileIssueDatabase {
             description: row.description || undefined,
             content: row.content || undefined,
             tags: row.tags ? JSON.parse(row.tags) : [],
-            related_tasks: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('issues-') || r.startsWith('plans-')) : undefined,
-            related_documents: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('docs-') || r.startsWith('knowledge-')) : undefined,
+            related: row.related ? JSON.parse(row.related) : undefined,
             date: row.start_date || row.id.split('-').slice(0, 3).join('-'),
             startTime: row.start_time || undefined,
             createdAt: row.created_at,
@@ -686,8 +665,7 @@ export class FileIssueDatabase {
             description: row.description || undefined,
             content: row.content || undefined,
             tags: row.tags ? JSON.parse(row.tags) : [],
-            related_tasks: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('issues-') || r.startsWith('plans-')) : undefined,
-            related_documents: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('docs-') || r.startsWith('knowledge-')) : undefined,
+            related: row.related ? JSON.parse(row.related) : undefined,
             date: row.start_date || row.id.split('-').slice(0, 3).join('-'),
             startTime: row.start_time || undefined,
             createdAt: row.created_at,
@@ -704,8 +682,7 @@ export class FileIssueDatabase {
             description: row.description || undefined,
             content: row.content || '',
             tags: row.tags ? JSON.parse(row.tags) : [],
-            related_tasks: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('issues-') || r.startsWith('plans-')) : [],
-            related_documents: row.related ? JSON.parse(row.related).filter((r) => r.startsWith('docs-') || r.startsWith('knowledge-')) : [],
+            related: row.related ? JSON.parse(row.related) : [],
             createdAt: row.created_at,
             updatedAt: row.updated_at || undefined
         }));
@@ -775,7 +752,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [String, String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "createTask", null);
 __decorate([
@@ -787,7 +764,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [String, Number, String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "updateTask", null);
 __decorate([
@@ -835,7 +812,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "createIssue", null);
 __decorate([
@@ -847,7 +824,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "updateIssue", null);
 __decorate([
@@ -871,7 +848,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "createPlan", null);
 __decorate([
@@ -883,7 +860,7 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String, Array, String, Object, Object, Array, Array]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, Array, String, Object, Object, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "updatePlan", null);
 __decorate([
@@ -919,13 +896,13 @@ __decorate([
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Array, String, Array, Array]),
+    __metadata("design:paramtypes", [String, String, String, Array, String, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "createDocument", null);
 __decorate([
     ensureInitialized,
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, String, String, Array, String, Array, Array]),
+    __metadata("design:paramtypes", [String, Number, String, String, Array, String, Array]),
     __metadata("design:returntype", Promise)
 ], FileIssueDatabase.prototype, "updateDocument", null);
 __decorate([

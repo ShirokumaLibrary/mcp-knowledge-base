@@ -59,8 +59,7 @@ describe('Field Validation Tests', () => {
         tags: ['test-field', 'validation'],
         start_date: '2025-01-01',
         end_date: '2025-12-31',
-        related_tasks: ['plans-1'],
-        related_documents: ['docs-1']
+        related: ['plans-1', 'docs-1']
       });
 
       // Get items list
@@ -93,8 +92,6 @@ describe('Field Validation Tests', () => {
       expect(item).not.toHaveProperty('end_date');
       expect(item).not.toHaveProperty('start_time');
       expect(item).not.toHaveProperty('related');
-      expect(item).not.toHaveProperty('related_tasks');
-      expect(item).not.toHaveProperty('related_documents');
       expect(item).not.toHaveProperty('created_at');
     });
 
@@ -188,8 +185,7 @@ describe('Field Validation Tests', () => {
         tags: ['detail-test'],
         start_date: '2025-02-01',
         end_date: '2025-02-28',
-        related_tasks: ['plans-1', 'plans-2'],
-        related_documents: ['docs-1', 'knowledge-1']
+        related: ['plans-1', 'plans-2', 'docs-1', 'knowledge-1']
       });
 
       // Get list item
@@ -207,14 +203,12 @@ describe('Field Validation Tests', () => {
       expect(detail).toHaveProperty('start_date', '2025-02-01');
       expect(detail).toHaveProperty('end_date', '2025-02-28');
       expect(detail).toHaveProperty('start_time');
-      expect(detail).toHaveProperty('related_tasks');
-      expect(detail).toHaveProperty('related_documents');
+      expect(detail).toHaveProperty('related');
       expect(detail).toHaveProperty('created_at');
       expect(detail).toHaveProperty('status_id');
       
-      // Related arrays should be present in detail
-      expect(detail.related_tasks).toEqual(['plans-1', 'plans-2']);
-      expect(detail.related_documents).toEqual(['docs-1', 'knowledge-1']);
+      // Related array should be present in detail
+      expect(detail.related).toEqual(['plans-1', 'plans-2', 'docs-1', 'knowledge-1']);
     });
 
     it('should show content only in detail view for documents', async () => {
@@ -269,14 +263,9 @@ describe('Field Validation Tests', () => {
       expect(item).toHaveProperty('content');
       expect(item.content).toBe(''); // Empty string for compatibility
       
-      // For backward compatibility, should have related_tasks/related_documents (even if empty arrays)
-      // Note: Based on the actual implementation, these might be missing
-      // This is a known issue that the backward compatibility conversion might not be perfect
-      if (item.related_tasks !== undefined) {
-        expect(Array.isArray(item.related_tasks)).toBe(true);
-      }
-      if (item.related_documents !== undefined) {
-        expect(Array.isArray(item.related_documents)).toBe(true);
+      // Check for unified related field
+      if (item.related !== undefined) {
+        expect(Array.isArray(item.related)).toBe(true);
       }
     });
   });

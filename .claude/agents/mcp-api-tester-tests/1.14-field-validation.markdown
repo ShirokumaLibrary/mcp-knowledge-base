@@ -17,13 +17,10 @@ Parameters: {
   tags: ["test-field", "validation"],
   start_date: "2025-01-01",
   end_date: "2025-12-31",
-  related_tasks: ["issues-1"],
-  related_documents: ["docs-1"]
+  related: ["issues-1", "docs-1"]
 }
 Expected: Success with JSON response { data: { ... } } containing:
 - data.related: ["issues-1", "docs-1"] (unified array containing all related items)
-- data.related_tasks: ["issues-1"] (maintained for backward compatibility)
-- data.related_documents: ["docs-1"] (maintained for backward compatibility)
 ```
 
 ### Get Items List - Check Fields
@@ -34,7 +31,7 @@ Expected: JSON response { data: [...] }
 Validation for each item in data array:
 - MUST include: id, type, title, description, status, priority, tags, updated_at
 - MAY include: date (for sessions/dailies only)
-- MUST NOT include: content, status_id, start_date, end_date, start_time, related, related_tasks, related_documents, created_at
+- MUST NOT include: content, status_id, start_date, end_date, start_time, related, created_at
 - Field count should be exactly 8 for issues/plans/docs
 ```
 
@@ -46,8 +43,6 @@ For the created issue in the list:
 - status: "Open" (NOT undefined)
 - tags: ["test-field", "validation"]
 - content: Should NOT exist in list response
-- related_tasks: Should NOT exist in list response
-- related_documents: Should NOT exist in list response
 - related: Should NOT exist in list response
 
 ## Test 14.2: Verify get_item_detail Full Structure
@@ -58,14 +53,12 @@ Tool: get_item_detail
 Parameters: {type: "issues", id: <created_id>}
 Expected: JSON response { data: { ... } }
 Validation for data object:
-- MUST include ALL fields: id, type, title, description, content, priority, status, status_id, start_date, end_date, start_time, version, tags, related, related_tasks, related_documents, created_at, updated_at
+- MUST include ALL fields: id, type, title, description, content, priority, status, status_id, start_date, end_date, start_time, version, tags, related, created_at, updated_at
 - content: "This is detailed content that should NOT appear in list view"
 - start_date: "2025-01-01"
 - end_date: "2025-12-31"
 - version: null or undefined (optional field)
 - related: ["issues-1", "docs-1"] (unified array containing all related items)
-- related_tasks: ["issues-1"] (maintained for backward compatibility)
-- related_documents: ["docs-1"] (maintained for backward compatibility)
 ```
 
 ## Test 14.3: Search by Tag Field Validation
@@ -77,10 +70,9 @@ Parameters: {tag: "test-field"}
 Expected: JSON response { data: { tasks: {...}, documents: {...} } }
 Validation:
 - Returns grouped structure with tasks/documents
-- Each item should have full UnifiedItem fields (for backward compatibility)
+- Each item should have full UnifiedItem fields
 - Check that content field exists but is empty string
 - Check that related field exists (unified array)
-- Check that related_tasks/related_documents exist for backward compatibility (even if empty arrays)
 ```
 
 ## Test 14.4: Document Types Field Validation

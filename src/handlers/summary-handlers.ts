@@ -9,6 +9,7 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { SessionManager } from '../session-manager.js';
 import type { ToolResponse } from '../types/mcp-types.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 import {
   CreateDailySchema,
   UpdateDailySchema,
@@ -45,15 +46,16 @@ export class SummaryHandlers {
    */
   async handleCreateDaily(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = CreateDailySchema.parse(args);  // @ai-validation: Strict date format
+      // Check and potentially transform legacy fields
+      const cleanArgs = checkLegacyFields(args as Record<string, unknown>, { logger: this.logger, source: 'daily-create' });
+      const validatedArgs = CreateDailySchema.parse(cleanArgs);  // @ai-validation: Strict date format
 
       const summary = await this.sessionManager.createDaily(
         validatedArgs.date,     // @ai-critical: Primary key
         validatedArgs.title,    // @ai-validation: Required
         validatedArgs.content,  // @ai-validation: Required
         validatedArgs.tags,     // @ai-default: Empty array
-        validatedArgs.related_tasks,
-        validatedArgs.related_documents,
+        validatedArgs.related,
         validatedArgs.description  // @ai-intent: One-line description for list views
       );
 
@@ -91,14 +93,15 @@ export class SummaryHandlers {
    */
   async handleUpdateDaily(args: unknown): Promise<ToolResponse> {
     try {
-      const validatedArgs = UpdateDailySchema.parse(args);
+      // Check and potentially transform legacy fields
+      const cleanArgs = checkLegacyFields(args as Record<string, unknown>, { logger: this.logger, source: 'daily-update' });
+      const validatedArgs = UpdateDailySchema.parse(cleanArgs);
       const summary = await this.sessionManager.updateDaily(
         validatedArgs.date,     // @ai-critical: Identifies summary
         validatedArgs.title,    // @ai-bug: || prevents clearing
         validatedArgs.content,  // @ai-bug: || prevents clearing
         validatedArgs.tags,     // @ai-logic: Can be cleared
-        validatedArgs.related_tasks,
-        validatedArgs.related_documents,
+        validatedArgs.related,
         validatedArgs.description  // @ai-intent: One-line description for list views
       );
 

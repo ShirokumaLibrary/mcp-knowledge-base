@@ -249,14 +249,10 @@ export class TestAssertions {
     expect(summary.content).toBeDefined();
   }
 
-  static assertRelationships(item: any, expectedTasks: string[] = [], expectedDocs: string[] = []) {
-    if (expectedTasks.length > 0) {
-      expect(item.related_tasks).toBeDefined();
-      expect(item.related_tasks).toEqual(expect.arrayContaining(expectedTasks));
-    }
-    if (expectedDocs.length > 0) {
-      expect(item.related_documents).toBeDefined();
-      expect(item.related_documents).toEqual(expect.arrayContaining(expectedDocs));
+  static assertRelationships(item: any, expectedRelated: string[] = []) {
+    if (expectedRelated.length > 0) {
+      expect(item.related).toBeDefined();
+      expect(item.related).toEqual(expect.arrayContaining(expectedRelated));
     }
   }
 

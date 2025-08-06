@@ -180,9 +180,9 @@ describe('FileIssueDatabase Async Tests', () => {
     });
 
     /**
-     * @ai-intent Test new task fields: start_date, end_date, related_tasks
+     * @ai-intent Test new task fields: start_date, end_date, related
      * @ai-validation Ensures new fields are properly stored and retrieved
-     * @ai-pattern Dates in YYYY-MM-DD format, related_tasks as array
+     * @ai-pattern Dates in YYYY-MM-DD format, related as array
      */
     test('should handle new task fields', async () => {
       const issue = await db.createTask(
@@ -200,13 +200,13 @@ describe('FileIssueDatabase Async Tests', () => {
       
       expect(issue.start_date).toBe('2025-07-25');
       expect(issue.end_date).toBe('2025-07-30');
-      expect(issue.related_tasks).toEqual(['plans-1', 'issues-2']);
+      expect(issue.related).toEqual(['plans-1', 'issues-2']);
       
       // @ai-validation: Verify persistence
       const retrieved = await db.getTask('issues', parseInt(issue.id));
       expect(retrieved!.start_date).toBe('2025-07-25');
       expect(retrieved!.end_date).toBe('2025-07-30');
-      expect(retrieved!.related_tasks).toEqual(['plans-1', 'issues-2']);
+      expect(retrieved!.related).toEqual(['plans-1', 'issues-2']);
     });
 
     /**
@@ -233,7 +233,7 @@ describe('FileIssueDatabase Async Tests', () => {
       expect(updated!.title).toBe('Updated Task');
       expect(updated!.start_date).toBe('2025-08-01');
       expect(updated!.end_date).toBe('2025-08-15');
-      expect(updated!.related_tasks).toEqual(['plans-3']);
+      expect(updated!.related).toEqual(['plans-3']);
     });
   });
 

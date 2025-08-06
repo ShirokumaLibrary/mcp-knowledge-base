@@ -1,6 +1,7 @@
 import { TypeRepository } from '../database/type-repository.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { createLogger } from '../utils/logger.js';
+import { checkLegacyFields } from '../config/field-enforcement.js';
 import { GetItemsParams, GetItemDetailParams, CreateItemParams, UpdateItemParams, DeleteItemParams, SearchItemsByTagParams } from '../schemas/unified-schemas.js';
 export function createUnifiedHandlers(fileDb) {
     const logger = createLogger('UnifiedHandlers');
@@ -31,14 +32,16 @@ export function createUnifiedHandlers(fileDb) {
         return item;
     }
     async function handleCreateItem(params) {
-        if (params.version) {
-            logger.debug('Received version field', { type: params.type, version: params.version });
+        const cleanParams = checkLegacyFields(params, { logger, source: 'api' });
+        if (cleanParams.version) {
+            logger.debug('Received version field', { type: cleanParams.type, version: cleanParams.version });
         }
-        return itemRepository.createItem(params);
+        return itemRepository.createItem(cleanParams);
     }
     async function handleUpdateItem(params) {
-        const { type, id, ...updateData } = params;
-        const updated = await itemRepository.updateItem({ type, id: String(id), ...updateData });
+        const cleanParams = checkLegacyFields(params, { logger, source: 'api' });
+        const { type, id, ...updateData } = cleanParams;
+        const updated = await itemRepository.updateItem({ type: type, id: String(id), ...updateData });
         if (!updated) {
             throw new McpError(ErrorCode.InvalidRequest, `${type} with ID ${id} not found. Use 'get_items' with type='${type}' to see available items.`);
         }
@@ -198,16 +201,6 @@ export const unifiedTools = [
                     items: { type: 'string' },
                     description: 'Array of tag names'
                 },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
-                },
                 start_date: {
                     type: 'string',
                     description: 'Start date in YYYY-MM-DD format (for tasks types)'
@@ -276,16 +269,6 @@ export const unifiedTools = [
                     type: 'array',
                     items: { type: 'string' },
                     description: 'New array of tag names'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
-                },
-                related_tasks: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
                 },
                 start_date: {
                     type: ['string', 'null'],

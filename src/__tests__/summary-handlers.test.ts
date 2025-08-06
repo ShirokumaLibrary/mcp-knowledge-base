@@ -139,7 +139,6 @@ describe('SummaryHandlers', () => {
         'Summary content',
         ['work', 'done'],
         undefined,
-        undefined,
         undefined  // description parameter
       );
       const response = JSON.parse(result.content[0].text);
@@ -166,7 +165,6 @@ describe('SummaryHandlers', () => {
         'Simple Summary',
         'Content',
         [],
-        undefined,
         undefined,
         undefined  // description parameter
       );
@@ -217,7 +215,6 @@ describe('SummaryHandlers', () => {
         'Updated content',
         ['updated'],
         undefined,
-        undefined,
         undefined  // description parameter
       );
       const response = JSON.parse(result.content[0].text);
@@ -242,7 +239,6 @@ describe('SummaryHandlers', () => {
         '2025-01-26',
         undefined,
         'Updated content',
-        undefined,
         undefined,
         undefined,
         undefined  // description parameter

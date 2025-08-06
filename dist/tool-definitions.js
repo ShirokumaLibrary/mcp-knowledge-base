@@ -96,15 +96,10 @@ export const toolDefinitions = [
                     type: 'string',
                     description: 'End date in YYYY-MM-DD format. OPTIONAL for task types (issues, plans). Useful for deadlines and milestones.'
                 },
-                related_tasks: {
+                related: {
                     type: 'array',
                     items: { type: 'string' },
-                    description: 'Related task references. OPTIONAL for task types (issues, plans). Format: ["issues-1", "plans-2"]. Links to related issues or plans.'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Related document references. OPTIONAL for all types. Format: ["docs-1", "knowledge-2"]. Links to documentation or knowledge articles.'
+                    description: 'Related item references. Format: ["type-id", ...]. Examples: ["issues-1", "docs-5", "knowledge-3"]. Links to any type of item.'
                 },
                 datetime: {
                     type: 'string',
@@ -178,15 +173,10 @@ export const toolDefinitions = [
                     type: 'string',
                     description: 'New end date (for tasks types)'
                 },
-                related_tasks: {
+                related: {
                     type: 'array',
                     items: { type: 'string' },
-                    description: 'New related task references (for tasks types, e.g. ["issues-1", "plans-2"])'
-                },
-                related_documents: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'New related document references (for all types, e.g. ["docs-1", "knowledge-2"])'
+                    description: 'New related item references. Format: ["type-id", ...]. Examples: ["issues-1", "docs-5", "knowledge-3"]'
                 },
                 version: {
                     type: 'string',

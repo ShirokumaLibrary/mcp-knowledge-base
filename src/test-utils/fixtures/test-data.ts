@@ -24,8 +24,7 @@ export const testIssues: Issue[] = [
     description: 'Critical authentication issue affecting all users',
     start_date: '2024-01-01',
     end_date: '2024-01-05',
-    related_tasks: ['plans-1'],
-    related_documents: ['docs-1']
+    related: ['plans-1', 'docs-1']
   },
   {
     id: 2,
@@ -67,8 +66,7 @@ export const testPlans: Plan[] = [
     description: 'Quarterly development plan',
     start_date: '2024-01-01',
     end_date: '2024-03-31',
-    related_tasks: ['issues-1', 'issues-2'],
-    related_documents: ['docs-2']
+    related: ['issues-1', 'issues-2', 'docs-2']
   },
   {
     id: 2,
@@ -98,8 +96,7 @@ export const testDocuments: Document[] = [
     updated_at: '2024-01-10T10:00:00Z',
     tags: ['api', 'documentation'],
     description: 'Complete API reference guide',
-    related_tasks: ['issues-1'],
-    related_documents: ['knowledge-1']
+    related: ['issues-1', 'knowledge-1']
   },
   {
     id: 2,
@@ -109,7 +106,7 @@ export const testDocuments: Document[] = [
     created_at: '2024-01-05T10:00:00Z',
     updated_at: '2024-01-05T10:00:00Z',
     tags: ['architecture', 'design'],
-    related_tasks: ['plans-1']
+    related: ['plans-1']
   },
   {
     id: 1,
@@ -119,7 +116,7 @@ export const testDocuments: Document[] = [
     created_at: '2024-01-08T10:00:00Z',
     updated_at: '2024-01-08T10:00:00Z',
     tags: ['best-practices', 'guidelines'],
-    related_documents: ['docs-1']
+    related: ['docs-1']
   }
 ];
 
@@ -138,8 +135,7 @@ export const testSessions: Session[] = [
     content: 'Detailed work log for the session...',
     tags: ['development', 'bugfix'],
     createdAt: '2024-01-15T10:30:00Z',
-    related_tasks: ['issues-1', 'issues-2'],
-    related_documents: ['docs-1']
+    related: ['issues-1', 'issues-2', 'docs-1']
   },
   {
     id: '2024-01-15-14.00.00.000',
@@ -166,8 +162,7 @@ export const testSummaries: Daily[] = [
     tags: ['daily', 'summary'],
     createdAt: '2024-01-15T18:00:00Z',
     updatedAt: '2024-01-15T18:00:00Z',
-    related_tasks: ['issues-1', 'issues-2', 'plans-1'],
-    related_documents: ['docs-1']
+    related: ['issues-1', 'issues-2', 'plans-1', 'docs-1']
   },
   {
     date: '2024-01-14',
@@ -327,21 +322,19 @@ export function createLinkedTestData() {
   const issue1 = TestDataFactory.createIssue({
     id: 1,
     title: 'Linked Issue 1',
-    related_tasks: ['plans-1'],
-    related_documents: ['docs-1']
+    related: ['plans-1', 'docs-1']
   });
   
   const plan1 = TestDataFactory.createPlan({
     id: 1,
     title: 'Linked Plan 1',
-    related_tasks: ['issues-1'],
-    related_documents: ['docs-1']
+    related: ['issues-1', 'docs-1']
   });
   
   const doc1 = TestDataFactory.createDocument({
     id: 1,
     title: 'Linked Document 1',
-    related_tasks: ['issues-1', 'plans-1']
+    related: ['issues-1', 'plans-1']
   });
   
   return { issue1, plan1, doc1 };
