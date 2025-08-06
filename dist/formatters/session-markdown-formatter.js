@@ -125,7 +125,7 @@ export class SessionMarkdownFormatter {
             description: descriptionMatch?.[1],
             content: bodyContent.replace(/^# .+\n\n/, '').trim(),
             tags: tagsMatch?.[1] ? tagsMatch[1].split(', ').map(tag => tag.replace(/"/g, '')) : [],
-            related: relatedMatch?.[1] ? relatedMatch[1].split(', ').map((r) => r.replace(/"/g, '')) : undefined,
+            related: relatedMatch?.[1] ? relatedMatch[1].split(', ').map((r) => r.replace(/"/g, '')) : [],
             createdAt: createdAtMatch?.[1] || '',
             updatedAt: updatedAtMatch?.[1]
         };
