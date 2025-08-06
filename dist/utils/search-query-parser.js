@@ -12,7 +12,7 @@ function tokenize(query) {
     const tokenRegex = /(-)?(?:(\w+):("([^"]*)"|([^\s()]+))|"([^"]+)"|([^\s()]+)|(\(|\)))/g;
     let match;
     while ((match = tokenRegex.exec(query)) !== null) {
-        const [fullMatch, negation, field, fieldValueFull, quotedValue, unquotedValue, quotedTerm, plainTerm, paren] = match;
+        const [fullMatch, negation, field, _fieldValueFull, quotedValue, unquotedValue, quotedTerm, plainTerm, paren] = match;
         if (paren) {
             tokens.push({ type: paren === '(' ? 'LPAREN' : 'RPAREN' });
         }

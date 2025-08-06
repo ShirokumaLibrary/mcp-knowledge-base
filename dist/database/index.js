@@ -123,47 +123,42 @@ export class FileIssueDatabase {
         }
     }
     async performAutoRebuild() {
-        try {
-            const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
-                const stat = statSync(dir);
-                const dirName = path.basename(dir);
-                if (!stat.isDirectory() || dirName === 'search.db') {
-                    return false;
-                }
-                return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
-            });
-            const typeMapping = {
-                issues: 'tasks',
-                plans: 'tasks',
-                docs: 'documents',
-                knowledge: 'documents',
-                decisions: 'documents',
-                features: 'documents'
-            };
-            const existingTypes = await this.typeRepo.getAllTypes();
-            const existingTypeNames = new Set(existingTypes.map(t => t.type));
-            for (const dir of dirs) {
-                const typeName = path.basename(dir);
-                const baseType = typeMapping[typeName] || 'documents';
-                if (!existingTypeNames.has(typeName)) {
-                    await this.typeRepo.createType(typeName, baseType);
-                }
+        const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
+            const stat = statSync(dir);
+            const dirName = path.basename(dir);
+            if (!stat.isDirectory() || dirName === 'search.db') {
+                return false;
             }
-            const allTypes = await this.typeRepo.getAllTypes();
-            allTypes.push({ type: 'sessions', base_type: 'sessions' });
-            allTypes.push({ type: 'dailies', base_type: 'documents' });
-            let totalSynced = 0;
-            for (const typeInfo of allTypes) {
-                const type = typeInfo.type;
-                const count = await this.itemRepo.rebuildFromMarkdown(type);
-                totalSynced += count;
+            return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
+        });
+        const typeMapping = {
+            issues: 'tasks',
+            plans: 'tasks',
+            docs: 'documents',
+            knowledge: 'documents',
+            decisions: 'documents',
+            features: 'documents'
+        };
+        const existingTypes = await this.typeRepo.getAllTypes();
+        const existingTypeNames = new Set(existingTypes.map(t => t.type));
+        for (const dir of dirs) {
+            const typeName = path.basename(dir);
+            const baseType = typeMapping[typeName] || 'documents';
+            if (!existingTypeNames.has(typeName)) {
+                await this.typeRepo.createType(typeName, baseType);
             }
-            const db = this.connection.getDatabase();
-            await db.runAsync('DELETE FROM db_metadata WHERE key = ?', ['needs_rebuild']);
         }
-        catch (error) {
-            throw error;
+        const allTypes = await this.typeRepo.getAllTypes();
+        allTypes.push({ type: 'sessions', base_type: 'sessions' });
+        allTypes.push({ type: 'dailies', base_type: 'documents' });
+        let _totalSynced = 0;
+        for (const typeInfo of allTypes) {
+            const type = typeInfo.type;
+            const count = await this.itemRepo.rebuildFromMarkdown(type);
+            _totalSynced += count;
         }
+        const db = this.connection.getDatabase();
+        await db.runAsync('DELETE FROM db_metadata WHERE key = ?', ['needs_rebuild']);
     }
     async getAllStatuses() {
         return this.statusRepo.getAllStatuses();
@@ -553,10 +548,10 @@ export class FileIssueDatabase {
         });
         return {
             type: item.type,
-            id: item.id,
+            id: parseInt(item.id),
             title: item.title,
             description: item.description,
-            content: item.content,
+            content: item.content || '',
             tags: item.tags,
             related_tasks: item.related_tasks,
             related_documents: item.related_documents,
@@ -576,9 +571,20 @@ export class FileIssueDatabase {
             related_documents
         });
         if (!item) {
-            return false;
+            return null;
         }
-        return true;
+        return {
+            type: item.type,
+            id: parseInt(item.id),
+            title: item.title,
+            description: item.description,
+            content: item.content || '',
+            tags: item.tags,
+            related_tasks: item.related_tasks,
+            related_documents: item.related_documents,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+        };
     }
     async deleteDocument(type, id) {
         return this.itemRepo.deleteItem(type, String(id));
@@ -614,19 +620,27 @@ export class FileIssueDatabase {
         }));
     }
     async getAllTypes() {
-        return this.typeRepo.getAllTypes();
+        const types = await this.typeRepo.getAllTypes();
+        return types.map(t => ({ type: t.type, base_type: t.base_type }));
     }
     async createType(name, baseType) {
         return this.typeRepo.createType(name, baseType);
     }
     async deleteType(name) {
-        return this.typeRepo.deleteType(name);
+        await this.typeRepo.deleteType(name);
+        return true;
     }
     async getBaseType(name) {
         return this.typeRepo.getBaseType(name);
     }
     async searchContent(query) {
-        return this.searchRepo.searchContent(query);
+        const searchRows = await this.searchRepo.searchContent(query);
+        return searchRows.map(row => ({
+            ...row,
+            id: String(row.id),
+            priority: row.priority,
+            tags: Array.isArray(row.tags) ? row.tags : []
+        }));
     }
     async getItems(type) {
         return this.itemRepo.getItems(type);
@@ -700,7 +714,7 @@ export class FileIssueDatabase {
         try {
             await this.connection.close();
         }
-        catch (error) {
+        catch {
         }
     }
 }

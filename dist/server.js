@@ -58,7 +58,7 @@ export class IssueTrackerServer {
             }
         });
         this.setupToolHandlers();
-        this.server.onerror = (error) => {
+        this.server.onerror = (_error) => {
         };
         process.on('SIGINT', async () => {
             await this.server.close();
@@ -129,7 +129,7 @@ export class IssueTrackerServer {
                 return await this.fileIndexHandlers.createHandlers().get_related_files(validated);
             }
             case 'get_index_status': {
-                return await this.fileIndexHandlers.createHandlers().get_index_status();
+                return await this.fileIndexHandlers.createHandlers().get_index_status({});
             }
             default:
                 throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
@@ -192,7 +192,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     process.env.DEBUG = '';
     guardStdio();
     const server = new IssueTrackerServer();
-    server.run().catch((error) => {
+    server.run().catch((_error) => {
         process.exit(1);
     });
 }

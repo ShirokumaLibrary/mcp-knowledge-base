@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import { minimatch } from 'minimatch';
 import { pipeline } from '@xenova/transformers';
 import { config as appConfig } from '../config.js';
+import { createLogger } from '../utils/logger.js';
 const DEFAULT_CONFIG = {
     indexPath: join(appConfig.database.path, 'index.db'),
     maxFileSize: 10 * 1024 * 1024,
@@ -37,6 +38,7 @@ export class FileIndexer {
     config;
     embedder;
     initialized = false;
+    logger = createLogger('FileIndexer');
     constructor(config) {
         this.config = {
             ...DEFAULT_CONFIG,
@@ -104,7 +106,7 @@ export class FileIndexer {
                 .filter(file => file.length > 0)
                 .filter(file => this.shouldIndexFile(file));
         }
-        catch (error) {
+        catch {
             throw new Error('Not a git repository. File indexing works with git-managed files only.');
         }
     }
@@ -223,7 +225,7 @@ export class FileIndexer {
                 await this.indexFile(file);
             }
             catch (error) {
-                console.error(`Error indexing ${file}:`, error);
+                this.logger.error(`Error indexing ${file}:`, error);
             }
         }
     }
@@ -239,7 +241,7 @@ export class FileIndexer {
             }
         }
         if (deletedCount > 0) {
-            console.log(`Cleaned up ${deletedCount} deleted files from index`);
+            this.logger.info(`Cleaned up ${deletedCount} deleted files from index`);
         }
     }
     async search(query, options) {

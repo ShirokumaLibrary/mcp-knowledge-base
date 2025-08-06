@@ -41,7 +41,7 @@ function mergeRelatedArrays(relatedDocs, relatedTasks) {
         const merged = [...tasks, ...docs];
         return JSON.stringify(merged);
     }
-    catch (e) {
+    catch {
         const docsContent = relatedDocs.replace(/^\[/, '').replace(/\]$/, '');
         const tasksContent = relatedTasks.replace(/^\[/, '').replace(/\]$/, '');
         if (docsContent && tasksContent) {

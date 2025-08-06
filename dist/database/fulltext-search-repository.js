@@ -12,12 +12,11 @@ export class FullTextSearchRepository {
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
         const offset = Math.max(0, options?.offset || 0);
         const trimmedQuery = query.trim();
-        let ftsQuery;
         if (!trimmedQuery) {
             throw new Error('Search query cannot be empty');
         }
         const parsed = parseSearchQuery(trimmedQuery);
-        ftsQuery = toFTS5Query(parsed);
+        const ftsQuery = toFTS5Query(parsed);
         if (!ftsQuery) {
             throw new Error('Invalid search query');
         }
@@ -61,7 +60,6 @@ export class FullTextSearchRepository {
         const maxLimit = 100;
         const limit = Math.min(Math.max(1, options?.limit || defaultLimit), maxLimit);
         const trimmedQuery = query.trim();
-        let ftsQuery;
         if (!trimmedQuery) {
             return [];
         }
@@ -83,13 +81,13 @@ export class FullTextSearchRepository {
         }
         const modifiedExpression = addPrefixToRightmostTerm(parsed.expression);
         const modifiedParsed = { ...parsed, expression: modifiedExpression };
-        ftsQuery = toFTS5Query(modifiedParsed);
+        const prefixFtsQuery = toFTS5Query(modifiedParsed);
         let typeFilter = '';
-        let params = [ftsQuery, limit];
+        let params = [prefixFtsQuery, limit];
         if (options?.types && options.types.length > 0) {
             const placeholders = options.types.map(() => '?').join(',');
             typeFilter = `AND items.type IN (${placeholders})`;
-            params = [ftsQuery, ...options.types, limit];
+            params = [prefixFtsQuery, ...options.types, limit];
         }
         const sql = `
       SELECT DISTINCT items.title

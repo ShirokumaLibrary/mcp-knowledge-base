@@ -3,6 +3,7 @@ import { FileIndexer } from '../indexing/file-indexer.js';
 import { join } from 'path';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { config } from '../config.js';
+import { createLogger } from '../utils/logger.js';
 export const fileIndexSchemas = {
     index_codebase: z.object({
         force: z.boolean().optional().describe('Force re-index all files'),
@@ -22,6 +23,7 @@ export const fileIndexSchemas = {
 export class FileIndexHandlers {
     database;
     indexers = new Map();
+    logger = createLogger('FileIndexHandlers');
     constructor(database) {
         this.database = database;
     }
@@ -35,7 +37,8 @@ export class FileIndexHandlers {
     }
     createHandlers() {
         return {
-            index_codebase: async (args) => {
+            index_codebase: async (_args) => {
+                const _typedArgs = _args;
                 const projectPath = process.cwd();
                 const indexer = this.getIndexer(projectPath);
                 let indexed = 0;
@@ -45,7 +48,7 @@ export class FileIndexHandlers {
                     indexed = current;
                     total = totalFiles;
                     if (current % 10 === 0 || current === totalFiles) {
-                        console.error(`Indexing progress: ${current}/${totalFiles} files`);
+                        this.logger.info(`Indexing progress: ${current}/${totalFiles} files`);
                     }
                 });
                 const stats = indexer.getStats();
@@ -66,7 +69,8 @@ The codebase is now indexed and ready for semantic search.`
                         }]
                 };
             },
-            search_code: async (args) => {
+            search_code: async (_args) => {
+                const args = _args;
                 const projectPath = process.cwd();
                 const indexPath = join(config.database.path, 'index.db');
                 if (!existsSync(indexPath)) {
@@ -105,7 +109,8 @@ The codebase is now indexed and ready for semantic search.`
                         }]
                 };
             },
-            get_related_files: async (args) => {
+            get_related_files: async (_args) => {
+                const args = _args;
                 const projectPath = process.cwd();
                 const indexPath = join(config.database.path, 'index.db');
                 if (!existsSync(indexPath)) {
@@ -173,7 +178,7 @@ The codebase is now indexed and ready for semantic search.`
                         }]
                 };
             },
-            get_index_status: async () => {
+            get_index_status: async (_args) => {
                 const projectPath = process.cwd();
                 const indexPath = join(config.database.path, 'index.db');
                 if (!existsSync(indexPath)) {

@@ -50,6 +50,9 @@ export class StatusRepository extends BaseRepository {
         const now = new Date().toISOString();
         const result = await this.db.runAsync('INSERT INTO statuses (name, is_closed, created_at, updated_at) VALUES (?, ?, ?, ?)', [name, is_closed ? 1 : 0, now, now]);
         const id = result.lastID;
+        if (!id) {
+            throw new Error('Failed to get ID of created status');
+        }
         const created = await this.findById(id);
         if (!created) {
             throw new Error(`Failed to retrieve created status with ID ${id}`);

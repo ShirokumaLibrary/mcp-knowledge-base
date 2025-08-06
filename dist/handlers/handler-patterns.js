@@ -39,28 +39,31 @@ export class HandlerPatterns {
             }),
             handleUpdate: handler.wrapHandler(`update ${entityName}`, schemas.update, async (args) => {
                 handler.ensureDatabase();
-                const updated = await operations.update(args.id, args);
+                const typedArgs = args;
+                const updated = await operations.update(typedArgs.id, typedArgs);
                 if (!updated) {
-                    return handler.createErrorResponse(`${entityName} with ID ${args.id} not found`);
+                    return handler.createErrorResponse(`${entityName} with ID ${typedArgs.id} not found`);
                 }
                 return handler.createResponse(`## ${entityName} Updated\n\n` +
                     `Successfully updated ${entityName.toLowerCase()} "${updated.title}"`);
             }),
             handleDelete: handler.wrapHandler(`delete ${entityName}`, schemas.delete, async (args) => {
                 handler.ensureDatabase();
-                const deleted = await operations.delete(args.id);
+                const typedArgs = args;
+                const deleted = await operations.delete(typedArgs.id);
                 if (!deleted) {
-                    return handler.createErrorResponse(`${entityName} with ID ${args.id} not found or cannot be deleted`);
+                    return handler.createErrorResponse(`${entityName} with ID ${typedArgs.id} not found or cannot be deleted`);
                 }
                 return handler.createResponse(`## ${entityName} Deleted\n\n` +
-                    `Successfully deleted ${entityName.toLowerCase()} with ID ${args.id}`);
+                    `Successfully deleted ${entityName.toLowerCase()} with ID ${typedArgs.id}`);
             })
         };
     }
     static createSearchHandler(handler, entityName, searchOperation, schema, formatter) {
         return handler.wrapHandler(`search ${entityName}s`, schema, async (args) => {
             handler.ensureDatabase();
-            const results = await searchOperation(args.query, args);
+            const typedArgs = args;
+            const results = await searchOperation(typedArgs.query, typedArgs);
             if (results.length === 0) {
                 return handler.createResponse(`## Search Results\n\nNo ${entityName.toLowerCase()}s found matching your search.`);
             }
@@ -159,7 +162,10 @@ export class ResponsePatterns {
             if (!groups.has(key)) {
                 groups.set(key, []);
             }
-            groups.get(key).push(item);
+            const group = groups.get(key);
+            if (group) {
+                group.push(item);
+            }
         }
         const lines = [];
         if (title) {

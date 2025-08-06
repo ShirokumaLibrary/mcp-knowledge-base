@@ -133,7 +133,11 @@ export class SessionRepository {
         if (!item) {
             return null;
         }
-        const date = STORAGE_CONFIGS.sessions.dateExtractor(sessionId);
+        const dateExtractor = STORAGE_CONFIGS.sessions.dateExtractor;
+        if (!dateExtractor) {
+            throw new Error('Date extractor not configured for sessions');
+        }
+        const date = dateExtractor(sessionId);
         return this.storageItemToSession(item, sessionId, date);
     }
     async searchSessionsByTag(tag) {
@@ -141,7 +145,11 @@ export class SessionRepository {
             const tags = Array.isArray(item.metadata.tags) ? item.metadata.tags : [];
             return tags.some(t => String(t) === tag);
         }).then(items => items.map(item => {
-            const date = STORAGE_CONFIGS.sessions.dateExtractor(item.id);
+            const dateExtractor = STORAGE_CONFIGS.sessions.dateExtractor;
+            if (!dateExtractor) {
+                throw new Error('Date extractor not configured for sessions');
+            }
+            const date = dateExtractor(item.id);
             return this.storageItemToSession(item, item.id, date);
         }));
     }
@@ -156,7 +164,11 @@ export class SessionRepository {
             ].join(' ').toLowerCase();
             return searchable.includes(lowerQuery);
         }).then(items => items.map(item => {
-            const date = STORAGE_CONFIGS.sessions.dateExtractor(item.id);
+            const dateExtractor = STORAGE_CONFIGS.sessions.dateExtractor;
+            if (!dateExtractor) {
+                throw new Error('Date extractor not configured for sessions');
+            }
+            const date = dateExtractor(item.id);
             return this.storageItemToSession(item, item.id, date);
         }));
     }

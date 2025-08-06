@@ -13,7 +13,7 @@ export class ChangeTypeHandlers {
         const { from_type, from_id, to_type } = ChangeItemTypeSchema.parse(args);
         const itemRepository = this.db.getItemRepository();
         try {
-            const result = await itemRepository.changeItemType(from_type, from_id, to_type);
+            const result = await itemRepository.changeItemType(from_type, String(from_id), to_type);
             if (!result.success) {
                 throw new McpError(ErrorCode.InvalidRequest, result.error || 'Failed to change item type');
             }
@@ -24,9 +24,7 @@ export class ChangeTypeHandlers {
 
 Item successfully migrated:
 - From: ${from_type}-${from_id}
-- To: ${to_type}-${result.newId}
-
-${result.relatedUpdates ? `\nRelated items updated: ${result.relatedUpdates}` : ''}
+- To: ${to_type}-${result.new_id}
 
 Note: The original item has been deleted.`
                     }]

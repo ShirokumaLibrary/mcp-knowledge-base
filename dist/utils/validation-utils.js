@@ -83,7 +83,10 @@ export class ValidationUtils {
             if (!grouped.has(type)) {
                 grouped.set(type, []);
             }
-            grouped.get(type).push(numId);
+            const group = grouped.get(type);
+            if (group) {
+                group.push(numId);
+            }
         }
         return grouped;
     }

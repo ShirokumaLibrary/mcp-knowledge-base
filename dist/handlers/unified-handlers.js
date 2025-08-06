@@ -1,7 +1,9 @@
 import { TypeRepository } from '../database/type-repository.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { createLogger } from '../utils/logger.js';
 import { GetItemsParams, GetItemDetailParams, CreateItemParams, UpdateItemParams, DeleteItemParams, SearchItemsByTagParams } from '../schemas/unified-schemas.js';
 export function createUnifiedHandlers(fileDb) {
+    const logger = createLogger('UnifiedHandlers');
     const itemRepository = fileDb.getItemRepository();
     const typeRepository = new TypeRepository(fileDb);
     (async () => {
@@ -30,7 +32,7 @@ export function createUnifiedHandlers(fileDb) {
     }
     async function handleCreateItem(params) {
         if (params.version) {
-            console.log('unified-handlers: Received version field', { type: params.type, version: params.version });
+            logger.debug('Received version field', { type: params.type, version: params.version });
         }
         return itemRepository.createItem(params);
     }
@@ -98,12 +100,12 @@ export function createUnifiedHandlers(fileDb) {
         return result;
     }
     return {
-        get_items: handleGetItems,
-        get_item_detail: handleGetItemDetail,
-        create_item: handleCreateItem,
-        update_item: handleUpdateItem,
-        delete_item: handleDeleteItem,
-        search_items_by_tag: handleSearchItemsByTag
+        get_items: (params) => handleGetItems(params),
+        get_item_detail: (params) => handleGetItemDetail(params),
+        create_item: (params) => handleCreateItem(params),
+        update_item: (params) => handleUpdateItem(params),
+        delete_item: (params) => handleDeleteItem(params),
+        search_items_by_tag: (params) => handleSearchItemsByTag(params)
     };
 }
 export const unifiedTools = [
