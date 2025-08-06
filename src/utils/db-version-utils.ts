@@ -36,7 +36,7 @@ export async function hasDbMetadataTable(db: Database): Promise<boolean> {
     const result = await db.getAsync(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='db_metadata'"
     ) as { name: string } | undefined;
-    
+
     return !!result;
   } catch {
     return false;
@@ -66,22 +66,22 @@ export async function setDbVersion(db: Database, version: string): Promise<void>
 
 export async function checkDatabaseVersion(db: Database, logger: winston.Logger): Promise<void> {
   const programVersion = await getProgramVersion();
-  
+
   // First check if db_metadata table exists
   const hasMetadataTable = await hasDbMetadataTable(db);
-  
+
   if (!hasMetadataTable) {
     // Old database without version tracking (< 0.7.5)
     logger.info('Database version table not found. This appears to be an old database.');
     throw new VersionMismatchError({
       programVersion,
       dbVersion: '<0.7.5',
-      message: `This database appears to be from a version older than 0.7.5.\n` +
+      message: 'This database appears to be from a version older than 0.7.5.\n' +
         `Current program version is ${programVersion}.\n` +
         'Please rebuild the database using: npm run rebuild:mcp'
     });
   }
-  
+
   const dbVersion = await getDbVersion(db);
 
   logger.info(`Program version: ${programVersion}`);
@@ -93,7 +93,7 @@ export async function checkDatabaseVersion(db: Database, logger: winston.Logger)
     throw new VersionMismatchError({
       programVersion,
       dbVersion: 'unknown',
-      message: `Database version is not set.\n` +
+      message: 'Database version is not set.\n' +
         `Current program version is ${programVersion}.\n` +
         'Please rebuild the database using: npm run rebuild:mcp'
     });

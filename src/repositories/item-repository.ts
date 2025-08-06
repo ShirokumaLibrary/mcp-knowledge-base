@@ -240,8 +240,10 @@ export class ItemRepository {
       status_id: Number(statusId),
       start_date: (() => {
         // 既存のstart_dateがある場合はそれを使用
-        if (metadata.start_date) return String(metadata.start_date);
-        
+        if (metadata.start_date) {
+          return String(metadata.start_date);
+        }
+
         // sessions/dailiesの場合、IDから日付を抽出
         if (type === 'sessions' || type === 'dailies') {
           if (type === 'dailies') {
@@ -252,10 +254,12 @@ export class ItemRepository {
           } else if (type === 'sessions') {
             // sessionsのIDは日時形式（例：2024-01-01-14.30.00.000）
             const dateMatch = item.id.match(/^(\d{4}-\d{2}-\d{2})/);
-            if (dateMatch) return dateMatch[1];
+            if (dateMatch) {
+              return dateMatch[1];
+            }
           }
         }
-        
+
         return null;
       })(),
       end_date: metadata.end_date ? String(metadata.end_date) : null,
@@ -544,7 +548,7 @@ export class ItemRepository {
           'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")'
         );
       }
-      
+
       // Check for overflow (max 99999 per segment)
       const parts = params.version.split('.');
       const [major, minor, patch] = parts.map(p => parseInt(p, 10));
@@ -746,7 +750,7 @@ export class ItemRepository {
           'Version must be in X.Y.Z format where X, Y, Z are numbers (e.g., "1.0.0", "0.7.11")'
         );
       }
-      
+
       // Check for overflow (max 99999 per segment)
       const parts = params.version.split('.');
       const [major, minor, patch] = parts.map(p => parseInt(p, 10));

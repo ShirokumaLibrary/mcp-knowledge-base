@@ -62,7 +62,7 @@ export abstract class BaseRepository<T extends { id: string | number }, K extend
     loggerName: string
   ) {
     this.logger = createLogger(loggerName);
-    
+
     // @ai-critical: Disable all logging in MCP mode to prevent protocol corruption
     if (this.isMCPEnvironment()) {
       const noop = (): Logger => this.logger;

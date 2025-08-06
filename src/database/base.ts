@@ -75,6 +75,25 @@ export abstract class BaseRepository {
   }
 
   /**
+   * @ai-intent Get current sequence value without incrementing
+   * @ai-flow Query sequences table for current value
+   * @ai-critical Used for checking existing IDs before file creation
+   * @ai-error-handling Throws Error if sequence not found
+   */
+  protected async getCurrentSequenceValue(sequenceName: string): Promise<number> {
+    const row = await this.db.getAsync(
+      'SELECT current_value FROM sequences WHERE type = ?',
+      [sequenceName]
+    ) as { current_value: number } | undefined;
+
+    if (!row) {
+      throw new Error(`Sequence not found for type: ${sequenceName}`);
+    }
+
+    return row.current_value;
+  }
+
+  /**
    * @ai-intent Generate unique sequential IDs for entities
    * @ai-flow 1. Atomically increment sequence -> 2. Retrieve new value -> 3. Return ID
    * @ai-critical Must be atomic to prevent duplicate IDs in concurrent operations

@@ -81,7 +81,7 @@ export function getConfig(): Config {
       enabled: process.env.MCP_LOGGING_ENABLED !== 'false',
       // @ai-default: Logs directory at project root
       logDir: process.env.MCP_LOG_DIR || path.join(process.cwd(), 'logs')
-    },
+    }
   };
 }
 

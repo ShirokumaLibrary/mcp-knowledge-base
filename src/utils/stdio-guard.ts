@@ -12,7 +12,7 @@ export function guardStdio(): void {
   if (process.env.NODE_ENV === 'test' || process.env.MCP_MODE === 'false') {
     return;
   }
-  
+
   if (process.env.NODE_ENV === 'production' || process.env.MCP_GUARD_STDIO === 'true') {
     try {
       // Save original stdout write

@@ -231,11 +231,11 @@ export class FileIssueDatabase {
       const dirs = globSync(path.join(this.dataDir, '*')).filter(dir => {
         const stat = statSync(dir);
         const dirName = path.basename(dir);
-        
+
         if (!stat.isDirectory() || dirName === 'search.db') {
           return false;
         }
-        
+
         return dirName !== 'sessions' && dirName !== 'state' && dirName !== 'current_state.md';
       });
 

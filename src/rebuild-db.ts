@@ -298,7 +298,7 @@ async function rebuildDatabase() {
     const filesPattern = path.join(databasePath, type, `${type}-*.md`);
     const files = globSync(filesPattern);
     let maxFileId = 0;
-    
+
     for (const file of files) {
       const basename = path.basename(file);
       const match = basename.match(new RegExp(`^${type}-(\\d+)\\.md$`));
@@ -309,7 +309,7 @@ async function rebuildDatabase() {
         }
       }
     }
-    
+
     if (maxFileId > maxId) {
       console.log(`  ⚠️  Warning: Found file ${type}-${maxFileId}.md but max ID in DB is ${maxId}`);
       console.log('     This suggests some files were not imported during rebuild');
@@ -515,10 +515,10 @@ export async function rebuildFromMarkdown(dbPath: string): Promise<void> {
   const db = fullDb.getDatabase();
   const programVersion = await getProgramVersion();
   await setDbVersion(db, programVersion);
-  
+
   console.log(`\n✅ Database rebuild complete! Total items: ${totalSynced}`);
   console.log(`📌 Database schema version: ${programVersion}`);
-  
+
   await fullDb.close();
 }
 

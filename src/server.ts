@@ -191,7 +191,7 @@ export class IssueTrackerServer {
   private async handleToolCall(toolName: string, args: unknown): Promise<{ content: { type: 'text'; text: string }[] }> {
     // Check for version mismatch before processing any request
     this.checkVersionError();
-    
+
     switch (toolName) {
       // Unified item handlers
       case 'get_items':
@@ -272,7 +272,7 @@ export class IssueTrackerServer {
 
   async run() {
     await this.db.initialize();
-    
+
     // Check database version compatibility
     try {
       // Create a silent logger for MCP environment
@@ -283,7 +283,7 @@ export class IssueTrackerServer {
       logger.info = noop;
       logger.warn = noop;
       logger.error = noop;
-      
+
       await checkDatabaseVersion(this.db.getDatabase(), logger);
     } catch (error) {
       if (error instanceof VersionMismatchError) {
@@ -298,7 +298,7 @@ export class IssueTrackerServer {
         throw error;
       }
     }
-    
+
     await this.typeHandlers.init();
 
     // Initialize unified handlers after database is ready

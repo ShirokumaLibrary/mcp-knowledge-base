@@ -15,7 +15,7 @@ import { DatabaseConnection } from '../../database/base.js';
 import path from 'path';
 import os from 'os';
 import { promises as fs } from 'fs';
-import { CreateItemParams } from '../../types/unified-types.js';
+import { CreateItemParams, UnifiedItem } from '../../types/unified-types.js';
 
 describe('ItemRepository', () => {
   let testDataDir: string;
@@ -828,6 +828,281 @@ describe('ItemRepository', () => {
         // Only end date
         const itemsToEnd = await itemRepo.getItems('dailies', false, undefined, undefined, '2024-01-15');
         expect(itemsToEnd.map(i => i.id).sort()).toEqual(['2024-01-10', '2024-01-15']);
+      });
+    });
+  });
+
+  describe('File existence check functionality', () => {
+    describe('getCurrentSequenceValue', () => {
+      it('should get current sequence value for existing type', async () => {
+        // Arrange: 既存のタイプでアイテムを作成
+        await itemRepo.createItem({
+          type: 'issues',
+          title: 'Test Issue',
+          content: 'Content'
+        });
+        
+        // Act: プライベートメソッドへのアクセス（リフレクション使用）
+        const value = await (itemRepo as any).getCurrentSequenceValue('issues');
+        
+        // Assert
+        expect(value).toBe(1);
+      });
+
+      it('should throw error for non-existent type', async () => {
+        // Act & Assert
+        await expect((itemRepo as any).getCurrentSequenceValue('non-existent'))
+          .rejects.toThrow('Sequence not found for type: non-existent');
+      });
+
+      it('should maintain separate sequences for different types', async () => {
+        // Arrange: 異なるタイプでアイテムを作成
+        await itemRepo.createItem({ type: 'issues', title: 'Issue 1', content: 'Content' });
+        await itemRepo.createItem({ type: 'issues', title: 'Issue 2', content: 'Content' });
+        await itemRepo.createItem({ type: 'plans', title: 'Plan 1', content: 'Content' });
+        
+        // Act
+        const issuesValue = await (itemRepo as any).getCurrentSequenceValue('issues');
+        const plansValue = await (itemRepo as any).getCurrentSequenceValue('plans');
+        
+        // Assert
+        expect(issuesValue).toBe(2);
+        expect(plansValue).toBe(1);
+      });
+    });
+
+    describe('file existence check during creation', () => {
+      it('should detect when file already exists with next sequence ID', async () => {
+        // Arrange: ファイルを作成してからシーケンスを巻き戻す
+        const item1 = await itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 1',
+          content: 'Content'
+        });
+        
+        // シーケンスを手動で巻き戻す（シミュレート）
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act & Assert
+        await expect(itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 2',
+          content: 'Content'
+        })).rejects.toThrow(/File already exists for issues-1/);
+      });
+
+      it('should include detailed error message with sequence information', async () => {
+        // Arrange
+        await itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 1',
+          content: 'Content'
+        });
+        
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act & Assert
+        try {
+          await itemRepo.createItem({
+            type: 'issues',
+            title: 'Issue 2',
+            content: 'Content'
+          });
+          fail('Should have thrown an error');
+        } catch (error: any) {
+          expect(error.message).toContain('File already exists for issues-1');
+          expect(error.message).toContain('This may indicate a sequence corruption');
+          expect(error.message).toContain('Current sequence value: 0');
+          expect(error.message).toContain('Next ID would be: 1');
+          expect(error.message).toContain('Please check the sequences table and rebuild if necessary');
+        }
+      });
+
+      it('should handle orphaned files correctly', async () => {
+        // Arrange: ファイルを作成してDBエントリを削除（ファイルは残す）
+        const item = await itemRepo.createItem({
+          type: 'issues',
+          title: 'Orphaned Issue',
+          content: 'Content'
+        });
+        
+        // DBからのみ削除（ファイルは残る）
+        await database.getDatabase().runAsync(
+          'DELETE FROM items WHERE type = ? AND id = ?',
+          ['issues', item.id]
+        );
+        
+        // シーケンスをリセット
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act & Assert: 同じIDで作成しようとするとエラー
+        await expect(itemRepo.createItem({
+          type: 'issues',
+          title: 'New Issue',
+          content: 'Content'
+        })).rejects.toThrow(/File already exists for issues-1/);
+      });
+    });
+
+    describe('edge cases and recovery', () => {
+      it('should handle sequential creation with existing files', async () => {
+        // Arrange: ID 1のファイルを作成
+        await itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 1',
+          content: 'Content'
+        });
+        
+        // ID 2のファイルを手動で作成（DBには登録しない）
+        const issuesDir = path.join(testDataDir, 'issues');
+        await fs.writeFile(
+          path.join(issuesDir, 'issues-2.md'),
+          '---\ntitle: Manual Issue\n---\nManual content'
+        );
+        
+        // シーケンスを1に戻す（ID 2で作成しようとする）
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 1 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act & Assert: ID 2で作成しようとするとエラー
+        await expect(itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 2',
+          content: 'Content'
+        })).rejects.toThrow(/File already exists for issues-2/);
+      });
+
+      it('should handle sequence at 0', async () => {
+        // Arrange: シーケンスを0に設定（初期状態）
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act: 新しいアイテムを作成（ID 1になるべき）
+        const item = await itemRepo.createItem({
+          type: 'issues',
+          title: 'First Issue',
+          content: 'Content'
+        });
+        
+        // Assert
+        expect(item.id).toBe('1');
+        
+        // シーケンスが更新されたことを確認
+        const value = await (itemRepo as any).getCurrentSequenceValue('issues');
+        expect(value).toBe(1);
+      });
+
+      it('should handle file deletion after failed creation', async () => {
+        // Arrange: アイテムを作成
+        const item1 = await itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 1',
+          content: 'Content'
+        });
+        
+        // ファイルを削除
+        const filePath = path.join(testDataDir, 'issues', `issues-${item1.id}.md`);
+        await fs.unlink(filePath);
+        
+        // シーケンスを巻き戻す
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['issues']
+        );
+        
+        // Act: 同じIDで作成（ファイルが存在しないので成功するはず）
+        const item2 = await itemRepo.createItem({
+          type: 'issues',
+          title: 'Issue 1 Recreated',
+          content: 'New Content'
+        });
+        
+        // Assert
+        expect(item2.id).toBe('1');
+        expect(item2.title).toBe('Issue 1 Recreated');
+      });
+    });
+
+    describe('type-specific file checks', () => {
+      it('should not perform file check for dailies type', async () => {
+        // Arrange: 既存のdailyを作成
+        const date = '2024-01-15';
+        await itemRepo.createItem({
+          type: 'dailies',
+          date: date,
+          title: 'Daily Summary',
+          content: 'Content'
+        });
+        
+        // Act & Assert: 同じ日付で作成するとdailies固有のエラー
+        await expect(itemRepo.createItem({
+          type: 'dailies',
+          date: date,
+          title: 'Duplicate Daily',
+          content: 'Content'
+        })).rejects.toThrow(/Daily summary for 2024-01-15 already exists/);
+      });
+
+      it('should not perform sequence check for sessions type', async () => {
+        // Sessions はシーケンシャルIDを使わないため、ファイル存在チェックも異なる
+        const session1 = await itemRepo.createItem({
+          type: 'sessions',
+          title: 'Session 1',
+          content: 'Content'
+        });
+        
+        const session2 = await itemRepo.createItem({
+          type: 'sessions',
+          title: 'Session 2',
+          content: 'Content'
+        });
+        
+        // IDフォーマットが異なることを確認
+        expect(session1.id).toMatch(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/);
+        expect(session2.id).toMatch(/^\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{3}$/);
+        expect(session1.id).not.toBe(session2.id);
+      });
+
+      it('should perform file existence check for custom types', async () => {
+        // Arrange: カスタムタイプを作成
+        await database.createType('customtasks', 'tasks');
+        
+        // アイテムを作成
+        await itemRepo.createItem({
+          type: 'customtasks',
+          title: 'Custom Task 1',
+          content: 'Content',
+          priority: 'high',
+          status: 'Open'
+        });
+        
+        // シーケンスを巻き戻す
+        await database.getDatabase().runAsync(
+          'UPDATE sequences SET current_value = 0 WHERE type = ?',
+          ['customtasks']
+        );
+        
+        // Act & Assert: 同じIDで作成しようとするとエラー
+        await expect(itemRepo.createItem({
+          type: 'customtasks',
+          title: 'Custom Task 2',
+          content: 'Content',
+          priority: 'medium',
+          status: 'Open'
+        })).rejects.toThrow(/File already exists for customtasks-1/);
       });
     });
   });
