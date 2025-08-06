@@ -314,7 +314,8 @@ describe('FileIssueDatabase', () => {
         parseInt(doc.id),
         'Updated Document'
       );
-      expect(updated).toBe(true);
+      expect(updated).toBeTruthy();
+      expect(updated?.title).toBe('Updated Document');
       
       const deleted = await database.deleteDocument('docs', parseInt(doc.id));
       expect(deleted).toBe(true);

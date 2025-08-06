@@ -4,7 +4,8 @@
  * @ai-critical Isolates handler logic from dependencies
  */
 
-import { BaseHandler, ToolResponse } from '../../handlers/base-handler.js';
+import { BaseHandler } from '../../handlers/base-handler.js';
+import type { ToolResponse } from '../../types/mcp-types.js';
 import { jest } from '@jest/globals';
 import { createMockLogger } from './database-mock.js';
 
