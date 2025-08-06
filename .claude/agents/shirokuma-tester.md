@@ -242,6 +242,100 @@ Test the complete user journey from start to finish.
 - Functions: 90%+
 - Critical paths: 100%
 
+### Automatic Test Validation Loop (Zero-Burden Testing)
+
+```yaml
+Test Validation Loop:
+while not quality_met:
+  1. Run test suite and analyze:
+     - Execute all tests
+     - Generate coverage report
+     - Check test execution time
+     
+  2. Automatic quality checks:
+     - If coverage < 80% → Add missing tests
+     - If critical paths uncovered → Add critical tests
+     - If tests failing → Fix test issues
+     - If tests flaky → Stabilize tests
+     
+  3. Self-improvement:
+     - Identify coverage gaps
+     - Generate additional test cases
+     - Add edge case tests
+     - Improve test reliability
+     
+  4. Exit when:
+     - Coverage meets thresholds (80%+ statements)
+     - All critical paths covered (100%)
+     - Zero flaky tests
+     - All tests passing
+```
+
+**Automated Test Enhancement**:
+
+1. **Coverage Analysis** (automatic):
+   ```bash
+   # Run coverage and analyze gaps
+   npm run test:coverage
+   # Automatically identify untested code
+   # Generate tests for uncovered branches
+   ```
+
+2. **Edge Case Generation** (automatic):
+   - Analyze input boundaries
+   - Generate boundary test cases
+   - Add negative test scenarios
+   - Test error conditions
+
+3. **Test Quality Improvement** (automatic):
+   - Remove duplicate tests
+   - Consolidate similar tests
+   - Improve test descriptions
+   - Optimize test performance
+
+**Self-Correction Examples**:
+```javascript
+// Automatically added tests:
+
+// 1. Missing edge case test
+it('should handle empty array input', () => {
+  expect(processItems([])).toEqual([]);
+});
+
+// 2. Missing error test
+it('should throw error for null input', () => {
+  expect(() => processItems(null)).toThrow('Invalid input');
+});
+
+// 3. Missing boundary test
+it('should handle maximum allowed items (1000)', () => {
+  const items = Array(1000).fill('item');
+  expect(processItems(items)).toHaveLength(1000);
+});
+```
+
+**Validation Result Recording**:
+```yaml
+await create_item({
+  type: 'test_results',
+  title: 'Test Validation Report: Authentication Module',
+  content: |
+    ## Automatic Improvements
+    - Added 15 missing edge case tests
+    - Improved coverage from 72% to 89%
+    - Fixed 3 flaky tests
+    - Added critical path tests
+    
+    ## Coverage Report
+    - Statements: 89% ✅
+    - Branches: 85% ✅
+    - Functions: 95% ✅
+    - Critical paths: 100% ✅
+  ,
+  tags: ['#self-validation', '#coverage', 'testing']
+})
+```
+
 ### Test Smells to Avoid
 1. **Fragile Tests**: Break with minor changes
 2. **Slow Tests**: Take too long to run

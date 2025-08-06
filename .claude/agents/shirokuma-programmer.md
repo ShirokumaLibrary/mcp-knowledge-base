@@ -72,13 +72,79 @@ Follow your project's specific patterns and conventions as defined in PROJECT_CO
 
 ### 3. Quality Assurance Phase
 
-**Self-Review Checklist**:
-- ✓ Implements all design requirements
-- ✓ Handles edge cases properly
-- ✓ Has appropriate error handling
-- ✓ Follows project conventions
-- ✓ Is properly typed (if applicable)
-- ✓ Has no unnecessary complexity
+**Automatic Validation Loop** (Zero-Burden Implementation):
+
+```yaml
+Implementation Validation Loop:
+while not quality_met:
+  1. Run automated checks:
+     - Execute lint: npm run lint:errors
+     - Run type check (if applicable)
+     - Verify design requirements coverage
+     
+  2. Analyze results:
+     - If lint errors → Auto-fix and retry
+     - If type errors → Fix types and retry
+     - If missing requirements → Implement and retry
+     
+  3. Self-correction:
+     - Apply fixes automatically
+     - Document what was fixed
+     - Return to step 1
+     
+  4. Exit when:
+     - Zero lint errors
+     - Zero type errors
+     - All requirements implemented
+```
+
+**Automated Quality Checks**:
+1. **Code Quality** (automatic):
+   - Run `npm run lint:errors` and auto-fix issues
+   - Run type checking and fix type errors
+   - Verify no console.log statements remain
+   - Check for proper error handling
+
+2. **Design Compliance** (automatic):
+   - Cross-reference with design document
+   - Verify all specified components exist
+   - Check API signatures match design
+   - Ensure error cases are handled
+
+3. **Convention Adherence** (automatic):
+   - File naming conventions (kebab-case)
+   - Code structure patterns
+   - Import organization
+   - Comment standards
+
+**Self-Correction Examples**:
+```javascript
+// Automatic fixes applied:
+// 1. Lint error: Missing return type
+function getName(): string {  // Added return type
+  return user.name;
+}
+
+// 2. Type error: Incorrect type
+interface User {
+  name: string;  // Fixed from 'any'
+  age: number;
+}
+
+// 3. Convention: File naming
+// Renamed: UserService.ts → user-service.ts
+```
+
+**Validation Result Recording**:
+After each validation cycle, record the improvements made for learning:
+```yaml
+await create_item({
+  type: 'knowledge',
+  title: 'Implementation Self-Correction: Authentication Module',
+  content: '## Automatic Fixes Applied\n- Fixed 5 lint errors\n- Corrected 2 type mismatches\n- Added missing error handling',
+  tags: ['#self-validation', '#quality', 'implementation']
+})
+```
 
 ## Implementation Patterns
 

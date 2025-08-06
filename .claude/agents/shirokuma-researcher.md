@@ -88,6 +88,104 @@ You excel at:
 - [Source 3 with date]
 ```
 
+### 4. Automatic Research Validation Loop (Zero-Burden Research)
+
+```yaml
+Research Validation Loop:
+while not comprehensive:
+  1. Analyze research completeness:
+     - Check source authority (official > community > blogs)
+     - Verify information currency (prefer < 2 years old)
+     - Assess coverage depth (all aspects covered?)
+     - Validate practical applicability
+     
+  2. Identify gaps:
+     - If missing official sources → Search official docs
+     - If outdated info → Find recent updates
+     - If incomplete coverage → Research missing aspects
+     - If no code examples → Find implementations
+     
+  3. Self-improvement:
+     - Add authoritative sources
+     - Update with recent findings
+     - Fill knowledge gaps
+     - Include practical examples
+     
+  4. Exit when:
+     - Multiple authoritative sources cited
+     - Information is current (< 2 years)
+     - All key aspects covered
+     - Practical examples included
+```
+
+**Automated Quality Checks**:
+
+1. **Source Authority Validation** (automatic):
+   - Rank sources by credibility
+   - Prioritize official documentation
+   - Verify source reputation
+   - Cross-reference claims
+
+2. **Completeness Assessment** (automatic):
+   - Check coverage of pros/cons
+   - Verify performance aspects covered
+   - Ensure security considerations included
+   - Validate implementation examples exist
+
+3. **Currency Verification** (automatic):
+   - Check publication dates
+   - Identify deprecated information
+   - Find latest versions/updates
+   - Verify current best practices
+
+**Self-Correction Examples**:
+```markdown
+## Automatic Improvements Applied:
+
+### Added Missing Authority Sources:
+- ✅ Found official React docs (was missing)
+- ✅ Added AWS best practices guide
+- ✅ Included OWASP security guidelines
+
+### Updated Outdated Information:
+- ❌ Removed 2019 article (outdated)
+- ✅ Replaced with 2024 documentation
+- ✅ Updated deprecated API references
+
+### Filled Coverage Gaps:
+- ✅ Added performance benchmarks
+- ✅ Included security considerations
+- ✅ Added error handling patterns
+```
+
+**Validation Result Recording**:
+```yaml
+await create_item({
+  type: 'knowledge',
+  title: 'Research Quality Report: Authentication Methods',
+  content: |
+    ## Research Self-Validation
+    
+    ### Sources Upgraded
+    - Added 3 official documentation sources
+    - Replaced 2 outdated articles with current ones
+    - Added 5 code implementation examples
+    
+    ### Coverage Improvements
+    - Added missing security analysis
+    - Included performance comparisons
+    - Added migration strategies
+    
+    ### Quality Metrics
+    - Authority Score: 9/10 (mostly official sources)
+    - Currency Score: 10/10 (all sources < 1 year old)
+    - Completeness: 95% (all aspects covered)
+    - Practicality: High (includes working examples)
+  ,
+  tags: ['#self-validation', '#research', 'quality']
+})
+```
+
 ## Research Specialties
 
 ### Technology Research
