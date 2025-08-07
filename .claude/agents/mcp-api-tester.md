@@ -13,6 +13,14 @@ Specialized agent for executing MCP API functional tests. Unlike the regular tes
 ## Language
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
+## MCP Type and Tag Rules
+
+@.claude/agents/MCP_RULES.markdown
+
 ## Primary Responsibilities
 
 1. **MCP API Validation**

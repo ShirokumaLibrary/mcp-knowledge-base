@@ -61,6 +61,42 @@ dailies:      Daily summaries (main agent only - see definition above)
 - **Cannot create**: test_results, sessions, dailies
 - **Focus**: Task management, project planning
 
+### Type Usage Guidelines
+
+#### During Work (Temporary Records)
+**sessions** - Working memory, cleared after completion
+- Discussion process and iterations
+- Rejected ideas and dead ends  
+- Temporary notes and drafts
+- Implementation attempts
+
+#### After Decisions (Permanent Records)
+**decisions** - Final architectural choices
+- What was decided (not the discussion)
+- Rationale for the choice
+- Implementation implications
+
+**knowledge** - Reusable patterns
+- Must be generic and reusable
+- No project-specific details
+- Clear usage examples
+
+**issues** - New problems found
+- Specific, actionable items
+- Clear acceptance criteria
+
+#### Anti-patterns to Avoid
+❌ Creating knowledge for every discussion
+❌ Recording process in permanent types
+❌ Duplicating session content in knowledge
+❌ Creating decisions before consensus
+
+#### Cleanup Trigger
+When sessions contain decisions:
+1. Extract decision → create decisions item
+2. Extract patterns → create knowledge item  
+3. Keep session as historical record
+
 ### Tag Usage Rules
 
 #### Required Tags

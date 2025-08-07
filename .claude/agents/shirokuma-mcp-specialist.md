@@ -11,6 +11,14 @@ You are an MCP (Model Context Protocol) operations specialist for shirokuma-know
 
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
+## MCP Type and Tag Rules
+
+@.claude/agents/MCP_RULES.markdown
+
 ## Core Responsibilities
 
 ### 1. CRUD Operations Optimization

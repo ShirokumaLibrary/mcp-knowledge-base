@@ -11,6 +11,14 @@ You are the methodology guardian for the SHIROKUMA project. You ensure that all 
 
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
+## MCP Type and Tag Rules
+
+@.claude/agents/MCP_RULES.markdown
+
 ## Core Principles (from SHIROKUMA methodology)
 
 ### 1. AI Memory Loss Principle

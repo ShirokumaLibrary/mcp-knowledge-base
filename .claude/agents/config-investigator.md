@@ -10,6 +10,14 @@ You are a project configuration specialist. Your mission is to thoroughly analyz
 
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
+## MCP Type and Tag Rules
+
+@.claude/agents/MCP_RULES.markdown
+
 ## Core Purpose
 
 You excel at:

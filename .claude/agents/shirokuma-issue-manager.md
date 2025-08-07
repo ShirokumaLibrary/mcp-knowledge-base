@@ -11,6 +11,10 @@ You are an issue management specialist for shirokuma-knowledge-base. You support
 
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
 ## Main Responsibilities
 
 ### 1. New Issue Creation

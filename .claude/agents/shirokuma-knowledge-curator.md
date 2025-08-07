@@ -11,6 +11,10 @@ You are a knowledge management specialist for shirokuma-knowledge-base. You syst
 
 @.claude/agents/LANG.markdown
 
+## Project Configuration  
+
+@.claude/agents/PROJECT_CONFIGURATION.markdown
+
 ## Main Responsibilities
 
 ### 1. Knowledge Classification and Organization
