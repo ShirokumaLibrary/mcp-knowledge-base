@@ -46,106 +46,29 @@ Pre-flight Checks:
    - Purpose: Skip unnecessary checks for documentation-only changes
    - Implementation:
      ```bash
-     # Define comprehensive change detection function
-     get_all_changes() {
-       {
-         git diff --name-only HEAD 2>/dev/null
-         git diff --cached --name-only 2>/dev/null
-         git diff --name-only 2>/dev/null
-         git ls-files --others --exclude-standard 2>/dev/null
-       } | sort -u
-     }
+     # Use external script for better maintainability
+     # The script sets these environment variables:
+     # - SKIP_CHECKS (true/false)
+     # - CHANGE_TYPE (markdown/code/mixed/none/forced)
+     # - MARKDOWN_COUNT (number)
+     # - CODE_COUNT (number)
      
-     # Get all changed files
-     CHANGED_FILES=$(get_all_changes)
+     # Run the check script (pass any arguments like --force)
+     .claude/tools/check-markdown-only.sh "$@"
+     CHECK_RESULT=$?
      
-     # Initialize skip flag
-     SKIP_CHECKS=false
+     # Exit code 0 means markdown-only (can skip checks)
+     # Exit code 1 means code/config changes (need full checks)
+     # Exit code 2 means error occurred
      
-     # Handle empty or error cases
-     if [ -z "$CHANGED_FILES" ]; then
-       if ! git rev-parse --git-dir > /dev/null 2>&1; then
-         echo "⚠️ Not in a git repository - running full checks for safety"
-         SKIP_CHECKS=false
-       else
-         echo "ℹ️ No changes detected - running full checks"
-         SKIP_CHECKS=false
-       fi
+     if [ $CHECK_RESULT -eq 0 ]; then
+       SKIP_CHECKS=true
      else
-       # Efficient type detection using grep (no bash loops)
-       HAS_CODE_CHANGES=false
-       HAS_CONFIG_CHANGES=false
-       
-       # Check for code files
-       if echo "$CHANGED_FILES" | grep -qE '\.(ts|js|tsx|jsx|mjs|cjs)$'; then
-         HAS_CODE_CHANGES=true
-       fi
-       
-       # Check for config files
-       if echo "$CHANGED_FILES" | grep -qE '(package\.json|package-lock\.json|tsconfig.*\.json|jest\.config\.|rollup\.config\.|webpack\.config\.|\.eslintrc|\.prettierrc)'; then
-         HAS_CONFIG_CHANGES=true
-       fi
-       
-       # Count file types
-       MARKDOWN_COUNT=$(echo "$CHANGED_FILES" | grep -cE '\.(md|mdx)$' || echo 0)
-       TOTAL_COUNT=$(echo "$CHANGED_FILES" | wc -l)
-       CODE_COUNT=$(echo "$CHANGED_FILES" | grep -cE '\.(ts|js|tsx|jsx|mjs|cjs)$' || echo 0)
-       OTHER_COUNT=$((TOTAL_COUNT - MARKDOWN_COUNT - CODE_COUNT))
-       
-       # Make skip decision with detailed reporting
-       if [ "$HAS_CODE_CHANGES" = true ] || [ "$HAS_CONFIG_CHANGES" = true ]; then
-         echo "🔍 Code/Config changes detected"
-         echo "   Code files: $CODE_COUNT, Config files: detected"
-         echo "   Running full pre-flight checks..."
-         SKIP_CHECKS=false
-       elif [ $MARKDOWN_COUNT -gt 0 ] && [ $OTHER_COUNT -eq 0 ] && [ $CODE_COUNT -eq 0 ]; then
-         echo "📝 Markdown-only changes detected"
-         echo "   Files changed: ${MARKDOWN_COUNT} markdown file(s)"
-         echo "   ⏱️  Time saved: ~48 seconds"
-         echo "   💡 To force full checks: /ai-go $ISSUE_ID --force"
-         
-         # Verbose mode - show changed files
-         if [ "${VERBOSE:-false}" = true ] || [ "${DEBUG:-false}" = true ]; then
-           echo "   Changed files:"
-           echo "$CHANGED_FILES" | grep -E '\.(md|mdx)$' | head -5 | sed 's/^/     - /'
-           if [ $MARKDOWN_COUNT -gt 5 ]; then
-             echo "     ... and $((MARKDOWN_COUNT - 5)) more"
-           fi
-         fi
-         
-         SKIP_CHECKS=true
-       else
-         echo "🔍 Mixed changes detected"
-         echo "   Markdown: $MARKDOWN_COUNT, Code: $CODE_COUNT, Other: $OTHER_COUNT"
-         echo "   Running full pre-flight checks for safety..."
-         SKIP_CHECKS=false
-       fi
+       SKIP_CHECKS=false
      fi
      
-     # Force flag support - check all arguments
-     for arg in "$@"; do
-       if [ "$arg" = "--force" ] || [ "$arg" = "-f" ]; then
-         echo "⚠️ Force flag detected - Running full checks"
-         SKIP_CHECKS=false
-         break
-       fi
-     done
-     
-     # Edge case: Check for symbolic link changes
-     if [ "$SKIP_CHECKS" = true ]; then
-       if [ -n "$(find . -type l -newer .git/index 2>/dev/null)" ]; then
-         echo "⚠️ Symbolic link changes detected - running full checks"
-         SKIP_CHECKS=false
-       fi
-     fi
-     
-     # Edge case: Check for submodule changes
-     if [ "$SKIP_CHECKS" = true ]; then
-       if git submodule status 2>/dev/null | grep -q '^[+-]'; then
-         echo "⚠️ Submodule changes detected - running full checks"
-         SKIP_CHECKS=false
-       fi
-     fi
+     # The script already printed appropriate messages
+     # Environment variables are already exported for use
      ```
 
 1. Build Status Check:

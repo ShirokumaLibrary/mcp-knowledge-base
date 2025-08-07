@@ -28,48 +28,38 @@ I need to:
 **SMART: Analyze changes and run appropriate checks**
 
 ```bash
-# Define comprehensive change detection function (same as ai-go)
-get_all_changes() {
-  {
-    git diff --name-only HEAD 2>/dev/null
-    git diff --cached --name-only 2>/dev/null
-    git diff --name-only 2>/dev/null
-    git ls-files --others --exclude-standard 2>/dev/null
-  } | sort -u
-}
+# Use external script for change detection
+# Source common functions for access to environment variables
+source .claude/tools/lib/common.sh
 
-# Get all changes
-ALL_CHANGES=$(get_all_changes)
+# Run the check script to analyze changes
+.claude/tools/check-markdown-only.sh
+CHECK_RESULT=$?
 
-# Initialize flags
-HAS_CODE=false
-HAS_CONFIG=false
-SKIP_TESTS=false
+# The script exports these variables:
+# - SKIP_CHECKS (true/false)
+# - CHANGE_TYPE (markdown/code/mixed/none/forced)
+# - MARKDOWN_COUNT (number)
+# - CODE_COUNT (number)
 
-# Handle empty changes
-if [ -z "$ALL_CHANGES" ]; then
-  echo "⚠️ No changes detected - proceeding with caution"
-  HAS_CODE=true  # Default to running tests for safety
+# Determine if we need to run tests
+if [ "$SKIP_CHECKS" = true ]; then
+  echo "📝 No code changes detected"
+  echo "   Markdown files: $MARKDOWN_COUNT"
+  echo "   ⏱️  Skipping tests (saves ~25 seconds)"
+  echo "   Only documentation/markdown files will be committed"
+  
+  # Show files in verbose mode
+  if [ "${VERBOSE:-false}" = true ]; then
+    ALL_CHANGES=$(get_all_changes)
+    echo "   Files to commit:"
+    echo "$ALL_CHANGES" | head -10 | sed 's/^/     - /'
+    TOTAL_COUNT=$(echo "$ALL_CHANGES" | wc -l)
+    [ $TOTAL_COUNT -gt 10 ] && echo "     ... and $((TOTAL_COUNT - 10)) more"
+  fi
 else
-  # Efficient file type detection using grep
-  if echo "$ALL_CHANGES" | grep -qE '\.(ts|js|tsx|jsx|mjs|cjs)$'; then
-    HAS_CODE=true
-  fi
-  
-  if echo "$ALL_CHANGES" | grep -qE '(package\.json|package-lock\.json|tsconfig.*\.json|jest\.config\.|\\.eslintrc)'; then
-    HAS_CONFIG=true
-  fi
-  
-  # Count file types for reporting
-  MARKDOWN_COUNT=$(echo "$ALL_CHANGES" | grep -cE '\.(md|mdx)$' || echo 0)
-  CODE_COUNT=$(echo "$ALL_CHANGES" | grep -cE '\.(ts|js|tsx|jsx|mjs|cjs)$' || echo 0)
-  TOTAL_COUNT=$(echo "$ALL_CHANGES" | wc -l)
-fi
-
-# Make test decision with detailed output
-if [ "$HAS_CODE" = true ] || [ "$HAS_CONFIG" = true ]; then
   echo "🔍 Code/Config changes detected"
-  echo "   Code files: $CODE_COUNT, Total files: $TOTAL_COUNT"
+  echo "   Code files: $CODE_COUNT"
   echo "   Running tests before commit..."
   
   npm test
@@ -81,18 +71,6 @@ if [ "$HAS_CODE" = true ] || [ "$HAS_CONFIG" = true ]; then
   fi
   
   echo "✅ All tests passed - safe to commit"
-else
-  echo "📝 No code changes detected"
-  echo "   Markdown files: $MARKDOWN_COUNT"
-  echo "   ⏱️  Skipping tests (saves ~25 seconds)"
-  echo "   Only documentation/markdown files will be committed"
-  
-  # Show files in verbose mode
-  if [ "${VERBOSE:-false}" = true ]; then
-    echo "   Files to commit:"
-    echo "$ALL_CHANGES" | head -10 | sed 's/^/     - /'
-    [ $TOTAL_COUNT -gt 10 ] && echo "     ... and $((TOTAL_COUNT - 10)) more"
-  fi
 fi
 ```
 
@@ -117,7 +95,7 @@ git add src/**/*.test.ts src/**/*.spec.ts src/__tests__/
 ### 3. Distribution Files  
 ```bash
 # Conditional build step - only build if code changed
-if [ "$HAS_CODE" = true ] || [ "$HAS_CONFIG" = true ]; then
+if [ "$SKIP_CHECKS" != true ]; then
   echo "🔨 Building distribution files..."
   npm run build  # MUST use production build, not dev
   
