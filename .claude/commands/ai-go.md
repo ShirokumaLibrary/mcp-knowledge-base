@@ -7,8 +7,11 @@
 
 Examples:
 - `/ai-go issues-123` - Autonomously work on issue until completion
+- `/ai-go issues-123 --force` - Force full checks even for Markdown changes
+- `/ai-go issues-123 -f` - Short form of force flag
 - `/ai-go "implement authentication"` - Design and implement the feature
 - `/ai-go "React state management"` - Research and document the topic
+- `DEBUG=true /ai-go issues-123` - Show detailed change information
 
 ## Task
 
@@ -36,21 +39,157 @@ Execute development workflow autonomously, solving problems independently until 
 
 ### Pre-flight Check Phase
 
-**Environment Health Verification** (Before Starting Work):
+**Smart Environment Health Verification** (Before Starting Work):
 ```yaml
 Pre-flight Checks:
+0. Smart Change Detection (NEW):
+   - Purpose: Skip unnecessary checks for documentation-only changes
+   - Implementation:
+     ```bash
+     # Define comprehensive change detection function
+     get_all_changes() {
+       {
+         git diff --name-only HEAD 2>/dev/null
+         git diff --cached --name-only 2>/dev/null
+         git diff --name-only 2>/dev/null
+         git ls-files --others --exclude-standard 2>/dev/null
+       } | sort -u
+     }
+     
+     # Get all changed files
+     CHANGED_FILES=$(get_all_changes)
+     
+     # Initialize skip flag
+     SKIP_CHECKS=false
+     
+     # Handle empty or error cases
+     if [ -z "$CHANGED_FILES" ]; then
+       if ! git rev-parse --git-dir > /dev/null 2>&1; then
+         echo "⚠️ Not in a git repository - running full checks for safety"
+         SKIP_CHECKS=false
+       else
+         echo "ℹ️ No changes detected - running full checks"
+         SKIP_CHECKS=false
+       fi
+     else
+       # Efficient type detection using grep (no bash loops)
+       HAS_CODE_CHANGES=false
+       HAS_CONFIG_CHANGES=false
+       
+       # Check for code files
+       if echo "$CHANGED_FILES" | grep -qE '\.(ts|js|tsx|jsx|mjs|cjs)$'; then
+         HAS_CODE_CHANGES=true
+       fi
+       
+       # Check for config files
+       if echo "$CHANGED_FILES" | grep -qE '(package\.json|package-lock\.json|tsconfig.*\.json|jest\.config\.|rollup\.config\.|webpack\.config\.|\.eslintrc|\.prettierrc)'; then
+         HAS_CONFIG_CHANGES=true
+       fi
+       
+       # Count file types
+       MARKDOWN_COUNT=$(echo "$CHANGED_FILES" | grep -cE '\.(md|mdx)$' || echo 0)
+       TOTAL_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+       CODE_COUNT=$(echo "$CHANGED_FILES" | grep -cE '\.(ts|js|tsx|jsx|mjs|cjs)$' || echo 0)
+       OTHER_COUNT=$((TOTAL_COUNT - MARKDOWN_COUNT - CODE_COUNT))
+       
+       # Make skip decision with detailed reporting
+       if [ "$HAS_CODE_CHANGES" = true ] || [ "$HAS_CONFIG_CHANGES" = true ]; then
+         echo "🔍 Code/Config changes detected"
+         echo "   Code files: $CODE_COUNT, Config files: detected"
+         echo "   Running full pre-flight checks..."
+         SKIP_CHECKS=false
+       elif [ $MARKDOWN_COUNT -gt 0 ] && [ $OTHER_COUNT -eq 0 ] && [ $CODE_COUNT -eq 0 ]; then
+         echo "📝 Markdown-only changes detected"
+         echo "   Files changed: ${MARKDOWN_COUNT} markdown file(s)"
+         echo "   ⏱️  Time saved: ~48 seconds"
+         echo "   💡 To force full checks: /ai-go $ISSUE_ID --force"
+         
+         # Verbose mode - show changed files
+         if [ "${VERBOSE:-false}" = true ] || [ "${DEBUG:-false}" = true ]; then
+           echo "   Changed files:"
+           echo "$CHANGED_FILES" | grep -E '\.(md|mdx)$' | head -5 | sed 's/^/     - /'
+           if [ $MARKDOWN_COUNT -gt 5 ]; then
+             echo "     ... and $((MARKDOWN_COUNT - 5)) more"
+           fi
+         fi
+         
+         SKIP_CHECKS=true
+       else
+         echo "🔍 Mixed changes detected"
+         echo "   Markdown: $MARKDOWN_COUNT, Code: $CODE_COUNT, Other: $OTHER_COUNT"
+         echo "   Running full pre-flight checks for safety..."
+         SKIP_CHECKS=false
+       fi
+     fi
+     
+     # Force flag support - check all arguments
+     for arg in "$@"; do
+       if [ "$arg" = "--force" ] || [ "$arg" = "-f" ]; then
+         echo "⚠️ Force flag detected - Running full checks"
+         SKIP_CHECKS=false
+         break
+       fi
+     done
+     
+     # Edge case: Check for symbolic link changes
+     if [ "$SKIP_CHECKS" = true ]; then
+       if [ -n "$(find . -type l -newer .git/index 2>/dev/null)" ]; then
+         echo "⚠️ Symbolic link changes detected - running full checks"
+         SKIP_CHECKS=false
+       fi
+     fi
+     
+     # Edge case: Check for submodule changes
+     if [ "$SKIP_CHECKS" = true ]; then
+       if git submodule status 2>/dev/null | grep -q '^[+-]'; then
+         echo "⚠️ Submodule changes detected - running full checks"
+         SKIP_CHECKS=false
+       fi
+     fi
+     ```
+
 1. Build Status Check:
-   - Run: npm run build
+   - Condition: Skip if SKIP_CHECKS is true
+   - Implementation:
+     ```bash
+     if [ "$SKIP_CHECKS" != true ]; then
+       echo "🔨 Running build check..."
+       npm run build
+       # [rest of build check logic]
+     else
+       echo "⏭️  Skipping build check (markdown-only changes)"
+     fi
+     ```
    - Threshold: 0 errors allowed
    - Action: If errors > threshold → Show issues and ask user to proceed/abort
 
 2. Test Status Check:
-   - Run: npm test
+   - Condition: Skip if SKIP_CHECKS is true
+   - Implementation:
+     ```bash
+     if [ "$SKIP_CHECKS" != true ]; then
+       echo "🧪 Running test check..."
+       npm test
+       # [rest of test check logic]
+     else
+       echo "⏭️  Skipping test check (markdown-only changes)"
+     fi
+     ```
    - Record: Baseline failure count
    - Action: If failures > 5 → Warn user about existing issues
 
 3. Lint Status Check:
-   - Run: npm run lint:errors
+   - Condition: Skip if SKIP_CHECKS is true
+   - Implementation:
+     ```bash
+     if [ "$SKIP_CHECKS" != true ]; then
+       echo "🔍 Running lint check..."
+       npm run lint:errors
+       # [rest of lint check logic]
+     else
+       echo "⏭️  Skipping lint check (markdown-only changes)"
+     fi
+     ```
    - Threshold: 10 errors (configurable)
    - Action: If errors > threshold → Suggest fixing first
 

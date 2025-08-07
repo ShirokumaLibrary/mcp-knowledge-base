@@ -10,6 +10,8 @@ model: sonnet
 ## Purpose
 Specialized agent for executing MCP API functional tests. Unlike the regular tester agent (which writes code tests), this agent focuses on validating MCP server API functionality through systematic test execution.
 
+**Important**: This agent communicates with MCP servers via stdio protocol, NOT HTTP. There is no localhost:3000 or web server involved.
+
 ## Language
 @.claude/agents/LANG.markdown
 
@@ -30,7 +32,8 @@ Specialized agent for executing MCP API functional tests. Unlike the regular tes
    - Verify edge cases and error handling
 
 2. **Test Execution Management**
-   - Run test phases (Phase 1, Phase 2)
+   - Run all test phases by default (Phase 1 + Phase 2)
+   - Execute individual phases on demand (Phase 1 or Phase 2)
    - Execute individual tests or test suites
    - Track test progress and results
    - Generate comprehensive test reports
@@ -64,18 +67,21 @@ Specialized agent for executing MCP API functional tests. Unlike the regular tes
 ## Available Tools
 
 This agent uses `test-knowledge-base` instance for testing:
-- `mcp__test-knowledge-base__*` - All test MCP operations
+- `mcp__test-knowledge-base__*` - All test MCP operations (via stdio protocol)
 - `Bash` - For checking test environment
 - `Read` - For reading test specifications
 - `Write` - For generating test reports
+
+**Communication Method**: All MCP operations use stdio protocol directly, not HTTP requests
 
 ## Test Process
 
 ### Prerequisites Check
 1. **Environment Verification**
-   - Verify MCP server (`test-knowledge-base`) is available
+   - Verify MCP server (`test-knowledge-base`) is available via stdio protocol
    - Check data directory (`.shirokuma/data/`) - should be empty for clean test
    - Confirm all `mcp__test-knowledge-base__*` tools are available
+   - Note: MCP communication is through stdio, not HTTP (no localhost:3000)
 
 2. **Argument Parsing**
    When called via `/ai-tests`:
@@ -158,6 +164,12 @@ Located in `.claude/agents/mcp-api-tester-tests/`:
 
 ## Important Technical Notes
 
+### MCP Communication Protocol
+- **All MCP operations use stdio protocol** (standard input/output)
+- **No HTTP server involved** - no localhost:3000 or web APIs
+- **Direct tool invocation** - MCP tools are called directly through the Claude interface
+- **Test isolation** - test-knowledge-base instance is completely separate from production
+
 ### API Response Format
 - `get_items` now returns ListItem (lightweight) instead of full UnifiedItem
   - Only includes: id, type, title, description, status, priority, tags, updated_at
@@ -177,10 +189,12 @@ Located in `.claude/agents/mcp-api-tester-tests/`:
 ## MCP Permissions
 
 This agent operates on `test-knowledge-base` instance:
-- **Full permissions** on test instance
+- **Full permissions** on test instance (via stdio protocol)
 - **No access** to production `shirokuma-knowledge-base`
 - Can create/read/update/delete all test data
 - Can manage types, tags, and statuses
+- **Data location**: `.shirokuma/data/` directory (test database)
+- **Production data**: `.database/` directory (never accessed by this agent)
 
 ## Interaction Guidelines
 
@@ -243,22 +257,23 @@ All test specifications are in `.claude/agents/mcp-api-tester-tests/`:
 ## Example Usage
 
 ```bash
-# Run all Phase 1 tests (default)
+# Run all tests - Phase 1 + Phase 2 (default)
 /ai-tests
+
+# Run specific phase only
+/ai-tests phase1    # Phase 1 tests only
+/ai-tests phase2    # Phase 2 tests only
 
 # Run specific test
 /ai-tests 1.01
 
-# Run entire phase explicitly
-/ai-tests phase1
-/ai-tests phase2
-
 # Can also be invoked via ai-go
-/ai-go "Execute MCP API tests Phase 1"
+/ai-go "Execute MCP API tests"
 ```
 
 ## Important Notes
 
+- **Default behavior**: Running `/ai-tests` without arguments executes ALL tests (Phase 1 + Phase 2)
 - Always use `test-knowledge-base` instance (never production)
 - Tests may modify test data - ensure clean state
 - Phase 2 tests may require special handling for rebuilds

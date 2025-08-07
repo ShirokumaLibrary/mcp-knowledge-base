@@ -8,10 +8,10 @@ argument-hint: "[test-number or phase]"
 
 ## Usage
 ```
-/ai-tests           # Run all tests
+/ai-tests           # Run all tests (Phase 1 + Phase 2)
 /ai-tests 1.01      # Run specific test
-/ai-tests phase1    # Run Phase 1 tests (1.01-1.15)
-/ai-tests phase2    # Run Phase 2 tests (2.01-2.02)
+/ai-tests phase1    # Run Phase 1 tests only (1.01-1.15)
+/ai-tests phase2    # Run Phase 2 tests only (2.01-2.02)
 ```
 
 ## Task
@@ -25,10 +25,10 @@ Coordinate MCP API functional test execution through the specialist agent.
 The system delegates test execution to the @agent-mcp-api-tester specialist agent.
 
 Parse user arguments:
-- No arguments → phase1 (default)
+- No arguments → all tests (Phase 1 + Phase 2, default)
 - Test number (e.g., "1.01") → specific test
-- "phase1" → tests 1.01-1.15
-- "phase2" → tests 2.01-2.02
+- "phase1" → Phase 1 tests only (1.01-1.15)
+- "phase2" → Phase 2 tests only (2.01-2.02)
 
 ### Specialist Agent
 
@@ -54,7 +54,7 @@ The specialist autonomously handles:
 
 The specialist will provide:
 - Test-by-test results (✅ passed / ❌ failed)
-- Summary statistics (X/15 tests passed)
+- Summary statistics (e.g., 17/17 tests passed for full run, 15/15 for phase1, 2/2 for phase2)
 - Detailed failure reasons
 
 ### Important Note

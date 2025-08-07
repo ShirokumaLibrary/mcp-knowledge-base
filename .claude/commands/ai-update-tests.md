@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read, Write, MultiEdit, Edit, Grep, Bash(npm test:*), mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__index_codebase, mcp__shirokuma-knowledge-base__search_code, mcp__shirokuma-knowledge-base__get_index_status, Task
+allowed-tools: Read, Write, MultiEdit, Edit, Grep, Bash(npm test:*), mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__index_codebase, mcp__shirokuma-knowledge-base__search_code, mcp__shirokuma-knowledge-base__get_index_status
 description: Update test code to match the latest implementation
 ---
 
@@ -12,9 +12,20 @@ description: Update test code to match the latest implementation
 /ai-update-tests int     # Update integration tests only
 ```
 
-## Task
+## Scope and Responsibility
 
 @.claude/agents/LANG.markdown
+
+**This command is responsible for test code updates ONLY:**
+- ✅ Analyzes failing tests and identifies required updates
+- ✅ Updates test expectations to match current implementation
+- ✅ Fixes deprecated patterns and field names
+- ✅ Updates test files to use correct assertions and mock data
+- ❌ Does NOT execute tests after updates (use `/ai-tests` for execution)
+- ❌ Does NOT design test strategies (use `/ai-test-strategy` for planning)
+- ❌ Does NOT validate MCP API behavior (handled by mcp-api-tester agent)
+
+## Task
 
 Analyze the current system implementation and update test code files to match the latest API behavior.
 
@@ -74,52 +85,60 @@ For failing tests:
 ### 4. Delegation to Specialists
 
 **For comprehensive test updates**:
-- Use Task tool to delegate to shirokuma-tester agent
+- Delegate complex test refactoring to @agent-shirokuma-tester
 - Provide list of failing tests and error details
 - Agent will update test code to match current implementation
 
-**For API test validation**:
-- Use Task tool to delegate to mcp-api-tester agent
-- Request execution of specific test phases
-- Agent will validate current API behavior against specifications
+**Note**: MCP API validation is handled by @agent-mcp-api-tester separately
 
 ### 5. Validation
 
 After updates:
-1. Run all tests: `npm test`
-2. Check coverage: `npm run test:coverage`
-3. Verify no regressions
-4. Document changes made
+1. Run specific test files to verify changes: `npm test -- <file>`
+2. Check for TypeScript errors: `npm run type-check`
+3. Document changes made in update summary
 
 ### Output Format
 
 ```
-[Analysis Complete]
-- Tests analyzed: X files
-- Failures found: Y tests
-- Updates made: Z changes
+## Test Update Summary
 
-[Test Results]
-✅ Unit tests: X/Y passing
-✅ Integration tests: X/Y passing
-✅ Coverage maintained: XX%
+### Files Updated
+- [ ] src/core/manager.test.ts (X changes)
+- [ ] tests/integration/api.test.ts (Y changes)
+- [ ] src/utils/validation.test.ts (Z changes)
 
-[Changes Summary]
-- Field consolidation: X updates
-- Response format: Y updates
-- Error messages: Z updates
+### Changes Applied
+1. **Field Consolidation**: X occurrences
+   - related_tasks → related
+   - related_documents → related
+
+2. **Response Format**: Y updates
+   - Plain text → JSON format
+   - Added message field
+
+3. **Error Messages**: Z updates
+   - Updated to AI-friendly format
+
+### Test Code Update Results
+- Total files modified: X
+- Total changes applied: Y
+- TypeScript errors resolved: Z
+
+### Next Steps
+- Run `/ai-tests` to execute updated tests
+- Review any remaining failures
+- Consider test coverage improvements
+
+Note: This command updates test code only. For execution:
+- Unit/integration tests: Use `/ai-tests` command
+- MCP API tests: Use @agent-mcp-api-tester directly
 ```
 
 ### Notes
 
-- **API Test Specifications** are now managed by mcp-api-tester agent
-  - Location: `.claude/agents/mcp-api-tester-tests/*.markdown`
-  - Use `/ai-tests` command to execute them
-  
-- **Code Tests** remain in the codebase
-  - Location: `src/**/*.test.ts`, `tests/**/*.test.ts`
-  - This command focuses on updating these files
-
-- **Backwards Compatibility**
-  - Maintain support for both old and new field names where possible
-  - Add deprecation warnings for old patterns
+- **Test Code Location**: `src/**/*.test.ts`, `tests/**/*.test.ts`
+- **Focus Area**: Update existing test code only
+- **Test Execution**: Use `/ai-tests` command after updates
+- **Backwards Compatibility**: Maintain support for both old and new field names where possible
+- **Deprecation Warnings**: Add warnings for old patterns when appropriate
