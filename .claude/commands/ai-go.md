@@ -132,28 +132,135 @@ The Pre-flight Check logic has been extracted to a reusable script for better ma
 
 The system automatically analyzes input and executes the complete workflow:
 
+#### Task Type Detection and Workflow Selection
+
+**Automatic Task Type Detection**:
+```yaml
+Task Type Analysis:
+1. File Extension Detection:
+   - .md, .txt, .mdx → Documentation workflow
+   - .ts, .js, .py, .java → Code workflow (TDD)
+   - .json, .yaml, .toml → Configuration workflow
+   
+2. Keyword Analysis (in issue/instruction):
+   - "document", "README", "specification" → Documentation
+   - "implement", "fix", "refactor", "bug" → Code (TDD)
+   - "research", "investigate", "explore" → Research
+   - "configure", "setup", "settings" → Configuration
+   
+3. MCP Issue Tag Analysis:
+   - #documentation → Documentation workflow
+   - #bug, #feature → Code workflow (TDD)
+   - #research → Research workflow
+   - #config → Configuration workflow
+
+4. Confidence Scoring:
+   - High (80%+): Proceed with detected workflow
+   - Medium (60-79%): Confirm detection with user
+   - Low (<60%): Default to TDD workflow
+```
+
+**Workflow Selection Logic**:
+```yaml
+if task_type == "documentation":
+  execute DocumentationWorkflow:
+    1. Design: Structure and outline creation
+    2. Draft: Content writing by knowledge-curator
+    3. Review: Content accuracy and clarity check
+    4. Polish: Final improvements and formatting
+    
+elif task_type == "configuration":
+  execute ConfigurationWorkflow:
+    1. Analyze: Current configuration review
+    2. Plan: Changes needed
+    3. Apply: Make configuration changes
+    4. Validate: Test configuration works
+    
+elif task_type == "research":
+  execute ResearchWorkflow:
+    1. Investigate: Gather information
+    2. Analyze: Evaluate findings
+    3. Synthesize: Create recommendations
+    4. Document: Record in knowledge base
+    
+else:  # Default to code/TDD workflow
+  execute TDDWorkflow  # Existing TDD cycle
+```
+
 #### For Issues (e.g., `issues-123`):
 1. **Fetch issue details** from MCP
-2. **Analyze and plan** optimal approach
-3. **Execute TDD workflow (Kent Beck methodology)**:
-   - Problem discovery and root cause analysis
-   - Design with multiple solution options
-   - RED: Write failing tests first
-   - GREEN: Minimal implementation to pass tests
-   - REFACTOR: Tidy first, then improve
-   - Code review with focus on separation of concerns
-4. **Continue until success** or truly unsolvable problem
+2. **Detect task type** from issue tags, title, and description
+3. **Select appropriate workflow** based on task type:
+   - Documentation tasks → Documentation workflow
+   - Code tasks → TDD workflow (Kent Beck methodology)
+   - Research tasks → Research workflow
+   - Configuration tasks → Configuration workflow
+4. **Execute selected workflow** autonomously
+5. **Continue until success** or truly unsolvable problem
 
 #### For Instructions (e.g., `"implement authentication"`):
 1. **Parse and understand** the request
-2. **Create tracking issue** automatically
-3. **Execute full workflow** with autonomous decision-making
+2. **Detect task type** from keywords and context
+3. **Create tracking issue** automatically with appropriate tags
+4. **Execute appropriate workflow** with autonomous decision-making
 
 ### Autonomous Execution Flow
 
 The system executes all tasks autonomously with built-in quality assurance:
 
-#### 1. Design Phase with Auto-Review
+#### Workflow-Specific Execution
+
+##### Documentation Workflow (for .md, README, specs, docs)
+```yaml
+Documentation Creation Flow:
+1. Outline Phase:
+   @agent-shirokuma-designer:
+     - Analyze documentation requirements
+     - Create structure and sections
+     - Define key topics to cover
+     - Save outline to decisions-XX
+
+2. Draft Phase:
+   @agent-shirokuma-knowledge-curator:
+     - Write content based on outline
+     - Include examples and explanations
+     - Add appropriate formatting
+     - Create knowledge-XX or docs-XX
+
+3. Review Phase:
+   @agent-shirokuma-reviewer:
+     - Check content accuracy
+     - Verify completeness
+     - Assess clarity and readability
+     - Create handover with feedback
+
+4. Polish Phase (if needed):
+   @agent-shirokuma-knowledge-curator:
+     - Apply review feedback
+     - Improve formatting
+     - Add missing sections
+     - Finalize document
+```
+
+##### Configuration Workflow (for .json, .yaml, .toml)
+```yaml
+Configuration Update Flow:
+1. Analysis: Review current configuration
+2. Planning: Identify required changes
+3. Implementation: Apply changes carefully
+4. Validation: Test configuration works
+```
+
+##### Research Workflow (for investigations, explorations)
+```yaml
+Research Flow:
+1. Investigation: Gather relevant information
+2. Analysis: Evaluate findings and options
+3. Synthesis: Create recommendations
+4. Documentation: Record in knowledge base
+```
+
+#### 1. Design Phase with Auto-Review (for Code/TDD Workflow)
 ```yaml
 Design Loop (Bounded):
 1. @agent-shirokuma-designer creates initial design
@@ -167,9 +274,9 @@ Design Loop (Bounded):
 5. Report outcome clearly to user
 ```
 
-#### 2. TDD Implementation Phase (Kent Beck Methodology)
+#### 2. TDD Implementation Phase (Kent Beck Methodology with Review)
 ```yaml
-TDD Cycle - Red → Green → Refactor:
+Complete TDD Cycle - Red → Green → Review → Refactor (conditional):
 
 1. Problem Discovery Phase:
    @agent-shirokuma-designer:
@@ -184,89 +291,254 @@ TDD Cycle - Red → Green → Refactor:
      - Use descriptive test names (behavior-focused)
      - Verify test fails for the RIGHT reason
      - Save test specifications to test_results-XX
-     - Create handover with expected behavior
+     - Create handover with expected behavior (tester → reviewer)
 
-3. GREEN Phase (Minimal Implementation):
+3. TEST REVIEW Phase (Test Quality Assurance) - MAX 3 iterations:
+   Task Tool Invocation (by main agent):
+   ```yaml
+   await Task({
+     subagent_type: "shirokuma-reviewer",
+     prompt: `Review the test quality from handover-XX.
+       
+       Required checks:
+       1. Test coverage adequacy (edge cases, error conditions)
+       2. Test clarity and maintainability
+       3. Correct failure reasons (failing for the right reason)
+       4. Test independence and isolation
+       5. Proper test naming and structure
+       
+       Quality criteria:
+       - Tests must be comprehensive
+       - Tests must be readable and maintainable
+       - Tests must follow TDD principles
+       
+       Create handover with:
+       - Review findings
+       - Coverage assessment
+       - Decision: APPROVED or NEEDS_IMPROVEMENT
+       
+       Iteration: {current} of 3 maximum`,
+     context: {
+       phase: "TEST_REVIEW",
+       handover_id: "handover-XX",
+       iteration: current_iteration
+     }
+   })
+   ```
+   
+   Test Review Decision Logic:
+   - If test quality sufficient: → APPROVED → Proceed to GREEN Phase
+   - If improvements needed AND iteration < 3: → NEEDS_IMPROVEMENT → Tester refines tests
+   - If iteration == 3: → PROCEED_WITH_WARNINGS → Continue with current tests
+
+4. GREEN Phase (Minimal Implementation):
    @agent-shirokuma-programmer:
      - Write ONLY code to make test pass
      - No extra features or optimizations
      - Focus: Make it work, not perfect
      - Verify all tests pass
-     - Create handover for refactoring
+     - Create handover for review (programmer → reviewer)
 
-4. REFACTOR Phase (Tidy First):
-   Step 1 - Structural Changes (if needed):
-     - Rename for clarity
-     - Extract duplicate code
-     - Reorganize file structure
-     - Commit separately with "refactor:" prefix
+4. REVIEW Phase (Quality Assurance) - MAX 3 iterations:
+   Task Tool Invocation (by main agent):
+   ```yaml
+   await Task({
+     subagent_type: "shirokuma-reviewer",
+     prompt: `Review the implementation from handover-XX.
+       
+       Required checks:
+       1. Code quality assessment (maintainability, readability)
+       2. Security vulnerability scan
+       3. Performance analysis
+       4. TDD compliance verification
+       
+       Quality gates:
+       - Code quality score must be >= 80%
+       - Security issues must be 0
+       - All tests must pass
+       
+       Create handover with:
+       - Review findings
+       - Quality metrics
+       - Decision: APPROVED or NEEDS_REFACTOR
+       
+       Iteration: {current} of 3 maximum`,
+     context: {
+       phase: "REVIEW",
+       handover_id: "handover-XX",
+       iteration: current_iteration,
+       quality_threshold: 80
+     }
+   })
+   ```
    
-   Step 2 - Improvements:
-     - Optimize performance
-     - Improve code quality
-     - Add documentation
-     - Ensure tests still pass
+   Review Decision Logic:
+   - If quality >= 80% AND security_issues == 0: → APPROVED → Complete
+   - If issues found AND iteration < 3: → NEEDS_REFACTOR → Refactor Phase
+   - If iteration == 3: → PARTIAL_SUCCESS → Complete with warnings
 
-5. Verification:
+5. REFACTOR Phase (Conditional) - Only if review requires changes:
+   Task Tool Invocation (when NEEDS_REFACTOR):
+   ```yaml
+   await Task({
+     subagent_type: "shirokuma-programmer",
+     prompt: `Apply improvements from review handover-XX.
+       
+       Priority order:
+       1. Fix security vulnerabilities (critical)
+       2. Improve code quality issues
+       3. Optimize performance bottlenecks
+       
+       Requirements:
+       - Keep all tests passing (GREEN state)
+       - Follow "Tidy First" principle
+       - Separate structural and behavioral changes
+       
+       Create handover when complete`,
+     context: {
+       phase: "REFACTOR",
+       review_handover_id: "handover-XX",
+       iteration: current_iteration
+     }
+   })
+   ```
+   
+   After refactoring: Return to Review Phase (iteration + 1)
+
+6. Verification:
    - Each phase must complete before next
    - Tests must pass after EVERY change
-   - Structural and behavioral changes NEVER mixed
+   - Quality gates enforced at review
+   - Maximum 3 iterations for review-refactor cycle
 ```
 
-#### 3. Review and Refactor Phase (REFACTOR)
+#### 3. Review Phase with Task Tool (After GREEN)
 ```yaml
-Review and Refactor Loop (Bounded):
-1. @agent-shirokuma-reviewer examines implementation and tests:
-   - Code quality assessment
-   - Design conformance check
-   - Security vulnerability scan
-   - Performance analysis
+Review Phase Execution (Bounded to 3 iterations):
 
-2. Refactor Phase (if improvements needed AND iterations < 3):
-   @agent-shirokuma-programmer:
-     - Apply reviewer's improvement suggestions
-     - Refactor without breaking tests
-     - Verify tests still pass using project's test command
-     - Ensure tests remain in GREEN state
-     - Update implementation in knowledge-XX
-   
-3. Quality Gates:
-   - All tests must continue passing
-   - Code quality score > 80%
-   - No security vulnerabilities
-   - Performance benchmarks met
+1. Main agent invokes reviewer via Task tool:
+   Task({
+     subagent_type: "shirokuma-reviewer",
+     prompt: "Review implementation and create handover with findings"
+   })
 
-4. Stop after: quality achieved OR 3 iterations reached
-5. Report final status and metrics to user
+2. @agent-shirokuma-reviewer performs:
+   - Code quality assessment (score 0-100)
+   - Security vulnerability scan (critical/high/medium/low)
+   - Performance analysis (bottlenecks, memory leaks)
+   - TDD compliance check (test coverage, quality)
+
+3. Reviewer creates handover with decision:
+   - APPROVED: Quality >= 80%, no security issues
+   - NEEDS_REFACTOR: Issues found, improvements needed
+   - PARTIAL_SUCCESS: Max iterations reached
+
+4. Quality Gates (enforced):
+   - Code quality score >= 80%
+   - Security vulnerabilities = 0
+   - Test coverage maintained
+   - Performance acceptable
+
+5. Iteration Control:
+   - Maximum 3 review-refactor cycles
+   - Each iteration tracked in handovers
+   - Stop at approval or iteration limit
 ```
 
-### Specialist Agents
+#### 4. Refactor Phase with Task Tool (Conditional)
+```yaml
+Refactor Phase Execution (Only when NEEDS_REFACTOR):
 
-The system coordinates these specialists autonomously:
+1. Main agent invokes programmer for fixes:
+   Task({
+     subagent_type: "shirokuma-programmer",
+     prompt: "Apply review feedback from handover-XX"
+   })
+
+2. @agent-shirokuma-programmer applies improvements:
+   Priority 1: Security fixes (must fix all)
+   Priority 2: Code quality improvements
+   Priority 3: Performance optimizations
+
+3. Tidy First Principle:
+   - Commit 1: Structural changes (renaming, reorganizing)
+   - Commit 2: Behavioral improvements (logic, optimization)
+   - Never mix change types in same commit
+
+4. Validation after refactoring:
+   - All tests must still pass
+   - No regression in functionality
+   - Improvements documented in handover
+
+5. Return to Review Phase:
+   - Increment iteration counter
+   - Create new handover for re-review
+   - Continue until approved or max iterations
+```
+
+### Specialist Agents and Task Tool Usage
+
+The system coordinates these specialists autonomously using the Task tool:
 
 1. **shirokuma-researcher** - Investigates technologies and best practices
 2. **shirokuma-designer** - Creates and iterates on technical designs
-3. **shirokuma-reviewer** - Reviews designs and code, suggests improvements
-4. **shirokuma-programmer** - Implements solutions based on designs
+3. **shirokuma-reviewer** - Reviews code quality and security (invoked via Task after GREEN)
+4. **shirokuma-programmer** - Implements solutions and applies review feedback
 5. **shirokuma-tester** - Creates comprehensive test suites
 
-All agents work together seamlessly without user coordination.
+**Critical: Reviewer Invocation Pattern**
+```typescript
+// After GREEN phase completion, ALWAYS invoke reviewer:
+const reviewResult = await Task({
+  subagent_type: "shirokuma-reviewer",
+  prompt: `Review the implementation from ${handoverId}.
+    Check: quality, security, performance, TDD compliance.
+    Create handover with decision: APPROVED or NEEDS_REFACTOR.`,
+  context: { phase: "REVIEW", iteration: currentIteration }
+});
+
+// Handle review decision:
+if (reviewResult.status === "NEEDS_REFACTOR" && iteration < 3) {
+  // Invoke programmer for refactoring
+  await Task({
+    subagent_type: "shirokuma-programmer",
+    prompt: `Apply improvements from review ${reviewHandoverId}`,
+    context: { phase: "REFACTOR" }
+  });
+  // Return to review phase
+}
+```
+
+All agents work together seamlessly through Task tool coordination.
 
 ### Autonomous Workflow Orchestration
 
 The system orchestrates everything automatically:
 
 ```yaml
-Autonomous Flow:
+Autonomous Flow with Mandatory Review:
 1. Analyze input and understand requirements
 2. Check existing work to avoid duplication
-3. Execute iterative development:
+3. Execute complete TDD cycle:
    
    Design Phase (Max 3 iterations):
    - Create design → Review → Improve → Stop at success or limit
    
-   Implementation Phase (Max 3 iterations):
-   - Implement + Test (parallel) → Review → Fix → Stop at success or limit
+   RED Phase:
+   - Write failing tests → Verify they fail correctly
+   
+   GREEN Phase:
+   - Minimal implementation → Tests pass → Create handover
+   
+   REVIEW Phase (MANDATORY after GREEN):
+   - Invoke reviewer via Task tool
+   - Check quality gates (80% quality, 0 security issues)
+   - Get decision: APPROVED or NEEDS_REFACTOR
+   
+   REFACTOR Phase (Conditional, Max 3 iterations):
+   - Only if NEEDS_REFACTOR
+   - Apply reviewer suggestions
+   - Return to REVIEW phase
    
 4. Update all tracking automatically
 5. Only escalate if truly stuck after multiple attempts
@@ -297,20 +569,31 @@ graph TB
     
     C --> D[Design Review Loop]
     D --> |Improvements| B
-    D --> |Approved| E[Implementation]
+    D --> |Approved| E[RED: Test Phase]
     
-    E --> F[@agent-shirokuma-programmer]
     E --> G[@agent-shirokuma-tester]
+    G --> I{test_results-XX}
+    I --> TR[TEST REVIEW Phase]
+    TR --> TV[@agent-shirokuma-reviewer via Task]
+    TV --> TD{Test Quality OK?}
+    TD --> |Needs Improvement| G
+    TD --> |Approved| F[GREEN: Implementation]
     
-    F --> H{knowledge-XX}
-    G --> I{test-results-XX}
+    F --> H[@agent-shirokuma-programmer]
+    H --> K{knowledge-XX}
+    K --> |Tests Pass| L{handover-XX}
     
-    H --> J[Code Review Loop]
-    I --> J
+    L --> M[REVIEW: Quality Check]
+    M --> N[@agent-shirokuma-reviewer via Task]
+    N --> O{Review Decision}
     
-    J --> |Auto-Fix| F
-    J --> |Auto-Fix| G
-    J --> |Success| K[Complete]
+    O --> |APPROVED| R[Complete]
+    O --> |NEEDS_REFACTOR| P[REFACTOR Phase]
+    O --> |Max Iterations| R
+    
+    P --> Q[@agent-shirokuma-programmer via Task]
+    Q --> |Improvements Applied| M
+    Q --> |Iteration < 3| L
 ```
 
 All loops execute automatically without user intervention.
@@ -399,39 +682,61 @@ User Escalation (After Recovery Attempts):
 # → AI identifies the issue, implements fix, verifies it works
 ```
 
-### TDD Example Flow (Kent Beck Style)
+### Complete TDD Example Flow with Review
 
 ```typescript
-// Example: Adding user validation
+// Example: Adding user validation with full TDD cycle
 
-// 1. RED Phase - Start with failing test
+// 1. RED Phase - Start with failing test (@agent-shirokuma-tester)
 test('should reject invalid email', () => {
   const result = validateUser({ email: 'invalid' });
   expect(result.isValid).toBe(false);
 });
 // → Test fails: validateUser is not defined
+// → Creates test_results-XX and handover to programmer
 
-// 2. GREEN Phase - Minimal implementation
+// 2. GREEN Phase - Minimal implementation (@agent-shirokuma-programmer)
 function validateUser(user) {
   return { isValid: false }; // Simplest code to pass
 }
 // → Test passes
+// → Creates knowledge-XX and handover to reviewer
 
-// 3. REFACTOR Phase - Improve without breaking
-// First commit (structural):
-function validateUser(user: User): ValidationResult {
-  return { isValid: false };
-}
+// 3. REVIEW Phase - Quality check (main agent invokes via Task)
+await Task({
+  subagent_type: "shirokuma-reviewer",
+  prompt: "Review validateUser implementation from handover-XX"
+});
+// → Reviewer finds: no type safety, no actual validation
+// → Creates handover with NEEDS_REFACTOR status
 
-// Second commit (behavioral):
+// 4. REFACTOR Phase - Apply improvements (@agent-shirokuma-programmer via Task)
+await Task({
+  subagent_type: "shirokuma-programmer", 
+  prompt: "Apply type safety and validation logic from review"
+});
+// Result after refactoring:
 function validateUser(user: User): ValidationResult {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return { isValid: emailRegex.test(user.email) };
 }
-// → All tests still pass
+// → Tests still pass, quality improved
+
+// 5. RE-REVIEW Phase - Verify improvements
+await Task({
+  subagent_type: "shirokuma-reviewer",
+  prompt: "Re-review validateUser after refactoring"
+});
+// → Quality score: 85%, Security: OK
+// → Status: APPROVED
+// → Complete!
 ```
 
-**Remember**: The AI will follow TDD strictly - no code without tests, no mixing of change types.
+**Critical Points**:
+- Main agent MUST invoke reviewer via Task after GREEN
+- Refactor only happens if review finds issues
+- Maximum 3 review-refactor iterations
+- Quality gates enforced: 80% quality, 0 security issues
 
 
 ### Integration Points
