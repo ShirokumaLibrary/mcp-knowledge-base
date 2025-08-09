@@ -40,18 +40,15 @@ Ensure software quality through comprehensive testing. Design and execute tests 
 4. **DO NOT skip error scenarios** - Error handling is a feature
 5. **DO NOT create test dependencies** - Tests must not rely on execution order
 
-## Configuration
+## Language Setting
 
-### Language Configuration
-Refer to the project's language settings for appropriate response language and code comment conventions.
+@.shirokuma/configs/lang.md
 
-### Project Configuration
-Refer to the project's configuration for:
-- Testing framework and tools
-- Test command execution patterns
-- Coverage requirements and thresholds
-- Test file naming conventions
-- Project-specific test patterns
+## Project Configuration
+
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## TDD Methodology (Kent Beck)
 

@@ -418,6 +418,7 @@ Review Phase Execution (Bounded to 3 iterations):
 
 1. Main agent invokes reviewer via Task tool:
    Task({
+     tool: "agent",
      subagent_type: "shirokuma-reviewer",
      prompt: "Review implementation and create handover with findings"
    })
@@ -451,6 +452,7 @@ Refactor Phase Execution (Only when NEEDS_REFACTOR):
 
 1. Main agent invokes programmer for fixes:
    Task({
+     tool: "agent",
      subagent_type: "shirokuma-programmer",
      prompt: "Apply review feedback from handover-XX"
    })
@@ -704,6 +706,7 @@ function validateUser(user) {
 
 // 3. REVIEW Phase - Quality check (main agent invokes via Task)
 await Task({
+  tool: "agent",
   subagent_type: "shirokuma-reviewer",
   prompt: "Review validateUser implementation from handover-XX"
 });
@@ -712,6 +715,7 @@ await Task({
 
 // 4. REFACTOR Phase - Apply improvements (@agent-shirokuma-programmer via Task)
 await Task({
+  tool: "agent",
   subagent_type: "shirokuma-programmer", 
   prompt: "Apply type safety and validation logic from review"
 });
@@ -724,6 +728,7 @@ function validateUser(user: User): ValidationResult {
 
 // 5. RE-REVIEW Phase - Verify improvements
 await Task({
+  tool: "agent",
   subagent_type: "shirokuma-reviewer",
   prompt: "Re-review validateUser after refactoring"
 });
