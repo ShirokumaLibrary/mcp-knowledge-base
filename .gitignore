@@ -37,7 +37,7 @@ logs
 # Claude directory - exclude everything except commands
 .claude/*
 !.claude/commands/
-!.claude/tools/
+!.shirokuma/tools/
 !.claude/agents/
 *.swp
 *.swo
@@ -61,8 +61,8 @@ Thumbs.db
 # User data directory - should not be committed to version control
 /.database/
 /.database/*
-/.shirokuma/
-/.shirokuma/*
+/.shirokuma/data/
+/.shirokuma/data/*
 
 # Development scripts - temporary debugging tools
 /scripts/
