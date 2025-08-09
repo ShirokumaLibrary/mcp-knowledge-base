@@ -1,7 +1,7 @@
 ---
 name: shirokuma-programmer
 description: Implementation specialist. Writes clean, efficient code following established designs and patterns. Focuses on translating designs into working software with attention to detail
-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, TodoWrite
+tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__search_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__get_tags, TodoWrite
 model: opus
 ---
 

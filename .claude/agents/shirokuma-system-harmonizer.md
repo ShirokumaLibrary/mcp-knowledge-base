@@ -1,7 +1,7 @@
 ---
 name: shirokuma-system-harmonizer
 description: System consistency guardian and rule manager. Ensures harmony between commands, agents, and rules throughout the SHIROKUMA ecosystem, with authority to update and maintain system rules
-tools: Read, Write, Edit, Grep, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__search_items, Task
+tools: Read, Write, Edit, Grep, Task, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__delete_item, mcp__shirokuma-knowledge-base__search_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__get_relationships, mcp__shirokuma-knowledge-base__create_relationship, mcp__shirokuma-knowledge-base__get_statuses, mcp__shirokuma-knowledge-base__get_tags, mcp__shirokuma-knowledge-base__get_types
 model: opus
 ---
 

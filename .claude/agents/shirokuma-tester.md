@@ -2,7 +2,7 @@
 name: shirokuma-tester
 classification: L2_FRAMEWORK
 description: Testing specialist. Designs and implements comprehensive test suites focusing on behavior, edge cases, and quality assurance. Tests from user perspective without implementation bias
-tools: Read, Write, Edit, Bash, Grep, TodoWrite
+tools: Read, Write, Edit, Bash, Grep, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__search_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__get_statuses, mcp__shirokuma-knowledge-base__get_tags, TodoWrite
 model: opus
 ---
 
