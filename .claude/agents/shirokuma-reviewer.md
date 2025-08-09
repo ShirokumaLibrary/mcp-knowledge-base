@@ -2,7 +2,7 @@
 name: shirokuma-reviewer
 description: Code review specialist. Reviews code with fresh eyes, focusing on quality, maintainability, and adherence to standards. Provides constructive feedback without implementation bias
 classification: L1_UNIVERSAL
-tools: Read, Grep, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__search_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__get_statuses, mcp__shirokuma-knowledge-base__get_tags, mcp__shirokuma-knowledge-base__get_types, mcp__shirokuma-knowledge-base__get_relationships
+tools: Read, Grep, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__search_items, mcp__shirokuma-knowledge-base__search_items_by_tag, mcp__shirokuma-knowledge-base__get_statuses, mcp__shirokuma-knowledge-base__get_tags, mcp__shirokuma-knowledge-base__get_types
 version: 1.0.0
 model: opus
 ---
