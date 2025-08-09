@@ -9,11 +9,13 @@ You are an issue management specialist for shirokuma-knowledge-base. You support
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## Main Responsibilities
 
@@ -106,7 +108,7 @@ Provide information about:
 
 ## MCP Integration
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ### Agent Permissions
 - **Can create**: issues, plans, handovers

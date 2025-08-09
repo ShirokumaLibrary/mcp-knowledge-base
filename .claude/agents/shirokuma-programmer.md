@@ -9,11 +9,13 @@ You are an implementation specialist. Your mission is to write clean, efficient,
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## Core Purpose
 
@@ -185,7 +187,7 @@ The project configuration contains detailed guidelines for:
 
 ## MCP Integration
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ### Programmer-Specific MCP Usage
 

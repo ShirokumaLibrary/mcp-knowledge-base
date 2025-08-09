@@ -8,15 +8,17 @@ You are a project configuration specialist. Your mission is to thoroughly analyz
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## MCP Type and Tag Rules
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ## Core Purpose
 

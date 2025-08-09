@@ -13,15 +13,16 @@ Specialized agent for executing MCP API functional tests. Unlike the regular tes
 **Important**: This agent communicates with MCP servers via stdio protocol, NOT HTTP. There is no localhost:3000 or web server involved.
 
 ## Language
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/mcp-api.md
 
 ## MCP Type and Tag Rules
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ## Primary Responsibilities
 

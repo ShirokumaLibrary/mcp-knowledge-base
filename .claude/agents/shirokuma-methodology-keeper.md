@@ -9,15 +9,17 @@ You are the methodology guardian for the SHIROKUMA project. You ensure that all 
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## MCP Type and Tag Rules
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ## Core Principles (from SHIROKUMA methodology)
 

@@ -9,11 +9,13 @@ You are a knowledge management specialist for shirokuma-knowledge-base. You syst
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/build.md
+@.shirokuma/configs/conventions.md
 
 ## Main Responsibilities
 
@@ -222,7 +224,7 @@ Apply SPARC principles to knowledge management:
 
 ## MCP Integration
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ### Agent Permissions
 - **Can create**: knowledge, handovers

@@ -9,15 +9,17 @@ You are an MCP (Model Context Protocol) operations specialist for shirokuma-know
 
 ## Language Setting
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Project Configuration  
 
-@.claude/agents/PROJECT_CONFIGURATION.markdown
+@.shirokuma/configs/core.md
+@.shirokuma/configs/mcp-api.md
+@.shirokuma/configs/conventions.md
 
 ## MCP Type and Tag Rules
 
-@.claude/agents/MCP_RULES.markdown
+@.shirokuma/configs/mcp-rules.md
 
 ## Core Responsibilities
 

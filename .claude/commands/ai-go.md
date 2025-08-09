@@ -15,7 +15,7 @@ Examples:
 
 ## Task
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 Execute development workflow autonomously, solving problems independently until completion. Only escalate to user when truly stuck.
 
@@ -40,92 +40,54 @@ Execute development workflow autonomously, solving problems independently until 
 ### Pre-flight Check Phase
 
 **Smart Environment Health Verification** (Before Starting Work):
-```yaml
-Pre-flight Checks:
-0. Smart Change Detection (NEW):
-   - Purpose: Skip unnecessary checks for documentation-only changes
-   - Implementation:
-     ```bash
-     # Use external script for better maintainability
-     # The script sets these environment variables:
-     # - SKIP_CHECKS (true/false)
-     # - CHANGE_TYPE (markdown/code/mixed/none/forced)
-     # - MARKDOWN_COUNT (number)
-     # - CODE_COUNT (number)
-     
-     # Run the check script (pass any arguments like --force)
-     .claude/tools/check-markdown-only.sh "$@"
-     CHECK_RESULT=$?
-     
-     # Exit code 0 means markdown-only (can skip checks)
-     # Exit code 1 means code/config changes (need full checks)
-     # Exit code 2 means error occurred
-     
-     if [ $CHECK_RESULT -eq 0 ]; then
-       SKIP_CHECKS=true
-     else
-       SKIP_CHECKS=false
-     fi
-     
-     # The script already printed appropriate messages
-     # Environment variables are already exported for use
-     ```
 
-1. Build Status Check:
-   - Condition: Skip if SKIP_CHECKS is true
-   - Implementation:
-     ```bash
-     if [ "$SKIP_CHECKS" != true ]; then
-       echo "🔨 Running build check..."
-       npm run build
-       # [rest of build check logic]
-     else
-       echo "⏭️  Skipping build check (markdown-only changes)"
-     fi
-     ```
-   - Threshold: 0 errors allowed
-   - Action: If errors > threshold → Show issues and ask user to proceed/abort
+The Pre-flight Check logic has been extracted to a reusable script for better maintainability:
 
-2. Test Status Check:
-   - Condition: Skip if SKIP_CHECKS is true
-   - Implementation:
-     ```bash
-     if [ "$SKIP_CHECKS" != true ]; then
-       echo "🧪 Running test check..."
-       npm test
-       # [rest of test check logic]
-     else
-       echo "⏭️  Skipping test check (markdown-only changes)"
-     fi
-     ```
-   - Record: Baseline failure count
-   - Action: If failures > 5 → Warn user about existing issues
+```bash
+# Execute pre-flight checks using the external script
+# This script handles all validation: build, test, lint, and checkpoint creation
+.shirokuma/scripts/preflight-check.sh [options]
 
-3. Lint Status Check:
-   - Condition: Skip if SKIP_CHECKS is true
-   - Implementation:
-     ```bash
-     if [ "$SKIP_CHECKS" != true ]; then
-       echo "🔍 Running lint check..."
-       npm run lint:errors
-       # [rest of lint check logic]
-     else
-       echo "⏭️  Skipping lint check (markdown-only changes)"
-     fi
-     ```
-   - Threshold: 10 errors (configurable)
-   - Action: If errors > threshold → Suggest fixing first
+# Exit codes:
+# 0 - All checks passed
+# 1 - Build check failed
+# 2 - Test check failed
+# 3 - Lint check failed
+# 4 - Checks skipped (markdown-only changes)
+# 5 - Critical failure requiring user decision
+# 6 - Configuration error
+# 7 - Checkpoint creation failed
 
-4. Checkpoint Creation:
-   - Git status capture
-   - Create recovery checkpoint
-   - Save session state to MCP
-   
-5. User Decision Point:
-   - Show health report
-   - If issues found → "Continue anyway? (y/n)"
-   - User can abort to fix issues first
+# Common usage:
+# Normal run
+.shirokuma/scripts/preflight-check.sh
+
+# Force full checks (skip markdown detection)
+.shirokuma/scripts/preflight-check.sh --force
+
+# Debug mode
+.shirokuma/scripts/preflight-check.sh --debug
+
+# Skip specific checks
+.shirokuma/scripts/preflight-check.sh --skip-test --skip-lint
+
+# Parallel execution for speed
+.shirokuma/scripts/preflight-check.sh --parallel
 ```
+
+**Pre-flight Check Features**:
+1. **Smart Change Detection**: Automatically detects markdown-only changes and skips unnecessary checks
+2. **Build Validation**: Ensures the project builds successfully (timeout: 180s)
+3. **Test Validation**: Runs test suite and checks for failures (timeout: 300s)
+4. **Lint Validation**: Checks for lint errors (timeout: 60s)
+5. **Checkpoint Creation**: Creates a recovery checkpoint before proceeding
+6. **Parallel Execution**: Optional parallel mode for faster checks
+7. **Debug Mode**: Detailed output for troubleshooting
+
+**User Decision Points**:
+- If critical errors are found, the script will prompt for user confirmation
+- Exit code 5 indicates user decision is required
+- The script provides clear feedback about what failed and why
 
 ### Automatic Workflow Detection
 

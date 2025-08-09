@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ### Session Start Procedure
 
@@ -156,4 +156,4 @@ As the main agent executing this command, you have permissions to:
 - **Read**: all types
 - **Create**: knowledge, handovers (if needed)
 
-Note: Follow the tag rules in @.claude/agents/MCP_RULES.markdown
+Note: Follow the tag rules in @.shirokuma/configs/mcp-rules.md

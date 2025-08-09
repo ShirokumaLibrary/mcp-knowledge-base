@@ -20,7 +20,7 @@ Examples:
 
 ## Task
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 Analyze the check type requested: $ARGUMENTS
 

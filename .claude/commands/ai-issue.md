@@ -2,7 +2,7 @@
 
 ## Language
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 ## Purpose
 

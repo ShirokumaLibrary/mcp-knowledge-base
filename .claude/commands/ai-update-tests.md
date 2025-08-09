@@ -14,7 +14,7 @@ description: Update test code to match the latest implementation
 
 ## Scope and Responsibility
 
-@.claude/agents/LANG.markdown
+@.shirokuma/configs/lang.md
 
 **This command is responsible for test code updates ONLY:**
 - ✅ Analyzes failing tests and identifies required updates
