@@ -63,6 +63,8 @@ Thumbs.db
 /.database/*
 /.shirokuma/data/
 /.shirokuma/data/*
+/.shirokuma/checkpoints/
+/.shirokuma/test-reports/
 
 # Development scripts - temporary debugging tools
 /scripts/
