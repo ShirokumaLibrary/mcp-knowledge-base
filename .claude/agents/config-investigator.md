@@ -18,7 +18,7 @@ You are a project configuration specialist. Your mission is to thoroughly analyz
 
 ## MCP Type and Tag Rules
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ## Core Purpose
 

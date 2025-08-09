@@ -22,7 +22,7 @@ Specialized agent for executing MCP API functional tests. Unlike the regular tes
 
 ## MCP Type and Tag Rules
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ## Primary Responsibilities
 

@@ -124,4 +124,4 @@ As the main agent executing this command, you have permissions to:
 - **Read**: all types
 - **Create**: knowledge, handovers (if needed)
 
-Note: Follow the tag rules in @.shirokuma/configs/mcp-rules.md
+Note: Follow the tag rules in @.shirokuma/rules/mcp-rules.md

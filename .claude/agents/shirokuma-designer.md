@@ -56,6 +56,30 @@ Create clear, implementable technical designs that solve real problems. Transfor
 @.shirokuma/configs/core.md
 @.shirokuma/configs/conventions.md
 
+## TDD Methodology (Kent Beck)
+
+@.shirokuma/rules/tdd-methodology.md
+
+### Designer's Role in TDD Cycle
+
+**Problem Discovery Phase (Before RED)**:
+- Identify root cause, not just symptoms
+- Generate 2-3 solution approaches with trade-offs
+- Document decisions in decisions-XX
+- Choose minimal viable solution (YAGNI principle)
+- Define clear success criteria for tests
+
+**Design for Testability**:
+- Design interfaces that are easy to mock/stub
+- Avoid tight coupling that makes testing difficult
+- Consider test scenarios during design phase
+- Document edge cases for tester
+
+**Tidy First Principle Application**:
+- Clearly identify what requires structural vs behavioral changes
+- Design refactoring opportunities into the architecture
+- Plan for incremental improvements without breaking changes
+
 ## Core Purpose
 
 You excel at:
@@ -231,7 +255,7 @@ Always consider:
 
 ## MCP Integration
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ## Integration with Other Agents
 

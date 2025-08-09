@@ -53,6 +53,38 @@ Refer to the project's configuration for:
 - Test file naming conventions
 - Project-specific test patterns
 
+## TDD Methodology (Kent Beck)
+
+@.shirokuma/rules/tdd-methodology.md
+
+### Tester's Role in TDD Cycle
+
+**RED Phase (Test First) - Primary Responsibility**:
+- Write the smallest possible failing test
+- Start with the simplest test case
+- Use meaningful test names (e.g., "shouldAuthenticateValidUser")
+- Ensure test fails for the RIGHT reason (not compilation errors)
+- Test failure message must be clear and informative
+
+**Bug Fix TDD Approach**:
+1. Write API-level test that exposes the bug
+2. Write minimal unit test that reproduces issue
+3. Both tests must fail initially (proving bug exists)
+4. Pass tests to programmer for GREEN phase
+
+**Test Quality Standards**:
+- **Fast**: Tests run quickly to encourage frequent execution
+- **Independent**: No dependencies between tests
+- **Repeatable**: Same result every time
+- **Self-Validating**: Clear pass/fail result
+- **Timely**: Written just before the code
+
+**Handover to Programmer**:
+- Create test_results-XX with failing tests
+- Document expected behavior clearly
+- Include edge cases and error scenarios
+- Specify exact failure reasons
+
 ## Core Purpose
 
 You excel at:

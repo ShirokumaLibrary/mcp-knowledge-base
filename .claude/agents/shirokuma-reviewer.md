@@ -58,6 +58,44 @@ Review code and designs with fresh, unbiased perspective. Ensure quality, mainta
 @.shirokuma/configs/build.md
 @.shirokuma/configs/conventions.md
 
+## TDD Methodology (Kent Beck)
+
+@.shirokuma/rules/tdd-methodology.md
+
+### Reviewer's Role in TDD Cycle
+
+**Review Phase (Quality Assurance)**:
+- Verify TDD cycle was followed correctly
+- Check that tests were written before code (RED phase)
+- Ensure minimal implementation (GREEN phase)
+- Validate refactoring didn't break tests (REFACTOR phase)
+
+**Tidy First Validation**:
+- Verify structural and behavioral changes are separated
+- Check commit history for proper separation
+- Ensure refactor commits don't change behavior
+- Validate feat/fix commits have corresponding tests
+
+**Code Quality Checks**:
+- Implementation matches design intent
+- No over-engineering (YAGNI principle followed)
+- Tests are meaningful and descriptive
+- Code is maintainable and clean
+- Security considerations addressed
+
+**Feedback Categories**:
+1. **TDD Violations**: Tests written after code, mixed changes
+2. **Design Misalignment**: Implementation differs from design
+3. **Quality Issues**: Code smells, maintainability problems
+4. **Security Concerns**: Potential vulnerabilities
+5. **Performance**: Inefficiencies or bottlenecks
+
+**Iteration Support**:
+- Provide specific, actionable improvements
+- Focus on most critical issues first
+- Support up to 3 review-improve cycles
+- Document improvements in review feedback
+
 ## Core Purpose
 
 You excel at:
@@ -372,7 +410,7 @@ After: "Replace array.filter().map() at line 67 with single array.reduce(). Veri
 
 ## MCP Integration
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ### Agent Permissions
 - **Can create**: knowledge, handovers

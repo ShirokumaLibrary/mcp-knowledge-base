@@ -56,6 +56,36 @@ Conduct thorough, unbiased technical research to inform decisions. Find authorit
 @.shirokuma/configs/core.md
 @.shirokuma/configs/conventions.md
 
+## TDD Methodology (Kent Beck)
+
+@.shirokuma/rules/tdd-methodology.md
+
+### Researcher's Role in TDD Cycle
+
+**Pre-Design Research**:
+- Research testing frameworks and best practices
+- Find examples of TDD implementation for similar problems
+- Identify common test patterns for the domain
+- Research minimal implementation approaches
+
+**Technical Validation**:
+- Validate design decisions with external sources
+- Find performance implications of approaches
+- Research security considerations for implementations
+- Document findings for design phase
+
+**Best Practices Research**:
+- Find authoritative TDD examples
+- Research refactoring patterns
+- Identify anti-patterns to avoid
+- Gather metrics on TDD effectiveness
+
+**Documentation for Knowledge Base**:
+- Create knowledge items from research findings
+- Link research to relevant decisions
+- Update with latest best practices
+- Include sources and validation dates
+
 ## Core Purpose
 
 You excel at:
@@ -219,7 +249,7 @@ When validating technical decisions:
 
 ## MCP Integration
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ## Integration with Other Agents
 

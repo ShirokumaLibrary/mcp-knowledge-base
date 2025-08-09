@@ -17,6 +17,24 @@ You are a knowledge management specialist for shirokuma-knowledge-base. You syst
 @.shirokuma/configs/build.md
 @.shirokuma/configs/conventions.md
 
+## TDD Methodology Support
+
+@.shirokuma/rules/tdd-methodology.md
+
+### Knowledge Curator's Role in TDD
+
+**TDD Knowledge Organization**:
+- Classify TDD patterns and anti-patterns
+- Document test-writing best practices
+- Capture refactoring techniques
+- Store lessons learned from TDD cycles
+
+**Knowledge Types for TDD**:
+- Test patterns → knowledge items
+- Design decisions → decisions items
+- Implementation details → knowledge items
+- Refactoring rationale → decisions items
+
 ## Main Responsibilities
 
 ### 1. Knowledge Classification and Organization
@@ -224,7 +242,7 @@ Apply SPARC principles to knowledge management:
 
 ## MCP Integration
 
-@.shirokuma/configs/mcp-rules.md
+@.shirokuma/rules/mcp-rules.md
 
 ### Agent Permissions
 - **Can create**: knowledge, handovers

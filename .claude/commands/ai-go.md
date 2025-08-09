@@ -7,11 +7,8 @@
 
 Examples:
 - `/ai-go issues-123` - Autonomously work on issue until completion
-- `/ai-go issues-123 --force` - Force full checks even for Markdown changes
-- `/ai-go issues-123 -f` - Short form of force flag
 - `/ai-go "implement authentication"` - Design and implement the feature
 - `/ai-go "React state management"` - Research and document the topic
-- `DEBUG=true /ai-go issues-123` - Show detailed change information
 
 ## Task
 
@@ -19,19 +16,71 @@ Examples:
 
 Execute development workflow autonomously, solving problems independently until completion. Only escalate to user when truly stuck.
 
-### Core Philosophy: Autonomous Problem Solving
+### Core Philosophy: TDD & Tidy First (Kent Beck Methodology)
 
 **Key Principles**:
-1. **AI solves problems independently** - No user interaction unless absolutely necessary
-2. **Continuous improvement loop** - Design → Review → Improve until optimal
-3. **Self-healing workflow** - Automatically retry and fix issues
-4. **User-controlled autonomy** - Bounded iteration with clear completion
+1. **TDD Cycle (Red → Green → Refactor)** - Always start with failing tests, write minimal code to pass, then refactor
+2. **Tidy First Separation** - Never mix structural changes with behavioral changes in same commit
+3. **Problem Discovery First** - Identify root cause and multiple solutions before solving
+4. **Minimal Implementation** - Write only the code needed to make tests pass
+5. **Autonomous Execution** - AI handles the entire cycle without user intervention
+
+### TDD Methodology (Kent Beck Approach)
+
+**Red → Green → Refactor Cycle**:
+1. **RED Phase**: Write the smallest possible failing test
+   - Start with the simplest test case
+   - Use meaningful test names (e.g., "shouldAuthenticateValidUser")
+   - Ensure test fails for the right reason (not compilation/syntax errors)
+   
+2. **GREEN Phase**: Write minimal code to make test pass
+   - Implement only what's needed to pass the test
+   - Don't add extra functionality
+   - Focus on making it work, not making it perfect
+   
+3. **REFACTOR Phase**: Improve code without changing behavior
+   - Clean up duplication
+   - Improve naming and structure
+   - Ensure all tests still pass
+
+### Tidy First Principle
+
+**Separation of Changes**:
+```yaml
+Structural Changes (Tidy):
+  - Rename variables/functions
+  - Extract methods
+  - Move code between files
+  - Database migrations
+  - Configuration updates
+  → Commit separately, verify tests still pass
+
+Behavioral Changes:
+  - Add new features
+  - Fix bugs
+  - Change business logic
+  - Modify API responses
+  → Always preceded by failing test
+```
+
+**Rule**: If both are needed, ALWAYS do structural changes first in a separate commit.
+
+### Problem Discovery Priority
+
+**Before solving any problem**:
+1. **Identify Root Cause** - Don't fix symptoms
+2. **Generate Multiple Solutions** - At least 2-3 approaches
+3. **Evaluate Trade-offs** - Consider impact and risks
+4. **Choose Minimal Solution** - Start with simplest approach
+5. **Validate with Tests** - Prove the problem exists and is fixed
 
 ### Iteration Limits for Bounded Autonomy
 
 **MAX_ITERATIONS = 3 per phase**
 - Design phase: Maximum 3 review-improve cycles
-- Implementation phase: Maximum 3 review-fix cycles
+- Test phase: Tests must fail first (RED state verification)
+- Implementation phase: Maximum 3 attempts to achieve GREEN state
+- Refactor phase: Maximum 3 improvement cycles
 - Error recovery: Maximum 2 retries per error type with checkpoint recovery
 - Clear completion after task success or iteration limit
 - Automatic checkpoint creation before each major phase
@@ -46,7 +95,7 @@ The Pre-flight Check logic has been extracted to a reusable script for better ma
 ```bash
 # Execute pre-flight checks using the external script
 # This script handles all validation: build, test, lint, and checkpoint creation
-.shirokuma/scripts/preflight-check.sh [options]
+.shirokuma/scripts/preflight-check.sh
 
 # Exit codes:
 # 0 - All checks passed
@@ -58,21 +107,11 @@ The Pre-flight Check logic has been extracted to a reusable script for better ma
 # 6 - Configuration error
 # 7 - Checkpoint creation failed
 
-# Common usage:
-# Normal run
-.shirokuma/scripts/preflight-check.sh
-
-# Force full checks (skip markdown detection)
-.shirokuma/scripts/preflight-check.sh --force
-
-# Debug mode
-.shirokuma/scripts/preflight-check.sh --debug
-
-# Skip specific checks
-.shirokuma/scripts/preflight-check.sh --skip-test --skip-lint
-
-# Parallel execution for speed
-.shirokuma/scripts/preflight-check.sh --parallel
+# The script automatically determines:
+# - Whether to run full checks or skip for markdown-only changes
+# - Whether to run checks in parallel for speed
+# - The appropriate debug level based on context
+# - Which checks are critical vs optional
 ```
 
 **Pre-flight Check Features**:
@@ -96,13 +135,13 @@ The system automatically analyzes input and executes the complete workflow:
 #### For Issues (e.g., `issues-123`):
 1. **Fetch issue details** from MCP
 2. **Analyze and plan** optimal approach
-3. **Execute autonomous workflow**:
-   - Research (if needed)
-   - Design with built-in review cycles
-   - Implementation
-   - Code review
-   - Testing
-   - Automatic fixes for any issues found
+3. **Execute TDD workflow (Kent Beck methodology)**:
+   - Problem discovery and root cause analysis
+   - Design with multiple solution options
+   - RED: Write failing tests first
+   - GREEN: Minimal implementation to pass tests
+   - REFACTOR: Tidy first, then improve
+   - Code review with focus on separation of concerns
 4. **Continue until success** or truly unsolvable problem
 
 #### For Instructions (e.g., `"implement authentication"`):
@@ -128,48 +167,77 @@ Design Loop (Bounded):
 5. Report outcome clearly to user
 ```
 
-#### 2. Implementation Phase (Parallel Execution)
+#### 2. TDD Implementation Phase (Kent Beck Methodology)
 ```yaml
-Parallel Implementation with Synchronization:
-1. Load shared design document (MCP decisions-XX)
-2. Start parallel execution:
+TDD Cycle - Red → Green → Refactor:
+
+1. Problem Discovery Phase:
+   @agent-shirokuma-designer:
+     - Identify root cause (not just symptoms)
+     - Generate 2-3 solution approaches
+     - Document trade-offs in decisions-XX
+     - Choose minimal viable solution
+
+2. RED Phase (Test-First):
+   @agent-shirokuma-tester:
+     - Write smallest possible failing test
+     - Use descriptive test names (behavior-focused)
+     - Verify test fails for the RIGHT reason
+     - Save test specifications to test_results-XX
+     - Create handover with expected behavior
+
+3. GREEN Phase (Minimal Implementation):
+   @agent-shirokuma-programmer:
+     - Write ONLY code to make test pass
+     - No extra features or optimizations
+     - Focus: Make it work, not perfect
+     - Verify all tests pass
+     - Create handover for refactoring
+
+4. REFACTOR Phase (Tidy First):
+   Step 1 - Structural Changes (if needed):
+     - Rename for clarity
+     - Extract duplicate code
+     - Reorganize file structure
+     - Commit separately with "refactor:" prefix
    
-   Promise.allSettled([
-     @agent-shirokuma-programmer: {
-       - Load design from decisions-XX
-       - Implement solution
-       - Handle partial failures
-       - Save progress to knowledge-XX
-     },
-     @agent-shirokuma-tester: {
-       - Load same design document
-       - Create comprehensive tests
-       - Generate test scenarios
-       - Save to test-results-XX
-     }
-   ])
-   
-3. Synchronization and Error Handling:
-   - Both succeed → Continue to review
-   - @agent-shirokuma-programmer fails, @agent-shirokuma-tester succeeds → Save tests, retry implementation
-   - @agent-shirokuma-programmer succeeds, @agent-shirokuma-tester fails → Save code, generate basic tests
-   - Both fail → Review design, consider rollback
-   
-4. Timeout: 30 minutes with AbortController
-5. Progress tracking via MCP handovers
+   Step 2 - Improvements:
+     - Optimize performance
+     - Improve code quality
+     - Add documentation
+     - Ensure tests still pass
+
+5. Verification:
+   - Each phase must complete before next
+   - Tests must pass after EVERY change
+   - Structural and behavioral changes NEVER mixed
 ```
 
-#### 3. Code Review with Auto-Fix
+#### 3. Review and Refactor Phase (REFACTOR)
 ```yaml
-Review Loop (Bounded):
-1. @agent-shirokuma-reviewer examines implementation and tests
-2. If issues found AND iterations < 3:
-   - Generate specific fix instructions
-   - @agent-shirokuma-programmer/@agent-shirokuma-tester automatically apply fixes
-   - Increment iteration counter
-   - Return to step 1
-3. Stop after: quality met OR 3 iterations reached
-4. Report final status to user
+Review and Refactor Loop (Bounded):
+1. @agent-shirokuma-reviewer examines implementation and tests:
+   - Code quality assessment
+   - Design conformance check
+   - Security vulnerability scan
+   - Performance analysis
+
+2. Refactor Phase (if improvements needed AND iterations < 3):
+   @agent-shirokuma-programmer:
+     - Apply reviewer's improvement suggestions
+     - Refactor without breaking tests
+     - Verify tests still pass using project's test command
+     - Ensure tests remain in GREEN state
+     - Update implementation in knowledge-XX
+   
+3. Quality Gates:
+   - All tests must continue passing
+   - Code quality score > 80%
+   - No security vulnerabilities
+   - Performance benchmarks met
+
+4. Stop after: quality achieved OR 3 iterations reached
+5. Report final status and metrics to user
 ```
 
 ### Specialist Agents
@@ -306,7 +374,7 @@ Enhanced Error Recovery with Checkpoints:
 
 4. Session Continuity:
    - Save work session to MCP
-   - Enable resume with: /ai-go --resume [session-id]
+   - Automatically detect and resume interrupted work
    - Restore from checkpoint
    - Continue from last successful phase
 
@@ -331,7 +399,39 @@ User Escalation (After Recovery Attempts):
 # → AI identifies the issue, implements fix, verifies it works
 ```
 
-**Remember**: The AI will work autonomously, iterating as many times as needed to achieve quality results. User intervention is only requested when absolutely necessary.
+### TDD Example Flow (Kent Beck Style)
+
+```typescript
+// Example: Adding user validation
+
+// 1. RED Phase - Start with failing test
+test('should reject invalid email', () => {
+  const result = validateUser({ email: 'invalid' });
+  expect(result.isValid).toBe(false);
+});
+// → Test fails: validateUser is not defined
+
+// 2. GREEN Phase - Minimal implementation
+function validateUser(user) {
+  return { isValid: false }; // Simplest code to pass
+}
+// → Test passes
+
+// 3. REFACTOR Phase - Improve without breaking
+// First commit (structural):
+function validateUser(user: User): ValidationResult {
+  return { isValid: false };
+}
+
+// Second commit (behavioral):
+function validateUser(user: User): ValidationResult {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return { isValid: emailRegex.test(user.email) };
+}
+// → All tests still pass
+```
+
+**Remember**: The AI will follow TDD strictly - no code without tests, no mixing of change types.
 
 
 ### Integration Points
@@ -374,22 +474,39 @@ This command transforms AI from an assistant into an autonomous developer that t
    report_completion(design, iterations)
    ```
 
-3. **Code Review Loop (Bounded)**
+3. **TDD Loop (Kent Beck Style)**
    ```
    iterations = 0
    while iterations < 3:
-     code = implement_solution()
-     tests = create_tests()  # Note: Shares iteration counter in parallel
-     feedback = review_all(code, tests)
-     if feedback.has_issues:
-       apply_fixes(feedback)
-       iterations += 1
-     else:
-       break
-   report_completion(code, tests, iterations)
+     # RED: Test first
+     test = write_failing_test()
+     verify_test_fails_correctly(test)
+     
+     # GREEN: Minimal implementation
+     code = write_minimal_code_to_pass(test)
+     verify_all_tests_pass()
+     
+     # REFACTOR: Tidy first
+     if needs_refactoring():
+       structural_changes = tidy_code()  # Separate commit
+       behavioral_improvements = optimize()  # Separate commit
+       verify_all_tests_still_pass()
+     
+     iterations += 1
+   report_completion(test, code, iterations)
    ```
 
-4. **Error Recovery**
+4. **Bug Fix TDD Approach (Kent Beck Method)**
+   ```
+   # When fixing bugs:
+   1. Write API-level test that exposes the bug
+   2. Write minimal unit test that reproduces issue
+   3. Fix the bug (minimal change)
+   4. Verify both tests pass
+   5. Refactor if needed (separate commit)
+   ```
+
+5. **Error Recovery**
    - Never give up on first failure
    - Try different approaches (max 2 retries)
    - Learn from each attempt
