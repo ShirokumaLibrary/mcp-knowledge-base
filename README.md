@@ -1,5 +1,8 @@
 # Shirokuma MCP Knowledge Base
 
+> ⚠️ **Under Active Development**  
+> This project is under active development and specifications may change significantly.
+
 **Model Context Protocol (MCP) server for comprehensive knowledge management with AI-optimized dual-storage architecture.**
 
 📦 **npm**: [@shirokuma-library/mcp-knowledge-base](https://www.npmjs.com/package/@shirokuma-library/mcp-knowledge-base)  
