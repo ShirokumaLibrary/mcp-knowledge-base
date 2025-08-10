@@ -578,6 +578,240 @@ Missing Phase Detection and Repair:
     - Ensure proper error handling
 ```
 
+#### Script Calling Consistency Validation
+- **Rule ID**: script-calling-consistency-live
+- **Purpose**: Validate script calling patterns comply with guidelines
+- **Method**:
+  1. Scan all files for script invocation patterns
+  2. Detect forbidden patterns (absolute paths, env vars, etc.)
+  3. Provide auto-fix for simple violations
+  4. Generate report with specific fixes
+  5. Update files with approved corrections
+
+**Detailed Implementation**:
+```yaml
+Script Pattern Detection:
+  1. Scan Target Files:
+     - All .md files in .claude/commands/
+     - All .md files in .claude/agents/
+     - All .sh files in .shirokuma/scripts/
+     - CLAUDE.md and other documentation
+  
+  2. Forbidden Pattern Detection:
+     # Absolute paths
+     - Pattern: /absolute/path/.shirokuma/scripts/*
+     - Pattern: ${HOME}/.shirokuma/scripts/*
+     - Pattern: $(pwd)/.shirokuma/scripts/*
+     
+     # Environment variable usage
+     - Pattern: VAR=value .shirokuma/scripts/*
+     - Pattern: DEBUG=true .shirokuma/scripts/*
+     - Pattern: LANG=en .shirokuma/scripts/*
+     
+     # Dynamic path construction
+     - Pattern: ${VAR}/.shirokuma/scripts/*
+     - Pattern: $(command)/.shirokuma/scripts/*
+     - Pattern: `pwd`/.shirokuma/scripts/*
+     
+     # Unnecessary wrappers
+     - Pattern: bash .shirokuma/scripts/*
+     - Pattern: sh .shirokuma/scripts/*
+     - Pattern: source .shirokuma/scripts/*
+     
+     # Direct tool directory access
+     - Pattern: .shirokuma/tools/*
+     - Pattern: .shirokuma/lib/*
+  
+  3. Validation Rules:
+     - Must use relative paths from project root
+     - Must start with .shirokuma/scripts/
+     - Options via --flags, not env vars
+     - No command substitution in paths
+     - No unnecessary shell wrappers
+```
+
+**Auto-Fix Capabilities**:
+```yaml
+Pattern Fixes:
+  1. Absolute Path Fixes:
+     Before: /home/user/project/.shirokuma/scripts/test.sh
+     After:  .shirokuma/scripts/test.sh
+     
+     Before: ${HOME}/mcp/.shirokuma/scripts/build.sh
+     After:  .shirokuma/scripts/build.sh
+  
+  2. Environment Variable Fixes:
+     Before: DEBUG=true .shirokuma/scripts/test.sh
+     After:  .shirokuma/scripts/test.sh --debug
+     
+     Before: VERBOSE=1 .shirokuma/scripts/validate.sh
+     After:  .shirokuma/scripts/validate.sh --verbose
+  
+  3. Dynamic Path Fixes:
+     Before: $(pwd)/.shirokuma/scripts/check.sh
+     After:  .shirokuma/scripts/check.sh
+     
+     Before: ${PROJECT_ROOT}/.shirokuma/scripts/run.sh
+     After:  .shirokuma/scripts/run.sh
+  
+  4. Wrapper Removal:
+     Before: bash .shirokuma/scripts/test.sh
+     After:  .shirokuma/scripts/test.sh
+     
+     Before: sh .shirokuma/scripts/build.sh --prod
+     After:  .shirokuma/scripts/build.sh --prod
+  
+  5. Tool Directory Correction:
+     Before: .shirokuma/tools/check-markdown-only.sh
+     After:  .shirokuma/scripts/check-markdown.sh
+     
+     Before: .shirokuma/lib/utils.sh
+     After:  # Source internally from scripts, not directly
+```
+
+**Implementation Workflow**:
+```javascript
+// Pattern detection and fixing logic
+function validateScriptCalling(content, filePath) {
+  const violations = [];
+  const fixes = [];
+  
+  // Detect absolute paths
+  const absolutePathRegex = /\/[^\s]+\/.shirokuma\/scripts\/[^\s]+/g;
+  let match;
+  while (match = absolutePathRegex.exec(content)) {
+    const original = match[0];
+    const fixed = original.replace(/^.*\/.shirokuma\/scripts\//, '.shirokuma/scripts/');
+    violations.push({
+      type: 'absolute-path',
+      line: getLineNumber(content, match.index),
+      original,
+      fixed,
+      autoFixable: true
+    });
+  }
+  
+  // Detect environment variables
+  const envVarRegex = /(\w+)=(\S+)\s+\.shirokuma\/scripts\/([^\s]+)/g;
+  while (match = envVarRegex.exec(content)) {
+    const [original, varName, varValue, scriptPath] = match;
+    const optionFlag = '--' + varName.toLowerCase().replace(/_/g, '-');
+    const fixed = `.shirokuma/scripts/${scriptPath} ${optionFlag}`;
+    violations.push({
+      type: 'env-var',
+      line: getLineNumber(content, match.index),
+      original,
+      fixed,
+      autoFixable: true,
+      note: `Converted ${varName}=${varValue} to ${optionFlag}`
+    });
+  }
+  
+  // Detect dynamic paths
+  const dynamicPathRegex = /\$\{?\w+\}?\/.shirokuma\/scripts\/[^\s]+/g;
+  while (match = dynamicPathRegex.exec(content)) {
+    const original = match[0];
+    const fixed = original.replace(/^\$\{?\w+\}?\//, '');
+    violations.push({
+      type: 'dynamic-path',
+      line: getLineNumber(content, match.index),
+      original,
+      fixed,
+      autoFixable: true
+    });
+  }
+  
+  // Detect unnecessary wrappers
+  const wrapperRegex = /(bash|sh|source)\s+\.shirokuma\/scripts\/([^\s]+)/g;
+  while (match = wrapperRegex.exec(content)) {
+    const [original, wrapper, scriptPath] = match;
+    const fixed = `.shirokuma/scripts/${scriptPath}`;
+    violations.push({
+      type: 'wrapper',
+      line: getLineNumber(content, match.index),
+      original,
+      fixed,
+      autoFixable: true,
+      note: `Removed unnecessary ${wrapper} wrapper`
+    });
+  }
+  
+  // Detect direct tool access
+  const toolAccessRegex = /\.shirokuma\/(tools|lib)\/[^\s]+/g;
+  while (match = toolAccessRegex.exec(content)) {
+    violations.push({
+      type: 'direct-tool-access',
+      line: getLineNumber(content, match.index),
+      original: match[0],
+      fixed: null,
+      autoFixable: false,
+      note: 'Tools should be called via scripts in .shirokuma/scripts/'
+    });
+  }
+  
+  return { violations, fixes };
+}
+```
+
+**Reporting Format**:
+```markdown
+### Script Calling Consistency Report
+
+#### Files Scanned: X
+#### Violations Found: Y
+#### Auto-Fixable: Z
+
+#### Violations by Type:
+- Absolute paths: X
+- Environment variables: Y
+- Dynamic paths: Z
+- Unnecessary wrappers: A
+- Direct tool access: B
+
+#### Detailed Violations:
+File: .claude/commands/ai-test.md
+Line 45: ❌ Absolute path
+  Original: /home/user/.shirokuma/scripts/test.sh
+  Fixed:    .shirokuma/scripts/test.sh
+  Status:   ✅ Auto-fixable
+
+Line 67: ❌ Environment variable
+  Original: DEBUG=true .shirokuma/scripts/validate.sh
+  Fixed:    .shirokuma/scripts/validate.sh --debug
+  Status:   ✅ Auto-fixable
+
+Line 89: ⚠️ Direct tool access
+  Original: .shirokuma/tools/check.sh
+  Fixed:    Requires manual migration to scripts/
+  Status:   ❌ Manual fix required
+```
+
+**Auto-Fix Process**:
+```yaml
+Execution:
+  1. Pre-fix validation:
+     - Create backup of all files
+     - Verify patterns are correctly identified
+     - Generate fix preview
+  
+  2. Apply fixes:
+     - Process auto-fixable violations
+     - Maintain file formatting
+     - Preserve indentation
+     - Update line references
+  
+  3. Post-fix validation:
+     - Re-scan for remaining violations
+     - Verify no new issues introduced
+     - Test script execution
+     - Generate compliance report
+  
+  4. Documentation:
+     - Record all changes in audit log
+     - Update knowledge base with fixes
+     - Create rollback instructions
+```
+
 #### Command Integration Validation
 - **Rule ID**: command-integration-live
 - **Purpose**: Verify all commands work correctly
