@@ -1,7 +1,5 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-const DEFAULT_FALLBACK_VERSION = '0.7.5';
-const FALLBACK_VERSION = process.env.MCP_FALLBACK_VERSION || DEFAULT_FALLBACK_VERSION;
+export const DB_SCHEMA_VERSION = '0.7.15';
+const SCHEMA_VERSION = process.env.MCP_SCHEMA_VERSION || DB_SCHEMA_VERSION;
 export class VersionMismatchError extends Error {
     programVersion;
     dbVersion;
@@ -16,34 +14,7 @@ export class VersionMismatchError extends Error {
     }
 }
 export async function getProgramVersion() {
-    try {
-        const currentDir = __dirname;
-        const possiblePaths = [
-            path.join(currentDir, '..', '..', 'package.json'),
-            path.join(currentDir, '..', '..', '..', 'package.json')
-        ];
-        for (const packageJsonPath of possiblePaths) {
-            try {
-                const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-                if (packageJson.version) {
-                    return packageJson.version;
-                }
-            }
-            catch (error) {
-                if (process.env.DEBUG) {
-                    console.debug(`Failed to read ${packageJsonPath}:`, error);
-                }
-                continue;
-            }
-        }
-        return FALLBACK_VERSION;
-    }
-    catch (error) {
-        if (process.env.DEBUG) {
-            console.debug('Failed to get program version:', error);
-        }
-        return FALLBACK_VERSION;
-    }
+    return SCHEMA_VERSION;
 }
 export async function hasDbMetadataTable(db) {
     try {

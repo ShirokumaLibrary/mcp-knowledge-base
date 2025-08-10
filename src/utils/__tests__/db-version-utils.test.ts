@@ -27,9 +27,9 @@ describe('getProgramVersion', () => {
       
       // Assert
       // This test SHOULD FAIL because current implementation uses process.cwd()
-      // Expected: MCP's actual version (0.7.13)
+      // Expected: MCP's actual version (0.7.15)
       // Actual: Will get 99.99.99 from current directory
-      expect(version).toBe('0.7.13'); // MCP's actual version
+      expect(version).toBe('0.7.15'); // MCP's actual version
       expect(version).not.toBe('99.99.99'); // Should NOT be the temp dir version
     } finally {
       // Cleanup
@@ -44,7 +44,7 @@ describe('getProgramVersion', () => {
     const version = await getProgramVersion();
     
     // Should get the actual MCP version regardless of where it's run from
-    expect(version).toBe('0.7.13');
+    expect(version).toBe('0.7.15');
     expect(typeof version).toBe('string');
     expect(version).toMatch(/^\d+\.\d+\.\d+$/); // Semantic versioning format
   });
@@ -56,7 +56,7 @@ describe('getProgramVersion', () => {
     const version = await getProgramVersion();
     
     // Should get the correct MCP version
-    expect(version).toBe('0.7.13');
+    expect(version).toBe('0.7.15');
     expect(typeof version).toBe('string');
   });
 
@@ -78,7 +78,7 @@ describe('getProgramVersion', () => {
         const version = await getProgramVersion();
         
         // Should still get correct version through symlink
-        expect(version).toBe('0.7.13');
+        expect(version).toBe('0.7.15');
       } finally {
         process.chdir(originalCwd);
       }
@@ -102,7 +102,7 @@ describe('getProgramVersion', () => {
       const version = await getProgramVersion();
       
       // With __dirname-based implementation, it still finds MCP's package.json
-      expect(version).toBe('0.7.13'); // MCP's actual version
+      expect(version).toBe('0.7.15'); // MCP's actual version
     } finally {
       process.chdir(originalCwd);
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -126,7 +126,7 @@ describe('getProgramVersion', () => {
       const version = await getProgramVersion();
       
       // With __dirname-based implementation, it still finds MCP's package.json
-      expect(version).toBe('0.7.13'); // MCP's actual version
+      expect(version).toBe('0.7.15'); // MCP's actual version
     } finally {
       process.chdir(originalCwd);
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -157,7 +157,7 @@ describe('getProgramVersion', () => {
       const version = await getProgramVersion();
       
       // MCP should report its own version, not user's project version
-      expect(version).toBe('0.7.13'); // MCP version
+      expect(version).toBe('0.7.15'); // MCP version
       expect(version).not.toBe('1.0.0'); // NOT user's project version
       
       // This test demonstrates the bug's impact:
@@ -189,7 +189,7 @@ describe('getProgramVersion - Edge Cases', () => {
       
       // With __dirname-based implementation, it still finds MCP's package.json
       expect(version).not.toBeUndefined();
-      expect(version).toBe('0.7.13'); // MCP's actual version
+      expect(version).toBe('0.7.15'); // MCP's actual version
     } finally {
       process.chdir(originalCwd);
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -208,7 +208,7 @@ describe('getProgramVersion - Edge Cases', () => {
     );
     await fs.writeFile(
       path.join(nodeModulesDir, 'package.json'),
-      JSON.stringify({ version: '0.7.13' }, null, 2)
+      JSON.stringify({ version: '0.7.15' }, null, 2)
     );
     
     const originalCwd = process.cwd();
@@ -220,7 +220,7 @@ describe('getProgramVersion - Edge Cases', () => {
       
       // Should get MCP's version from its own package.json in node_modules
       // NOT the parent project's version
-      expect(version).toBe('0.7.13');
+      expect(version).toBe('0.7.15');
       expect(version).not.toBe('2.0.0');
     } finally {
       process.chdir(originalCwd);
@@ -249,10 +249,10 @@ describe('getProgramVersion - Test Failure Clarity', () => {
       
       // This assertion will fail with current implementation
       // The failure message should clearly show:
-      // Expected: "0.7.13" (MCP's version)
+      // Expected: "0.7.15" (MCP's version)
       // Received: "3.0.0" (current directory's version)
       // This makes the bug immediately obvious
-      expect(version).toBe('0.7.13');
+      expect(version).toBe('0.7.15');
     } catch (error: any) {
       // Verify the error message is informative
       expect(error.message).toContain('Expected');
