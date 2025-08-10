@@ -6,7 +6,7 @@ export class VersionMismatchError extends Error {
     constructor(params) {
         const message = params.message ||
             `Database version (${params.dbVersion}) does not match program version (${params.programVersion}).\n` +
-                'Please rebuild the database using: npm run rebuild:mcp';
+                'Please rebuild the database using: shirokuma-mcp-knowledge-base-rebuild';
         super(message);
         this.name = 'VersionMismatchError';
         this.programVersion = params.programVersion;
@@ -47,7 +47,7 @@ export async function checkDatabaseVersion(db, logger) {
             dbVersion: '<0.7.5',
             message: 'This database appears to be from a version older than 0.7.5.\n' +
                 `Current program version is ${programVersion}.\n` +
-                'Please rebuild the database using: npm run rebuild:mcp'
+                'Please rebuild the database using: shirokuma-mcp-knowledge-base-rebuild'
         });
     }
     const dbVersion = await getDbVersion(db);
@@ -60,7 +60,7 @@ export async function checkDatabaseVersion(db, logger) {
             dbVersion: 'unknown',
             message: 'Database version is not set.\n' +
                 `Current program version is ${programVersion}.\n` +
-                'Please rebuild the database using: npm run rebuild:mcp'
+                'Please rebuild the database using: shirokuma-mcp-knowledge-base-rebuild'
         });
     }
     if (dbVersion !== programVersion) {
