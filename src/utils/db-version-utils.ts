@@ -3,6 +3,10 @@ import * as path from 'path';
 import type { Database } from '../database/base.js';
 import type winston from 'winston';
 
+// Constants for version management
+const DEFAULT_FALLBACK_VERSION = '0.7.5';
+const FALLBACK_VERSION = process.env.MCP_FALLBACK_VERSION || DEFAULT_FALLBACK_VERSION;
+
 export class VersionMismatchError extends Error {
   public readonly programVersion: string;
   public readonly dbVersion: string;
@@ -20,14 +24,42 @@ export class VersionMismatchError extends Error {
 
 export async function getProgramVersion(): Promise<string> {
   try {
-    // In production, package.json should be at the root
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-    return packageJson.version;
-  } catch {
+    // Get current directory - works in Jest/CommonJS environment
+    // Note: When moving to pure ESM, this will need to use import.meta.url
+    const currentDir = __dirname;
+
+    // Try different relative paths based on whether we're in src or dist
+    const possiblePaths = [
+      path.join(currentDir, '..', '..', 'package.json'),  // src/utils -> ../..
+      path.join(currentDir, '..', '..', '..', 'package.json')  // dist/utils -> ../../..
+    ];
+    for (const packageJsonPath of possiblePaths) {
+      try {
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
+        if (packageJson.version) {
+          return packageJson.version;
+        }
+      } catch (error) {
+        // Log error for debugging (optional)
+        if (process.env.DEBUG) {
+          // eslint-disable-next-line no-console
+          console.debug(`Failed to read ${packageJsonPath}:`, error);
+        }
+        // Try next path
+        continue;
+      }
+    }
+
+    // Fallback to a default version if package.json not found or has no version
+    return FALLBACK_VERSION;
+  } catch (error) {
     // Fallback to a default version if package.json not found
     // This might happen in test environments
-    return '0.7.5';
+    if (process.env.DEBUG) {
+      // eslint-disable-next-line no-console
+      console.debug('Failed to get program version:', error);
+    }
+    return FALLBACK_VERSION;
   }
 }
 
