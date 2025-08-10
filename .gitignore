@@ -88,3 +88,6 @@ __test_data_*__/
 test-results/
 search.db
 *.db
+# Type migration backups
+.database-backup/
+.database-backup-*/
