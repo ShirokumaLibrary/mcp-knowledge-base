@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { EmbeddingManager } from './embedding-manager.js';
 
 export interface WeightConfig {
@@ -24,7 +25,7 @@ export interface RelatedItem {
 export class UnifiedSearch {
   private embeddingManager = new EmbeddingManager();
 
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   /**
    * Find related items using unified search strategies

@@ -1,14 +1,15 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient, Prisma } = pkg;
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { CreateItemSchema, GetItemSchema, UpdateItemSchema, DeleteItemSchema } from '../database/schemas.js';
 import { getStatusId, ensureTags } from '../database/database-init.js';
 import { validateType } from '../../utils/validation.js';
 
-// Type definition for update data - using Prisma generated type
-type UpdateItemData = Prisma.ItemUpdateInput;
+// Type definition for update data - using dynamic type
+type UpdateItemData = Parameters<InstanceType<typeof PrismaClient>['item']['update']>[0]['data'];
 
 export class CRUDHandlers {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   async createItem(args: unknown) {
     const params = CreateItemSchema.parse(args);

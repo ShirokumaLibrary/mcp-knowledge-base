@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
 export class GraphService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   /**
    * Add bidirectional relation between items (manual relations only)

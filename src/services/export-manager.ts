@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 // Types are defined inline in method signatures
 
 // Constants
@@ -33,7 +34,7 @@ export interface StateExportResult {
 }
 
 export class ExportManager {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   /**
    * Sanitize filename by replacing invalid characters

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
@@ -76,7 +77,7 @@ export async function checkAndApplyMigrations(): Promise<void> {
 }
 
 // Auto-seed if needed
-export async function autoSeedIfNeeded(prisma: PrismaClient): Promise<void> {
+export async function autoSeedIfNeeded(prisma: InstanceType<typeof PrismaClient>): Promise<void> {
   try {
     // Check if statuses exist
     const statusCount = await prisma.status.count();
@@ -100,7 +101,7 @@ export async function autoSeedIfNeeded(prisma: PrismaClient): Promise<void> {
 }
 
 // Initialize database and apply migrations automatically
-export async function initializeDatabase(prisma: PrismaClient): Promise<void> {
+export async function initializeDatabase(prisma: InstanceType<typeof PrismaClient>): Promise<void> {
   try {
     // Check if tables exist by attempting a simple query
     await prisma.status.findFirst();
@@ -174,7 +175,7 @@ export async function initializeDatabase(prisma: PrismaClient): Promise<void> {
 }
 
 // Helper functions
-export async function getStatusId(prisma: PrismaClient, statusName: string): Promise<number> {
+export async function getStatusId(prisma: InstanceType<typeof PrismaClient>, statusName: string): Promise<number> {
   // Try exact match first
   let status = await prisma.status.findUnique({
     where: { name: statusName }
@@ -199,7 +200,7 @@ interface Tag {
   name: string;
 }
 
-export async function ensureTags(prisma: PrismaClient, tagNames: string[]): Promise<Tag[]> {
+export async function ensureTags(prisma: InstanceType<typeof PrismaClient>, tagNames: string[]): Promise<Tag[]> {
   const tags = [];
   for (const name of tagNames) {
     let tag = await prisma.tag.findUnique({ where: { name } });

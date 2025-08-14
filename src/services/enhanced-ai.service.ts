@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { ClaudeInterface, EnrichedMetadata } from './ai/claude-interface.js';
 import { EmbeddingManager } from './ai/embedding-manager.js';
 import { DataStorage } from './ai/data-storage.js';
@@ -22,7 +23,7 @@ export class EnhancedAIService {
   private similaritySearch: SimilaritySearch;
   private unifiedSearch: UnifiedSearch;
 
-  constructor(private prisma: PrismaClient) {
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {
     this.claudeInterface = new ClaudeInterface();
     this.embeddingManager = new EmbeddingManager();
     this.dataStorage = new DataStorage(prisma);

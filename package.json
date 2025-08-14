@@ -1,6 +1,6 @@
 {
   "name": "@shirokuma-library/mcp-knowledge-base",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "MCP server for AI-powered knowledge management with semantic search, graph analysis, and automatic enrichment",
   "keywords": [
     "mcp",
@@ -86,7 +86,7 @@
     "migrate:status": "tsx scripts/migrate.ts status",
     "migrate:reset": "tsx scripts/migrate.ts reset",
     "prepublishOnly": "prisma generate && npm run build:prod",
-    "postinstall": "echo 'Shirokuma installed. Run shirokuma-kb serve to start.'"
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma || true"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

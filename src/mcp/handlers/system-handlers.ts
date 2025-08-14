@@ -1,8 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { UpdateCurrentStateSchema } from '../database/schemas.js';
 
 export class SystemHandlers {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   async getCurrentState() {
     const currentState = await this.prisma.systemState.findFirst({

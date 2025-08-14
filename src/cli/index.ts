@@ -40,7 +40,8 @@ if (!process.env.SHIROKUMA_DATABASE_URL) {
   process.env.SHIROKUMA_DATABASE_URL = dbPath;
 }
 
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
 // Check for DATABASE_URL for non-migrate commands
 function checkDatabaseUrl(command: string) {

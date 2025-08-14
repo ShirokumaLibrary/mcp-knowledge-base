@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { ExportManager } from '../../services/export-manager.js';
 import Table from 'cli-table3';
 import path from 'path';

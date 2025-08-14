@@ -1,9 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { AddRelationsSchema } from '../database/schemas.js';
 
 export class RelationHandlers {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   async getRelatedItems(args: unknown) {
     const params = args as Record<string, unknown>;

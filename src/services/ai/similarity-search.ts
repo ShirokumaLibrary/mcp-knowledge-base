@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { EmbeddingManager } from './embedding-manager.js';
 
 export class SimilaritySearch {
   private embeddingManager = new EmbeddingManager();
 
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   /**
    * Find similar items efficiently using pre-filtered search

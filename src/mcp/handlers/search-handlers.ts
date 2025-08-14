@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import { SearchItemsSchema, ListItemsSchema } from '../database/schemas.js';
 import { getStatusId } from '../database/database-init.js';
 import searchQueryParser from 'search-query-parser';
 
 export class SearchHandlers {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
 
   async searchItems(args: unknown) {
     const params = SearchItemsSchema.parse(args);
