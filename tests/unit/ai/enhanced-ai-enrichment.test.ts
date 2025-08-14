@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 
 describe('EnhancedAIService - Title/Description/Content Integration', () => {
   let EnhancedAIService: any;
@@ -22,7 +21,10 @@ describe('EnhancedAIService - Title/Description/Content Integration', () => {
     }));
     
     vi.doMock('@prisma/client', () => ({
-      PrismaClient: vi.fn(() => ({}))
+      default: {
+        PrismaClient: vi.fn(() => ({})),
+        Prisma: {}
+      }
     }));
     
     // Mock ClaudeInterface with dynamic responses
@@ -37,6 +39,8 @@ describe('EnhancedAIService - Title/Description/Content Integration', () => {
     const module = await import('../../../src/services/enhanced-ai.service.js');
     EnhancedAIService = module.EnhancedAIService;
     
+    // Create mock Prisma instance
+    const { PrismaClient } = (await import('@prisma/client')).default;
     prisma = new PrismaClient();
     service = new EnhancedAIService(prisma);
     

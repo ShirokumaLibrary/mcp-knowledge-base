@@ -1,44 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { MockPrismaClient, MockPrisma } from '../../mocks/prisma-mock.js';
 import { CRUDHandlers } from '../../../src/mcp/handlers/crud-handlers.js';
 
-// Mock PrismaClient
+// Mock PrismaClient with default export for ESM/CommonJS compatibility
 vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(() => ({
-    item: {
-      findUnique: vi.fn(),
-      update: vi.fn()
-    },
-    status: {
-      findFirst: vi.fn(),
-      findUnique: vi.fn()
-    },
-    tag: {
-      findMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    itemTag: {
-      deleteMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    keyword: {
-      findMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    concept: {
-      findMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    itemKeyword: {
-      deleteMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    itemConcept: {
-      deleteMany: vi.fn(),
-      createMany: vi.fn()
-    },
-    $transaction: vi.fn(function(callback) { return callback(this); })
-  }))
+  default: {
+    PrismaClient: MockPrismaClient,
+    Prisma: MockPrisma
+  }
 }));
 
 // Mock database-init
@@ -100,7 +69,7 @@ describe('Update Item - AI Enrichment (Fixed)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    prisma = new PrismaClient();
+    prisma = new MockPrismaClient();
     crudHandlers = new CRUDHandlers(prisma);
     
     // Set up default mock responses

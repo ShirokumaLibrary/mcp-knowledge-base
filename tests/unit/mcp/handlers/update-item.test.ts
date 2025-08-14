@@ -10,29 +10,17 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { MockPrismaClient, MockPrisma } from '../../../mocks/prisma-mock.js';
 import { CRUDHandlers } from '../../../../src/mcp/handlers/crud-handlers.js';
 import { validateType } from '../../../../src/utils/validation.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
-// Mock Prisma Client
+// Mock Prisma Client with default export for ESM/CommonJS compatibility
 vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(() => ({
-    item: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-    itemTag: {
-      deleteMany: vi.fn(),
-    },
-    status: {
-      findUnique: vi.fn(),
-    },
-    tag: {
-      findMany: vi.fn(),
-      createMany: vi.fn(),
-    },
-  })),
+  default: {
+    PrismaClient: MockPrismaClient,
+    Prisma: MockPrisma
+  }
 }));
 
 // Mock database-init functions
@@ -47,7 +35,7 @@ describe('UpdateItem with type field support', () => {
   
   beforeEach(() => {
     vi.clearAllMocks();
-    prisma = new PrismaClient();
+    prisma = new MockPrismaClient();
     crudHandlers = new CRUDHandlers(prisma);
   });
 
@@ -438,7 +426,7 @@ describe('UpdateItem with type field support', () => {
       });
       
       // Assert
-      expect(validateTypeSpy).toHaveBeenCalledWith(testType, false);
+      expect(validateTypeSpy).toHaveBeenCalledWith(testType);
     });
   });
 
@@ -484,7 +472,7 @@ describe('UpdateItem integration with validation', () => {
   
   beforeEach(() => {
     vi.clearAllMocks();
-    prisma = new PrismaClient();
+    prisma = new MockPrismaClient();
     crudHandlers = new CRUDHandlers(prisma);
   });
 
