@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("SHIROKUMA_DATABASE_URL")
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  MINIMAL
+}
+
+model Item {
+  id          Int       @id @default(autoincrement())
+  type        String
+  
+  // Required fields
+  title       String
+  description String
+  content     String
+  aiSummary   String?   @map("ai_summary")
+  statusId    Int       @map("status_id")
+  priority    Priority  @default(MEDIUM)
+  
+  // Optional fields
+  category    String?
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  version     String?
+  
+  // Intelligent extension fields
+  searchIndex String?   @map("search_index")
+  entities    String?
+  embedding   Bytes?
+  
+  // Timestamps
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  status      Status    @relation(fields: [statusId], references: [id])
+  tags        ItemTag[]
+  keywords    ItemKeyword[]
+  concepts    ItemConcept[]
+  relationsFrom ItemRelation[] @relation("SourceItem")
+  relationsTo   ItemRelation[] @relation("TargetItem")
+  
+  @@index([type])
+  @@index([statusId])
+  @@index([priority])
+  @@index([category])
+  @@index([startDate, endDate])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("items")
+}
+
+model Status {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  isClosable  Boolean  @default(false) @map("is_closable")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  items       Item[]
+  
+  @@index([sortOrder])
+  @@map("statuses")
+}
+
+model Tag {
+  id    Int       @id @default(autoincrement())
+  name  String    @unique
+  items ItemTag[]
+  
+  @@map("tags")
+}
+
+model ItemTag {
+  itemId Int @map("item_id")
+  tagId  Int @map("tag_id")
+  
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([itemId, tagId])
+  @@map("item_tags")
+}
+
+model ItemRelation {
+  sourceId Int @map("source_id")
+  targetId Int @map("target_id")
+  
+  source Item @relation("SourceItem", fields: [sourceId], references: [id], onDelete: Cascade)
+  target Item @relation("TargetItem", fields: [targetId], references: [id], onDelete: Cascade)
+  
+  @@id([sourceId, targetId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("item_relations")
+}
+
+model Keyword {
+  id       Int      @id @default(autoincrement())
+  word     String   @unique
+  items    ItemKeyword[]
+  
+  @@index([word])
+  @@map("keywords")
+}
+
+model ItemKeyword {
+  itemId    Int   @map("item_id")
+  keywordId Int   @map("keyword_id")
+  weight    Float @default(1.0)
+  
+  item    Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  
+  @@id([itemId, keywordId])
+  @@index([keywordId, weight(Sort: Desc)])
+  @@map("item_keywords")
+}
+
+model Concept {
+  id    Int           @id @default(autoincrement())
+  name  String        @unique
+  items ItemConcept[]
+  
+  @@index([name])
+  @@map("concepts")
+}
+
+model ItemConcept {
+  itemId     Int   @map("item_id")
+  conceptId  Int   @map("concept_id")
+  confidence Float @default(1.0)
+  
+  item    Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  
+  @@id([itemId, conceptId])
+  @@index([conceptId, confidence(Sort: Desc)])
+  @@map("item_concepts")
+}
+
+// System state management - separate from regular items
+model SystemState {
+  id          Int      @id @default(autoincrement())
+  version     String   @default("v0.8.0")
+  content     String   // Main state content in Markdown
+  summary     String?  // Quick summary
+  
+  // System metrics snapshot
+  metrics     String?  // JSON: { items: number, relations: number, etc }
+  
+  // Context preservation
+  context     String?  // JSON: { lastOperation, environment, etc }
+  checkpoint  String?  // JSON: Serialized important data for recovery
+  
+  // Related items for context
+  relatedItems String  @default("[]") // JSON array of item IDs
+  
+  // Metadata
+  tags        String   @default("[]") // JSON array of tags
+  metadata    String?  // JSON: Additional metadata
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Only one active state at a time
+  isActive    Boolean  @default(false) @map("is_active")
+  
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("system_states")
+}

@@ -1,0 +1,143 @@
+# Build Configuration
+
+## ビルドコマンド
+
+```bash
+# 開発
+npm run dev          # 開発サーバー起動
+
+# ビルド
+npm run build        # TypeScriptコンパイル
+
+# テスト
+npm test             # テスト実行（現在未実装）
+
+# 品質チェック
+npm run lint:errors  # ESLintエラーチェック
+
+# マイグレーション
+shirokuma-kb migrate # データベースマイグレーション
+```
+
+## package.json スクリプト
+
+```json
+{
+  "scripts": {
+    "dev": "tsx watch src/mcp/server.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src --ext .ts",
+    "lint:errors": "eslint src --ext .ts --quiet",
+    "serve": "node dist/mcp/server.js",
+    "cli": "node dist/cli/index.js",
+    "postinstall": "tsx scripts/postinstall-setup.ts"
+  }
+}
+```
+
+## TypeScript設定
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "dist", "*.test.ts"]
+}
+```
+
+## ESLint設定
+
+### 主要ルール
+- `no-explicit-any`: エラー
+- `no-unused-vars`: エラー  
+- `no-console`: エラー（logger使用推奨）
+- ファイル名: kebab-case必須
+
+### よくあるエラーと対処法
+```bash
+# エラーチェック
+npm run lint:errors
+
+# よくあるエラー
+- "Unexpected any" → 適切な型を指定
+- "Filename not in kebab case" → ファイル名をkebab-caseに変更
+- "Missing return type" → 関数の戻り値型を明示
+- "Unexpected console statement" → console.logを削除
+```
+
+## ビルド出力
+
+```
+dist/
+├── cli/
+│   └── index.js         # CLIエントリーポイント
+├── mcp/
+│   ├── server.js        # MCPサーバーエントリーポイント
+│   ├── handlers/        # ハンドラー
+│   ├── tools/          # ツール定義
+│   └── database/       # データベース層
+├── services/
+│   ├── ai/            # AIサービスモジュール
+│   └── *.service.js   # 各種サービス
+├── utils/
+│   └── validation.js   # バリデーション
+└── scripts/
+    └── postinstall-setup.js # セットアップスクリプト
+```
+
+## 依存関係
+
+### 本番依存
+- `@modelcontextprotocol/sdk`: ^1.0.6
+- `@prisma/client`: ^6.13.0
+- `commander`: ^13.1.0
+- `chalk`: ^5.4.1
+- `zod`: ^3.24.1
+
+### 開発依存
+- `typescript`: ^5.7.3
+- `@types/node`: ^22.10.7
+- `tsx`: ^4.19.2
+- `eslint`: ^9.18.0
+- `prisma`: ^6.13.0
+
+## ビルド前チェックリスト
+
+1. [ ] ESLintエラーがない（`npm run lint:errors`）
+2. [ ] TypeScriptコンパイルが成功（`npm run build`）
+3. [ ] データベーススキーマが最新（`shirokuma-kb migrate`）
+4. [ ] 不要なconsole.logが削除されている
+5. [ ] ファイル名がkebab-case
+
+## トラブルシューティング
+
+### ビルドエラー
+```bash
+# TypeScriptエラーの場合
+npx tsc --noEmit  # 型チェックのみ実行
+
+# Prismaエラーの場合
+npx prisma generate  # クライアント再生成
+```
+
+### マイグレーションエラー
+```bash
+# データベースリセット
+shirokuma-kb migrate --reset --seed
+```

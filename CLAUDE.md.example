@@ -1,0 +1,143 @@
+# CLAUDE.md.example
+
+## Language
+
+@.claude/agents/LANG.markdown
+
+This file provides project-specific information for Claude Code (claude.ai/code) when working with this repository.
+
+## 📋 Project Management Methodology
+
+For comprehensive AI pair programming and MCP usage methodology, see:
+→ @SHIROKUMA.md
+
+## 🎯 Project Overview
+
+### Basic Information
+- **Project Name**: [Your project name]
+- **Purpose**: [What problem this project solves]
+- **Target Users**: [Who this project is for]
+
+### Technology Stack
+- **Language**: TypeScript/JavaScript
+- **Framework**: [Your framework]
+- **Database**: [Your database]
+- **Other**: [Other important technologies]
+
+## ⚡ Essential Commands
+
+### Development
+```bash
+npm run dev          # Start development server
+npm run build        # Production build
+npm test             # Run tests
+npm run lint         # Run linter
+npm run typecheck    # Type checking
+```
+
+### Deployment
+```bash
+npm run deploy:staging    # Deploy to staging
+npm run deploy:production # Deploy to production
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/     # UI components
+├── services/       # Business logic
+├── utils/          # Utility functions
+├── types/          # TypeScript definitions
+└── tests/          # Test files
+```
+
+## 📐 Coding Conventions
+
+### Naming Conventions
+- **File names**: kebab-case (e.g., user-service.ts)
+- **Class names**: PascalCase (e.g., UserService)
+- **Function names**: camelCase (e.g., getUserById)
+- **Constants**: UPPER_SNAKE_CASE (e.g., MAX_RETRY_COUNT)
+
+### Import Order
+1. External libraries
+2. Internal modules (absolute paths)
+3. Relative path modules
+4. Type definitions
+
+## 🔧 Environment Setup
+
+### Required Environment Variables
+```bash
+DATABASE_URL=       # Database connection string
+API_KEY=           # External API key
+NODE_ENV=          # development | production
+```
+
+### Initial Setup
+```bash
+npm install         # Install dependencies
+npm run db:setup    # Initialize database
+npm run seed        # Seed test data
+```
+
+## 🚨 Critical Constraints
+
+### Security
+- Manage auth tokens via environment variables
+- SQL injection prevention required
+- Consider XSS protection
+
+### Performance
+- API responses within 2 seconds
+- Bundle size under 500KB
+- Monitor memory usage
+
+## 🔍 Troubleshooting
+
+### Common Errors
+
+#### Build Errors
+```bash
+# Clear cache
+rm -rf node_modules/.cache
+npm run build
+```
+
+#### Test Failures
+```bash
+# Run specific test
+npm test -- --testNamePattern="specific test name"
+```
+
+#### Database Connection Errors
+```bash
+# Check connection
+npm run db:check
+```
+
+## 📚 Related Documentation
+
+### Internal Documentation (in MCP)
+- **docs-1**: API Specification
+- **docs-2**: Architecture Design
+- **knowledge-1**: Deployment Procedures
+
+### External Links
+- [Project Wiki](https://...)
+- [Design System](https://...)
+- [API Documentation](https://...)
+
+## 🔄 Continuous Integration
+
+### Pre-PR Checklist
+- [ ] All tests pass
+- [ ] No linter errors
+- [ ] Type checks pass
+- [ ] Documentation updated (if needed)
+
+### Merge Requirements
+- Review approval: 1+ reviewers
+- All CI checks green
+- No conflicts

@@ -1,0 +1,143 @@
+# CLAUDE.md.ja.example
+
+## Language
+
+@.claude/agents/LANG.markdown
+
+このファイルは、Claude Code (claude.ai/code) がこのリポジトリで作業する際のプロジェクト固有情報を提供します。
+
+## 📋 プロジェクト管理方法論
+
+AIペアプログラミングとMCP活用の詳細な方法論については：
+→ @SHIROKUMA.md を参照
+
+## 🎯 プロジェクト概要
+
+### 基本情報
+- **プロジェクト名**: [プロジェクト名]
+- **目的**: [このプロジェクトが解決する問題]
+- **対象ユーザー**: [誰のためのプロジェクトか]
+
+### 技術スタック
+- **言語**: TypeScript/JavaScript
+- **フレームワーク**: [使用フレームワーク]
+- **データベース**: [使用DB]
+- **その他**: [その他の重要な技術]
+
+## ⚡ 必須コマンド
+
+### 開発
+```bash
+npm run dev          # 開発サーバー起動
+npm run build       # プロダクションビルド
+npm test            # テスト実行
+npm run lint        # リンター実行
+npm run typecheck   # 型チェック
+```
+
+### デプロイ
+```bash
+npm run deploy:staging    # ステージング環境
+npm run deploy:production # 本番環境
+```
+
+## 🏗️ プロジェクト構造
+
+```
+src/
+├── components/     # UIコンポーネント
+├── services/       # ビジネスロジック
+├── utils/          # ユーティリティ関数
+├── types/          # TypeScript型定義
+└── tests/          # テストファイル
+```
+
+## 📐 コーディング規約
+
+### 命名規則
+- **ファイル名**: kebab-case (例: user-service.ts)
+- **クラス名**: PascalCase (例: UserService)
+- **関数名**: camelCase (例: getUserById)
+- **定数**: UPPER_SNAKE_CASE (例: MAX_RETRY_COUNT)
+
+### インポート順序
+1. 外部ライブラリ
+2. 内部モジュール（絶対パス）
+3. 相対パスのモジュール
+4. 型定義
+
+## 🔧 環境設定
+
+### 必要な環境変数
+```bash
+DATABASE_URL=       # データベース接続文字列
+API_KEY=           # 外部API キー
+NODE_ENV=          # development | production
+```
+
+### 初回セットアップ
+```bash
+npm install         # 依存関係インストール
+npm run db:setup    # データベース初期化
+npm run seed        # テストデータ投入
+```
+
+## 🚨 重要な制約
+
+### セキュリティ
+- 認証トークンは環境変数で管理
+- SQLインジェクション対策必須
+- XSS対策を考慮
+
+### パフォーマンス
+- APIレスポンスは2秒以内
+- バンドルサイズは500KB以下
+- メモリ使用量の監視
+
+## 🔍 トラブルシューティング
+
+### よくあるエラー
+
+#### ビルドエラー
+```bash
+# キャッシュクリア
+rm -rf node_modules/.cache
+npm run build
+```
+
+#### テスト失敗
+```bash
+# 特定のテストのみ実行
+npm test -- --testNamePattern="特定のテスト名"
+```
+
+#### データベース接続エラー
+```bash
+# 接続確認
+npm run db:check
+```
+
+## 📚 関連ドキュメント
+
+### 内部ドキュメント（MCP内）
+- **docs-1**: API仕様書
+- **docs-2**: アーキテクチャ設計書
+- **knowledge-1**: デプロイ手順書
+
+### 外部リンク
+- [プロジェクトWiki](https://...)
+- [デザインシステム](https://...)
+- [APIドキュメント](https://...)
+
+## 🔄 継続的インテグレーション
+
+### PR作成前チェックリスト
+- [ ] テストが全て通る
+- [ ] リンターエラーなし
+- [ ] 型チェック通過
+- [ ] ドキュメント更新（必要な場合）
+
+### マージ条件
+- レビュー承認: 1名以上
+- CI全項目グリーン
+- コンフリクトなし

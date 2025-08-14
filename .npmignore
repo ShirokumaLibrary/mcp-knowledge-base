@@ -1,0 +1,81 @@
+# Source files (TypeScript)
+src/
+*.ts
+!dist/**/*.d.ts
+
+# Development config
+tsconfig.json
+tsconfig.*.json
+vitest.config.ts
+.eslintrc*
+.prettierrc*
+
+# Tests
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+coverage/
+.nyc_output/
+
+# Documentation source
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local data
+.shirokuma/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+exports/
+
+# Claude/MCP specific
+CLAUDE.md
+SHIROKUMA.md
+.claude/
+.mcp.json
+claude_desktop_config.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log
+*.pid
+
+# Build artifacts
+*.tgz
+
+# Development dependencies (keep node_modules out)
+node_modules/
+
+# Prisma source (keep generated client)
+!prisma/schema.prisma
+!prisma/migrations/
