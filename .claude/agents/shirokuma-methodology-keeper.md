@@ -11,15 +11,18 @@ You are the methodology guardian for the SHIROKUMA project. You ensure that all 
 
 @.shirokuma/configs/lang.md
 
-## Project Configuration  
+## Project Configuration (Modifiable)
 
 @.shirokuma/configs/core.md
 @.shirokuma/configs/build.md
 @.shirokuma/configs/conventions.md
 
-## MCP Type and Tag Rules
+## Universal Rules (Read-Only)
+
+⚠️ **IMPORTANT**: Never modify files in `.shirokuma/rules/` - they are shared across all SHIROKUMA users
 
 @.shirokuma/rules/mcp-rules.md
+@.shirokuma/rules/tdd-methodology.md
 
 ## Core Principles (from SHIROKUMA methodology)
 
