@@ -16,7 +16,7 @@ Actions:
 
 ### Purpose
 
-This command analyzes the current project structure and generates or updates the `.claude/agents/PROJECT_CONFIGURATION.markdown` file, which contains comprehensive project-specific settings and patterns for all AI agents.
+This command analyzes the current project structure and generates or updates the configuration files in `.shirokuma/configs/` directory, which contains comprehensive project-specific settings and patterns for all AI agents.
 
 ### Workflow
 
@@ -26,30 +26,35 @@ This command analyzes the current project structure and generates or updates the
 2. Detect technology stack
 3. Identify conventions and patterns
 4. Find MCP instance if exists
-5. Generate configuration file
-6. Save to .claude/agents/PROJECT_CONFIGURATION.markdown
+5. Generate configuration files:
+   - .shirokuma/configs/lang.md (language settings)
+   - .shirokuma/configs/core.md (project overview)
+   - .shirokuma/configs/build.md (build configuration)
+   - .shirokuma/configs/test.md (test configuration)
+   - .shirokuma/configs/conventions.md (coding standards)
 ```
 
 #### Update Configuration
 ```yaml
-1. Read existing configuration
+1. Read existing configuration files from .shirokuma/configs/
 2. Re-analyze project
 3. Merge new findings
 4. Preserve manual customizations
-5. Update configuration file
+5. Update individual configuration files
 ```
 
 #### Validate Configuration
 ```yaml
 1. Check configuration exists
-   - Verify .claude/agents/PROJECT_CONFIGURATION.markdown exists
-   - Check YAML syntax is valid
+   - Verify .shirokuma/configs/ directory exists
+   - Check all 5 config files are present
+   - Validate markdown syntax
    - Ensure required sections present
 
 2. Verify all referenced files
-   - methodology_file exists
-   - project_instructions exists
-   - example_files exist
+   - Files referenced in core.md exist
+   - Build commands in build.md are valid
+   - Test commands in test.md work
 
 3. Validate MCP connections
    - Test MCP prefix format
@@ -108,43 +113,88 @@ Operations:
   6. Generate comprehensive config
 ```
 
-### Configuration Structure
+### Configuration File Structure
 
-The generated markdown file includes comprehensive configuration with embedded YAML:
+The configuration is split across multiple focused files:
 
-```yaml
-project:
-  name: "Project Name"
-  description: "Project Description"
-  language_env: "LANGUAGE_ENV_VAR"
-  
-mcp:
-  prefix: "mcp__instance-name__"
-  tools: [list of available tools]
+#### .shirokuma/configs/lang.md
+```markdown
+## Language Usage Rules
 
-references:
-  methodology_file: "methodology.md"
-  project_instructions: "instructions.md"
-  
-conventions:
-  test_framework: "detected framework"
-  test_command: "detected command"
-  lint_command: "detected command"
-  build_command: "detected command"
-  file_naming: "detected pattern"
-  
-tech_stack:
-  language: "detected language"
-  runtime: "detected runtime"
-  package_manager: "detected manager"
-  frameworks: [detected frameworks]
-  
-quality_standards:
-  review_threshold: 85
-  test_coverage_target: 80
-  
-development_principles:
-  - "Detected principles"
+### Chat Response
+- Japanese for all user interactions
+### Code Comments
+- English for inline comments
+### Documentation
+- Technical docs in English
+- User guides in Japanese
+```
+
+#### .shirokuma/configs/core.md
+```markdown
+# Project Core Configuration
+
+## Project Overview
+- Name: [Project Name]
+- Version: [Version]
+- Description: [Description]
+
+## Technology Stack
+- Language: [Language]
+- Runtime: [Runtime]
+- Database: [Database]
+- Frameworks: [List]
+
+## Directory Structure
+[Project structure details]
+
+## Data Models
+[Core data schemas]
+```
+
+#### .shirokuma/configs/build.md
+```markdown
+# Build Configuration
+
+## Build Commands
+- build: [command]
+- dev: [command]
+
+## TypeScript Configuration
+[tsconfig.json details]
+
+## Dependencies
+[Key dependencies]
+```
+
+#### .shirokuma/configs/test.md
+```markdown
+# Testing Configuration
+
+## Test Commands
+- test: [command]
+- test:coverage: [command]
+
+## Pre-flight Checks
+[Validation steps]
+
+## Quality Gates
+[Coverage requirements]
+```
+
+#### .shirokuma/configs/conventions.md
+```markdown
+# Coding Conventions
+
+## File Naming
+- Pattern: kebab-case
+
+## Code Style
+- Indent: 2 spaces
+- Quotes: single
+
+## Git Conventions
+[Commit message format]
 ```
 
 ### Error Handling
@@ -156,72 +206,42 @@ development_principles:
 
 ### Success Indicators
 
-- Configuration file created/updated
+- All 5 configuration files created/updated in .shirokuma/configs/
 - All project specifics captured
-- Valid YAML syntax
+- Valid markdown syntax
 - Agent compatibility verified
 
 This command ensures all AI agents have accurate project context for optimal performance.
 
-### Generic Project Template
-
-For new projects or manual configuration, use this comprehensive template:
-
-```yaml
-# Generic Project Configuration Template
-# Save as: .claude/agents/PROJECT_CONFIGURATION.markdown
-
-project:
-  name: "PROJECT_NAME"
-  description: "Brief project description"
-  version: "0.1.0"
-  language_env: "LANGUAGE_ENV_VAR"  # Optional environment variable for language
-  
-references:
-  methodology_file: "README.md"  # Or your main docs
-  project_instructions: "CONTRIBUTING.md"  # Or your guidelines
-  
-conventions:
-  # Commands - Update these based on your project
-  test_command: "# TODO: Add test command"
-  lint_command: "# TODO: Add lint command"
-  build_command: "# TODO: Add build command"
-  # Type checking may be included in build process or as separate command
-  
-  # Naming conventions
-  file_naming: "kebab-case"  # or camelCase, PascalCase, snake_case
-  
-  # Code style
-  indent_style: "space"  # or tab
-  indent_size: 2  # or 4
-  quote_style: "single"  # or double
-
-tech_stack:
-  language: "Unknown"  # Update with actual language
-  runtime: "Unknown"  # Update with runtime
-  package_manager: "Unknown"  # npm, pip, cargo, etc.
-  frameworks: []  # Add frameworks as discovered
-
-quality_standards:
-  review_threshold: 85
-  test_coverage_target: 80
-  max_complexity: 10
-  
-development_principles:
-  - "Clean Code"
-  - "SOLID Principles"
-  - "Test-Driven Development"
-  - "Documentation First"
-  - "# TODO: Add project-specific principles"
-```
-
-#### Template Usage
+### Template Usage
 
 1. Run `/ai-config generate` to auto-detect your project settings
-2. Or manually create `.claude/agents/PROJECT_CONFIGURATION.markdown` with the template
-3. Replace all `# TODO:` items with actual values
-4. Update placeholders like `PROJECT_NAME` and `Unknown`
-5. Add project-specific sections as needed
-6. Run `/ai-config validate` to check configuration
+2. Configuration files will be created in `.shirokuma/configs/`
+3. Review and customize each file as needed
+4. Run `/ai-config validate` to check configuration
 
-The AI agents will gracefully handle TODO items and provide guidance when commands are needed but not yet configured.
+### Configuration File Locations
+
+```
+.shirokuma/
+├── configs/            # ✅ PROJECT-SPECIFIC (modifiable)
+│   ├── README.md       # Guide for config files
+│   ├── lang.md         # Language settings
+│   ├── core.md         # Project overview
+│   ├── build.md        # Build configuration
+│   ├── test.md         # Test configuration
+│   └── conventions.md  # Coding standards
+│
+└── rules/              # ⚠️ UNIVERSAL (read-only, DO NOT MODIFY)
+    ├── mcp-rules.md    # MCP methodology
+    └── tdd-methodology.md # TDD principles
+```
+
+## ⚠️ Critical Warning
+
+**NEVER modify files in `.shirokuma/rules/`** - These are:
+- Shared across all SHIROKUMA users
+- Updated only by methodology maintainers
+- Should be treated as read-only reference
+
+This command ONLY manages `.shirokuma/configs/` files. The AI agents will reference both configs (project-specific) and rules (universal methodology).

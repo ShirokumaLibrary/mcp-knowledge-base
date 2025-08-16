@@ -100,6 +100,48 @@ Update current_state using `mcp__shirokuma-knowledge-base__update_current_state`
 
 Show user a complete summary as formatted in step 4.
 
+### Step 5: Automatic Quality Check (Conditional)
+
+Invoke @agent-shirokuma-methodology-keeper automatically when:
+- Session duration > 30 minutes
+- Modified files > 5
+- Created test files > 0  
+- Tags include "tdd", "refactor", or "test"
+
+```javascript
+// Automatic quality check logic
+const shouldRunQualityCheck = () => {
+  return (
+    sessionDuration > 30 ||
+    modifiedFiles.length > 5 ||
+    createdTestFiles > 0 ||
+    tags.includes("tdd") ||
+    tags.includes("refactor")
+  );
+};
+
+if (shouldRunQualityCheck()) {
+  // Invoke methodology keeper quietly
+  const qualityReport = await Task({
+    subagent_type: "shirokuma-methodology-keeper",
+    prompt: "Brief quality check for session. Max 5 lines summary. Focus on critical issues only.",
+    description: "Session quality audit"
+  });
+  
+  // Show only critical issues to user (1-2 lines)
+  if (qualityReport.criticalIssues) {
+    console.log("⚠️ Quality note:", qualityReport.brief);
+  }
+  
+  // Save detailed report to MCP
+  await mcp__shirokuma-kb__create_item({
+    type: "analysis",
+    title: `Quality Report - ${sessionId}`,
+    content: qualityReport.detailed
+  });
+}
+```
+
 ### Best Practices
 
 1. **Complete Documentation**

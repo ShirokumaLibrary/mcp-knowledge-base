@@ -1,3 +1,9 @@
+---
+description: Simple and intuitive issue management for AI pair programming
+argument-hint: "[issue-id | 'issue description' | search 'keyword' | export]"
+allowed-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__list_items
+---
+
 # /ai-issue
 
 ## Language
@@ -55,6 +61,28 @@ Search across all issues:
 
 This command consolidates the issue-related functionality from the deprecated /ai-remember and /ai-remind commands into a single, focused interface.
 
+### Argument Parsing Rules
+
+**IMPORTANT**: Parse arguments carefully to determine the correct action:
+
+1. **No arguments** → List open issues
+2. **Numeric only (e.g., "42")** → Show issue details
+3. **Numeric + action (e.g., "42 close")** → Update issue status
+4. **"search" + keyword** → Search issues
+5. **"export"** → Export issues (special case)
+6. **Any other text** → Create new issue with that description
+
+**DO NOT** start unrelated work based on the argument text. The command should only:
+- List issues
+- Create issues
+- Show issue details
+- Update issue status
+- Search issues
+- Export issues
+
+If the user's text seems like a work request rather than an issue description, confirm before creating an issue:
+"This looks like a work request. Should I create an issue for this, or did you mean to use `/ai-go` to start working?"
+
 ## Examples
 
 ```bash
@@ -79,12 +107,3 @@ This command consolidates the issue-related functionality from the deprecated /a
 - `/ai-start` - Begin work session and see context
 - `/ai-go` - Execute work on selected issue
 - `/ai-finish` - End session with handover
-
-## Migration Notice
-
-This command replaces the issue-related functionality previously spread across:
-- `/ai-remember` (for creating issues)
-- `/ai-remind` (for retrieving issues)
-- `/ai-check` (for status checks)
-
-For a simpler, more focused workflow.
