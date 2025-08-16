@@ -210,32 +210,59 @@ if iteration >= MAX_ITERATIONS:
 /ai-code 42
 > Loading design #42...
 > Design: "User Authentication Module"
+> Initializing TDD process...
+> Creating todo list with 5 tasks...
 
-## 📝 RED Phase - Writing Tests
+## 📊 Task Progress
+⏳ Starting: [RED] Write failing tests
+
+## 🔴 RED Phase - Writing Tests
 > Creating auth.test.ts...
 > Writing 15 test cases...
 > Running tests... ❌ 15 failures (expected)
+✅ Completed: [RED] Write failing tests
+⏳ Starting: [GREEN] Implement code to pass tests
 
-## 🔨 GREEN Phase - Implementation
+## 🟢 GREEN Phase - Implementation
 > Creating auth.service.ts...
 > Implementing login method...
 > Implementing logout method...
-> Running tests... ✅ 15 passing
+> Running tests... ✅ 15/15 passing
+✅ Completed: [GREEN] Implement code to pass tests
+⏳ Starting: [REFACTOR] Optimize and clean code
 
-## ♻️ REFACTOR Phase - Optimization
+## ♾️ REFACTOR Phase - Optimization
 > Extracting validation logic...
 > Improving error handling...
-> Running tests... ✅ 15 passing
+> Running tests... ✅ 15/15 passing
+> Code coverage: 96%
+✅ Completed: [REFACTOR] Optimize and clean code
+⏳ Starting: [REVIEW] Automated code review
 
 ## 👀 REVIEW Phase - Quality Check
+Automated review is mandatory and starting now...
+
+### Review Iteration 1/3
 > Invoking @agent-shirokuma-reviewer...
-> Review: APPROVED ✅
-> Score: 94/100
+- Status: APPROVED
+- Score: 94/100
+- Review: APPROVED ✅
+✅ Completed: [REVIEW] Automated code review
 
 ## ✨ Implementation Complete!
+
+### 📊 Final Status
+✅ All tasks completed (5/5):
+- [x] [RED] Write failing tests
+- [x] [GREEN] Implement code to pass tests
+- [x] [REFACTOR] Optimize and clean code
+- [x] [REVIEW] Automated code review
+- [x] Present implementation results
+
+### 📋 Results
 - Tests: 15/15 passing
 - Coverage: 96%
-- Review: APPROVED
+- Review: APPROVED (Score: 94/100)
 - Ready for integration
 ```
 
@@ -246,21 +273,41 @@ if iteration >= MAX_ITERATIONS:
 /ai-code feedback "Add retry logic for network failures"
 > Finding recent implementation...
 > Found: auth.service.ts
+> Creating todo list for feedback implementation...
 
-## 📝 Updating Tests
+## 📊 Feedback Implementation Progress
+⏳ Starting: Update tests for new requirement
+
+## 📝 Updating Tests (RED)
 > Adding test for retry logic...
 > Running tests... ❌ 1 failure (expected)
+✅ Completed: Update tests for new requirement
+⏳ Starting: Implement feedback changes
 
-## 🔨 Applying Feedback
+## 🔨 Applying Feedback (GREEN)
 > Adding retry mechanism...
 > Configuring exponential backoff...
-> Running tests... ✅ 16 passing
+> Running tests... ✅ 16/16 passing
+✅ Completed: Implement feedback changes
+⏳ Starting: Re-review implementation
 
-## 👀 Re-Review
+## 👀 Re-Review (Automated)
+Mandatory review starting...
+
+### Review Iteration 1/3
 > Invoking @agent-shirokuma-reviewer again...
-> Review: APPROVED ✅
+- Status: APPROVED
+- Review: APPROVED ✅
+✅ Completed: Re-review implementation
 
 ## ✨ Update Complete!
+
+### 📊 All tasks completed (3/3)
+- [x] Update tests for new requirement
+- [x] Implement feedback changes
+- [x] Re-review implementation
+
+### 📋 Results
 - New feature: Retry logic with exponential backoff
 - Tests: 16/16 passing
 - Review: APPROVED
@@ -319,10 +366,3 @@ Re-submitting for review...
 - Tests are written before code
 - Review is mandatory before completion
 - All artifacts stored in MCP for traceability
-
-## Related Commands
-
-- `/ai-design` - Create technical design
-- `/ai-test` - Add more tests
-- `/ai-review` - Manual code review
-- `/ai-go` - Full cycle (design + code)

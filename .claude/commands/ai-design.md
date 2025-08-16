@@ -35,11 +35,26 @@ Create technical designs for issues with automated review validation. This comma
 
 ## Process Flow
 
+### Overview with Todo Integration
 1. **Issue Analysis** → Understand the problem
 2. **Design Creation** → Generate technical design
 3. **Self-Validation** → Check completeness
 4. **Peer Review** → Automated review by shirokuma-reviewer
 5. **User Review** → Present for final approval
+
+### TodoWrite Integration
+All phases are tracked using TodoWrite for visibility:
+```python
+# Initial todo registration
+todos = [
+    {"id": "1", "content": "Analyze issue requirements", "status": "pending"},
+    {"id": "2", "content": "Generate technical design document", "status": "pending"},
+    {"id": "3", "content": "Validate design completeness", "status": "pending"},
+    {"id": "4", "content": "Automated peer review", "status": "pending"},
+    {"id": "5", "content": "Present design for user approval", "status": "pending"}
+]
+TodoWrite(todos)
+```
 
 ## Features
 
@@ -134,6 +149,10 @@ else:
 
 ### Step 2: Design Generation or Revision
 ```python
+# Update todo status
+update_todo(id="1", status="completed")
+update_todo(id="2", status="in_progress")
+
 if revision_mode:
     # Fetch latest design from MCP
     # Apply user feedback
@@ -144,20 +163,38 @@ else:
     # Generate comprehensive design document
     # Self-validate completeness
     # Iterate if gaps found
+
+# Mark design creation as completed
+update_todo(id="2", status="completed")
+update_todo(id="3", status="in_progress")
 ```
 
-### Step 3: Review Process
+### Step 3: Review Process (Automated)
 ```python
+# Update todo for review phase
+update_todo(id="3", status="completed")
+update_todo(id="4", status="in_progress")
+
+# Display review progress
+print("## 👀 Automated Review Starting...")
+print("This review is mandatory and will run automatically.")
+
 # Invoke @agent-shirokuma-reviewer via Task tool
 iteration = 0
 MAX_ITERATIONS = 3
 
 while iteration < MAX_ITERATIONS:
+    print(f"\n### Review Iteration {iteration + 1}/{MAX_ITERATIONS}")
+    
     review_result = Task({
         subagent_type: "shirokuma-reviewer",
         prompt: f"Review design {design_id} for completeness, clarity, and implementability",
         description: "Design review"
     })
+    
+    # Display review status
+    print(f"- Status: {review_result.status}")
+    print(f"- Score: {review_result.score}/100")
     
     if review_result.status == "APPROVED":
         # Additional testability check
@@ -170,13 +207,21 @@ while iteration < MAX_ITERATIONS:
         if testability_check.has_issues:
             add_testability_notes(design_id, testability_check.notes)
         
+        # Mark review as completed
+        update_todo(id="4", status="completed")
+        update_todo(id="5", status="in_progress")
+        
         present_to_user()
         break
     elif review_result.status == "NEEDS_CHANGES":
+        print(f"- Applying feedback automatically...")
         apply_feedback(review_result.feedback)
         iteration += 1
     
 if iteration >= MAX_ITERATIONS:
+    # Mark as completed with warnings
+    update_todo(id="4", status="completed")
+    update_todo(id="5", status="in_progress")
     present_with_caveats()
 ```
 
@@ -184,29 +229,64 @@ if iteration >= MAX_ITERATIONS:
 ```markdown
 ## 🎨 Design Complete: [Feature Name]
 
+### 📊 Task Progress
+✅ Completed:
+- [x] Analyze issue requirements
+- [x] Generate technical design document
+- [x] Validate design completeness
+- [x] Automated peer review
+- [x] Present design for user approval
+
+**Progress**: 100% (5/5 tasks completed)
+
+### 📋 Design Details
 **Issue**: #XX - [Title]
 **Review Status**: ✅ APPROVED
+**Review Iterations**: X/3
 **Confidence**: 0.9
 
 [Design Summary]
 
 **Next Steps**:
 1. Review the design document
-2. Use `/ai-go XX` to implement
-3. Or request changes with `/ai-design XX revise`
+2. Use `/ai-code XX` to implement
+3. Or request changes with `/ai-design feedback "your feedback"`
 
 **Design Document**: design-YY
 ```
+
+# Mark final todo as completed
+update_todo(id="5", status="completed")
 
 ## Examples
 
 ```bash
 # Design for current work
 /ai-design
+> Initializing design process...
+> Creating todo list with 5 tasks...
+
+## 📊 Task Progress
+⏳ Starting: Analyze issue requirements
+
 > Analyzing issue #67...
+✅ Completed: Analyze issue requirements
+⏳ Starting: Generate technical design document
+
 > Creating design document...
+✅ Completed: Generate technical design document
+⏳ Starting: Validate design completeness
+
 > Self-validation: ✓ Complete
-> Peer review: ✅ APPROVED
+✅ Completed: Validate design completeness
+⏳ Starting: Automated peer review
+
+## 👀 Automated Review Starting...
+### Review Iteration 1/3
+- Status: APPROVED
+- Score: 92/100
+✅ Completed: Automated peer review
+
 > Design ready for your review
 
 # Design for specific issue
@@ -254,12 +334,6 @@ if iteration >= MAX_ITERATIONS:
 3. **Implementability**: Clear action items
 4. **Quality**: Passes automated review
 5. **Traceability**: Linked to issue
-
-## Related Commands
-
-- `/ai-issue` - Create or view issues
-- `/ai-go` - Implement approved designs
-- `/ai-review` - Review implementation
 
 ## Notes
 
