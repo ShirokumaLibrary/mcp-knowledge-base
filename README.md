@@ -27,19 +27,34 @@ npm install -g @shirokuma-library/mcp-knowledge-base@0.8.0
 
 ## Quick Start
 
-### 1. Initialize Database
+### 1. Configure Environment
+
+Create a `.env` file with absolute paths:
+
+```bash
+# Option 1: Generate automatically with correct paths
+shirokuma-kb config export > .env
+
+# Option 2: Copy from example and edit
+cp .env.example .env
+# Edit .env and update paths to use ABSOLUTE PATHS
+```
+
+**⚠️ IMPORTANT**: Always use absolute paths in `.env` file. Relative paths will cause issues with Prisma migrations.
+
+### 2. Initialize Database
 
 ```bash
 shirokuma-kb migrate
 ```
 
-### 2. Start MCP Server
+### 3. Start MCP Server
 
 ```bash
 shirokuma-kb serve
 ```
 
-### 3. Configure Claude Desktop
+### 4. Configure Claude Desktop
 
 Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
