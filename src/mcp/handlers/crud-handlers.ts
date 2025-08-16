@@ -223,12 +223,13 @@ export class CRUDHandlers {
           description: finalDescription,
           content: finalContent
         });
-        
+
         // Add 3 second timeout for AI enrichment
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('AI enrichment timeout')), 3000)
-        );
-        
+        const timeoutPromise = new Promise((_, reject) => {
+          const timer = global.setTimeout(() => reject(new Error('AI enrichment timeout')), 3000);
+          return timer;
+        });
+
         const enrichedMetadata = await Promise.race([enrichmentPromise, timeoutPromise]) as Awaited<ReturnType<typeof enhancedAI.extractWeightedKeywords>>;
 
         // Add AI-enriched metadata to update

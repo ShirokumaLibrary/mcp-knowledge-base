@@ -25,9 +25,9 @@ if (!process.env.SHIROKUMA_DATABASE_URL) {
   const dataDir = process.env.SHIROKUMA_DATA_DIR || defaultDataDir;
   const resolvedDir = dataDir.replace(/^~/, os.homedir());
   const dbPath = `file:${resolvedDir}/shirokuma.db`;
-  
+
   process.env.SHIROKUMA_DATABASE_URL = dbPath;
-  console.log(`📁 Auto-configured SHIROKUMA_DATABASE_URL from SHIROKUMA_DATA_DIR: ${dbPath}`);
+  process.stderr.write(`📁 Auto-configured SHIROKUMA_DATABASE_URL from SHIROKUMA_DATA_DIR: ${dbPath}\n`);
 }
 
 // Initialize services
