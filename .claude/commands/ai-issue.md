@@ -13,6 +13,7 @@ allowed-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__s
 ## Purpose
 
 Simple and intuitive issue management for AI pair programming sessions.
+**This command ONLY manages issues - it never executes work or starts tasks.**
 
 ## Usage
 
@@ -33,8 +34,9 @@ Shows all open issues in a concise format:
 - Creation date
 
 ### 2. Create New Issue (with description)
-When provided with a text description:
-- Creates a new issue automatically
+When provided with a CLEAR issue description:
+- Text must be either quoted OR contain obvious issue keywords (bug, error, problem, feature, etc.)
+- Ambiguous text triggers confirmation dialog
 - Sets priority based on keywords (bug=high, improvement=medium, etc.)
 - Returns the new issue number
 
@@ -63,25 +65,33 @@ This command consolidates the issue-related functionality from the deprecated /a
 
 ### Argument Parsing Rules
 
-**IMPORTANT**: Parse arguments carefully to determine the correct action:
+**CRITICAL**: Parse arguments in this EXACT order to avoid misinterpretation:
 
 1. **No arguments** → List open issues
-2. **Numeric only (e.g., "42")** → Show issue details
+2. **Numeric only (e.g., "42")** → Show issue details  
 3. **Numeric + action (e.g., "42 close")** → Update issue status
 4. **"search" + keyword** → Search issues
 5. **"export"** → Export issues (special case)
-6. **Any other text** → Create new issue with that description
+6. **Text starting with quotes or clear issue keywords** → Create new issue
+7. **Ambiguous text** → **ALWAYS ASK before proceeding**
 
-**DO NOT** start unrelated work based on the argument text. The command should only:
-- List issues
-- Create issues
-- Show issue details
-- Update issue status
-- Search issues
-- Export issues
+**STRICT RULES**:
+- This command ONLY manages issues, NEVER executes work
+- If text could be interpreted as a work request, STOP and clarify
+- Never use Task or agent tools from this command
+- Issue creation requires explicit confirmation for ambiguous requests
 
-If the user's text seems like a work request rather than an issue description, confirm before creating an issue:
-"This looks like a work request. Should I create an issue for this, or did you mean to use `/ai-go` to start working?"
+**When text is ambiguous**, respond with:
+```
+Your input: "[user text]"
+
+What would you like to do?
+1. Create a new issue with this description
+2. Search for existing issues about this
+3. Cancel (use /ai-go if you want to start working)
+
+Please choose 1, 2, or 3.
+```
 
 ## Examples
 
@@ -89,8 +99,11 @@ If the user's text seems like a work request rather than an issue description, c
 # Morning routine
 /ai-issue                           # What needs to be done?
 
-# Found a bug
+# Found a bug (with quotes = clear intent)
 /ai-issue "Login fails with empty password"
+
+# Found a bug (with keywords = clear intent)  
+/ai-issue bug: login fails with empty password
 
 # Check specific issue
 /ai-issue 103
@@ -100,6 +113,9 @@ If the user's text seems like a work request rather than an issue description, c
 
 # Find related issues
 /ai-issue search "login"
+
+# Ambiguous input (will trigger confirmation)
+/ai-issue fix the authentication system  # → Asks what you want to do
 ```
 
 ## Related Commands
