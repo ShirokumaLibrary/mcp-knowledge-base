@@ -67,11 +67,17 @@ export default defineConfig({
     poolOptions: {
       forks: {
         singleFork: true,
-        maxForks: 1
+        maxForks: 1,
+        isolate: false
       }
     },
     maxWorkers: 1,
-    minWorkers: 1
+    minWorkers: 1,
+    // Additional memory optimization
+    sequence: {
+      shuffle: false
+    },
+    fileParallelism: false
   },
   
   resolve: {

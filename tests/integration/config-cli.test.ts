@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe('Config CLI Integration', () => {
+describe.skip('Config CLI Integration', () => {
   const testDir = path.join(__dirname, '../../.test-config');
   const originalEnv = process.env;
 

@@ -519,6 +519,12 @@ describe('UpdateItem integration with validation', () => {
     const existingItem = { id: itemId, type: oldType };
     
     prisma.item.findUnique.mockResolvedValue(existingItem);
+    prisma.status.findUnique.mockResolvedValue(null);
+    prisma.status.findMany.mockResolvedValue([
+      { id: 1, name: 'Open' },
+      { id: 2, name: 'Closed' },
+      { id: 3, name: 'In Progress' }
+    ]);
     prisma.item.update.mockResolvedValue({
       ...existingItem,
       type: newType,

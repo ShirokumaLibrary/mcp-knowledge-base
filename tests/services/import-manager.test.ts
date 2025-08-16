@@ -3,19 +3,8 @@ import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { ImportManager } from '../../src/services/import-manager.js';
 
-// Mock fs/promises with factory to prevent memory issues
-vi.mock('fs/promises', () => ({
-  default: {
-    stat: vi.fn(),
-    readFile: vi.fn(),
-    readdir: vi.fn(),
-    access: vi.fn()
-  },
-  stat: vi.fn(),
-  readFile: vi.fn(),
-  readdir: vi.fn(),
-  access: vi.fn()
-}));
+// Mock fs/promises module
+vi.mock('fs/promises');
 
 // Import fs after mocking
 import fs from 'fs/promises';
@@ -58,6 +47,7 @@ describe.skip('ImportManager', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   describe('importFile', () => {
