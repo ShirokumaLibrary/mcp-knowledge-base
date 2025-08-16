@@ -377,9 +377,6 @@ export class ExportManager {
       md += '\n\n';
     }
 
-    // Footer
-    md += '---\n';
-    md += '*Exported from SHIROKUMA Knowledge Base*\n';
 
     return md;
   }
@@ -568,9 +565,6 @@ export class ExportManager {
     md += '## Content\n\n';
     md += `${state.content}\n\n`;
 
-    // Footer
-    md += '---\n';
-    md += '*Exported from SHIROKUMA Knowledge Base - System State*\n';
 
     return md;
   }
