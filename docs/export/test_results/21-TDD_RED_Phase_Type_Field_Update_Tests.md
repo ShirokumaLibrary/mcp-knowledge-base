@@ -4,10 +4,11 @@ type: test_results
 title: "TDD RED Phase: Type Field Update Tests"
 status: Open
 priority: HIGH
+aiSummary: "TDD RED Phase: Type Field Update Tests Failing tests for enabling type field updates in update_item API # TDD RED Phase Test Results\n\n## Test Objective\nEnable type field updates in the update_item MCP"
 tags: ["testing","api","mcp","tdd","red-phase","type-field"]
 keywords: {"type":0.92,"field":0.46,"tests":0.44,"test":0.39,"update":0.37}
 embedding: "gISQgICAgIaAh5SDgICAgICAkYCAgISAgIilhoCBgICAgo6AgICIgoCFr4aAhoCAgICFgICAiICAgZmEgIqAgICHgICAgImDgISsgICHgICAkIKAgICIi4CAtoCAi4CAgJOKgICAg5CAgK6CgImAgICNkYCAgICNgIORgICEgIA="
-related: [1,20,6]
+related: [1,6,20]
 searchIndex: "type field tests test update should with for phase mcp"
 created: 2025-08-13T12:53:24.898Z
 updated: 2025-08-13T12:53:24.898Z
@@ -158,5 +159,3 @@ Enable type field updates in the update_item MCP
 - mcp (weight: 0.16)
 - phase (weight: 0.16)
 
----
-*Exported from SHIROKUMA Knowledge Base*

@@ -4,11 +4,12 @@ type: analysis
 title: "キーワード抽出分析 - embeddingフィールドのAI使用用途"
 status: Completed
 priority: MEDIUM
+aiSummary: "Analysis of embedding vector field usage in AI systems, focusing on whether AI models directly use embedding vectors, performance implications, and API design considerations for controlling embedding data output."
 tags: ["embedding","ai-usage","keyword-extraction","api-design","analysis"]
 keywords: {"embedding":1,"vector":0.9,"ai":0.9,"api":0.8,"claude":0.8}
 concepts: {"machine learning":0.9,"api design":0.8,"performance optimization":0.8,"natural language processing":0.8,"data structure":0.7}
 embedding: "gImMgICAgICXk6KAhJeAgoCBk4CAgICAkpmlgIuUgImAh5KAgICAgJaWmoCPj4COgICJgICAgICPmYiAjJ6AjYCBgYCAgICAhJCAgISVgIaAiYGAgICAgICEiYCAjoCAgJCAgICAgICGgJuAgpKAgYCQg4CAgICAkYedgICXgIA="
-related: [27,26,45,53,56]
+related: [26,27,45,53,56]
 searchIndex: "embedding vector ai claude api field usage flag control output quantization int8 dimension similarity calculation"
 created: 2025-08-14T01:02:34.731Z
 updated: 2025-08-14T01:02:34.731Z
@@ -110,5 +111,3 @@ Analysis of embedding vector field usage in AI systems, focusing on whether AI m
 - data structure (confidence: 0.70)
 - software architecture (confidence: 0.70)
 
----
-*Exported from SHIROKUMA Knowledge Base*

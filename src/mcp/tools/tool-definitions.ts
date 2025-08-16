@@ -114,7 +114,7 @@ export const MCPToolDefinitions = [
   },
   {
     name: 'get_related_items',
-    description: 'Get related items with customizable search strategies (graph traversal, AI similarity, keywords, concepts)',
+    description: 'Get related items with customizable search strategies (graph traversal, AI similarity, keywords, concepts). Note: Returns item metadata only (excludes content field to reduce response size)',
     inputSchema: {
       type: 'object',
       properties: {

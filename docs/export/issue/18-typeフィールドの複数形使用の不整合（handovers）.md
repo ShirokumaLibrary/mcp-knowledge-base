@@ -4,6 +4,7 @@ type: issue
 title: "typeフィールドの複数形使用の不整合（handovers）"
 status: Completed
 priority: HIGH
+aiSummary: "typeフィールドの複数形使用の不整合（handovers） handoverタイプが単数形と複数形（handovers）で混在している。エージェント定義ファイルで複数形が使われている。 ## 問題の詳細\n\nMCPデータベースを調査した結果、`handover`タイプが単数形と複数形で混在していることが判明。\n\n### 現状\n- **正しい形（単数形）**: handover - 4件（ID: 6"
 tags: ["bug","consistency","type-validation","data-integrity"]
 keywords: {"handover":1,"shirokuma":1,"type":1,"handovers":1,"claude":1}
 embedding: "i4CehICAjICAgICAgICJmoOAnICAgIaAgICMgICAiZKPgJmIgICGgICAloCAgIWGmYCXlYCAiYCAgJCAgICBgJiAmIyAgIyAgICfgICAgIaNgJyXgICGgICAo4CAgIOSgoCSmoCAhYCAgJaAgICIiYGAnJCAgIiAgICGgICAhZY="
@@ -89,5 +90,3 @@ MCPデータベースを調査した結果、`handover`タイプが単数形と�
 - curator (weight: 0.36)
 - programmer (weight: 0.36)
 
----
-*Exported from SHIROKUMA Knowledge Base*

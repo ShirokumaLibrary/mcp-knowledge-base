@@ -262,6 +262,11 @@ export class ExportManager {
       md += `endDate: ${item.endDate.toISOString()}\n`;
     }
 
+    // AI Summary in Front Matter
+    if (item.aiSummary) {
+      md += `aiSummary: "${item.aiSummary.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
+    }
+
     // Tags in Front Matter (JSON array)
     if (item.tags && item.tags.length > 0) {
       const tags = item.tags.map((t) => t.tag.name);

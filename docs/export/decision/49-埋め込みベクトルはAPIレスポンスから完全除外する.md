@@ -4,10 +4,11 @@ type: decision
 title: "埋め込みベクトルはAPIレスポンスから完全除外する"
 status: Completed
 priority: HIGH
+aiSummary: "埋め込みベクトルはAPIレスポンスから完全除外する embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。 ## 決定事項\n\n**埋め込みベクトル（embedding）はAPIレスポンスから完全に除外する**\n\n## 理由\n\n### 1. 使用者が存在しない\n| 利用者 | 使用可能性 | 理由 |\n|--------|---"
 tags: ["embedding","api-design","simplification","architecture","decision"]
 keywords: {"embedding":1,"api":0.86,"typescript":0.86,"phase":0.86,"issue":0.57}
 embedding: "gIOEgICAgICDm5SWgICAgICAh4CAgICDgKuWqYCAgICAg4aAgICAh4OokauAgICAgIuDgICAgISLqYeagICAgICPgICAgICHhZuAhYCAgICAjICAgICAhoySg4CAgICAgI+AgICAgIOPhI6PgICAgICKgYCAgICAioiWg4CAgIA="
-related: [25,8,13,26,48]
+related: [8,13,25,26,48]
 searchIndex: "embedding api typescript phase 1kb includeembedding issue claude 128 int8"
 created: 2025-08-14T01:08:53.953Z
 updated: 2025-08-14T01:08:53.953Z
@@ -107,5 +108,3 @@ delete result.embedding;
 - 128 (weight: 0.29)
 - int8 (weight: 0.29)
 
----
-*Exported from SHIROKUMA Knowledge Base*

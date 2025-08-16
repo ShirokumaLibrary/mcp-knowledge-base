@@ -5,6 +5,7 @@ title: "ステータス \"In Progress\" が存在しないエラーの修正"
 status: Closed
 priority: HIGH
 category: "bug-fix"
+aiSummary: "ステータス \"In Progress\" が存在しないエラーの修正 list_items APIでstatus: [\"Open\",\"In Progress\",\"Pending\"]を指定すると、\"Status 'In Progress' not found\"エラーが発生する ## 問題の詳細\n\n`mcp__shirokuma-kb__list_items` APIを呼び出す際に、ステータスフィルターに"
 tags: ["bug","database","status","api","mcp","list-items"]
 keywords: {"progress":1,"status":1,"api":0.86,"list_items":0.57,"open":0.57}
 embedding: "gICPn4CAgICAj6yCgICAj4CAiKGAgICAgIikgICAg4+AgIGagICAgICBlYGAgJCJgICAkICAgICAgImFgICbgYCAh4yAgICAgIaEgoCAm4CAgI6OgICAgICOjoaAgI+AgICQjYCAgICAiZ+IgICCgYCAipWAgICAgI+whoCAgYg="
@@ -71,5 +72,3 @@ MCP error -32603: Operation failed: Status 'In Progress' not found
 - mcp__shirokuma (weight: 0.29)
 - kb__list_items (weight: 0.29)
 
----
-*Exported from SHIROKUMA Knowledge Base*

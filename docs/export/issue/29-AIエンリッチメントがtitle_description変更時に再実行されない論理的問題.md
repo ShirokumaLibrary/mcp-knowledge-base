@@ -4,10 +4,11 @@ type: issue
 title: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題"
 status: Completed
 priority: HIGH
+aiSummary: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題 現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。 ## 問題の詳細\n\n現在の`crud-handlers.ts`"
 tags: ["ai-enrichment","update-api","logical-bug","search-indexing"]
 keywords: {"title":1,"description":1,"handlers":0.57,"const":0.57,"shouldenrich":0.57}
 embedding: "gICAi5+CgICIkIqFgICKgICAgIObgICAl4mLioCAi4CAgICAkoaAgKeBiYuAgIeAgICAhIyOgICpgIOHgICKgICAgI2OkYCAm4eAgYCAhoCAgICRnoyAgKCPgYCAgIGAgICAj6aQgICJiYeDgICAgICAgJGfioCAgJCLgICAhIA="
-related: [28,16,24,31,32,40]
+related: [16,24,28,31,32,40]
 searchIndex: "title description handlers const shouldenrich contentchanged api crud 213 typescript"
 created: 2025-08-13T13:49:24.051Z
 updated: 2025-08-13T23:06:46.185Z
@@ -90,5 +91,3 @@ AIエンリッチメントがtitle/description変更時に再実行されない�
 - crud (weight: 0.38)
 - 213 (weight: 0.38)
 
----
-*Exported from SHIROKUMA Knowledge Base*

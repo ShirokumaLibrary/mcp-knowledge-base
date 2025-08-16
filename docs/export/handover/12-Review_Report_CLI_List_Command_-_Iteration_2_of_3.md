@@ -4,6 +4,7 @@ type: handover
 title: "Review Report: CLI List Command - Iteration 2 of 3"
 status: Open
 priority: HIGH
+aiSummary: "Review Report: CLI List Command - Iteration 2 of 3 Second iteration code review of CLI list command implementation after refactoring from previous review. Assessing fixes for case-sensitive status mat"
 tags: ["eslint","typescript","review","code-quality","iteration-2","cli","needs-improvement"]
 keywords: {"error":0.48,"status":0.38,"item":0.31,"cli":0.29,"any":0.21}
 embedding: "lYCDoIWAgICGgICMkICAgIqAipGAgICAmYCFjY2Ag4CSgI+YgYCAgKaAi4iFgJGAh4CNmoiAgICigIeCgICdgICAhZaOgICAkICNgIKAnICDgIuPjoCAgIGAjYSKgJCAj4CDjY+AgICDgIeLhICCgJeAgJmNgICAlICBjoyAgYA="
@@ -251,5 +252,3 @@ Review Report: CLI List Command - Iteration 2 of 3 Second iteration code review 
 - name (weight: 0.17)
 - const (weight: 0.17)
 
----
-*Exported from SHIROKUMA Knowledge Base*

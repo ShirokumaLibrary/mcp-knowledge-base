@@ -4,10 +4,11 @@ type: analysis
 title: "未使用MCP APIの想定用途と実態のギャップ分析"
 status: Completed
 priority: HIGH
+aiSummary: "未使用MCP APIの想定用途と実態のギャップ分析 ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析 ## 未使用APIの想定用途分析\n\n### 🔍 グラフ分析系API\n\n#### find_shortest_path（最短パス検索）\n**想定用途**: \n- 「このバグとこの機能の関連を辿りたい」\n- 「AとBの知識がどう繋がっているか知りたい」\n\n**使われない理"
 tags: ["api-design","analysis","simplification","over-engineering","yagni"]
 keywords: {"api":1,"get_related_items":0.83,"git":0.5,"type":0.33,"find_similar_items":0.33}
 embedding: "gICCiICAg4CAgKGAgoCAgICAgJeFgJGAgICqgICAgICAgIWei4ChgICAp4CAgICAgICOmIuAooCAgJOAg4CAgICAkomHgJWAgICQgIGAgICAgJCAgYCOgICAl4CEgICAgICRhICAi4CAgKKAhoCAgICAi5OEgIKAgICngIWAgIA="
-related: [25,19,27,54]
+related: [19,25,27,54]
 searchIndex: "api get_related_items git type create find_similar_items get_stats get mcp find_shortest_path"
 created: 2025-08-14T01:23:20.180Z
 updated: 2025-08-14T01:23:20.180Z
@@ -221,5 +222,3 @@ updated: 2025-08-14T01:23:20.180Z
 - mcp (weight: 0.17)
 - find_shortest_path (weight: 0.17)
 
----
-*Exported from SHIROKUMA Knowledge Base*

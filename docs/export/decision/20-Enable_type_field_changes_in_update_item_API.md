@@ -4,10 +4,11 @@ type: decision
 title: "Enable type field changes in update_item API"
 status: Open
 priority: HIGH
+aiSummary: "Enable type field changes in update_item API Technical design for allowing type field updates while maintaining data integrity # Design: Enable Type Field Changes in update_item API\n\n## Problem Statem"
 tags: ["api","type_validation","data_integrity","prisma","update_item"]
 keywords: {"type":0.89,"validation":0.34,"field":0.19,"with":0.18,"existing":0.16}
 embedding: "gIiAhYCCgJeAhoyBgICAgICHgIGAh4WSgIefhYCAgICAiICAgImKioCFs4mAgICAgIeAgoCHioGAgZ2IgICAgICCgICAg4qDgISyhICAgICAgICDgICJkICAt4CAgICAgIGAh4CBhJuAgKeAgICAgICFgIiAgICbgIKLhICAgIA="
-related: [18,19,8,21]
+related: [8,18,19,21]
 searchIndex: "type validation field with existing option changes add update for"
 created: 2025-08-13T12:48:53.235Z
 updated: 2025-08-13T12:48:53.235Z
@@ -296,5 +297,3 @@ Enable type field changes in update_item API Technical design for allowing type 
 - update (weight: 0.15)
 - for (weight: 0.12)
 
----
-*Exported from SHIROKUMA Knowledge Base*

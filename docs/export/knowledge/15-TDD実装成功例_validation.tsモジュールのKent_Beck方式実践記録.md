@@ -5,10 +5,11 @@ title: "TDD実装成功例: validation.tsモジュールのKent Beck方式実践
 status: Open
 priority: HIGH
 category: "Testing & Quality"
+aiSummary: "TDD実装成功例: validation.tsモジュールのKent Beck方式実践記録 validation.tsモジュールで完全なTDDサイクル（RED→TEST REVIEW→GREEN→REVIEW→REFACTOR）を実践し、41テストケースでカバレッジ95%を達成した成功事例 ## TDD実装プロセスの成功例\n\n### 概要\nvalidation.tsモジュールのテスト実装で、完全なT"
 tags: ["tdd","validation","code-quality","best-practice","test-driven-development","kent-beck","refactoring","testing-pattern","tidy-first"]
 keywords: {"phase":1,"tdd":1,"review":0.8,"test":0.6,"validation":0.6}
 embedding: "jImQh5eAgJGUgIChgICFgJGLkoKIgICQl4CAqYCAioCOh46AgICAiJaAgKGAgIuAkoKFg4WAgICWgICQgICLgI2AgImTgICBjICAhoCAi4CEg4KMnYCAiIKAgIyAgIWAgImKiZqAgJCAgICQgICAgIOMkYOegICRiYCAkICAgIA="
-related: [13,8,6,16,17,23,57]
+related: [6,8,13,16,17,23,57]
 searchIndex: "tdd phase review validation kent beck test red green refactor"
 created: 2025-08-13T12:17:37.709Z
 updated: 2025-08-13T12:17:37.709Z
@@ -129,5 +130,3 @@ validation.tsモジュールのテスト実装で、完全なT
 - green (weight: 0.40)
 - refactor (weight: 0.40)
 
----
-*Exported from SHIROKUMA Knowledge Base*

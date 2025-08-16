@@ -79,7 +79,7 @@ export function createConfigCommand(): Command {
     .description('Switch to different environment (development|production|test)')
     .action(async (environment) => {
       try {
-        await configManager.switchEnvironment(environment);
+        await configManager.loadEnvFile(environment);
 
         // Save to .env file with restricted permissions
         const envPath = path.join(process.cwd(), '.env');
@@ -132,46 +132,44 @@ export function createConfigCommand(): Command {
         await configManager.createEnvExample();
         console.log(chalk.green('✓ Created .env.example'));
 
-        // Create config directory
-        const configDir = path.join(process.cwd(), '.shirokuma', 'config');
-        await fs.mkdir(configDir, { recursive: true });
-
-        // Create environment templates
+        // Create environment template files in project root
         const environments = ['development', 'production', 'test'];
         for (const env of environments) {
-          const envFile = path.join(configDir, `${env}.env`);
-          const envConfig: Record<string, string> = {};
-
-          // Set default values for each environment
-          if (env === 'development') {
-            envConfig.DATABASE_URL = 'file:.shirokuma/data-dev/shirokuma.db';
-            envConfig.NODE_ENV = 'development';
-            envConfig.SHIROKUMA_DATA_DIR = '.shirokuma/data-dev';
-          } else if (env === 'production') {
-            envConfig.DATABASE_URL = 'file:.shirokuma/data-prod/shirokuma.db';
-            envConfig.NODE_ENV = 'production';
-            envConfig.SHIROKUMA_DATA_DIR = '.shirokuma/data-prod';
-          } else if (env === 'test') {
-            envConfig.DATABASE_URL = 'file:.shirokuma/data-test/shirokuma.db';
-            envConfig.NODE_ENV = 'test';
-            envConfig.SHIROKUMA_DATA_DIR = '.shirokuma/data-test';
+          const envFile = path.join(process.cwd(), `.env.${env}`);
+          
+          // Skip if file already exists
+          try {
+            await fs.access(envFile);
+            console.log(chalk.yellow(`⚠ Skipped .env.${env} (already exists)`));
+            continue;
+          } catch {
+            // File doesn't exist, create it
           }
-
-          envConfig.SHIROKUMA_EXPORT_DIR = 'docs/export';
+          
+          // Create reasonable defaults for each environment
+          const envConfig: Record<string, string> = {
+            SHIROKUMA_DATABASE_URL: `file:.shirokuma/data-${env}/shirokuma.db`,
+            NODE_ENV: env,
+            SHIROKUMA_DATA_DIR: `.shirokuma/data-${env}`,
+            SHIROKUMA_EXPORT_DIR: env === 'production' ? 'docs/export' : `docs/export-${env}`
+          };
 
           // Create env content
-          let content = `# ${env.charAt(0).toUpperCase() + env.slice(1)} environment configuration\n\n`;
+          let content = `# ${env.charAt(0).toUpperCase() + env.slice(1)} environment configuration\n`;
           for (const [key, value] of Object.entries(envConfig)) {
             content += `${key}=${value}\n`;
           }
 
           await fs.writeFile(envFile, content, 'utf-8');
-          console.log(chalk.green(`✓ Created ${env}.env`));
+          console.log(chalk.green(`✓ Created .env.${env}`));
         }
 
         console.log(chalk.cyan('\nNext steps:'));
-        console.log('1. Copy .env.example to .env');
-        console.log('2. Update .env with your configuration');
+        console.log('1. Review and customize the environment files');
+        console.log('2. Use --env option to specify environment:');
+        console.log('   shirokuma-kb list --env development');
+        console.log('   shirokuma-kb list --env production');
+        console.log('   shirokuma-kb list --env test');
         console.log('3. Run "shirokuma-kb config validate" to check');
       } catch (error) {
         console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));

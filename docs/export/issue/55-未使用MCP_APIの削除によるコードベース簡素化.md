@@ -4,10 +4,11 @@ type: issue
 title: "未使用MCP APIの削除によるコードベース簡素化"
 status: Completed
 priority: MEDIUM
+aiSummary: "未使用MCP APIの削除によるコードベース簡素化 分析の結果、44%（11個）のAPIが完全未使用。これらを削除してメンテナンス性を向上させる。 ## 背景\n\nanalysis-54の分析結果に基づき、未使用APIを削除する。\n\n## ✅ 削除完了API（11個）\n\n### グラフ分析系（6個）\n1. **find_shortest_path** - 最短パス検索 ✅\n2. **find_hub"
 tags: ["api","simplification","breaking-change","cleanup","maintenance"]
 keywords: {"mcp":1,"api":0.9,"handlers":0.9,"src":0.79,"typescript":0.34}
 embedding: "gICAgImAgICAm5qNgICAgICAgICBgIKAgI+klICAgICAgICAgoCFgICClpeAgICAgICAgI+Ah4CAgZCUgICAgICAgICbgIWAgIuXjYCAgICAgICAm4CBgICZpIqAgICAgICAgJuAhICAj6yKgICAgICAgICWgIGAgJunioCAgIA="
-related: [4,8,13,54]
+related: [4,8,13,50,54]
 searchIndex: "mcp api handlers src typescript find_similar_items import npm run analysis"
 created: 2025-08-14T01:40:43.805Z
 updated: 2025-08-14T01:55:05.125Z
@@ -145,5 +146,3 @@ analysis-54の分析結果に基づき、未使用APIを削除する。
 - import (weight: 0.22)
 - analysis (weight: 0.11)
 
----
-*Exported from SHIROKUMA Knowledge Base*

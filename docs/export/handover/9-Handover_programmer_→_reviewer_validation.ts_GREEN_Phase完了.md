@@ -4,10 +4,11 @@ type: handover
 title: "Handover: programmer → reviewer: validation.ts GREEN Phase完了"
 status: Open
 priority: MEDIUM
+aiSummary: "Handover: programmer → reviewer: validation.ts GREEN Phase完了  ## ハンドオーバー概要\n\nTDD GREEN Phaseの実装を完了し、すべてのテストがパスしました。レビューをお願いします。\n\n## 実装内容\n\n### 対象ファイル\n- `/home/webapp/shirokuma-v8/src/utils/validation.ts"
 tags: ["#tdd","#green-phase","#validation","#handover","#review-request"]
 keywords: {"phase":0.95,"npm":0.48,"run":0.48,"validation":0.48,"normalizetype":0.48}
 embedding: "i4CAjICAgI+Aj4CYgICHgIWAgISAgICOgImApoCAjoCNgICCgICAh4CCgK6AgI+AkICAjoCAgICAh4CqgICPgIuAgJqAgICBgIGAnICAjoCEgICngICAh4CAgJOAgIeAgICAooCAgI6Ah4CcgICBgIOAgJCAgICPgI6AloCAgIA="
-related: [8,6,5,13]
+related: [5,6,8,13]
 searchIndex: "phase validation green normalizetype unicode passed refactor npm run handover"
 created: 2025-08-13T11:54:47.308Z
 updated: 2025-08-13T13:21:41.168Z
@@ -98,5 +99,3 @@ TDD GREEN Phaseの実装を完了し、すべてのテストがパスしまし�
 - refactor (weight: 0.48)
 - handover (weight: 0.24)
 
----
-*Exported from SHIROKUMA Knowledge Base*

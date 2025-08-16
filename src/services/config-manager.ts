@@ -218,20 +218,11 @@ export class ConfigManager {
 
   /**
    * Switch to different environment
+   * @deprecated Use loadEnvFile() instead
    */
   async switchEnvironment(env: 'development' | 'production' | 'test'): Promise<void> {
-    const configDir = path.join(process.cwd(), '.shirokuma', 'config');
-    const envFile = path.join(configDir, `${env}.env`);
-
-    try {
-      const content = await fs.readFile(envFile, 'utf-8');
-      this.importConfig(content, 'env');
-    } catch (error) {
-      if ((error as { code?: string }).code === 'ENOENT') {
-        throw new Error('Environment file not found');
-      }
-      throw error;
-    }
+    // Now just delegates to loadEnvFile
+    await this.loadEnvFile(env);
   }
 
   /**
@@ -294,5 +285,69 @@ export class ConfigManager {
   async loadConfig(filepath: string, format: 'env' | 'json' = 'env'): Promise<void> {
     const content = await fs.readFile(filepath, 'utf-8');
     this.importConfig(content, format);
+  }
+
+  /**
+   * Validate environment name to prevent path traversal attacks
+   * @param envName - Environment name to validate
+   */
+  private validateEnvName(envName: string): void {
+    // Allow only alphanumeric, dash, and underscore (this also prevents path traversal)
+    if (!/^[a-zA-Z0-9_-]+$/.test(envName)) {
+      throw new Error(`Invalid environment name format: ${envName}`);
+    }
+    // Additional check for path traversal patterns (redundant but explicit)
+    if (envName.includes('/') || envName.includes('\\') || envName.includes('..')) {
+      throw new Error(`Invalid environment name: ${envName}`);
+    }
+  }
+
+  /**
+   * Load environment file based on environment name
+   * @param envName - Environment name (e.g., 'dev', 'test', 'prod')
+   * Loading priority:
+   * 1. .env.[envName] if envName is provided
+   * 2. .env as fallback if specific env file not found
+   * 3. System environment variables if no files exist
+   */
+  async loadEnvFile(envName?: string): Promise<void> {
+    // Validate environment name to prevent security issues
+    if (envName) {
+      this.validateEnvName(envName);
+    }
+
+    const envFile = envName ? `.env.${envName}` : '.env';
+
+    try {
+      const content = await fs.readFile(envFile, 'utf-8');
+      this.importConfig(content, 'env');
+    } catch (error) {
+      if ((error as { code?: string }).code === 'ENOENT') {
+        // If environment-specific file doesn't exist, try to fallback to .env
+        if (envName) {
+          try {
+            const content = await fs.readFile('.env', 'utf-8');
+            this.importConfig(content, 'env');
+          } catch (fallbackError) {
+            // If both files don't exist, silently continue
+            if ((fallbackError as { code?: string }).code !== 'ENOENT') {
+              throw fallbackError;
+            }
+          }
+        }
+        // If no envName and .env doesn't exist, silently continue
+      } else {
+        // Re-throw non-ENOENT errors
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Initialize ConfigManager with specified environment
+   * @param envName - Environment name (e.g., 'dev', 'test', 'prod')
+   */
+  async initializeWithEnv(envName?: string): Promise<void> {
+    await this.loadEnvFile(envName);
   }
 }

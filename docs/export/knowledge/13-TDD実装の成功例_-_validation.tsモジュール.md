@@ -4,10 +4,11 @@ type: knowledge
 title: "TDD実装の成功例 - validation.tsモジュール"
 status: Open
 priority: MEDIUM
+aiSummary: "TDD実装の成功例 - validation.tsモジュール Kent Beck方式のTDDサイクルとレビュープロセスの実践記録 ## TDD実装プロセスの成功例\n\n### 概要\nvalidation.tsモジュールのテスト実装で、完全なTDDサイクルを実践した記録。\n\n### 実施したプロセス\n\n#### 1. RED Phase（テスト作成）\n- 41個の包括的テストケース作成\n- 正常系、異"
 tags: ["testing","vitest","tdd","validation","best-practice"]
 keywords: {"phase":1,"tdd":1,"validation":0.69,"review":0.69,"test":0.34}
 embedding: "h4iKh5mAgKGTgICcgICAgIuLi4GJgICdloCAp4CAgICJh4mAgICAjZWAgKKAgICAi4KDg4WAgIiVgICSgICAgIiAgIiVgICDjICAhYCAgICCg4GLoICAioKAgIiAgICAgIiGiJyAgJeAgICPgICAgIKLioOggICeiICAi4CAgIA="
-related: [8,6,9,14,15,16,17,49,54,55]
+related: [6,8,9,14,15,16,17,49,54,55]
 searchIndex: "tdd phase validation review kent beck red test approved green"
 created: 2025-08-13T12:16:48.261Z
 updated: 2025-08-13T12:16:48.261Z
@@ -98,5 +99,3 @@ validation.tsモジュールのテスト実装で、完全なTDDサイクルを�
 - beck (weight: 0.34)
 - approved (weight: 0.34)
 
----
-*Exported from SHIROKUMA Knowledge Base*

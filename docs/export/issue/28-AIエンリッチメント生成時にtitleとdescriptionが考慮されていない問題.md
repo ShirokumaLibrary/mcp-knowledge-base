@@ -4,10 +4,11 @@ type: issue
 title: "AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題"
 status: Completed
 priority: HIGH
+aiSummary: "AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題 現在のAIエンリッチメント（キーワード抽出、コンセプト検出）はcontentフィールドのみを対象としており、titleとdescriptionが含まれていない。これらの重要なメタデータを見逃している可能性がある。 ## 問題の詳細\n\n現在の実装を確認したところ、AIエンリッチメント処理に問題があることが判明しまし"
 tags: ["bug","ai-enrichment","search","keywords","title","description"]
 keywords: {"title":1,"description":1,"content":0.8,"const":0.4,"params":0.4}
 embedding: "iICAiaSAgICImYaEgICAioiAgIKdgICAmYyAiYCAgIuPgICAjICAgKSBgIqAgICLiYCAhICAgICdgoaGgICAi4uAgIqFgICAjI6NgYCAgIqNgICOlYCAgJmajYCAgICJjICAjKKAgICIm4iDgICAkoqAgI6ggICAgJyMgICAgIk="
-related: [24,17,16,29,31,32,40,42]
+related: [16,17,24,29,31,32,40,42]
 searchIndex: "title description content params const typescript new react hooks string"
 created: 2025-08-13T13:47:31.045Z
 updated: 2025-08-13T23:07:18.255Z
@@ -136,5 +137,3 @@ AIエンリッチメント生成時にtitleとdescriptionが考慮されてい�
 - react (weight: 0.30)
 - hooks (weight: 0.30)
 
----
-*Exported from SHIROKUMA Knowledge Base*

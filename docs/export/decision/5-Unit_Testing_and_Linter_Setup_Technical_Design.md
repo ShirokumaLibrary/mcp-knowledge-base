@@ -4,6 +4,7 @@ type: decision
 title: "Unit Testing and Linter Setup Technical Design"
 status: Open
 priority: HIGH
+aiSummary: "Unit Testing and Linter Setup Technical Design Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project # Design: Unit Testing and Linter Setup\n\n## "
 tags: ["testing","linting","vitest","eslint","typescript","esm","design"]
 keywords: {"test":0.47,"eslint":0.3,"for":0.23,"typescript":0.23,"tests":0.21}
 embedding: "gIOkgICAhoCAkIChgICAmYSAqICAgIeAgJOAooCAgJOJgaCAgICMgICNgJiAgICGi4CNgICAkYCAhICRgICAgIiGgICAgJaAgIqAhYCAgIOCj4WAgICWgICCgIiAgICAgJGYgICAjICAgICYgICAiIGMp4CAgIuAgIeAloCAgJQ="
@@ -431,5 +432,3 @@ Unit Testing and Linter Setup Technical Design Technical design for implementing
 - testing (weight: 0.14)
 - configuration (weight: 0.14)
 
----
-*Exported from SHIROKUMA Knowledge Base*

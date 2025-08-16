@@ -4,10 +4,11 @@ type: handover
 title: "Handover: programmer → reviewer: Type field update in update_item API"
 status: Open
 priority: HIGH
+aiSummary: "Handover: programmer → reviewer: Type field update in update_item API GREEN phase implementation for type field support in update_item API - minimal code to pass tests ## Handover: Type Field Update I"
 tags: ["api","tdd","handover","type-field","green-phase","update-item","implementation"]
 keywords: {"type":0.47,"field":0.36,"mcp":0.29,"test":0.25,"tests":0.25}
 embedding: "gIecgICAgIWAlJSAgICAgICJm4CAgICAgJGigICAgICAh5GAgICAgYCIo4CAgICAgIqPgICAgICAgpSAgICAgICPg4CAgICDgIumgICAgICAkYKAgICAioCMs4CAgICAgI+MgICAgI6Ah6+AgICAgICKmICAgICMgJCUgICAgIA="
-related: [18,1,6]
+related: [1,6,18]
 searchIndex: "type field mcp update implementation tests test handlers for minimal"
 created: 2025-08-13T12:57:49.010Z
 updated: 2025-08-13T12:57:49.010Z
@@ -104,5 +105,3 @@ Handover: programmer → reviewer: Type field update in update_item API GREEN ph
 - for (weight: 0.18)
 - minimal (weight: 0.18)
 
----
-*Exported from SHIROKUMA Knowledge Base*

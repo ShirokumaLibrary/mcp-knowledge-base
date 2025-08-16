@@ -4,10 +4,11 @@ type: analysis
 title: "MCP API完全分析レポート - 全25個のAPI詳細評価"
 status: Completed
 priority: HIGH
+aiSummary: "MCP API完全分析レポート - 全25個のAPI詳細評価 shirokuma-knowledge-base MCPサーバーの全25個のAPIを個別に分析。使用頻度、有用性、問題点、改善提案を記録。 # MCP API完全分析レポート\n\n## 概要\n- **総API数**: 25個\n- **分析日**: 2025-08-14\n- **プロジェクト**: shirokuma-knowledge-b"
 tags: ["api","documentation","analysis","cleanup","architecture","yagni"]
 keywords: {"api":1,"get_related_items":0.56,"get_stats":0.56,"mcp":0.28,"phase":0.28}
 embedding: "gIGAh4CAgoCAiqmGgICIiICAgJOAgI2AgJCxjICAiIaAgoCagICYgICQpIyAgISCgIaAlICAmYCAjpGHgICAgICIgIiAgI6AgIeJgYCAgIKAh4CAgICDgICGlICAgIOGgIiAhICAgICAgaeEgICHg4CFgJCAgIGAgIKygYCAhIc="
-related: [24,8,13,50,51,52,55]
+related: [8,13,24,51,52,55]
 searchIndex: "api get_related_items get_stats mcp phase shirokuma knowledge base embedding issue"
 created: 2025-08-14T01:40:00.235Z
 updated: 2025-08-14T01:40:00.235Z
@@ -299,5 +300,3 @@ MCP API完全分析レポート - 全25個のAPI詳細評価 shirokuma-knowledge
 - embedding (weight: 0.19)
 - base (weight: 0.19)
 
----
-*Exported from SHIROKUMA Knowledge Base*

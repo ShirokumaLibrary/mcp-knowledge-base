@@ -4,10 +4,11 @@ type: issue
 title: "conceptsの登録が正常に動作していない"
 status: Completed
 priority: HIGH
+aiSummary: "conceptsの登録が正常に動作していない AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。 ## 問題の詳細\n\nAIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない問題を調査・修正しました。\n\n### 発見された問題\n\n1. **Claude CLIの出"
 tags: ["bug","database","ai-enrichment","search","concepts"]
 keywords: {"json":1,"concepts":1,"claude":0.96,"test":0.43,"cli":0.43}
 embedding: "jIChgICDgIChgICAg4CAhoaAroCAgICAloGAgICAgJGLgKmAgIyAgIaFgICCgICbhICUgICcgICAh4CAiYCAm4CAgoCAooCAiYWAgI6AgJCCgISAgJeAgJmCgICLgICGiYCJgICHgICNgICAjoCAgY6AkoCAk4CAnYCAgIqAgII="
-related: [4,24,11]
+related: [4,11,24]
 searchIndex: "concepts json claude cli test after restart markdown output format"
 created: 2025-08-14T00:38:27.436Z
 updated: 2025-08-14T00:54:54.680Z
@@ -115,5 +116,3 @@ AIエンリッチメント時にconceptsの抽出と登録が期待通りに機�
 - output (weight: 0.21)
 - format (weight: 0.21)
 
----
-*Exported from SHIROKUMA Knowledge Base*

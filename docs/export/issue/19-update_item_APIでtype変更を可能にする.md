@@ -4,10 +4,11 @@ type: issue
 title: "update_item APIでtype変更を可能にする"
 status: Review
 priority: MEDIUM
+aiSummary: "change_item_type API の実装 既存アイテムのtypeフィールドを変更するAPIが必要。現在update_itemではtype変更不可。 ## 背景\n\n現在、一度作成されたアイテムのtypeフィールドは変更できない。これにより以下の問題が発生：\n\n1. **データ移行の困難**\n   - 間違ったtypeで作成されたアイテムの修正不可\n   - 例: handovers → ha"
 tags: ["api","data-integrity","feature","type-management"]
 keywords: {"type":1,"newtype":0.44,"validatedtype":0.44,"await":0.44,"api":0.33}
 embedding: "ioCAgICAj4qMhI2FgICAgISAgICAgI+EkIqbi4CAgIGAgICAgICJgI2Mr4yAgICGgYCAgICAgYKQiKWHgICAi4aAgICAgICAi4KzgYCAgIuCgICAgICAg4OGtICAgICGiICAgICAgYmAgauDgICAioyAgICAgIiMhICZgICAgIU="
-related: [18,2,3,20,43,52]
+related: [2,3,18,20,43,52]
 searchIndex: "type newtype validatedtype await api issue typescript number string validatetype"
 created: 2025-08-13T12:39:24.002Z
 updated: 2025-08-13T13:01:51.791Z
@@ -132,5 +133,3 @@ change_item_type API の実装 既存アイテムのtypeフィールドを変更
 - string (weight: 0.33)
 - number (weight: 0.33)
 
----
-*Exported from SHIROKUMA Knowledge Base*

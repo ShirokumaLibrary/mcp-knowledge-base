@@ -24,7 +24,7 @@ export class RelationHandlers {
 
       const relatedItems = await enhancedAI.findRelatedItemsUnified(params.id as number, strategy);
 
-      // Get full item details for results
+      // Get full item details for results (excluding content to reduce size)
       const itemDetails = await Promise.all(
         relatedItems.map(async (related) => {
           const item = await this.prisma.item.findUnique({
@@ -35,10 +35,18 @@ export class RelationHandlers {
             }
           });
 
+          if (!item) {
+            return null;
+          }
+
+          // Exclude content and other large fields from response
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { content, aiSummary, searchIndex, embedding, ...itemWithoutContent } = item;
+
           return {
-            ...item,
-            status: item?.status.name,
-            tags: item?.tags.map((t: { tag: { name: string } }) => t.tag.name) || [],
+            ...itemWithoutContent,
+            status: item.status.name,
+            tags: item.tags.map((t: { tag: { name: string } }) => t.tag.name) || [],
             related: [],
             searchScore: related.score,
             searchReason: related.reason,
@@ -68,12 +76,17 @@ export class RelationHandlers {
       const parsedParams = { id: params.id as number, depth: (params.depth as number) || 1, types: params.types as string[] | undefined };
       const result = await graphService.getRelatedItems(parsedParams.id, parsedParams.depth, parsedParams.types);
 
-      // Format results for output
+      // Format results for output (excluding content to reduce size)
       const formattedResults = result.items.map((item: Record<string, unknown>) => {
         const itemStatus = item.status as { name: string };
         const itemTags = item.tags as Array<{ tag: { name: string } }>;
+
+        // Exclude content and other large fields from response
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { content, aiSummary, searchIndex, embedding, ...itemWithoutContent } = item;
+
         return {
-          ...item,
+          ...itemWithoutContent,
           status: itemStatus.name,
           tags: itemTags.map((t: { tag: { name: string } }) => t.tag.name),
           related: []

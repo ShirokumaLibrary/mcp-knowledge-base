@@ -4,6 +4,7 @@ type: test_concepts
 title: "Concepts Extraction Test Production"
 status: Open
 priority: HIGH
+aiSummary: "Concepts Extraction Test Production Testing if concepts are extracted in production MCP environment This content covers multiple concepts: authentication systems, database optimization, React componen"
 tags: ["concepts","test","debug","production"]
 keywords: {"concepts":1,"production":0.77,"test":0.38,"mcp":0.38,"testing":0.38}
 embedding: "kICOgIWEgImAgoCAgIeAgJGAkICNgICCgJCDgICBhICdgI2AkI+AgICdgICAgICAmoCFgIujgIWAlIOAgIeDgI6AgICDqoCNgJ+LgICOi4CEgIKAiZ2AkICckICAj5CAhYCJgIKJgI6Ajo2AgI+NgI+Aj4CAl4CPgIGFgICOhoA="
@@ -40,5 +41,3 @@ Concepts Extraction Test Production Testing if concepts are extracted in product
 - environment (weight: 0.38)
 - this (weight: 0.38)
 
----
-*Exported from SHIROKUMA Knowledge Base*

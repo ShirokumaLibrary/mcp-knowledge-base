@@ -4,10 +4,11 @@ type: design
 title: "System Status Documentation Structure Design"
 status: Open
 priority: HIGH
+aiSummary: "System Status Documentation Structure Design Design documentation structure for 12 system statuses with detailed explanations and workflow transitions # システムステータス説明ドキュメント構造の設計\n\n## 問題背景\n\n**現状**:\n- データベ"
 tags: ["status","design","documentation","workflow","system","user-guide"]
 keywords: {"claude":0.65,"ready":0.65,"open":0.54,"completed":0.54,"progress":0.43}
 embedding: "gICUn4CHgICAgJOQgIKAgICApZWAkYCAgICKjICKgYCAgKeGgJSAgICAgYSAkImAgICYh4CTgICAgIGKgI6PgICAhZyAlICAgICAgoCQj4CAgIGpgIyAgICAgoCAjYiAgICDqYCCgICAgIyFgISBgICAj56AgICAgICUjYCAgIA="
-related: [35,36,34,38]
+related: [34,35,36,38]
 searchIndex: "ready claude open completed status specification waiting progress rejected docs"
 created: 2025-08-13T22:34:31.866Z
 updated: 2025-08-13T22:34:31.866Z
@@ -198,5 +199,3 @@ System Status Documentation Structure Design Design documentation structure for 
 - rejected (weight: 0.43)
 - docs (weight: 0.43)
 
----
-*Exported from SHIROKUMA Knowledge Base*

@@ -60,7 +60,18 @@ export default defineConfig({
     // Mock and stub configuration
     mockReset: true,
     clearMocks: true,
-    restoreMocks: true
+    restoreMocks: true,
+    
+    // Prevent memory issues in limited environments
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+        maxForks: 1
+      }
+    },
+    maxWorkers: 1,
+    minWorkers: 1
   },
   
   resolve: {

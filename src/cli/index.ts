@@ -7,37 +7,30 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { fileURLToPath } from 'url';
 import { validateType } from '../utils/validation.js';
 import { createConfigCommand } from './commands/config.js';
 import { createExportCommand } from './commands/export.js';
+import { createImportCommand } from './commands/import.js';
+import { ConfigManager } from '../services/config-manager.js';
 
-// Load .env file if it exists
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const envPath = path.resolve(__dirname, '../../../.env');
-if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf-8');
-  envContent.split('\n').forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const [key, ...valueParts] = trimmed.split('=');
-      const value = valueParts.join('=').replace(/^["']|["']$/g, '');
-      if (!process.env[key]) {
-        process.env[key] = value;
-      }
-    }
-  });
+// Parse --env option early to load the correct environment file
+function parseEnvOption(): string | undefined {
+  const envArgIndex = process.argv.indexOf('--env');
+  if (envArgIndex !== -1 && process.argv[envArgIndex + 1]) {
+    return process.argv[envArgIndex + 1];
+  }
+  return undefined;
 }
 
-// Auto-configure SHIROKUMA_DATABASE_URL from SHIROKUMA_DATA_DIR before importing Prisma
+// Initialize ConfigManager and load environment file
+const configManager = new ConfigManager();
+const envName = parseEnvOption();
+await configManager.loadEnvFile(envName);
+
+// Auto-configure SHIROKUMA_DATABASE_URL from SHIROKUMA_DATA_DIR if needed
 if (!process.env.SHIROKUMA_DATABASE_URL) {
-  const defaultDataDir = path.join(os.homedir(), '.shirokuma', 'data');
-  const dataDir = process.env.SHIROKUMA_DATA_DIR || defaultDataDir;
-  const resolvedDir = dataDir.replace(/^~/, os.homedir());
-  const dbPath = `file:${resolvedDir}/shirokuma.db`;
-  
-  process.env.SHIROKUMA_DATABASE_URL = dbPath;
+  const config = configManager.getConfig();
+  process.env.SHIROKUMA_DATABASE_URL = config.SHIROKUMA_DATABASE_URL;
 }
 
 import pkg from '@prisma/client';
@@ -63,7 +56,8 @@ const program = new Command();
 program
   .name('shirokuma')
   .description('Shirokuma MCP Knowledge Base CLI')
-  .version('0.8.0');
+  .version('0.8.0')
+  .option('--env <name>', 'Environment name (e.g., dev, test, prod) to load .env.<name> file');
 
 // Helper functions
 async function getStatusId(statusName: string): Promise<number> {
@@ -876,5 +870,6 @@ program.addCommand(createConfigCommand());
 
 // Add export command
 program.addCommand(createExportCommand());
+program.addCommand(createImportCommand());
 
 program.parse(process.argv);

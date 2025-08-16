@@ -4,10 +4,11 @@ type: issue
 title: "get_item APIでembeddingフィールドの出力を制御可能にする"
 status: Closed
 priority: MEDIUM
+aiSummary: "get_item APIでembeddingフィールドの出力を制御可能にする get_item APIが返すembeddingフィールド（128次元のInt8配列）は大きなデータサイズでコンテキストを消費するが、実際に必要なケースは限定的。オプションで出力を制御できるようにすべき。 ## 問題の詳細\n\n**このイシューは方針変更によりクローズされました。**\n\n代わりにissue-48で「embe"
 tags: ["api","performance","optimization","get-item","embedding","closed","superseded"]
 keywords: {"128":1,"api":1,"embedding":1,"get_item":1,"issue":0.95}
 embedding: "gIOAgICAgIGAm5OAg4CAgICGgICAgICLgLKVgI2AgICAjICAgICAk4CskICUgICAgJCAgICAgI6AsoaAk4CAgICPgICAgICVgKaAgImAgICAiYCAgICAkoCfg4CRgICAgIqAgICAgIiAiY2AhoCAgICLgICAgICAgIeUgICAgIA="
-related: [24,25,2,27,33,42,43,47,48,49,50,51,53]
+related: [2,24,25,27,33,42,43,47,48,49,51,53]
 searchIndex: "embedding api get_item 128 int8 issue includeembedding 2025"
 created: 2025-08-13T13:45:43.336Z
 updated: 2025-08-14T01:08:25.233Z
@@ -76,5 +77,3 @@ get_item APIでembeddingフィールドの出力を制御可能にする get_ite
 - 2025 (weight: 0.48)
 - includeembedding (weight: 0.48)
 
----
-*Exported from SHIROKUMA Knowledge Base*
