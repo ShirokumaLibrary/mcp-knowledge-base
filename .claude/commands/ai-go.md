@@ -1,90 +1,98 @@
-# ai-go - Autonomous Development Orchestrator
+---
+description: General-purpose task executor for non-design/coding work
+argument-hint: "[issue-id | 'task description']"
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, TodoWrite, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items
+---
+
+# ai-go - General Task Executor
 
 ## Usage
 ```
-/ai-go [issue-id or instruction]
+/ai-go [issue-id or task description]
 ```
 
 Examples:
-- `/ai-go issues-123` - Autonomously work on issue until completion
-- `/ai-go "implement authentication"` - Design and implement the feature
-- `/ai-go "React state management"` - Research and document the topic
+- `/ai-go issues-123` - Work on general task issue
+- `/ai-go "update dependencies"` - Update project dependencies
+- `/ai-go "add tests for utils"` - Add missing test coverage
+- `/ai-go "fix eslint warnings"` - Fix code quality issues
+- `/ai-go "update README"` - Update documentation
 
 ## Task
 
 @.shirokuma/configs/lang.md
 
-Execute development workflow autonomously, solving problems independently until completion. Only escalate to user when truly stuck.
+Execute general maintenance and operational tasks that don't require formal design or new feature implementation. For new features or major changes, use `/ai-design` followed by `/ai-code`.
 
-### Core Philosophy: TDD & Tidy First (Kent Beck Methodology)
+### Core Purpose: General Task Automation
 
-**Key Principles**:
-1. **TDD Cycle (Red → Green → Refactor)** - Always start with failing tests, write minimal code to pass, then refactor
-2. **Tidy First Separation** - Never mix structural changes with behavioral changes in same commit
-3. **Problem Discovery First** - Identify root cause and multiple solutions before solving
-4. **Minimal Implementation** - Write only the code needed to make tests pass
-5. **Autonomous Execution** - AI handles the entire cycle without user intervention
+**Task Categories**:
+1. **Bug Fixes** - Small fixes that don't require design
+2. **Refactoring** - Code improvements without behavior changes
+3. **Documentation** - README, comments, docs updates
+4. **Configuration** - Settings, environment, build configs
+5. **Testing** - Adding or fixing tests
+6. **Maintenance** - Dependencies, linting, formatting
+7. **Operations** - Build, deploy, migration tasks
 
-### TDD Methodology (Kent Beck Approach)
+### Task Execution Workflow
 
-**Red → Green → Refactor Cycle**:
-1. **RED Phase**: Write the smallest possible failing test
-   - Start with the simplest test case
-   - Use meaningful test names (e.g., "shouldAuthenticateValidUser")
-   - Ensure test fails for the right reason (not compilation/syntax errors)
-   
-2. **GREEN Phase**: Write minimal code to make test pass
-   - Implement only what's needed to pass the test
-   - Don't add extra functionality
-   - Focus on making it work, not making it perfect
-   
-3. **REFACTOR Phase**: Improve code without changing behavior
-   - Clean up duplication
-   - Improve naming and structure
-   - Ensure all tests still pass
+**General Workflow**:
+1. **Analysis Phase**: Understand the task requirements
+2. **Planning Phase**: Create execution plan with TodoWrite
+3. **Execution Phase**: Perform the task
+4. **Validation Phase**: Verify task completion
+5. **Cleanup Phase**: Update documentation/status
 
-### Tidy First Principle
+### Task Categories and Approaches
 
-**Separation of Changes**:
+**Bug Fixes (Small)**:
 ```yaml
-Structural Changes (Tidy):
-  - Rename variables/functions
-  - Extract methods
-  - Move code between files
-  - Database migrations
-  - Configuration updates
-  → Commit separately, verify tests still pass
-
-Behavioral Changes:
-  - Add new features
-  - Fix bugs
-  - Change business logic
-  - Modify API responses
-  → Always preceded by failing test
+Approach:
+  - Identify the issue
+  - Write test to reproduce (if applicable)
+  - Apply minimal fix
+  - Verify existing tests pass
+  → Single commit with clear message
 ```
 
-**Rule**: If both are needed, ALWAYS do structural changes first in a separate commit.
+**Refactoring**:
+```yaml
+Approach:
+  - Identify improvement areas
+  - Ensure tests exist
+  - Make structural changes
+  - Verify tests still pass
+  → Separate commits for different refactoring types
+```
 
-### Problem Discovery Priority
+**Documentation**:
+```yaml
+Approach:
+  - Review existing docs
+  - Identify gaps or outdated info
+  - Update or create documentation
+  - Add examples if helpful
+  → Commit with "docs:" prefix
+```
 
-**Before solving any problem**:
-1. **Identify Root Cause** - Don't fix symptoms
-2. **Generate Multiple Solutions** - At least 2-3 approaches
-3. **Evaluate Trade-offs** - Consider impact and risks
-4. **Choose Minimal Solution** - Start with simplest approach
-5. **Validate with Tests** - Prove the problem exists and is fixed
+**Configuration**:
+```yaml
+Approach:
+  - Review current settings
+  - Apply necessary changes
+  - Test configuration works
+  - Update related documentation
+  → Commit with "config:" prefix
+```
 
-### Iteration Limits for Bounded Autonomy
+### Execution Limits
 
-**MAX_ITERATIONS = 3 per phase**
-- Design phase: Maximum 3 review-improve cycles
-- Test phase: Tests must fail first (RED state verification)
-- Implementation phase: Maximum 3 attempts to achieve GREEN state
-- Refactor phase: Maximum 3 improvement cycles
-- Error recovery: Maximum 2 retries per error type with checkpoint recovery
-- Clear completion after task success or iteration limit
-- Automatic checkpoint creation before each major phase
-- Rollback capability on critical failures
+**MAX_ATTEMPTS = 3 per task**
+- Task execution: Maximum 3 attempts
+- Error recovery: Maximum 2 retries per error
+- Validation: Must pass before completion
+- Clear completion message after success
 
 ### Pre-flight Check Phase
 
@@ -97,63 +105,83 @@ For detailed pre-flight check procedures and test configurations, see:
 
 The checks include build validation, lint validation, type checking, test suite execution, and environment validation. Specific checks depend on the project configuration.
 
-### Automatic Workflow Detection
+### TodoWrite Integration
 
-The system automatically analyzes input and executes the complete workflow:
+**Progress Tracking**: All workflow phases are tracked using TodoWrite for visibility:
 
-#### Task Type Detection and Workflow Selection
+- **TDD Workflow**: Pre-flight → Design → RED → GREEN → REVIEW → REFACTOR → Complete
+- **Documentation Workflow**: Outline → Draft → Review → Polish
+- **Research Workflow**: Investigation → Analysis → Synthesis → Documentation
 
-**Automatic Task Type Detection**:
+Each phase updates todo status (pending → in_progress → completed) to show real-time progress.
+
+### Automatic Task Detection
+
+The system automatically analyzes input and selects the appropriate workflow:
+
+#### Task Type Detection
+
+**Automatic Task Type Analysis**:
 ```yaml
 Task Type Analysis:
-1. File Extension Detection:
-   - .md, .txt, .mdx → Documentation workflow
-   - .ts, .js, .py, .java → Code workflow (TDD)
-   - .json, .yaml, .toml → Configuration workflow
+1. Keyword Detection:
+   - "update dependencies", "npm update" → Maintenance
+   - "fix lint", "eslint" → Code Quality
+   - "add tests", "test coverage" → Testing
+   - "update README", "docs" → Documentation
+   - "refactor", "cleanup" → Refactoring
+   - "config", "settings" → Configuration
+   - "migrate", "database" → Migration
    
-2. Keyword Analysis (in issue/instruction):
-   - "document", "README", "specification" → Documentation
-   - "implement", "fix", "refactor", "bug" → Code (TDD)
-   - "research", "investigate", "explore" → Research
-   - "configure", "setup", "settings" → Configuration
-   
-3. MCP Issue Tag Analysis:
+2. Issue Tag Analysis:
+   - #maintenance → Maintenance workflow
+   - #refactoring → Refactoring workflow
    - #documentation → Documentation workflow
-   - #bug, #feature → Code workflow (TDD)
-   - #research → Research workflow
-   - #config → Configuration workflow
-
-4. Confidence Scoring:
-   - High (80%+): Proceed with detected workflow
-   - Medium (60-79%): Confirm detection with user
-   - Low (<60%): Default to TDD workflow
+   - #testing → Test addition workflow
+   - #bug (small) → Quick fix workflow
+   
+3. Scope Detection:
+   - Large scope (>5 files) → Suggest using ai-design first
+   - New feature detected → Redirect to ai-design
+   - Small scope → Proceed with task
 ```
 
 **Workflow Selection Logic**:
 ```yaml
-if task_type == "documentation":
+if scope_too_large or is_new_feature:
+  suggest: "This looks like it needs design. Use /ai-design first"
+  exit
+
+elif task_type == "maintenance":
+  execute MaintenanceWorkflow:
+    1. Identify: What needs updating
+    2. Execute: Run update commands
+    3. Test: Verify nothing broke
+    4. Document: Update lock files/docs
+    
+elif task_type == "refactoring":
+  execute RefactoringWorkflow:
+    1. Analyze: Current code structure
+    2. Plan: Refactoring approach
+    3. Execute: Make changes incrementally
+    4. Validate: All tests pass
+    
+elif task_type == "documentation":
   execute DocumentationWorkflow:
-    1. Design: Structure and outline creation
-    2. Draft: Content writing by knowledge-curator
-    3. Review: Content accuracy and clarity check
-    4. Polish: Final improvements and formatting
+    1. Review: Existing documentation
+    2. Update: Make improvements
+    3. Examples: Add if helpful
+    4. Commit: Clear message
     
-elif task_type == "configuration":
-  execute ConfigurationWorkflow:
-    1. Analyze: Current configuration review
-    2. Plan: Changes needed
-    3. Apply: Make configuration changes
-    4. Validate: Test configuration works
+elif task_type == "testing":
+  execute TestingWorkflow:
+    1. Coverage: Identify gaps
+    2. Write: Add test cases
+    3. Run: Verify tests pass
+    4. Report: Coverage improvement
     
-elif task_type == "research":
-  execute ResearchWorkflow:
-    1. Investigate: Gather information
-    2. Analyze: Evaluate findings
-    3. Synthesize: Create recommendations
-    4. Document: Record in knowledge base
-    
-else:  # Default to code/TDD workflow
-  execute TDDWorkflow  # Existing TDD cycle
+else:
+  execute GeneralTaskWorkflow
 ```
 
 #### For Issues (e.g., `issues-123`):
@@ -229,202 +257,56 @@ Research Flow:
 4. Documentation: Record in knowledge base
 ```
 
-#### 1. Design Phase (for Code/TDD Workflow)
+#### Task Execution Examples
+
+##### Bug Fix Workflow
 ```yaml
-Design Loop (Bounded):
-1. Main agent creates initial design
-2. Self-review for design quality
-3. If improvements needed AND iterations < 3:
-   - Generate specific improvement suggestions
-   - Main agent applies improvements
-   - Increment iteration counter
-   - Return to step 2
-4. Stop after: design complete OR 3 iterations reached
-5. Report outcome clearly to user
+Small Bug Fix:
+1. Identify the issue location
+2. Write test to reproduce (if testable)
+3. Apply minimal fix
+4. Verify all tests pass
+5. Commit with clear message
 ```
 
-#### 2. TDD Implementation Phase (Kent Beck Methodology with Review)
+##### Refactoring Workflow
 ```yaml
-Complete TDD Cycle - Red → Green → Review → Refactor (conditional):
-
-1. Problem Discovery Phase:
-   Main agent:
-     - Identify root cause (not just symptoms)
-     - Generate 2-3 solution approaches
-     - Document trade-offs in decisions-XX
-     - Choose minimal viable solution
-
-2. RED Phase (Test-First):
-   Main agent:
-     - Write smallest possible failing test
-     - Use descriptive test names (behavior-focused)
-     - Verify test fails for the RIGHT reason
-     - Save test specifications to test_results-XX
-     - Create handover with expected behavior
-
-3. TEST REVIEW Phase (Test Quality Assurance) - MAX 3 iterations:
-   Task Tool Invocation (by main agent):
-   ```yaml
-   await Task({
-     subagent_type: "shirokuma-reviewer",
-     prompt: `Review the test quality from handover-XX.
-       
-       Required checks:
-       1. Test coverage adequacy (edge cases, error conditions)
-       2. Test clarity and maintainability
-       3. Correct failure reasons (failing for the right reason)
-       4. Test independence and isolation
-       5. Proper test naming and structure
-       
-       Quality criteria:
-       - Tests must be comprehensive
-       - Tests must be readable and maintainable
-       - Tests must follow TDD principles
-       
-       Create handover with:
-       - Review findings
-       - Coverage assessment
-       - Decision: APPROVED or NEEDS_IMPROVEMENT
-       
-       Iteration: {current} of 3 maximum`,
-     context: {
-       phase: "TEST_REVIEW",
-       handover_id: "handover-XX",
-       iteration: current_iteration
-     }
-   })
-   ```
-   
-   Test Review Decision Logic:
-   - If test quality sufficient: → APPROVED → Proceed to GREEN Phase
-   - If improvements needed AND iteration < 3: → NEEDS_IMPROVEMENT → Tester refines tests
-   - If iteration == 3: → PROCEED_WITH_WARNINGS → Continue with current tests
-
-4. GREEN Phase (Minimal Implementation):
-   Main agent:
-     - Write ONLY code to make test pass
-     - No extra features or optimizations
-     - Focus: Make it work, not perfect
-     - Verify all tests pass
-     - Create handover for review
-
-4. REVIEW Phase (Quality Assurance) - MAX 3 iterations:
-   Task Tool Invocation (by main agent):
-   ```yaml
-   await Task({
-     subagent_type: "shirokuma-reviewer",
-     prompt: `Review the implementation from handover-XX.
-       
-       Required checks:
-       1. Code quality assessment (maintainability, readability)
-       2. Security vulnerability scan
-       3. Performance analysis
-       4. TDD compliance verification
-       
-       Quality gates:
-       - Code quality score must be >= 80%
-       - Security issues must be 0
-       - All tests must pass
-       
-       Create handover with:
-       - Review findings
-       - Quality metrics
-       - Decision: APPROVED or NEEDS_REFACTOR
-       
-       Iteration: {current} of 3 maximum`,
-     context: {
-       phase: "REVIEW",
-       handover_id: "handover-XX",
-       iteration: current_iteration,
-       quality_threshold: 80
-     }
-   })
-   ```
-   
-   Review Decision Logic:
-   - If quality >= 80% AND security_issues == 0: → APPROVED → Complete
-   - If issues found AND iteration < 3: → NEEDS_REFACTOR → Refactor Phase
-   - If iteration == 3: → PARTIAL_SUCCESS → Complete with warnings
-
-5. REFACTOR Phase (Conditional) - Only if review requires changes:
-   Main agent performs refactoring:
-   - Apply improvements from review handover-XX
-   - Priority order:
-     1. Fix security vulnerabilities (critical)
-     2. Improve code quality issues
-     3. Optimize performance bottlenecks
-   - Requirements:
-     - Keep all tests passing (GREEN state)
-     - Follow "Tidy First" principle
-     - Separate structural and behavioral changes
-   - Create handover when complete
-   
-   After refactoring: Return to Review Phase (iteration + 1)
-
-6. Verification:
-   - Each phase must complete before next
-   - Tests must pass after EVERY change
-   - Quality gates enforced at review
-   - Maximum 3 iterations for review-refactor cycle
+Code Refactoring:
+1. Identify code to refactor
+2. Ensure tests exist
+3. Make incremental changes
+4. Verify tests after each change
+5. Commit each logical change separately
 ```
 
-#### 3. Review Phase with Task Tool (After GREEN)
+##### Documentation Workflow
 ```yaml
-Review Phase Execution (Bounded to 3 iterations):
-
-1. Main agent invokes reviewer via Task tool:
-   Task({
-     tool: "agent",
-     subagent_type: "shirokuma-reviewer",
-     prompt: "Review implementation and create handover with findings"
-   })
-
-2. @agent-shirokuma-reviewer performs:
-   - Code quality assessment (score 0-100)
-   - Security vulnerability scan (critical/high/medium/low)
-   - Performance analysis (bottlenecks, memory leaks)
-   - TDD compliance check (test coverage, quality)
-
-3. Reviewer creates handover with decision:
-   - APPROVED: Quality >= 80%, no security issues
-   - NEEDS_REFACTOR: Issues found, improvements needed
-   - PARTIAL_SUCCESS: Max iterations reached
-
-4. Quality Gates (enforced):
-   - Code quality score >= 80%
-   - Security vulnerabilities = 0
-   - Test coverage maintained
-   - Performance acceptable
-
-5. Iteration Control:
-   - Maximum 3 review-refactor cycles
-   - Each iteration tracked in handovers
-   - Stop at approval or iteration limit
+Documentation Update:
+1. Review existing documentation
+2. Identify what needs updating
+3. Make improvements
+4. Add examples if helpful
+5. Commit with "docs:" prefix
 ```
 
-#### 4. Refactor Phase (Conditional)
+##### Maintenance Workflow
 ```yaml
-Refactor Phase Execution (Only when NEEDS_REFACTOR):
+Dependency Update:
+1. Check for outdated packages
+2. Update dependencies
+3. Run tests to verify
+4. Update lock files
+5. Document any breaking changes
+```
 
-1. Main agent applies improvements directly:
-   Priority 1: Security fixes (must fix all)
-   Priority 2: Code quality improvements
-   Priority 3: Performance optimizations
-
-3. Tidy First Principle:
-   - Commit 1: Structural changes (renaming, reorganizing)
-   - Commit 2: Behavioral improvements (logic, optimization)
-   - Never mix change types in same commit
-
-4. Validation after refactoring:
-   - All tests must still pass
-   - No regression in functionality
-   - Improvements documented in handover
-
-5. Return to Review Phase:
-   - Increment iteration counter
-   - Create new handover for re-review
-   - Continue until approved or max iterations
+##### Testing Workflow
+```yaml
+Add Missing Tests:
+1. Identify untested code
+2. Write test cases
+3. Ensure good coverage
+4. Run all tests
+5. Report coverage improvement
 ```
 
 ### Agent Role Distribution
@@ -621,150 +503,112 @@ User Escalation (After Recovery Attempts):
 ### Examples
 
 ```bash
-# Simple usage - AI handles everything
-/ai-go issues-123
-# → AI analyzes, designs, reviews, improves, implements, tests, and completes autonomously
+# Maintenance tasks
+/ai-go "update dependencies"
+# → Updates npm packages, runs tests, updates lock files
 
-/ai-go "implement user authentication"
-# → AI creates issue, researches best practices, iterates on design, implements with tests
+/ai-go "fix eslint warnings"
+# → Fixes linting issues, ensures code quality
 
-/ai-go "fix the login button alignment"
-# → AI identifies the issue, implements fix, verifies it works
+/ai-go "add tests for utils module"
+# → Identifies untested code, writes test cases
+
+# Documentation tasks
+/ai-go "update README with new API endpoints"
+# → Updates documentation with latest changes
+
+/ai-go "add JSDoc comments to public methods"
+# → Adds missing documentation
+
+# Refactoring tasks
+/ai-go "refactor authentication module"
+# → Improves code structure without changing behavior
+
+# Configuration tasks
+/ai-go "update TypeScript config for stricter checks"
+# → Updates tsconfig.json, fixes any new errors
 ```
 
-### Complete TDD Example Flow with Review
+### Complete Task Example
 
-```typescript
-// Example: Adding user validation with full TDD cycle
+```bash
+# Example: Update dependencies
+/ai-go "update all dependencies to latest versions"
 
-// 1. RED Phase - Start with failing test (Main agent)
-test('should reject invalid email', () => {
-  const result = validateUser({ email: 'invalid' });
-  expect(result.isValid).toBe(false);
-});
-// → Test fails: validateUser is not defined
-// → Creates test_results-XX and handover to programmer
-
-// 2. GREEN Phase - Minimal implementation (Main agent)
-function validateUser(user) {
-  return { isValid: false }; // Simplest code to pass
-}
-// → Test passes
-// → Creates knowledge-XX and handover to reviewer
-
-// 3. REVIEW Phase - Quality check (main agent invokes via Task)
-await Task({
-  tool: "agent",
-  subagent_type: "shirokuma-reviewer",
-  prompt: "Review validateUser implementation from handover-XX"
-});
-// → Reviewer finds: no type safety, no actual validation
-// → Creates handover with NEEDS_REFACTOR status
-
-// 4. REFACTOR Phase - Apply improvements (Main agent)
-// Main agent applies type safety and validation logic from review
-// Result after refactoring:
-function validateUser(user: User): ValidationResult {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return { isValid: emailRegex.test(user.email) };
-}
-// → Tests still pass, quality improved
-
-// 5. RE-REVIEW Phase - Verify improvements
-await Task({
-  tool: "agent",
-  subagent_type: "shirokuma-reviewer",
-  prompt: "Re-review validateUser after refactoring"
-});
-// → Quality score: 85%, Security: OK
-// → Status: APPROVED
-// → Complete!
+# Execution flow:
+1. Check current dependency versions
+2. Identify outdated packages
+3. Update package.json
+4. Run npm install
+5. Run tests to verify nothing broke
+6. Fix any breaking changes
+7. Update documentation if needed
+8. Commit changes
 ```
 
-**Critical Points**:
-- Main agent MUST invoke reviewer via Task after GREEN
-- Refactor only happens if review finds issues
-- Maximum 3 review-refactor iterations
-- Quality gates enforced: 80% quality, 0 security issues
+**When to use ai-go vs other commands**:
+- **Use ai-go for**: Maintenance, refactoring, testing, docs, config
+- **Use ai-design for**: New features requiring design
+- **Use ai-code for**: Implementing approved designs
 
 
 ### Integration Points
 
-- **Main agent**: Handles design, testing, programming, and research directly
-- **shirokuma-reviewer**: Invoked via Task tool for quality assurance only
-- **issue-manager**: May be used for issue tracking (separate command)
-- **mcp-specialist**: May be used for MCP operations (separate command)
+- **Main agent**: Handles all general tasks directly
+- **shirokuma-reviewer**: May be invoked for code review if needed
+- **ai-design**: Redirect users for new feature design
+- **ai-code**: Redirect users for implementing designs
 
 ### Success Criteria
 
-1. **Zero user interaction** during normal execution
-2. **Automatic quality improvement** through iteration
-3. **Self-healing workflows** that fix their own issues
-4. **Complete documentation** of all decisions and changes
-5. **Only escalate** when truly stuck
+1. **Task completion** without unnecessary complexity
+2. **Clear scope** - knows when to redirect to ai-design/ai-code
+3. **Quality maintenance** - ensures tests pass, linting clean
+4. **Documentation** - updates docs when relevant
+5. **User clarity** - clear about what was done
 
-This command transforms AI from an assistant into an autonomous developer that takes ownership of tasks and delivers complete solutions.
+This command handles routine development tasks that don't require formal design or new feature implementation.
 
 ## Implementation Guidelines
 
 ### Core Implementation Principles
 
-1. **Autonomous by Default**
-   - All decisions made by AI
-   - No options or flags needed
-   - Iterate until success
+1. **Task-Focused Execution**
+   - Complete specific task given
+   - Don't expand scope unnecessarily
+   - Redirect to appropriate command if needed
 
-2. **Design Review Loop (Bounded)**
+2. **Quality Maintenance**
    ```
-   iterations = 0
-   while iterations < 3:
-     design = create_design()
-     feedback = review_design(design)
-     if feedback.has_improvements:
-       apply_improvements(feedback)
-       iterations += 1
-     else:
-       break
-   report_completion(design, iterations)
+   # For any code changes:
+   1. Make the change
+   2. Run tests to verify
+   3. Fix any linting issues
+   4. Commit with clear message
    ```
 
-3. **TDD Loop (Kent Beck Style)**
+3. **Refactoring Approach**
    ```
-   iterations = 0
-   while iterations < 3:
-     # RED: Test first
-     test = write_failing_test()
-     verify_test_fails_correctly(test)
-     
-     # GREEN: Minimal implementation
-     code = write_minimal_code_to_pass(test)
-     verify_all_tests_pass()
-     
-     # REFACTOR: Tidy first
-     if needs_refactoring():
-       structural_changes = tidy_code()  # Separate commit
-       behavioral_improvements = optimize()  # Separate commit
-       verify_all_tests_still_pass()
-     
-     iterations += 1
-   report_completion(test, code, iterations)
+   # When refactoring:
+   1. Ensure tests exist first
+   2. Make incremental changes
+   3. Verify tests after each change
+   4. Keep commits atomic
    ```
 
-4. **Bug Fix TDD Approach (Kent Beck Method)**
+4. **Bug Fix Approach**
    ```
-   # When fixing bugs:
-   1. Write API-level test that exposes the bug
-   2. Write minimal unit test that reproduces issue
-   3. Fix the bug (minimal change)
-   4. Verify both tests pass
-   5. Refactor if needed (separate commit)
+   # When fixing small bugs:
+   1. Identify the issue
+   2. Write test if possible
+   3. Apply minimal fix
+   4. Verify all tests pass
    ```
 
 5. **Error Recovery**
-   - Never give up on first failure
-   - Try different approaches (max 2 retries)
-   - Learn from each attempt
-   - Stop gracefully after retry limit
+   - Try to fix issues encountered
+   - Maximum 2 retry attempts
+   - Report clearly if blocked
 
 ### Task Completion Behavior
 
@@ -789,13 +633,17 @@ Status: Task successfully completed in [X] iterations
 
 When `/ai-go` is called without parameters:
 ```
-Usage: /ai-go [issue-id or instruction]
+Usage: /ai-go [issue-id or task description]
 
-Examples:
-- /ai-go issues-123
-- /ai-go "implement authentication"
+Examples for general tasks:
+- /ai-go "update dependencies"
+- /ai-go "fix eslint warnings"
+- /ai-go "add missing tests"
+- /ai-go "update README"
 
-To see available issues, use: /ai-issue
+For new features: use /ai-design
+For implementing designs: use /ai-code
+To see available issues: use /ai-issue
 ```
 
 ### Zero Configuration Philosophy
@@ -812,55 +660,69 @@ Everything that was previously an option is now intelligently decided:
 
 ```yaml
 Automatic Decisions:
-1. Strategy Selection:
-   - Bug fixes → Careful mode with comprehensive testing
-   - New features → Balanced approach with design focus
-   - Documentation → Fast mode with minimal overhead
-   - Refactoring → Safe mode with extensive validation
+1. Task Type Detection:
+   - Maintenance tasks → Direct execution
+   - New features → Redirect to /ai-design
+   - Large refactoring → Suggest breaking down
+   - Documentation → Fast execution
 
-2. Pre-flight Handling:
-   - Few errors (<5) → Auto-fix and continue
-   - Many errors → Fix critical ones first
-   - Critical errors → Request user confirmation
+2. Quality Checks:
+   - Always run tests after changes
+   - Fix linting issues automatically
+   - Verify build succeeds
 
-3. Checkpoint Management:
-   - Always creates safe checkpoints
-   - Automatic rollback on failure
-   - Smart recovery from interruptions
+3. Scope Management:
+   - Small tasks → Execute directly
+   - Large scope → Suggest using /ai-design
+   - Multiple tasks → Focus on one at a time
 
-4. Session Continuity:
-   - Detects interrupted tasks automatically
-   - Resumes from last known good state
-   - No manual session ID needed
-
-5. Risk Assessment:
-   - Security changes → Extra validation
-   - Large changes (>20 files) → Phased approach
-   - Breaking changes → User confirmation required
+4. Error Handling:
+   - Test failures → Attempt to fix
+   - Lint errors → Auto-fix with eslint
+   - Build errors → Diagnose and fix
 ```
 
-### How It Works
+### Task Routing Logic
 
 ```typescript
-// Internal logic (not user-visible)
+// Intelligent task routing
 function executeTask(input: string) {
   const task = analyzeTask(input);
-  const strategy = determineOptimalStrategy(task);
-  const risks = assessRisks(task);
   
-  // All decisions made automatically
-  if (hasInterruptedSession(task)) {
-    resumeFromCheckpoint();
+  if (isNewFeature(task) || needsDesign(task)) {
+    suggest("This needs design. Use /ai-design first");
+    return;
   }
   
-  if (needsPreflightFix()) {
-    autoFixCriticalIssues();
+  if (hasApprovedDesign(task)) {
+    suggest("Use /ai-code to implement this design");
+    return;
   }
   
-  // Execute with optimal settings
-  runWithStrategy(strategy);
+  // Execute general task
+  performTask(task);
 }
 ```
 
-**The AI handles everything. You just specify what you want done.**
+## When to Use This Command
+
+**✅ Use ai-go for:**
+- Updating dependencies
+- Fixing linting/formatting issues
+- Adding missing tests
+- Small bug fixes (no design needed)
+- Refactoring existing code
+- Updating documentation
+- Configuration changes
+- Build/deployment tasks
+
+**❌ Don't use ai-go for:**
+- New features (use `/ai-design`)
+- Implementing designs (use `/ai-code`)
+- Large architectural changes (use `/ai-design`)
+- Complex bug fixes requiring design (use `/ai-design`)
+
+## Summary
+
+The `/ai-go` command is your general-purpose task executor for routine development work that doesn't require formal design or new feature implementation. It intelligently routes you to the appropriate specialized commands when needed.
 
