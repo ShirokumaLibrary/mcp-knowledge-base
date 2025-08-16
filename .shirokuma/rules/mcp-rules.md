@@ -13,9 +13,9 @@
 - No code without corresponding issue
 
 ### 3. Session Management
-- Start sessions: Restore context from MCP
+- Start session: Restore context from MCP
 - During work: Record decisions immediately
-- End sessions: Save state for next AI
+- End session: Save state for next AI
 
 ### 4. Knowledge Organization
 - Generic knowledge: Use appropriate knowledge types
@@ -31,11 +31,14 @@
 | **issue** | Bugs, features, improvements | "Fix login authentication bug" |
 | **knowledge** | Reusable technical knowledge | "React Hooks best practices" |
 | **decision** | Project-specific choices | "Use PostgreSQL for database" |
-| **session** | Work session records | "2025-01-13 work session" |
+| **session** | Work session records | "2025-08-16 work session" |
 | **pattern** | Code patterns & templates | "API error handling pattern" |
 | **task** | Specific task management | "Implement UI components" |
 | **research** | Investigation results | "Performance optimization findings" |
 | **standard** | Coding standards & conventions | "TypeScript style guide" |
+| **design** | Technical designs and architecture | "Authentication module design" |
+| **handover** | Implementation records and transitions | "TDD implementation for auth module" |
+| **feature** | Feature specifications and requirements | "Multi-factor authentication feature" |
 
 ## Search Strategies
 
@@ -57,7 +60,7 @@ strategy: 'concepts'
 ```typescript
 strategy: 'embedding'
 // Semantic similarity using vectors
-// API: find_similar_items, get_related_items
+// API: get_related_items with strategy='embedding'
 ```
 
 ### Hybrid Search
@@ -96,8 +99,9 @@ weights: { keywords: 0.4, embedding: 0.6 }
 
 ### 1. Type Field Format
 - Use lowercase letters, numbers, underscores only (a-z, 0-9, _)
-- Examples: `bug_fix`, `feature_123`, `user_story`
-- Validate before creation
+- Use singular form, not plural (e.g., `session` not `sessions`)
+- Examples: `issue`, `feature`, `session`, `design`
+- Validate before creation using `validateType()` function
 
 ### 2. Status Field Usage
 - **Active Statuses** (work in progress): Open, Specification, Waiting, Ready, In Progress, Review, Testing, Pending
@@ -214,7 +218,7 @@ get_related_items({
 update_current_state({
   content: "Working on authentication module refactoring",
   tags: ["session", "authentication", "refactoring"],
-  metadata: { updatedBy: "ai-session-2025-01-13" }
+  metadata: { updatedBy: "ai-session-2025-08-16" }
 })
 ```
 
