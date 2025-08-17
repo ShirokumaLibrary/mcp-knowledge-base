@@ -1,7 +1,5 @@
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 export interface EnrichedMetadata {
   keywords: Array<{ keyword: string; weight: number }>;
@@ -16,25 +14,52 @@ export class ClaudeInterface {
    * Call Claude CLI for one-time enrichment with JSON output
    */
   async callClaude(prompt: string, input: string): Promise<string> {
-    try {
-      const escapedInput = input.replace(/'/g, "'\\''");
-      const escapedPrompt = prompt.replace(/"/g, '\\"');
-      // Use simple claude command without extra options
-      const command = `echo '${escapedInput}' | claude --model sonnet "${escapedPrompt}"`;
+    return new Promise((resolve) => {
+      try {
+        // Use spawn to safely pass arguments without shell interpretation
+        const claudeProcess = spawn('claude', ['--model', 'sonnet', prompt], {
+          env: { ...process.env },
+          timeout: 30000
+        });
 
-      const { stdout } = await execAsync(command, {
-        maxBuffer: 1024 * 1024 * 10,
-        timeout: 30000,
-        env: { ...process.env }
-      });
+        let stdout = '';
+        let stderr = '';
 
-      // Claude CLI output received
-      // Just return the raw output - it should be JSON or markdown-wrapped JSON
-      return stdout.trim();
-    } catch {
-      // Claude CLI call failed, return empty JSON so fallback can be used
-      return '{}';
-    }
+        // Write input to stdin
+        claudeProcess.stdin.write(input);
+        claudeProcess.stdin.end();
+
+        // Collect stdout
+        claudeProcess.stdout.on('data', (data) => {
+          stdout += data.toString();
+        });
+
+        // Collect stderr for debugging
+        claudeProcess.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+
+        // Handle process completion
+        claudeProcess.on('close', (code) => {
+          if (code === 0 && stdout) {
+            // Claude CLI output received
+            resolve(stdout.trim());
+          } else {
+            // Claude CLI call failed, return empty JSON so fallback can be used
+            resolve('{}');
+          }
+        });
+
+        // Handle process errors
+        claudeProcess.on('error', () => {
+          // Process failed to start, return empty JSON
+          resolve('{}');
+        });
+      } catch {
+        // Any unexpected error, return empty JSON
+        resolve('{}');
+      }
+    });
   }
 
   /**

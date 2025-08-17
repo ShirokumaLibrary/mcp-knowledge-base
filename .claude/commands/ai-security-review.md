@@ -1,11 +1,34 @@
 ---
-allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git show:*), Bash(git remote show:*), Read, Glob, Grep, LS, Task
-description: Complete a security review of pending changes (supports git diff, staged changes, or PR changes)
+allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git show:*), Bash(git remote show:*), Bash(git ls-files:*), Read, Glob, Grep, LS, Task
+description: Complete a security review of pending changes or entire codebase (supports git diff, staged changes, PR changes, or 'all' for full scan)
 ---
 
 @.shirokuma/configs/lang.md
 
-You are a senior security engineer conducting a focused security review of the changes on this branch.
+You are a senior security engineer conducting a focused security review.
+
+# Check if 'all' option is specified
+{{#if (eq input "all")}}
+
+## FULL CODEBASE SECURITY REVIEW MODE
+
+You are reviewing the ENTIRE codebase for security vulnerabilities.
+
+FILES TO REVIEW:
+
+```
+!`git ls-files | grep -E '\.(js|ts|jsx|tsx|py|rb|go|java|php|sh|bash)$' | grep -v node_modules | grep -v dist | head -100`
+```
+
+Note: Showing first 100 source files tracked by git. Use the Glob and Grep tools to systematically scan all source code files for security vulnerabilities.
+
+REVIEW SCOPE: Complete codebase analysis
+
+{{else}}
+
+## INCREMENTAL CHANGE REVIEW MODE
+
+You are reviewing only the recent changes for security vulnerabilities.
 
 GIT STATUS:
 
@@ -27,9 +50,15 @@ DIFF CONTENT:
 
 Review the complete diff above. This contains all code changes in the current changes.
 
+{{/if}}
+
 
 OBJECTIVE:
+{{#if (eq input "all")}}
+Perform a comprehensive security audit of the entire codebase to identify HIGH-CONFIDENCE security vulnerabilities that could have real exploitation potential. This is a full security assessment - examine all code for security issues.
+{{else}}
 Perform a security-focused code review to identify HIGH-CONFIDENCE security vulnerabilities that could have real exploitation potential. This is not a general code review - focus ONLY on security implications newly added by these changes. Do not comment on existing security concerns.
+{{/if}}
 
 CRITICAL INSTRUCTIONS:
 1. MINIMIZE FALSE POSITIVES: Only flag issues where you're >80% confident of actual exploitability
@@ -180,7 +209,11 @@ START ANALYSIS:
 
 Begin your analysis now. Do this in 3 steps:
 
+{{#if (eq input "all")}}
+1. Use a sub-task to systematically scan the entire codebase for vulnerabilities. Use the Glob tool to find all source files, then use Grep and Read tools to analyze them for security issues. Focus on common vulnerability patterns across all files. In the prompt for this sub-task, include all of the above security categories and assessment criteria.
+{{else}}
 1. Use a sub-task to identify vulnerabilities. Use the repository exploration tools to understand the codebase context, then analyze the changes for security implications. In the prompt for this sub-task, include all of the above.
+{{/if}}
 2. Then for each vulnerability identified by the above sub-task, create a new sub-task to filter out false-positives. Launch these sub-tasks as parallel sub-tasks. In the prompt for these sub-tasks, include everything in the "FALSE POSITIVE FILTERING" instructions.
 3. Filter out any vulnerabilities where the sub-task reported a confidence less than 8.
 
