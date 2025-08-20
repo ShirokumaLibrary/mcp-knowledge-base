@@ -2,25 +2,16 @@
 id: 81
 type: issue
 title: "/ai-issueコマンドが予期しない作業を開始する問題"
+description: "/ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正"
 status: Completed
 priority: MEDIUM
 aiSummary: "/ai-issueコマンドが予期しない作業を開始する問題 /ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正 ## 問題の詳細\n\n`/ai-issue`コマンドの動作が不安定：\n1. 引数を渡すと、イシュー作成ではなく作業を開始してしまう\n2. コマンドの意図と実際の動作が一致しない\n\n## 期待される動作\n\n```bash\n/ai-issue"
 tags: ["bug","command","ai-issue","ux"]
 keywords: {"103":1,"issue":1,"search":1,"claude":0.56,"keyword":0.56}
-embedding: "gICJgJSAgIeBioCAgICAgICAjoCPgICCiJaAgICAgICAgI2Aj4CAiaKagICAgICAgICGgJSAgI62koCAgICAgICAgICZgICNs4WAgICAgICAgICAm4CAhquOgICAgICAgICAgI2AgICXgoCAgICAgICAgoCagICBkoCAgICAgIA="
 related: [84]
-searchIndex: "issue 103 search bash close keyword claude commands"
 created: 2025-08-16T05:45:03.685Z
 updated: 2025-08-16T05:45:44.306Z
 ---
-
-# /ai-issueコマンドが予期しない作業を開始する問題
-
-## Description
-
-/ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正
-
-## Content
 
 ## 問題の詳細
 
@@ -61,28 +52,3 @@ updated: 2025-08-16T05:45:44.306Z
 - 意図しない作業開始を防止
 - コマンドの動作が予測可能に
 - ユーザーの意図を確認する仕組みを追加
-
-## AI Summary
-
-/ai-issueコマンドが予期しない作業を開始する問題 /ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正 ## 問題の詳細
-
-`/ai-issue`コマンドの動作が不安定：
-1. 引数を渡すと、イシュー作成ではなく作業を開始してしまう
-2. コマンドの意図と実際の動作が一致しない
-
-## 期待される動作
-
-```bash
-/ai-issue
-
-## Keywords (Detailed)
-
-- issue (weight: 1.00)
-- search (weight: 1.00)
-- 103 (weight: 1.00)
-- claude (weight: 0.56)
-- keyword (weight: 0.56)
-- close (weight: 0.56)
-- bash (weight: 0.56)
-- commands (weight: 0.56)
-

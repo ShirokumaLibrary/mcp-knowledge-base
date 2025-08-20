@@ -2,25 +2,16 @@
 id: 48
 type: issue
 title: "embeddingフィールドの出力オプション自体を廃止すべき"
+description: "includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。"
 status: Completed
 priority: HIGH
 aiSummary: "embeddingフィールドの出力オプション自体を廃止すべき includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。 ## 背景\n\n現在、`get_item` APIには`includeEmbedding`パラメータがあり、128次元のInt8量子化ベクトルの出力を制御できます。しかし、*"
 tags: ["api","embedding","simplification","breaking-change","cleanup"]
 keywords: {"128":0.42,"embedding":1,"includeembedding":1,"api":0.83,"typescript":0.83}
-embedding: "gIaAgICAgI2AmJeLiYuAgICAgICAgISQgJ+Zl5SFgICAh4CAgICKmICblJmYgICAgJaAgICAhpOAnoiPkoCAgICfgICAgIuRgJOAg4eGgICAmoCAgICMi4CFhICKgoCAgJ6AgICAh4eAgJCIiYiAgICVgICAgIGIgImZgYGMgIA="
 related: [24,26,27,49]
-searchIndex: "embedding includeembedding api typescript get_item 128 async getitem args unknown"
 created: 2025-08-14T01:02:37.760Z
 updated: 2025-08-14T01:16:05.470Z
 ---
-
-# embeddingフィールドの出力オプション自体を廃止すべき
-
-## Description
-
-includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。
-
-## Content
 
 ## 背景
 
@@ -101,23 +92,3 @@ async getItem(args: unknown) {
 ### 関連イシュー
 - issue-26: get_item APIでembeddingフィールドの出力を制御可能にする
   → **クローズして、代わりに完全除外を実装すべき**
-
-## AI Summary
-
-embeddingフィールドの出力オプション自体を廃止すべき includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。 ## 背景
-
-現在、`get_item` APIには`includeEmbedding`パラメータがあり、128次元のInt8量子化ベクトルの出力を制御できます。しかし、*
-
-## Keywords (Detailed)
-
-- embedding (weight: 1.00)
-- includeembedding (weight: 1.00)
-- api (weight: 0.83)
-- typescript (weight: 0.83)
-- 128 (weight: 0.42)
-- get_item (weight: 0.42)
-- async (weight: 0.42)
-- getitem (weight: 0.42)
-- args (weight: 0.42)
-- unknown (weight: 0.42)
-

@@ -2,26 +2,17 @@
 id: 58
 type: handover
 title: "ConfigManager実装完了 - レビュー用ハンドオーバー"
+description: "Issue-56の実装完了。環境変数管理とエクスポート機能のレビュー準備"
 status: Ready
 priority: MEDIUM
 aiSummary: "Implementation of ConfigManager class with environment variable management, export/import functionality, CLI commands, and comprehensive testing. Includes security features like sensitive data masking and validation capabilities."
 tags: ["handover","review","issue-56","config-manager"]
 keywords: {"config":1,"environment":0.9,"manager":0.9,"cli":0.8,"variable":0.8}
 concepts: {"configuration management":0.95,"environment management":0.9,"cli tools":0.85,"software development":0.8,"security":0.8}
-embedding: "lICAgIiAgI+AgICNgomRgIiAgICAgICOgICAmYuEloCSgICAgYCAh4CAgJyRgZKAkoCAgIiAgICAgICUkI6WgIaAgICQgICBgICAkJKhj4CSgICAkYCAh4CAgJCOqISAnYCAgIqAgI6AgICFhaSAgJ6AgICCgICPgICAg4CZhoA="
 related: [43,56,57,59]
-searchIndex: "config manager environment variable export import cli command validation security api key test integration json"
 created: 2025-08-14T02:31:50.401Z
 updated: 2025-08-14T02:31:50.401Z
 ---
-
-# ConfigManager実装完了 - レビュー用ハンドオーバー
-
-## Description
-
-Issue-56の実装完了。環境変数管理とエクスポート機能のレビュー準備
-
-## Content
 
 ## 実装概要
 Issue-56「環境変数管理とエクスポート機能の実装」を完了しました。
@@ -83,32 +74,3 @@ shirokuma-kb config validate
 - ドキュメントの更新（使用方法の詳細）
 - 環境ごとの設定テンプレートのカスタマイズ
 - CI/CDパイプラインへの統合
-
-## AI Summary
-
-Implementation of ConfigManager class with environment variable management, export/import functionality, CLI commands, and comprehensive testing. Includes security features like sensitive data masking and validation capabilities.
-
-## Keywords (Detailed)
-
-- config (weight: 1.00)
-- environment (weight: 0.90)
-- manager (weight: 0.90)
-- cli (weight: 0.80)
-- variable (weight: 0.80)
-- export (weight: 0.80)
-- security (weight: 0.80)
-- test (weight: 0.70)
-- validation (weight: 0.70)
-- import (weight: 0.70)
-
-## Concepts
-
-- configuration management (confidence: 0.95)
-- environment management (confidence: 0.90)
-- cli tools (confidence: 0.85)
-- software development (confidence: 0.80)
-- security (confidence: 0.80)
-- testing (confidence: 0.75)
-- data export (confidence: 0.70)
-- validation (confidence: 0.70)
-

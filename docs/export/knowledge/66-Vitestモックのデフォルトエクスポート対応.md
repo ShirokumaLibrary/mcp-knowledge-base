@@ -2,25 +2,16 @@
 id: 66
 type: knowledge
 title: "Vitestモックのデフォルトエクスポート対応"
+description: "ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法"
 status: Completed
 priority: HIGH
 aiSummary: "Vitestモックのデフォルトエクスポート対応 ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法 ## 問題\nESM/CommonJS互換性対応でPrismaのインポート形式を変更：\n```javascript\n// 変更前\nimport { PrismaClient } from '@prisma/client';\n\n// "
 tags: ["testing","vitest","esm","prisma","commonjs","mocking"]
 keywords: {"prisma":1,"prismaclient":0.74,"const":0.59,"client":0.59,"export":0.44}
-embedding: "i5GAj4CVgICAgICNiICAgYCOgISAloCAgICAlYuHgICHhoCAgI6AgICAgJySj4CEmoCAhoCVgICAgICglZGAiYyEgJGAioCAgICAkZyKgIufgICXgIGAgICAgISYgoCIp4OAlICBgICAgICGjIiAgp6MgJeAi4CAgICAlYGBgIY="
 related: [65]
-searchIndex: "prisma prismaclient client const javascript export default vitest esm commonjs"
 created: 2025-08-14T08:29:57.665Z
 updated: 2025-08-14T08:29:57.665Z
 ---
-
-# Vitestモックのデフォルトエクスポート対応
-
-## Description
-
-ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法
-
-## Content
 
 ## 問題
 ESM/CommonJS互換性対応でPrismaのインポート形式を変更：
@@ -74,27 +65,3 @@ vi.doMock('@prisma/client', () => ({
 - モックオブジェクトは`default`プロパティでラップする
 - PrismaClientとPrismaの両方をエクスポートする
 - $transactionのモックは`this`コンテキストを維持する必要がある
-
-## AI Summary
-
-Vitestモックのデフォルトエクスポート対応 ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法 ## 問題
-ESM/CommonJS互換性対応でPrismaのインポート形式を変更：
-```javascript
-// 変更前
-import { PrismaClient } from '@prisma/client';
-
-// 
-
-## Keywords (Detailed)
-
-- prisma (weight: 1.00)
-- prismaclient (weight: 0.74)
-- const (weight: 0.59)
-- client (weight: 0.59)
-- export (weight: 0.44)
-- default (weight: 0.44)
-- javascript (weight: 0.44)
-- vitest (weight: 0.29)
-- esm (weight: 0.29)
-- commonjs (weight: 0.29)
-

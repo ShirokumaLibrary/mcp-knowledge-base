@@ -2,25 +2,16 @@
 id: 19
 type: issue
 title: "update_item APIでtype変更を可能にする"
+description: "現在update_itemではtypeフィールドの変更が禁止されている。データ整合性を保ちながらtype変更を可能にする実装が必要。"
 status: Review
 priority: MEDIUM
 aiSummary: "change_item_type API の実装 既存アイテムのtypeフィールドを変更するAPIが必要。現在update_itemではtype変更不可。 ## 背景\n\n現在、一度作成されたアイテムのtypeフィールドは変更できない。これにより以下の問題が発生：\n\n1. **データ移行の困難**\n   - 間違ったtypeで作成されたアイテムの修正不可\n   - 例: handovers → ha"
 tags: ["api","data-integrity","feature","type-management"]
 keywords: {"type":1,"newtype":0.44,"validatedtype":0.44,"await":0.44,"api":0.33}
-embedding: "ioCAgICAj4qMhI2FgICAgISAgICAgI+EkIqbi4CAgIGAgICAgICJgI2Mr4yAgICGgYCAgICAgYKQiKWHgICAi4aAgICAgICAi4KzgYCAgIuCgICAgICAg4OGtICAgICGiICAgICAgYmAgauDgICAioyAgICAgIiMhICZgICAgIU="
-related: [2,3,18,20,43,52]
-searchIndex: "type newtype validatedtype await api issue typescript number string validatetype"
+related: [2,3,18,20,43,52,95]
 created: 2025-08-13T12:39:24.002Z
 updated: 2025-08-13T13:01:51.791Z
 ---
-
-# update_item APIでtype変更を可能にする
-
-## Description
-
-現在update_itemではtypeフィールドの変更が禁止されている。データ整合性を保ちながらtype変更を可能にする実装が必要。
-
-## Content
 
 ## 背景
 
@@ -109,27 +100,3 @@ async changeItemType(id: number, newType: string) {
 
 - issue-18: typeフィールドの複数形使用の不整合（実例）
 - `.shirokuma/mcp-api-tester-tests/1.13-type-change.md`: テスト仕様書（参考）
-
-## AI Summary
-
-change_item_type API の実装 既存アイテムのtypeフィールドを変更するAPIが必要。現在update_itemではtype変更不可。 ## 背景
-
-現在、一度作成されたアイテムのtypeフィールドは変更できない。これにより以下の問題が発生：
-
-1. **データ移行の困難**
-   - 間違ったtypeで作成されたアイテムの修正不可
-   - 例: handovers → ha
-
-## Keywords (Detailed)
-
-- type (weight: 1.00)
-- newtype (weight: 0.44)
-- validatedtype (weight: 0.44)
-- await (weight: 0.44)
-- api (weight: 0.33)
-- issue (weight: 0.33)
-- typescript (weight: 0.33)
-- validatetype (weight: 0.33)
-- string (weight: 0.33)
-- number (weight: 0.33)
-

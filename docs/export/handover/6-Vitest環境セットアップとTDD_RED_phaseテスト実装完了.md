@@ -2,25 +2,16 @@
 id: 6
 type: handover
 title: "Vitest環境セットアップとTDD RED phaseテスト実装完了"
+description: "Vitestテスト環境のセットアップとvalidation.tsの包括的なテストスイートを作成しました。TDDのRED phaseとして3つのテストが意図的に失敗している状態です。"
 status: Completed
 priority: HIGH
 aiSummary: "Vitest環境セットアップとTDD RED phaseテスト実装完了 Vitestテスト環境のセットアップとvalidation.tsの包括的なテストスイートを作成しました。TDDのRED phaseとして3つのテストが意図的に失敗している状態です。 # Vitest環境セットアップとTDD RED phaseテスト実装\n\n## 完了タスク\n\n### 1. Vitestと関連パッケージのインスト"
 tags: ["testing","vitest","tdd","red-phase","validation","handover"]
 keywords: {"vitest":1,"test":0.78,"phase":0.5,"run":0.5,"validation":0.39}
-embedding: "gIqXgIeAgIyGgICtgICAgICLmoCCgICLg4CAqoCAgICAiJWAgICAhYeAgKOAgICAgIKIgIGAgICJgICsgICAgICDgICGgICAhoCAloCAgICAi4OAiYCAhoKAgI+AgICAgJGPgIiAgIyAgICggICAgICRmYCJgICMgoCAroCAgIA="
 related: [1,5,7,8,9,13,14,15,21,22,23,40,45,46]
-searchIndex: "vitest test phase run validation red tdd coverage tests npm"
 created: 2025-08-13T11:46:15.597Z
 updated: 2025-08-13T11:46:15.597Z
 ---
-
-# Vitest環境セットアップとTDD RED phaseテスト実装完了
-
-## Description
-
-Vitestテスト環境のセットアップとvalidation.tsの包括的なテストスイートを作成しました。TDDのRED phaseとして3つのテストが意図的に失敗している状態です。
-
-## Content
 
 # Vitest環境セットアップとTDD RED phaseテスト実装
 
@@ -169,25 +160,3 @@ npx vitest run tests/unit/utils/validation.test.ts
 ## 結論
 
 Vitestテスト環境のセットアップが完了し、TDDのRED phaseとして3つの失敗するテストを含む包括的なテストスイートを実装しました。次はプログラマーがGREEN phaseでこれらのテストをパスさせる実装を行い、その後REFACTORフェーズでコードを改善します。
-
-## AI Summary
-
-Vitest環境セットアップとTDD RED phaseテスト実装完了 Vitestテスト環境のセットアップとvalidation.tsの包括的なテストスイートを作成しました。TDDのRED phaseとして3つのテストが意図的に失敗している状態です。 # Vitest環境セットアップとTDD RED phaseテスト実装
-
-## 完了タスク
-
-### 1. Vitestと関連パッケージのインスト
-
-## Keywords (Detailed)
-
-- vitest (weight: 1.00)
-- test (weight: 0.78)
-- phase (weight: 0.50)
-- run (weight: 0.50)
-- validation (weight: 0.39)
-- red (weight: 0.34)
-- npm (weight: 0.28)
-- tests (weight: 0.28)
-- tdd (weight: 0.28)
-- coverage (weight: 0.28)
-

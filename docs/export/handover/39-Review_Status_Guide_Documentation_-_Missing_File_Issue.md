@@ -2,25 +2,16 @@
 id: 39
 type: handover
 title: "Review: Status Guide Documentation - Missing File Issue"
+description: "Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md"
 status: Open
 priority: CRITICAL
 aiSummary: "Review: Status Guide Documentation - Missing File Issue Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md # Review Report: Status Guide "
 tags: ["handover","review","documentation","status-guide","missing-file","critical"]
 keywords: {"status":0.64,"file":0.47,"guide":0.44,"mcp":0.34,"documentation":0.27}
-embedding: "gICJgICAgICJh4mPn4CBjoCAhICAgICAioiGi6uAhIqAgICAgICAgIqFgISqgJaDgICBgICAgICKgYWJnICmgICAgICAgICAhYSRgo+ApYOAgIKAgICAgIGAnoCOgJWKgICHgICAgICAgKGEm4CDhYCAioCAgICAhIOXi5GAgYw="
 related: [2,3,34]
-searchIndex: "status file guide mcp documentation shirokuma docs review transitions for"
 created: 2025-08-13T22:40:49.689Z
 updated: 2025-08-13T22:40:49.689Z
 ---
-
-# Review: Status Guide Documentation - Missing File Issue
-
-## Description
-
-Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md
-
-## Content
 
 # Review Report: Status Guide Documentation
 
@@ -157,21 +148,3 @@ Once fixes are applied:
 
 ## Conclusion
 ステータスガイドドキュメントの作成は計画され、MCPに記録されていますが、実際のファイルが作成されていません。これは重要な欠落であり、すぐに対処する必要があります。上記の推奨事項に従ってファイルを作成し、包括的なガイドを提供することで、ユーザーエクスペリエンスが大幅に向上します。
-
-## AI Summary
-
-Review: Status Guide Documentation - Missing File Issue Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md # Review Report: Status Guide 
-
-## Keywords (Detailed)
-
-- status (weight: 0.64)
-- file (weight: 0.47)
-- guide (weight: 0.44)
-- mcp (weight: 0.34)
-- documentation (weight: 0.27)
-- shirokuma (weight: 0.24)
-- docs (weight: 0.24)
-- review (weight: 0.17)
-- transitions (weight: 0.17)
-- for (weight: 0.14)
-

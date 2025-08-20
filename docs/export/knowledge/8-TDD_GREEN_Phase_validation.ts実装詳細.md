@@ -7,16 +7,10 @@ priority: MEDIUM
 aiSummary: "TDD GREEN Phase: validation.ts実装詳細  ## 実装概要\n\nvalidation.tsのテストをパスさせるための最小限の実装を完了しました。\n\n## 実装した変更\n\n### 1. validateType関数の修正\n- autoNormalizeがtrueの場合、常にnormalizeType関数を呼ぶように変更\n- これにより、`bug___fix`のような複数アン"
 tags: ["#knowledge","#tdd","#green-phase","#validation","#implementation"]
 keywords: {"phase":1,"normalizetype":1,"ascii":1,"validation":0.87,"green":0.87}
-embedding: "lYCAkImAgJiAnICOgICQgImIgISDgICWgJGCmoCAmICAlYCAgICAi4CEgJuAgJaAgpyAh4KAgIGAjYSQgICSgI2WgJOIgICBgIGKg4CAioCFnICZjICAjICBjICAgISAkZKAk4qAgJaAjYmKgICGgJiFgIeMgICYgJmDgoCAjYA="
 related: [4,6,9,13,14,15,20,25,49,54,55]
-searchIndex: "phase normalizetype ascii green validation validatetype tdd autonormalize true bug___fix"
 created: 2025-08-13T11:54:18.729Z
 updated: 2025-08-13T11:54:18.729Z
 ---
-
-# TDD GREEN Phase: validation.ts実装詳細
-
-## Content
 
 ## 実装概要
 
@@ -65,29 +59,3 @@ validation.tsのテストをパスさせるための最小限の実装を完了�
 - テストをパスさせることのみに集中
 - 余分な機能は追加していない
 - リファクタリングは後のフェーズで実施
-
-## AI Summary
-
-TDD GREEN Phase: validation.ts実装詳細  ## 実装概要
-
-validation.tsのテストをパスさせるための最小限の実装を完了しました。
-
-## 実装した変更
-
-### 1. validateType関数の修正
-- autoNormalizeがtrueの場合、常にnormalizeType関数を呼ぶように変更
-- これにより、`bug___fix`のような複数アン
-
-## Keywords (Detailed)
-
-- phase (weight: 1.00)
-- normalizetype (weight: 1.00)
-- ascii (weight: 1.00)
-- validation (weight: 0.87)
-- green (weight: 0.87)
-- validatetype (weight: 0.87)
-- tdd (weight: 0.43)
-- autonormalize (weight: 0.43)
-- true (weight: 0.43)
-- bug___fix (weight: 0.43)
-

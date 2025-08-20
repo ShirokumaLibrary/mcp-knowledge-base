@@ -2,25 +2,16 @@
 id: 29
 type: issue
 title: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題"
+description: "現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。"
 status: Completed
 priority: HIGH
 aiSummary: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題 現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。 ## 問題の詳細\n\n現在の`crud-handlers.ts`"
 tags: ["ai-enrichment","update-api","logical-bug","search-indexing"]
 keywords: {"title":1,"description":1,"handlers":0.57,"const":0.57,"shouldenrich":0.57}
-embedding: "gICAi5+CgICIkIqFgICKgICAgIObgICAl4mLioCAi4CAgICAkoaAgKeBiYuAgIeAgICAhIyOgICpgIOHgICKgICAgI2OkYCAm4eAgYCAhoCAgICRnoyAgKCPgYCAgIGAgICAj6aQgICJiYeDgICAgICAgJGfioCAgJCLgICAhIA="
 related: [16,24,28,31,32,40]
-searchIndex: "title description handlers const shouldenrich contentchanged api crud 213 typescript"
 created: 2025-08-13T13:49:24.051Z
 updated: 2025-08-13T23:06:46.185Z
 ---
-
-# AIエンリッチメントがtitle/description変更時に再実行されない論理的問題
-
-## Description
-
-現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。
-
-## Content
 
 ## 問題の詳細
 
@@ -71,23 +62,3 @@ const shouldEnrich = contentChanged;
 - **description変更**: 同様に再生成
 - **content変更**: 従来通り再生成
 - **複数フィールド変更**: 1回のみ実行（パフォーマンス最適化）
-
-## AI Summary
-
-AIエンリッチメントがtitle/description変更時に再実行されない論理的問題 現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。 ## 問題の詳細
-
-現在の`crud-handlers.ts`
-
-## Keywords (Detailed)
-
-- title (weight: 1.00)
-- description (weight: 1.00)
-- handlers (weight: 0.57)
-- const (weight: 0.57)
-- shouldenrich (weight: 0.57)
-- contentchanged (weight: 0.57)
-- api (weight: 0.38)
-- typescript (weight: 0.38)
-- crud (weight: 0.38)
-- 213 (weight: 0.38)
-

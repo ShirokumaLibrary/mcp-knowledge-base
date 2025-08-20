@@ -2,26 +2,17 @@
 id: 88
 type: handover
 title: "ImportManager TDD実装完了 - レビュー待ち"
+description: "issue-67のインポート機能実装。TDDメソッドでRED-GREEN-REFACTORフェーズ完了"
 status: Completed
 priority: HIGH
 aiSummary: "TDD implementation of ImportManager for data import functionality from exported files, including security measures, CLI commands, and transaction support. Implementation completed through RED-GREEN-REFACTOR phases with comprehensive testing."
 tags: ["tdd","handover","import","review-needed"]
 keywords: {"tdd":1,"import":1,"implementation":0.9,"manager":0.9,"test":0.8}
 concepts: {"testing":0.9,"data_management":0.9,"development":0.8,"file_processing":0.8,"security":0.7}
-embedding: "gI2oi5OBgICAgICRjICHgICRpoKHgICAgICAmJGDj4CAi5iAgIiAgICAgJWOgJGAgIOWhYSRgICAgICJhYaQgICAhY2Qi4CAgICAgICQj4CAhIKRmJOAgICAgIaDloiAgI2RjZWSgICAgICAgJGBgICRo4WZiYCAgICAhYSHgIA="
 related: [67,85]
-searchIndex: "import manager tdd test driven development implementation red green refactor export data cli command security"
 created: 2025-08-16T08:21:42.655Z
 updated: 2025-08-16T08:26:57.927Z
 ---
-
-# ImportManager TDD実装完了 - レビュー待ち
-
-## Description
-
-issue-67のインポート機能実装。TDDメソッドでRED-GREEN-REFACTORフェーズ完了
-
-## Content
 
 # ImportManager TDD実装完了 - レビュー済み
 
@@ -107,31 +98,3 @@ Tests  3 passed (3)
 - **テストカバレッジ**: 65/100 → 70/100
 
 **総合スコア**: 78/100 → **90/100** ✅
-
-## AI Summary
-
-TDD implementation of ImportManager for data import functionality from exported files, including security measures, CLI commands, and transaction support. Implementation completed through RED-GREEN-REFACTOR phases with comprehensive testing.
-
-## Keywords (Detailed)
-
-- tdd (weight: 1.00)
-- import (weight: 1.00)
-- implementation (weight: 0.90)
-- manager (weight: 0.90)
-- test (weight: 0.80)
-- export (weight: 0.80)
-- development (weight: 0.80)
-- security (weight: 0.80)
-- cli (weight: 0.70)
-- red (weight: 0.70)
-
-## Concepts
-
-- testing (confidence: 0.90)
-- data_management (confidence: 0.90)
-- development (confidence: 0.80)
-- file_processing (confidence: 0.80)
-- security (confidence: 0.70)
-- validation (confidence: 0.70)
-- database (confidence: 0.60)
-

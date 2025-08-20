@@ -2,26 +2,17 @@
 id: 83
 type: feature
 title: "/ai-codeコマンド - 設計からのTDD実装自動化"
+description: "承認済み設計からTDDメソッドでコード実装を行うコマンド。RED-GREEN-REFACTORサイクルと自動レビューを含む"
 status: Completed
 priority: HIGH
 aiSummary: "AI command for automated TDD implementation from approved design specifications, following RED-GREEN-REFACTOR cycle with automated review"
 tags: ["automation","tdd","implementation","command","ai-code"]
 keywords: {"code":1,"ai":1,"test":0.9,"tdd":0.9,"command":0.9}
 concepts: {"test driven development":0.9,"testing":0.8,"software engineering":0.8,"automation":0.8,"development workflow":0.7}
-embedding: "gIuriY+AgImVgICCgJGAgICPo4KFgICOkYCAi4CVgICAipeAgICAhpWAgJKAkICAgIKbhIOAgICOgICRgIaAgICAh4uMgICBhICAk4CAgICAhI2Pk4CAiYCAgI+AhICAgIugi5GAgJCGgICGgICAgICProSTgICQkICAgICGgIA="
-related: [84]
-searchIndex: "ai code command tdd implementation automation design test red green refactor review quality coverage specification"
+related: [84,91,92,93]
 created: 2025-08-16T06:06:00.403Z
 updated: 2025-08-16T06:06:00.403Z
 ---
-
-# /ai-codeコマンド - 設計からのTDD実装自動化
-
-## Description
-
-承認済み設計からTDDメソッドでコード実装を行うコマンド。RED-GREEN-REFACTORサイクルと自動レビューを含む
-
-## Content
 
 ## 概要
 
@@ -133,30 +124,3 @@ updated: 2025-08-16T06:06:00.403Z
 ## 実装状況
 
 ✅ コマンド定義作成完了（.claude/commands/ai-code.md）
-
-## AI Summary
-
-AI command for automated TDD implementation from approved design specifications, following RED-GREEN-REFACTOR cycle with automated review
-
-## Keywords (Detailed)
-
-- code (weight: 1.00)
-- ai (weight: 1.00)
-- test (weight: 0.90)
-- tdd (weight: 0.90)
-- command (weight: 0.90)
-- implementation (weight: 0.80)
-- design (weight: 0.80)
-- automation (weight: 0.80)
-- red (weight: 0.70)
-- green (weight: 0.70)
-
-## Concepts
-
-- test driven development (confidence: 0.90)
-- testing (confidence: 0.80)
-- software engineering (confidence: 0.80)
-- automation (confidence: 0.80)
-- development workflow (confidence: 0.70)
-- code quality (confidence: 0.70)
-

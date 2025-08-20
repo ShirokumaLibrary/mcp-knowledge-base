@@ -2,25 +2,16 @@
 id: 37
 type: design
 title: "System Status Documentation Structure Design"
+description: "Design documentation structure for 12 system statuses with detailed explanations and workflow transitions"
 status: Open
 priority: HIGH
 aiSummary: "System Status Documentation Structure Design Design documentation structure for 12 system statuses with detailed explanations and workflow transitions # システムステータス説明ドキュメント構造の設計\n\n## 問題背景\n\n**現状**:\n- データベ"
 tags: ["status","design","documentation","workflow","system","user-guide"]
 keywords: {"claude":0.65,"ready":0.65,"open":0.54,"completed":0.54,"progress":0.43}
-embedding: "gICUn4CHgICAgJOQgIKAgICApZWAkYCAgICKjICKgYCAgKeGgJSAgICAgYSAkImAgICYh4CTgICAgIGKgI6PgICAhZyAlICAgICAgoCQj4CAgIGpgIyAgICAgoCAjYiAgICDqYCCgICAgIyFgISBgICAj56AgICAgICUjYCAgIA="
 related: [34,35,36,38]
-searchIndex: "ready claude open completed status specification waiting progress rejected docs"
 created: 2025-08-13T22:34:31.866Z
 updated: 2025-08-13T22:34:31.866Z
 ---
-
-# System Status Documentation Structure Design
-
-## Description
-
-Design documentation structure for 12 system statuses with detailed explanations and workflow transitions
-
-## Content
 
 # システムステータス説明ドキュメント構造の設計
 
@@ -176,26 +167,3 @@ Any → Canceled/Rejected (中止する場合)
 - ユーザーがステータス意味を理解できる（定性評価）
 - ステータス遷移の論理的一貫性確保
 - プロジェクト管理効率の向上
-
-## AI Summary
-
-System Status Documentation Structure Design Design documentation structure for 12 system statuses with detailed explanations and workflow transitions # システムステータス説明ドキュメント構造の設計
-
-## 問題背景
-
-**現状**:
-- データベ
-
-## Keywords (Detailed)
-
-- claude (weight: 0.65)
-- ready (weight: 0.65)
-- open (weight: 0.54)
-- completed (weight: 0.54)
-- progress (weight: 0.43)
-- status (weight: 0.43)
-- specification (weight: 0.43)
-- waiting (weight: 0.43)
-- rejected (weight: 0.43)
-- docs (weight: 0.43)
-
