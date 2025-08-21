@@ -9,7 +9,7 @@ aiSummary: "Migration plan from Prisma to TypeORM for v0.9.0 to solve global CLI
 tags: ["refactoring","architecture","migration","typeorm","v0.9.0"]
 keywords: {"prisma":1,"typeorm":1,"migration":0.9,"orm":0.9,"cli":0.8}
 concepts: {"database migration":0.9,"software architecture":0.8,"development tools":0.8,"system refactoring":0.8,"project management":0.7}
-related: [97]
+related: [96,97,105,107,108,109]
 created: 2025-08-20T00:34:02.658Z
 updated: 2025-08-20T00:34:02.658Z
 ---

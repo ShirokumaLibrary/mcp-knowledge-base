@@ -8,7 +8,7 @@ priority: CRITICAL
 aiSummary: "【緊急】エクスポートのcontent部分の不要データ削除とPrisma変更のロールバック エクスポート機能でcontent部分に不要なデータが出力されているバグの修正と、現リリースバージョンに影響するPrisma関連の変更をロールバックする ## 問題の詳細\n\n### 1. エクスポート機能のバグ\n- エクスポートされたファイルのcontent部分に不要なデータが含まれている\n- これによりファイ"
 tags: ["bug","critical","export","rollback","v0.8.3"]
 keywords: {"prisma":1,"content":1,"migrate":1,"src":0.4,"cli":0.4}
-related: [62,97]
+related: [62,96,97]
 created: 2025-08-20T00:40:08.563Z
 updated: 2025-08-20T00:54:28.093Z
 ---
