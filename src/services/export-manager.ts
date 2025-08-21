@@ -110,7 +110,9 @@ export class ExportManager {
         startDate: true,
         endDate: true,
         version: true,
-        // Exclude internal data: searchIndex, entities, embedding
+        // Include embedding for import/export compatibility
+        embedding: true,
+        // Exclude internal data: searchIndex, entities
         createdAt: true,
         updatedAt: true,
         status: {
@@ -235,7 +237,8 @@ export class ExportManager {
     description?: string | null;
     content?: string | null;
     aiSummary?: string | null;
-    // Removed: embedding, searchIndex, entities (internal data)
+    embedding?: Buffer | Uint8Array | null;
+    // Removed: searchIndex, entities (internal data)
   }): string {
     // Front Matter
     let md = '---\n';
@@ -296,7 +299,12 @@ export class ExportManager {
       md += `concepts: ${JSON.stringify(concepts)}\n`;
     }
 
-    // Embedding excluded from export (internal data)
+    // Embedding in Front Matter (Base64 encoded for import/export)
+    if (item.embedding) {
+      // Convert Buffer/Bytes to Base64 string
+      const embeddingBase64 = Buffer.from(item.embedding).toString('base64');
+      md += `embedding: "${embeddingBase64}"\n`;
+    }
 
     // Related items in Front Matter (simple ID array for manual relations)
     const relatedIds: number[] = [];
@@ -544,7 +552,9 @@ export class ExportManager {
         startDate: true,
         endDate: true,
         version: true,
-        // Exclude internal data: searchIndex, entities, embedding  
+        // Include embedding for import/export compatibility
+        embedding: true,
+        // Exclude internal data: searchIndex, entities
         createdAt: true,
         updatedAt: true,
         status: {
