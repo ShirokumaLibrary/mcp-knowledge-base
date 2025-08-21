@@ -2,25 +2,16 @@
 id: 38
 type: knowledge
 title: "Status System Guide - Comprehensive Documentation"
+description: "Complete guide for understanding and using the status system in shirokuma-knowledge-base"
 status: Completed
 priority: HIGH
 aiSummary: "Status System Guide - Comprehensive Documentation Complete guide for understanding and using the status system in shirokuma-knowledge-base # Status System Guide\n\n## Overview\n\nThe status system in shir"
 tags: ["status","documentation","workflow","guide","best-practices","lifecycle"]
 keywords: {"status":0.37,"review":0.27,"waiting":0.21,"ready":0.21,"testing":0.2}
-embedding: "gICAnoCEgICWjo6AgIOAgIaAgJWAi4CAmpGHgICNhICQgICGgI6AgJmMgYCAlZSAk4CAhoCNgICZg4CAgJKigI6AgJiAjoCAjomAgICVooCEgIChgIiAgIKBgoCAkJOAgICAooCCgICAgImAgIaDgIKAgJyAgICAioaPgICAgYA="
 related: [35,36,37]
-searchIndex: "status review waiting ready testing progress for open completed specification"
 created: 2025-08-13T22:36:28.571Z
 updated: 2025-08-13T22:36:28.571Z
 ---
-
-# Status System Guide - Comprehensive Documentation
-
-## Description
-
-Complete guide for understanding and using the status system in shirokuma-knowledge-base
-
-## Content
 
 # Status System Guide
 
@@ -548,25 +539,3 @@ Key takeaways:
 3. Monitor status metrics for process health
 4. Automate workflows based on status transitions
 5. Regular review of items in blocking statuses
-
-## AI Summary
-
-Status System Guide - Comprehensive Documentation Complete guide for understanding and using the status system in shirokuma-knowledge-base # Status System Guide
-
-## Overview
-
-The status system in shir
-
-## Keywords (Detailed)
-
-- status (weight: 0.37)
-- review (weight: 0.27)
-- waiting (weight: 0.21)
-- ready (weight: 0.21)
-- testing (weight: 0.20)
-- progress (weight: 0.18)
-- for (weight: 0.18)
-- open (weight: 0.16)
-- completed (weight: 0.14)
-- specification (weight: 0.14)
-

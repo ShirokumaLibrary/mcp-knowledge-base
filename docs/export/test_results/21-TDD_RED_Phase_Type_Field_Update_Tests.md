@@ -2,25 +2,16 @@
 id: 21
 type: test_results
 title: "TDD RED Phase: Type Field Update Tests"
+description: "Failing tests for enabling type field updates in update_item API"
 status: Open
 priority: HIGH
 aiSummary: "TDD RED Phase: Type Field Update Tests Failing tests for enabling type field updates in update_item API # TDD RED Phase Test Results\n\n## Test Objective\nEnable type field updates in the update_item MCP"
 tags: ["testing","api","mcp","tdd","red-phase","type-field"]
 keywords: {"type":0.92,"field":0.46,"tests":0.44,"test":0.39,"update":0.37}
-embedding: "gISQgICAgIaAh5SDgICAgICAkYCAgISAgIilhoCBgICAgo6AgICIgoCFr4aAhoCAgICFgICAiICAgZmEgIqAgICHgICAgImDgISsgICHgICAkIKAgICIi4CAtoCAi4CAgJOKgICAg5CAgK6CgImAgICNkYCAgICNgIORgICEgIA="
 related: [1,6,20]
-searchIndex: "type field tests test update should with for phase mcp"
 created: 2025-08-13T12:53:24.898Z
 updated: 2025-08-13T12:53:24.898Z
 ---
-
-# TDD RED Phase: Type Field Update Tests
-
-## Description
-
-Failing tests for enabling type field updates in update_item API
-
-## Content
 
 # TDD RED Phase Test Results
 
@@ -138,24 +129,3 @@ Based on: decisions-20 - "Enable type field updates in update_item API"
 2. Programmer implements minimal code to pass tests
 3. Return for additional test coverage if needed
 4. Refactor for code quality (REFACTOR phase)
-
-## AI Summary
-
-TDD RED Phase: Type Field Update Tests Failing tests for enabling type field updates in update_item API # TDD RED Phase Test Results
-
-## Test Objective
-Enable type field updates in the update_item MCP
-
-## Keywords (Detailed)
-
-- type (weight: 0.92)
-- field (weight: 0.46)
-- tests (weight: 0.44)
-- test (weight: 0.39)
-- update (weight: 0.37)
-- should (weight: 0.25)
-- with (weight: 0.21)
-- for (weight: 0.18)
-- mcp (weight: 0.16)
-- phase (weight: 0.16)
-

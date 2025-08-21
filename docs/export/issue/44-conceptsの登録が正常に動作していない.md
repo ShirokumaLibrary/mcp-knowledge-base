@@ -2,25 +2,16 @@
 id: 44
 type: issue
 title: "conceptsの登録が正常に動作していない"
+description: "AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。"
 status: Completed
 priority: HIGH
 aiSummary: "conceptsの登録が正常に動作していない AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。 ## 問題の詳細\n\nAIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない問題を調査・修正しました。\n\n### 発見された問題\n\n1. **Claude CLIの出"
 tags: ["bug","database","ai-enrichment","search","concepts"]
 keywords: {"json":1,"concepts":1,"claude":0.96,"test":0.43,"cli":0.43}
-embedding: "jIChgICDgIChgICAg4CAhoaAroCAgICAloGAgICAgJGLgKmAgIyAgIaFgICCgICbhICUgICcgICAh4CAiYCAm4CAgoCAooCAiYWAgI6AgJCCgISAgJeAgJmCgICLgICGiYCJgICHgICNgICAjoCAgY6AkoCAk4CAnYCAgIqAgII="
 related: [4,11,24]
-searchIndex: "concepts json claude cli test after restart markdown output format"
 created: 2025-08-14T00:38:27.436Z
 updated: 2025-08-14T00:54:54.680Z
 ---
-
-# conceptsの登録が正常に動作していない
-
-## Description
-
-AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。
-
-## Content
 
 ## 問題の詳細
 
@@ -92,27 +83,3 @@ SELECT COUNT(*) FROM item_concepts;  -- 12件
 ## 結論
 
 問題は解決され、conceptsが正しく抽出・保存されるようになりました。
-
-## AI Summary
-
-conceptsの登録が正常に動作していない AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。 ## 問題の詳細
-
-AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない問題を調査・修正しました。
-
-### 発見された問題
-
-1. **Claude CLIの出
-
-## Keywords (Detailed)
-
-- json (weight: 1.00)
-- concepts (weight: 1.00)
-- claude (weight: 0.96)
-- test (weight: 0.43)
-- cli (weight: 0.43)
-- after (weight: 0.43)
-- restart (weight: 0.43)
-- markdown (weight: 0.32)
-- output (weight: 0.21)
-- format (weight: 0.21)
-

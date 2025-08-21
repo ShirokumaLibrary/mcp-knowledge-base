@@ -94,7 +94,7 @@ export class ExportManager {
       };
     }
 
-    // Fetch items with relations (including embedding)
+    // Fetch items with relations (excluding internal data)
     const items = await this.prisma.item.findMany({
       where,
       take: options.limit,
@@ -110,9 +110,7 @@ export class ExportManager {
         startDate: true,
         endDate: true,
         version: true,
-        searchIndex: true,  // Include search index
-        entities: true,     // Include entities
-        embedding: true,    // Include embedding field
+        // Exclude internal data: searchIndex, entities, embedding
         createdAt: true,
         updatedAt: true,
         status: {
@@ -230,7 +228,6 @@ export class ExportManager {
     tags?: { tag: { name: string } }[];
     keywords?: { keyword: { word: string }; weight: number }[];
     concepts?: { concept: { name: string }; confidence: number }[];
-    embedding?: Buffer | Uint8Array | null;
     relationsFrom?: { target: { id: number } }[];
     relationsTo?: { source: { id: number } }[];
     createdAt: Date;
@@ -238,14 +235,16 @@ export class ExportManager {
     description?: string | null;
     content?: string | null;
     aiSummary?: string | null;
-    searchIndex?: string | null;
-    entities?: string | null;
+    // Removed: embedding, searchIndex, entities (internal data)
   }): string {
     // Front Matter
     let md = '---\n';
     md += `id: ${item.id}\n`;
     md += `type: ${item.type}\n`;
     md += `title: "${item.title.replace(/"/g, '\\"')}"\n`;
+    if (item.description) {
+      md += `description: "${item.description.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
+    }
     md += `status: ${item.status.name}\n`;
     md += `priority: ${item.priority || 'MEDIUM'}\n`;
 
@@ -297,12 +296,7 @@ export class ExportManager {
       md += `concepts: ${JSON.stringify(concepts)}\n`;
     }
 
-    // Embedding in Front Matter (base64 encoded)
-    if (item.embedding) {
-      // Convert Buffer to base64 string
-      const embeddingBase64 = Buffer.from(item.embedding).toString('base64');
-      md += `embedding: "${embeddingBase64}"\n`;
-    }
+    // Embedding excluded from export (internal data)
 
     // Related items in Front Matter (simple ID array for manual relations)
     const relatedIds: number[] = [];
@@ -325,62 +319,20 @@ export class ExportManager {
       md += `related: ${JSON.stringify(uniqueRelated)}\n`;
     }
 
-    // Search index (if present)
-    if (item.searchIndex) {
-      md += `searchIndex: "${item.searchIndex.replace(/"/g, '\\"')}"\n`;
-    }
-
-    // Entities (if present)
-    if (item.entities) {
-      md += `entities: ${item.entities}\n`; // Already JSON string
-    }
+    // Search index and entities excluded from export (internal data)
 
     // Metadata
     md += `created: ${item.createdAt.toISOString()}\n`;
     md += `updated: ${item.updatedAt.toISOString()}\n`;
     md += '---\n\n';
 
-    // Title
-    md += `# ${item.title}\n\n`;
-
-    // Description
-    if (item.description) {
-      md += '## Description\n\n';
-      md += `${item.description}\n\n`;
-    }
-
-    // Main content
+    // Main content only (Title and Description are in front matter)
     if (item.content) {
-      md += '## Content\n\n';
-      md += `${item.content}\n\n`;
+      md += item.content;
     }
 
-    // AI Summary
-    if (item.aiSummary) {
-      md += '## AI Summary\n\n';
-      md += `${item.aiSummary}\n\n`;
-    }
-
-    // Detailed Keywords (if more than 5)
-    if (item.keywords && item.keywords.length > 5) {
-      md += '## Keywords (Detailed)\n\n';
-      const keywords = item.keywords
-        .sort((a, b) => b.weight - a.weight)
-        .slice(0, 10)
-        .map((k) => `- ${k.keyword.word} (weight: ${k.weight.toFixed(2)})`);
-      md += keywords.join('\n');
-      md += '\n\n';
-    }
-
-    // Concepts
-    if (item.concepts && item.concepts.length > 0) {
-      md += '## Concepts\n\n';
-      const concepts = item.concepts
-        .sort((a, b) => b.confidence - a.confidence)
-        .map((c) => `- ${c.concept.name} (confidence: ${c.confidence.toFixed(2)})`);
-      md += concepts.join('\n');
-      md += '\n\n';
-    }
+    // AI Summary, Keywords, and Concepts are now included only in front matter
+    // Not duplicated in the content section to keep exports clean
 
 
     return md;
@@ -592,9 +544,7 @@ export class ExportManager {
         startDate: true,
         endDate: true,
         version: true,
-        searchIndex: true,  // Include search index
-        entities: true,     // Include entities
-        embedding: true,    // Include embedding field
+        // Exclude internal data: searchIndex, entities, embedding  
         createdAt: true,
         updatedAt: true,
         status: {

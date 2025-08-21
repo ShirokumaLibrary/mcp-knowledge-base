@@ -2,26 +2,17 @@
 id: 62
 type: issue
 title: "エクスポート機能にカレントステート（current_state）を含める"
+description: "ExportManagerでMCPアイテムをエクスポートする際、システムの現在状態（current_state）も一緒にエクスポートする機能が未実装"
 status: Review
 priority: MEDIUM
 aiSummary: "Implementation of current state export functionality in ExportManager, including system state backup, CLI commands, directory structure, security enhancements, and comprehensive testing for MCP items export system."
 tags: ["feature","export","current-state","enhancement"]
 keywords: {"export":1,"current":0.9,"state":0.9,"mcp":0.8,"system":0.8}
 concepts: {"data_management":0.9,"system_administration":0.8,"software_architecture":0.7,"file_management":0.7,"security":0.6}
-embedding: "gJqPkYCAgICQgICAhICQgICkjouAgICAjIOEgJGCi4CAqoeSgICAgJCOgICagIOAgJ6MkYCAgICKl4WAmIWJgICLhYiAgICAg5aPgJuOgYCAk4CBgICAgICMlYCVkoCAgJKCgYCAgICEgZGAiI6FgICWioiAgICAjIiHgICFjYA="
-related: [56,63,64,67,85]
-searchIndex: "export current state system mcp manager item backup migration ai session cli command directory format"
+related: [56,63,64,67,85,99]
 created: 2025-08-14T03:49:51.809Z
 updated: 2025-08-14T04:38:22.275Z
 ---
-
-# エクスポート機能にカレントステート（current_state）を含める
-
-## Description
-
-ExportManagerでMCPアイテムをエクスポートする際、システムの現在状態（current_state）も一緒にエクスポートする機能が未実装
-
-## Content
 
 ## 問題
 
@@ -72,30 +63,3 @@ ExportManagerでMCPアイテムをエクスポートする際、システムの�
 - 単体テスト実装済み（5テストケース全てパス）
 - 統合テスト確認済み
 - コードレビュー実施済み、指摘事項修正完了
-
-## AI Summary
-
-Implementation of current state export functionality in ExportManager, including system state backup, CLI commands, directory structure, security enhancements, and comprehensive testing for MCP items export system.
-
-## Keywords (Detailed)
-
-- export (weight: 1.00)
-- current (weight: 0.90)
-- state (weight: 0.90)
-- mcp (weight: 0.80)
-- system (weight: 0.80)
-- item (weight: 0.70)
-- manager (weight: 0.70)
-- ai (weight: 0.60)
-- backup (weight: 0.60)
-- session (weight: 0.60)
-
-## Concepts
-
-- data_management (confidence: 0.90)
-- system_administration (confidence: 0.80)
-- software_architecture (confidence: 0.70)
-- file_management (confidence: 0.70)
-- security (confidence: 0.60)
-- testing (confidence: 0.50)
-

@@ -2,26 +2,17 @@
 id: 87
 type: issue
 title: "/ai-codeコマンドでレビュアーが呼ばれない問題"
+description: "/ai-codeコマンド実行時に、REVIEW Phase でshirokuma-reviewerエージェントが呼ばれるべきだが、実際には呼ばれていない"
 status: Completed
 priority: HIGH
 aiSummary: "Issue with /ai-code command where shirokuma-reviewer agent is not being called during REVIEW phase of TDD implementation, affecting code quality assurance workflow"
 tags: ["bug","tdd","ai-code","reviewer","task"]
 keywords: {"ai-code":1,"command":0.9,"reviewer":0.9,"shirokuma-reviewer":0.9,"phase":0.8}
 concepts: {"code review":0.9,"software testing":0.9,"development workflow":0.8,"automation":0.8,"bug tracking":0.8}
-embedding: "gIqPgI2HgICPgICZgICAgICNjYCFjoCAkoCAoICDhICAiIWAgI+AgJGAgKWAjY+AgIKLgIOJgICRgICigJSWgICAg4CLgoCAiYCApoCRk4CAg4CAkYCAgIGAgKWAlIiAgIqDgI+FgICAgICdgI+AgICNi4CSjICAh4CAloCFgoA="
 related: [80]
-searchIndex: "ai-code command reviewer review phase shirokuma-reviewer agent tdd implementation red green refactor task handover code"
 created: 2025-08-16T08:17:27.281Z
 updated: 2025-08-16T08:18:20.640Z
 ---
-
-# /ai-codeコマンドでレビュアーが呼ばれない問題
-
-## Description
-
-/ai-codeコマンド実行時に、REVIEW Phase でshirokuma-reviewerエージェントが呼ばれるべきだが、実際には呼ばれていない
-
-## Content
 
 # /ai-codeコマンドでレビュアーが呼ばれない問題
 
@@ -74,31 +65,3 @@ review_result = Task({
 
 ## 結論
 これはツールの不具合ではなく、AI（実行者）の実行漏れが原因。今後は確実にREVIEW Phaseを実行することで解決。
-
-## AI Summary
-
-Issue with /ai-code command where shirokuma-reviewer agent is not being called during REVIEW phase of TDD implementation, affecting code quality assurance workflow
-
-## Keywords (Detailed)
-
-- ai-code (weight: 1.00)
-- command (weight: 0.90)
-- reviewer (weight: 0.90)
-- shirokuma-reviewer (weight: 0.90)
-- phase (weight: 0.80)
-- tdd (weight: 0.80)
-- review (weight: 0.80)
-- code (weight: 0.80)
-- implementation (weight: 0.70)
-- agent (weight: 0.70)
-
-## Concepts
-
-- code review (confidence: 0.90)
-- software testing (confidence: 0.90)
-- development workflow (confidence: 0.80)
-- automation (confidence: 0.80)
-- bug tracking (confidence: 0.80)
-- quality assurance (confidence: 0.70)
-- ai automation (confidence: 0.70)
-

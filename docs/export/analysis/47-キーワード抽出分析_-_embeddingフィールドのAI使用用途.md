@@ -2,26 +2,17 @@
 id: 47
 type: analysis
 title: "キーワード抽出分析 - embeddingフィールドのAI使用用途"
+description: "embeddingフィールドのAI使用用途に関するテキストのキーワード分析"
 status: Completed
 priority: MEDIUM
 aiSummary: "Analysis of embedding vector field usage in AI systems, focusing on whether AI models directly use embedding vectors, performance implications, and API design considerations for controlling embedding data output."
 tags: ["embedding","ai-usage","keyword-extraction","api-design","analysis"]
 keywords: {"embedding":1,"vector":0.9,"ai":0.9,"api":0.8,"claude":0.8}
 concepts: {"machine learning":0.9,"api design":0.8,"performance optimization":0.8,"natural language processing":0.8,"data structure":0.7}
-embedding: "gImMgICAgICXk6KAhJeAgoCBk4CAgICAkpmlgIuUgImAh5KAgICAgJaWmoCPj4COgICJgICAgICPmYiAjJ6AjYCBgYCAgICAhJCAgISVgIaAiYGAgICAgICEiYCAjoCAgJCAgICAgICGgJuAgpKAgYCQg4CAgICAkYedgICXgIA="
 related: [26,27,45,53,56]
-searchIndex: "embedding vector ai claude api field usage flag control output quantization int8 dimension similarity calculation"
 created: 2025-08-14T01:02:34.731Z
 updated: 2025-08-14T01:02:34.731Z
 ---
-
-# キーワード抽出分析 - embeddingフィールドのAI使用用途
-
-## Description
-
-embeddingフィールドのAI使用用途に関するテキストのキーワード分析
-
-## Content
 
 ## 抽出結果
 
@@ -84,30 +75,3 @@ embeddingフィールドのAI使用用途に関するテキストのキーワー
 - **機械学習**: 埋め込みベクトル技術の基盤
 - **API設計**: インターフェース最適化
 - **パフォーマンス最適化**: 効率的なシステム運用
-
-## AI Summary
-
-Analysis of embedding vector field usage in AI systems, focusing on whether AI models directly use embedding vectors, performance implications, and API design considerations for controlling embedding data output.
-
-## Keywords (Detailed)
-
-- embedding (weight: 1.00)
-- vector (weight: 0.90)
-- ai (weight: 0.90)
-- api (weight: 0.80)
-- claude (weight: 0.80)
-- similarity (weight: 0.80)
-- field (weight: 0.70)
-- usage (weight: 0.70)
-- quantization (weight: 0.70)
-- calculation (weight: 0.70)
-
-## Concepts
-
-- machine learning (confidence: 0.90)
-- api design (confidence: 0.80)
-- performance optimization (confidence: 0.80)
-- natural language processing (confidence: 0.80)
-- data structure (confidence: 0.70)
-- software architecture (confidence: 0.70)
-

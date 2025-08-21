@@ -2,26 +2,17 @@
 id: 77
 type: issue
 title: "typeフィールドの命名規則統一: sessions→session"
+description: "MCPアイテムのtypeフィールドで「sessions」と「session」が混在していた問題を修正。単数形「session」に統一"
 status: Completed
 priority: LOW
 aiSummary: "Standardization of MCP item type field naming from plural 'sessions' to singular 'session' to maintain consistency across the database and test files"
 tags: ["data-integrity","type-field","cleanup","naming-convention"]
 keywords: {"type":1,"mcp":0.9,"field":0.9,"session":0.9,"item":0.8}
 concepts: {"data_normalization":0.9,"naming_standards":0.8,"database_management":0.7,"code_quality":0.6,"testing":0.5}
-embedding: "gIqAmYCAkY+NgJOPgICAgICCgI6AgIuJhYCfjICAgICAgICRgICTgoCAnYWAgICAgIWAkoCAkoCCgJKAgICAgICNgJCAgImEioCjgoCAgICAkYCFgICBi5GAr4mAgICAgI2Ai4CAgY+PgKyOgICAgICRgJWAgIiLkYCTi4CAgIA="
 related: [84,90]
-searchIndex: "type field naming convention standardization session mcp item database inconsistency singular plural test file correction"
 created: 2025-08-16T05:41:01.870Z
 updated: 2025-08-16T05:42:44.172Z
 ---
-
-# typeフィールドの命名規則統一: sessions→session
-
-## Description
-
-MCPアイテムのtypeフィールドで「sessions」と「session」が混在していた問題を修正。単数形「session」に統一
-
-## Content
 
 ## 問題の詳細
 
@@ -65,29 +56,3 @@ MCPのtypeフィールドは単数形を使用することを確認：
 search_items(query: "type:sessions") → 結果: 0件
 ```
 全ての`sessions`が`session`に統一されたことを確認
-
-## AI Summary
-
-Standardization of MCP item type field naming from plural 'sessions' to singular 'session' to maintain consistency across the database and test files
-
-## Keywords (Detailed)
-
-- type (weight: 1.00)
-- mcp (weight: 0.90)
-- field (weight: 0.90)
-- session (weight: 0.90)
-- item (weight: 0.80)
-- naming (weight: 0.80)
-- convention (weight: 0.80)
-- database (weight: 0.70)
-- standardization (weight: 0.70)
-- inconsistency (weight: 0.60)
-
-## Concepts
-
-- data_normalization (confidence: 0.90)
-- naming_standards (confidence: 0.80)
-- database_management (confidence: 0.70)
-- code_quality (confidence: 0.60)
-- testing (confidence: 0.50)
-

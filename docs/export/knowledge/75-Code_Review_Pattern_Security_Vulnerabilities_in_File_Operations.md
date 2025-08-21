@@ -2,26 +2,17 @@
 id: 75
 type: knowledge
 title: "Code Review Pattern: Security Vulnerabilities in File Operations"
+description: "ファイル操作におけるセキュリティ脆弱性の検出パターンとベストプラクティス"
 status: Open
 priority: MEDIUM
 aiSummary: "A comprehensive guide covering security vulnerabilities in file operations, focusing on path traversal attacks, input validation, access control, and secure coding practices for TypeScript/Node.js applications with testing strategies."
 tags: ["testing","security","best-practices","file-operations","vulnerability"]
 keywords: {"security":1,"file":0.9,"vulnerability":0.9,"validation":0.8,"path":0.8}
 concepts: {"security":0.95,"file-system":0.9,"vulnerability-assessment":0.85,"access-control":0.8,"input-validation":0.8}
-embedding: "hoCIgI+DgJeAgICIjYCSgICAjoCXjYCegICAkJ6AlICGgI6AlIaAnYCAgJKegI2AkoCIgImQgJSAgICLloCTgImAgYCAlYCMgICAgoyAioCVgICAgpCAi4CAgICLgIGAmoCGgIyGgJqAgICFkoCAgJKAjYCWgICUgICAgZGAiIA="
 related: [74]
-searchIndex: "security vulnerability file operation path traversal validation typescript node access control input sanitization injection race"
 created: 2025-08-14T12:51:21.747Z
 updated: 2025-08-14T12:51:21.747Z
 ---
-
-# Code Review Pattern: Security Vulnerabilities in File Operations
-
-## Description
-
-ファイル操作におけるセキュリティ脆弱性の検出パターンとベストプラクティス
-
-## Content
 
 # Security Vulnerabilities in File Operations
 
@@ -194,32 +185,3 @@ describe('Security', () => {
 - Node.js Security Best Practices
 - CWE-22: Path Traversal
 - CWE-73: External Control of File Name
-
-## AI Summary
-
-A comprehensive guide covering security vulnerabilities in file operations, focusing on path traversal attacks, input validation, access control, and secure coding practices for TypeScript/Node.js applications with testing strategies.
-
-## Keywords (Detailed)
-
-- security (weight: 1.00)
-- file (weight: 0.90)
-- vulnerability (weight: 0.90)
-- validation (weight: 0.80)
-- path (weight: 0.80)
-- traversal (weight: 0.80)
-- operation (weight: 0.80)
-- typescript (weight: 0.70)
-- input (weight: 0.70)
-- injection (weight: 0.70)
-
-## Concepts
-
-- security (confidence: 0.95)
-- file-system (confidence: 0.90)
-- vulnerability-assessment (confidence: 0.85)
-- access-control (confidence: 0.80)
-- input-validation (confidence: 0.80)
-- code-review (confidence: 0.75)
-- testing (confidence: 0.70)
-- web-security (confidence: 0.70)
-

@@ -2,25 +2,16 @@
 id: 49
 type: decision
 title: "埋め込みベクトルはAPIレスポンスから完全除外する"
+description: "embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。"
 status: Completed
 priority: HIGH
 aiSummary: "埋め込みベクトルはAPIレスポンスから完全除外する embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。 ## 決定事項\n\n**埋め込みベクトル（embedding）はAPIレスポンスから完全に除外する**\n\n## 理由\n\n### 1. 使用者が存在しない\n| 利用者 | 使用可能性 | 理由 |\n|--------|---"
 tags: ["embedding","api-design","simplification","architecture","decision"]
 keywords: {"embedding":1,"api":0.86,"typescript":0.86,"phase":0.86,"issue":0.57}
-embedding: "gIOEgICAgICDm5SWgICAgICAh4CAgICDgKuWqYCAgICAg4aAgICAh4OokauAgICAgIuDgICAgISLqYeagICAgICPgICAgICHhZuAhYCAgICAjICAgICAhoySg4CAgICAgI+AgICAgIOPhI6PgICAgICKgYCAgICAioiWg4CAgIA="
 related: [8,13,25,26,48]
-searchIndex: "embedding api typescript phase 1kb includeembedding issue claude 128 int8"
 created: 2025-08-14T01:08:53.953Z
 updated: 2025-08-14T01:08:53.953Z
 ---
-
-# 埋め込みベクトルはAPIレスポンスから完全除外する
-
-## Description
-
-embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。
-
-## Content
 
 ## 決定事項
 
@@ -82,29 +73,3 @@ delete result.embedding;
 - issue-48: 完全除外の提案（実装予定）
 - 決定日: 2025-08-14
 - 実装予定: v0.8.1
-
-## AI Summary
-
-埋め込みベクトルはAPIレスポンスから完全除外する embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。 ## 決定事項
-
-**埋め込みベクトル（embedding）はAPIレスポンスから完全に除外する**
-
-## 理由
-
-### 1. 使用者が存在しない
-| 利用者 | 使用可能性 | 理由 |
-|--------|---
-
-## Keywords (Detailed)
-
-- embedding (weight: 1.00)
-- api (weight: 0.86)
-- typescript (weight: 0.86)
-- phase (weight: 0.86)
-- issue (weight: 0.57)
-- includeembedding (weight: 0.57)
-- 1kb (weight: 0.57)
-- claude (weight: 0.29)
-- 128 (weight: 0.29)
-- int8 (weight: 0.29)
-

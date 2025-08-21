@@ -7,16 +7,10 @@ priority: MEDIUM
 aiSummary: "Handover: programmer → reviewer: validation.ts GREEN Phase完了  ## ハンドオーバー概要\n\nTDD GREEN Phaseの実装を完了し、すべてのテストがパスしました。レビューをお願いします。\n\n## 実装内容\n\n### 対象ファイル\n- `/home/webapp/shirokuma-v8/src/utils/validation.ts"
 tags: ["#tdd","#green-phase","#validation","#handover","#review-request"]
 keywords: {"phase":0.95,"npm":0.48,"run":0.48,"validation":0.48,"normalizetype":0.48}
-embedding: "i4CAjICAgI+Aj4CYgICHgIWAgISAgICOgImApoCAjoCNgICCgICAh4CCgK6AgI+AkICAjoCAgICAh4CqgICPgIuAgJqAgICBgIGAnICAjoCEgICngICAh4CAgJOAgIeAgICAooCAgI6Ah4CcgICBgIOAgJCAgICPgI6AloCAgIA="
 related: [5,6,8,13]
-searchIndex: "phase validation green normalizetype unicode passed refactor npm run handover"
 created: 2025-08-13T11:54:47.308Z
 updated: 2025-08-13T13:21:41.168Z
 ---
-
-# Handover: programmer → reviewer: validation.ts GREEN Phase完了
-
-## Content
 
 ## ハンドオーバー概要
 
@@ -74,28 +68,3 @@ Tests      41 passed (41)
 - すべてのテストがパスしていることを確認済み
 - ESLintエラーがないことを確認済み（`npm run lint:errors`）
 - TypeScriptコンパイルが成功することを確認済み（`npm run build`）
-
-## AI Summary
-
-Handover: programmer → reviewer: validation.ts GREEN Phase完了  ## ハンドオーバー概要
-
-TDD GREEN Phaseの実装を完了し、すべてのテストがパスしました。レビューをお願いします。
-
-## 実装内容
-
-### 対象ファイル
-- `/home/webapp/shirokuma-v8/src/utils/validation.ts
-
-## Keywords (Detailed)
-
-- phase (weight: 0.95)
-- npm (weight: 0.48)
-- run (weight: 0.48)
-- validation (weight: 0.48)
-- normalizetype (weight: 0.48)
-- green (weight: 0.48)
-- unicode (weight: 0.48)
-- passed (weight: 0.48)
-- refactor (weight: 0.48)
-- handover (weight: 0.24)
-

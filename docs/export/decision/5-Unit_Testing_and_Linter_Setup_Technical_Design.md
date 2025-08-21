@@ -2,25 +2,16 @@
 id: 5
 type: decision
 title: "Unit Testing and Linter Setup Technical Design"
+description: "Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project"
 status: Open
 priority: HIGH
 aiSummary: "Unit Testing and Linter Setup Technical Design Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project # Design: Unit Testing and Linter Setup\n\n## "
 tags: ["testing","linting","vitest","eslint","typescript","esm","design"]
 keywords: {"test":0.47,"eslint":0.3,"for":0.23,"typescript":0.23,"tests":0.21}
-embedding: "gIOkgICAhoCAkIChgICAmYSAqICAgIeAgJOAooCAgJOJgaCAgICMgICNgJiAgICGi4CNgICAkYCAhICRgICAgIiGgICAgJaAgIqAhYCAgIOCj4WAgICWgICCgIiAgICAgJGYgICAjICAgICYgICAiIGMp4CAgIuAgIeAloCAgJQ="
 related: [1,6,7,9,18]
-searchIndex: "test eslint for typescript tests vitest with testing configuration database"
 created: 2025-08-13T11:40:05.950Z
 updated: 2025-08-13T11:40:05.950Z
 ---
-
-# Unit Testing and Linter Setup Technical Design
-
-## Description
-
-Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project
-
-## Content
 
 # Design: Unit Testing and Linter Setup
 
@@ -412,23 +403,3 @@ describe('CrudHandlers Integration', () => {
 - Consider snapshot testing for API responses
 - Implement property-based testing for validation functions
 - Add mutation testing for quality validation
-
-## AI Summary
-
-Unit Testing and Linter Setup Technical Design Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project # Design: Unit Testing and Linter Setup
-
-## 
-
-## Keywords (Detailed)
-
-- test (weight: 0.47)
-- eslint (weight: 0.30)
-- for (weight: 0.23)
-- typescript (weight: 0.23)
-- tests (weight: 0.21)
-- vitest (weight: 0.16)
-- with (weight: 0.15)
-- database (weight: 0.14)
-- testing (weight: 0.14)
-- configuration (weight: 0.14)
-

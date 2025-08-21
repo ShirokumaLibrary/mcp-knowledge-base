@@ -2,25 +2,16 @@
 id: 74
 type: handover
 title: "handover-72: ImportManager Code Review Results"
+description: "ImportManager実装の包括的なコードレビュー結果。セキュリティ、パフォーマンス、品質の観点から評価"
 status: Open
 priority: HIGH
 aiSummary: "handover-72: ImportManager Code Review Results ImportManager実装の包括的なコードレビュー結果。セキュリティ、パフォーマンス、品質の観点から評価 # Handover 72: ImportManager Code Review Results\n\n## Review Summary\n- **Component**: ImportManager"
 tags: ["handover","review","security","needs-improvement","importmanager"]
 keywords: {"path":0.25,"security":0.25,"performance":0.2,"code":0.18,"add":0.18}
-embedding: "kpuAgICFgICYgICAgo2AgIOegICAkICAlICAgIqRgICFnYCAgI2AgI6AgICQjYCAl5OAgICUgICOgICAj4SAgJiFgICAoYCAjYCAgIiAgICdgoCAgKGAgIyAgICBg4CAqouAgICVgICIgICAgYCAgKWOgICAh4CAkYCAgICFgIA="
 related: [71,75,85]
-searchIndex: "security path performance code file add review 100 location importmanager"
 created: 2025-08-14T12:50:38.275Z
 updated: 2025-08-14T12:50:38.275Z
 ---
-
-# handover-72: ImportManager Code Review Results
-
-## Description
-
-ImportManager実装の包括的なコードレビュー結果。セキュリティ、パフォーマンス、品質の観点から評価
-
-## Content
 
 # Handover 72: ImportManager Code Review Results
 
@@ -163,24 +154,3 @@ Before marking as APPROVED:
 
 ---
 *Review conducted with focus on security, performance, and maintainability*
-
-## AI Summary
-
-handover-72: ImportManager Code Review Results ImportManager実装の包括的なコードレビュー結果。セキュリティ、パフォーマンス、品質の観点から評価 # Handover 72: ImportManager Code Review Results
-
-## Review Summary
-- **Component**: ImportManager
-
-## Keywords (Detailed)
-
-- path (weight: 0.25)
-- security (weight: 0.25)
-- performance (weight: 0.20)
-- code (weight: 0.18)
-- add (weight: 0.18)
-- file (weight: 0.18)
-- location (weight: 0.15)
-- review (weight: 0.15)
-- 100 (weight: 0.15)
-- importmanager (weight: 0.13)
-

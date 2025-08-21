@@ -2,26 +2,17 @@
 id: 17
 type: pattern
 title: "Pattern: 5-Phase TDD Cycle with Review Gates"
+description: "Complete TDD cycle pattern with review gates between phases to ensure quality at each step"
 status: Open
 priority: HIGH
 category: "Design Patterns"
 aiSummary: "Pattern: 5-Phase TDD Cycle with Review Gates Complete TDD cycle pattern with review gates between phases to ensure quality at each step ## 5-Phase TDD Cycle Pattern\n\n### Overview\nA comprehensive TDD p"
 tags: ["testing","quality-assurance","tdd","kent-beck","refactoring","pattern","review-gates"]
 keywords: {"input":0.42,"review":0.38,"phase":0.34,"test":0.27,"tdd":0.23}
-embedding: "iYCSgJuAgICYgICNgIuAgYOAlICRgICAnICGmICOgIeAgJCAhYCAgJuAlZiAioCUgYCGgI2AgICbgJ+OgIOAm4aAgICPgICAj4CZgoCAgJaLgIKAkYCAgIKAn4CAgoCKioCMgJKAgICAgJeJgICAjIuAk4CbgICAi4CIgoCEgIc="
 related: [13,14,15,28]
-searchIndex: "input review phase test tdd quality code somefunction string pattern"
 created: 2025-08-13T12:18:30.214Z
 updated: 2025-08-13T12:18:30.214Z
 ---
-
-# Pattern: 5-Phase TDD Cycle with Review Gates
-
-## Description
-
-Complete TDD cycle pattern with review gates between phases to ensure quality at each step
-
-## Content
 
 ## 5-Phase TDD Cycle Pattern
 
@@ -122,24 +113,3 @@ function validateInput(input: string): void {
 - Writing tests after code
 - Over-engineering in GREEN phase
 - Mixing refactoring with new features
-
-## AI Summary
-
-Pattern: 5-Phase TDD Cycle with Review Gates Complete TDD cycle pattern with review gates between phases to ensure quality at each step ## 5-Phase TDD Cycle Pattern
-
-### Overview
-A comprehensive TDD p
-
-## Keywords (Detailed)
-
-- input (weight: 0.42)
-- review (weight: 0.38)
-- phase (weight: 0.34)
-- test (weight: 0.27)
-- tdd (weight: 0.23)
-- quality (weight: 0.19)
-- code (weight: 0.19)
-- somefunction (weight: 0.19)
-- string (weight: 0.19)
-- pattern (weight: 0.15)
-

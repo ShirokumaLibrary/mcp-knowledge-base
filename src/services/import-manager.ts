@@ -94,9 +94,9 @@ export class ImportManager {
 
       // Handle based on mode
       if (existing) {
-        return await this.handleExistingItem(existing, validated, parsed.content, options);
+        return await this.handleExistingItem(existing, validated, parsed.content?.trim() || '', options);
       } else {
-        return await this.createNewItem(validated, parsed.content, options);
+        return await this.createNewItem(validated, parsed.content?.trim() || '', options);
       }
     } catch (error) {
       if (error instanceof ImportError) {
@@ -200,7 +200,7 @@ export class ImportManager {
                 where: { id: stateId },
                 data: {
                   version: parsed.data.version || 'v0.8.0',
-                  content: parsed.content || '',
+                  content: parsed.content?.trim() || '',
                   summary: parsed.data.summary || undefined,
                   metrics: parsed.data.metrics ? JSON.stringify(parsed.data.metrics) : undefined,
                   context: parsed.data.context ? JSON.stringify(parsed.data.context) : undefined,

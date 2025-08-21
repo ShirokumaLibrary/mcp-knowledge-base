@@ -2,25 +2,16 @@
 id: 51
 type: analysis
 title: "MCP API使用状況分析結果"
+description: "全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。"
 status: Completed
 priority: MEDIUM
 aiSummary: "MCP API使用状況分析結果 全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。 ## MCP API使用状況分析\n\n全25個のAPIを使用頻度で分類：\n\n### 🔥 頻繁に使用（コア機能）\n1. **create_item** - アイテム作成（イシュー、知識、セッション等）\n2. **update_item** - アイテム更新（"
 tags: ["api","optimization","analysis","cleanup","usage-stats"]
 keywords: {"api":1,"mcp":0.4,"find_shortest_path":0.4,"find_hub_nodes":0.4,"find_clusters":0.4}
-embedding: "gICAgICAhYWAgKiAhoCAjICBgICAgIyEgIC2gICAgIeAiICAgICSgYCArYCBgICOgI6AgICAlIOAgJqAiICAj4COgICAgJGBgICPgIOAgImAiICAgICHgICAloCKgICCgIGAgICAhoGAgKmAj4CAgICAgICAgIKDgIC2gI2AgIU="
 related: [24,25,26,54]
-searchIndex: "api mcp find_shortest_path find_hub_nodes find_clusters find_similar_items save_checkpoint list_checkpoints create_item update_item"
 created: 2025-08-14T01:19:56.102Z
 updated: 2025-08-14T01:19:56.102Z
 ---
-
-# MCP API使用状況分析結果
-
-## Description
-
-全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。
-
-## Content
 
 ## MCP API使用状況分析
 
@@ -121,27 +112,3 @@ analyze_graph({
 4. オーバーエンジニアリング
 
 シンプルで使いやすいAPIセットへの再設計を検討すべき。
-
-## AI Summary
-
-MCP API使用状況分析結果 全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。 ## MCP API使用状況分析
-
-全25個のAPIを使用頻度で分類：
-
-### 🔥 頻繁に使用（コア機能）
-1. **create_item** - アイテム作成（イシュー、知識、セッション等）
-2. **update_item** - アイテム更新（
-
-## Keywords (Detailed)
-
-- api (weight: 1.00)
-- mcp (weight: 0.40)
-- find_shortest_path (weight: 0.40)
-- find_hub_nodes (weight: 0.40)
-- find_clusters (weight: 0.40)
-- find_similar_items (weight: 0.27)
-- save_checkpoint (weight: 0.27)
-- list_checkpoints (weight: 0.27)
-- update_item (weight: 0.13)
-- create_item (weight: 0.13)
-

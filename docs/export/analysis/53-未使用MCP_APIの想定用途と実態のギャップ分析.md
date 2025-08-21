@@ -2,26 +2,17 @@
 id: 53
 type: analysis
 title: "未使用MCP APIの想定用途と実態のギャップ分析"
+description: "ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析"
 status: Completed
 priority: MEDIUM
 aiSummary: "Analysis of unused MCP APIs revealing gap between intended complex graph analysis features and actual simple knowledge base usage patterns, suggesting overengineering and need for API simplification"
 tags: ["api","mcp","optimization","analysis","yagni","usage"]
 keywords: {"api":1,"unused":0.9,"analysis":0.8,"graph":0.8,"search":0.7}
 concepts: {"api design":0.9,"graph analysis":0.8,"knowledge management":0.8,"system analysis":0.8,"software architecture":0.7}
-embedding: "gIiAgICFlYCAgKqAgICDgICBgICFiYqAg4CmgICAgICAgICAgIeDgIuAp4CAgIWAgICAgIiViICQgJOAgICOgICAgICQnJOAjoCCgICAiICAhoCAkpaVgJCAhICAgJCAgIyAgIuJnoCMgJaAgICSgICNgICDipuAhICpgICAjIA="
 related: [25,26,47]
-searchIndex: "api unused analysis gap graph search shortest path hub nodes cluster isolated checkpoint backup similarity"
 created: 2025-08-14T01:23:41.102Z
 updated: 2025-08-14T01:23:41.102Z
 ---
-
-# 未使用MCP APIの想定用途と実態のギャップ分析
-
-## Description
-
-ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析
-
-## Content
 
 # 未使用APIの想定用途と実態のギャップ分析
 
@@ -198,32 +189,3 @@ updated: 2025-08-14T01:23:41.102Z
 - 状態管理（get/update_current_state）
 
 **「シンプルで十分」**という実態に合わせてAPIを整理すべき。
-
-## AI Summary
-
-Analysis of unused MCP APIs revealing gap between intended complex graph analysis features and actual simple knowledge base usage patterns, suggesting overengineering and need for API simplification
-
-## Keywords (Detailed)
-
-- api (weight: 1.00)
-- unused (weight: 0.90)
-- analysis (weight: 0.80)
-- graph (weight: 0.80)
-- search (weight: 0.70)
-- similarity (weight: 0.70)
-- gap (weight: 0.70)
-- cluster (weight: 0.70)
-- checkpoint (weight: 0.70)
-- shortest (weight: 0.60)
-
-## Concepts
-
-- api design (confidence: 0.90)
-- graph analysis (confidence: 0.80)
-- knowledge management (confidence: 0.80)
-- system analysis (confidence: 0.80)
-- software architecture (confidence: 0.70)
-- data management (confidence: 0.70)
-- artificial intelligence (confidence: 0.70)
-- performance optimization (confidence: 0.60)
-

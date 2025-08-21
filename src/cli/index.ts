@@ -56,7 +56,7 @@ const program = new Command();
 program
   .name('shirokuma')
   .description('Shirokuma MCP Knowledge Base CLI')
-  .version('0.8.0')
+  .version('0.8.3')
   .option('--env <name>', 'Environment name (e.g., dev, test, prod) to load .env.<name> file');
 
 // Helper functions
