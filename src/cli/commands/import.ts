@@ -1,338 +1,217 @@
-import { Command } from 'commander';
 import chalk from 'chalk';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
-import { ImportManager } from '../../services/import-manager.js';
-import Table from 'cli-table3';
+import fs from 'fs';
 import path from 'path';
-import fs from 'fs/promises';
+import { AppDataSource } from '../../data-source.js';
+import { Item } from '../../entities/Item.js';
+import { SystemState } from '../../entities/SystemState.js';
+import { Status } from '../../entities/Status.js';
+import { Tag } from '../../entities/Tag.js';
+import { ItemTag } from '../../entities/ItemTag.js';
+import { ItemRelation } from '../../entities/ItemRelation.js';
+import { ImportManagerTypeORM } from '../../services/import-manager.js';
 
-export function createImportCommand(): Command {
-  const importCmd = new Command('import')
-    .description('Import items from markdown files');
+export interface ImportOptions {
+  file: string;
+  clear?: boolean;
+}
 
-  const prisma = new PrismaClient();
-  const importManager = new ImportManager(prisma);
+export async function importData(options: ImportOptions) {
+  const manager = new ImportManagerTypeORM();
+  
+  try {
+    const result = await manager.importPath(options.file, options);
+    
+    if (!result.success && result.errors && result.errors.length > 0) {
+      console.error(chalk.red('Import had errors:'));
+      for (const error of result.errors) {
+        console.error(chalk.red(`  - ${error.message}`));
+      }
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(chalk.red('Import failed:'), error);
+    process.exit(1);
+  }
+}
 
-  // Import a single file or directory
-  importCmd
-    .argument('<path>', 'File or directory to import')
-    .option('-m, --mode <mode>', 'Import mode: default, sync, or reset', 'default')
-    .option('-t, --type <type>', 'Filter by type (for directory import)')
-    .option('--dry-run', 'Preview import without making changes')
-    .option('--use-transaction', 'Use database transaction for batch imports')
-    .action(async (importPath, options) => {
-      try {
-        // Resolve path
-        const resolvedPath = path.resolve(importPath);
-        
-        // Check if path exists
-        const stats = await fs.stat(resolvedPath).catch(() => null);
-        if (!stats) {
-          console.error(chalk.red(`Error: Path not found: ${importPath}`));
-          process.exit(1);
-        }
+// Keep the original JSON import function for backward compatibility
+export async function importDataJSON(options: ImportOptions) {
+  try {
+    // Check if file exists
+    if (!fs.existsSync(options.file)) {
+      console.error(chalk.red(`File not found: ${options.file}`));
+      process.exit(1);
+    }
 
-        // Validate mode
-        if (!['default', 'sync', 'reset'].includes(options.mode)) {
-          console.error(chalk.red(`Error: Invalid mode: ${options.mode}. Use 'default', 'sync', or 'reset'`));
-          process.exit(1);
-        }
+    // Read and parse JSON
+    const data = JSON.parse(fs.readFileSync(options.file, 'utf-8'));
+    
+    console.log(chalk.bold.cyan('📥 Data Import\n'));
+    console.log(chalk.gray(`File: ${options.file}`));
+    console.log(chalk.gray(`Items to import: ${data.items?.length || 0}`));
 
-        console.log(chalk.cyan(`Importing from ${importPath}...`));
-        console.log(chalk.gray(`Mode: ${options.mode}`));
-        if (options.dryRun) {
-          console.log(chalk.yellow('DRY RUN: No changes will be made'));
-        }
+    // Initialize database
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
 
-        let result;
+    // Run migrations to ensure tables exist
+    console.log(chalk.gray('Ensuring database schema...'));
+    await AppDataSource.runMigrations();
 
-        if (stats.isFile()) {
-          // Import single file
-          if (!resolvedPath.endsWith('.md')) {
-            console.error(chalk.red('Error: Only markdown files can be imported'));
-            process.exit(1);
+    // Clear existing data if requested
+    if (options.clear) {
+      console.log(chalk.yellow('\n⚠️  Clearing existing data...'));
+      
+      // Delete in correct order due to foreign keys
+      await AppDataSource.getRepository(ItemRelation).clear();
+      await AppDataSource.getRepository(ItemTag).clear();
+      await AppDataSource.getRepository(Item).clear();
+      await AppDataSource.getRepository(Tag).clear();
+      await AppDataSource.getRepository(Status).clear();
+      await AppDataSource.getRepository(SystemState).clear();
+      
+      console.log(chalk.gray('Existing data cleared'));
+    }
+
+    // Import statuses first (ensure default statuses exist)
+    const statusRepo = AppDataSource.getRepository(Status);
+    const defaultStatuses = [
+      'Open', 'Specification', 'Waiting', 'Ready', 
+      'In Progress', 'Review', 'Testing', 'Pending',
+      'Completed', 'Closed', 'Canceled', 'Rejected'
+    ];
+    
+    const statusMap = new Map<string, number>();
+    for (let i = 0; i < defaultStatuses.length; i++) {
+      let status = await statusRepo.findOne({ where: { name: defaultStatuses[i] } });
+      if (!status) {
+        status = await statusRepo.save({
+          name: defaultStatuses[i],
+          isClosable: i >= 8, // Last 4 are closable
+          sortOrder: i
+        });
+      }
+      statusMap.set(defaultStatuses[i], status.id);
+    }
+
+    // Import items
+    const itemRepo = AppDataSource.getRepository(Item);
+    const tagRepo = AppDataSource.getRepository(Tag);
+    const itemTagRepo = AppDataSource.getRepository(ItemTag);
+    const relationRepo = AppDataSource.getRepository(ItemRelation);
+    
+    const idMap = new Map<number, number>(); // old ID -> new ID
+    let importedCount = 0;
+
+    for (const itemData of data.items || []) {
+      // Get status ID
+      let statusId = statusMap.get(itemData.status || 'Open');
+      if (!statusId) {
+        // Create status if not found
+        const newStatus = await statusRepo.save({
+          name: itemData.status || 'Open',
+          isClosable: false,
+          sortOrder: 999
+        });
+        statusId = newStatus.id;
+        statusMap.set(itemData.status || 'Open', statusId);
+      }
+
+      // Create item
+      const item = await itemRepo.save({
+        type: itemData.type,
+        title: itemData.title,
+        description: itemData.description || '',
+        content: itemData.content || '',
+        statusId,
+        priority: itemData.priority || 'MEDIUM',
+        category: itemData.category,
+        startDate: itemData.startDate ? new Date(itemData.startDate) : undefined,
+        endDate: itemData.endDate ? new Date(itemData.endDate) : undefined,
+        version: itemData.version,
+        aiSummary: itemData.aiSummary,
+        searchIndex: itemData.searchIndex,
+        entities: itemData.entities,
+        embedding: itemData.embedding ? Buffer.from(itemData.embedding, 'base64') : undefined,
+      });
+
+      idMap.set(itemData.id, item.id);
+
+      // Import tags
+      if (itemData.tags && Array.isArray(itemData.tags)) {
+        for (const tagName of itemData.tags) {
+          let tag = await tagRepo.findOne({ where: { name: tagName } });
+          if (!tag) {
+            tag = await tagRepo.save({ name: tagName });
           }
+          await itemTagRepo.save({ itemId: item.id, tagId: tag.id });
+        }
+      }
 
-          result = await importManager.importFile(resolvedPath, {
-            mode: options.mode as 'default' | 'sync' | 'reset',
-            dryRun: options.dryRun
-          });
+      importedCount++;
+      if (importedCount % 10 === 0) {
+        console.log(chalk.gray(`Imported ${importedCount} items...`));
+      }
+    }
 
-          if (result.success) {
-            if (result.skipped) {
-              console.log(chalk.yellow(`⚠ Item already exists (ID: ${result.itemId}), skipped`));
-            } else {
-              console.log(chalk.green(`✓ Imported item (ID: ${result.itemId})`));
+    // Import relations (second pass)
+    console.log(chalk.gray('\nImporting relations...'));
+    for (const itemData of data.items || []) {
+      if (itemData.related && Array.isArray(itemData.related)) {
+        const sourceId = idMap.get(itemData.id);
+        if (!sourceId) continue;
+
+        for (const oldTargetId of itemData.related) {
+          const targetId = idMap.get(oldTargetId);
+          if (targetId) {
+            // Check if relation already exists
+            const existing = await relationRepo.findOne({
+              where: { sourceId, targetId }
+            });
+            if (!existing) {
+              await relationRepo.save({ sourceId, targetId });
             }
           }
-        } else if (stats.isDirectory()) {
-          // Import directory
-          result = await importManager.importDirectory(resolvedPath, {
-            mode: options.mode as 'default' | 'sync' | 'reset',
-            type: options.type,
-            dryRun: options.dryRun,
-            useTransaction: options.useTransaction
-          });
-
-          // Display results
-          console.log(chalk.green(`\n✓ Import completed`));
-          console.log(chalk.cyan(`  Imported: ${result.imported || 0} item(s)`));
-          console.log(chalk.yellow(`  Skipped: ${result.skipped || 0} item(s)`));
-          if (result.failed && result.failed > 0) {
-            console.log(chalk.red(`  Failed: ${result.failed} item(s)`));
-          }
-
-          // Show errors if any
-          if (result.errors && result.errors.length > 0) {
-            console.log(chalk.red('\nErrors:'));
-            for (const error of result.errors) {
-              console.log(chalk.red(`  - ${error.message}`));
-            }
-          }
         }
-
-        await prisma.$disconnect();
-      } catch (error) {
-        console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
-        process.exit(1);
       }
-    });
+    }
 
-  // Import all exported data
-  importCmd
-    .command('all')
-    .description('Import all exported data including system state')
-    .argument('<directory>', 'Export directory to import from')
-    .option('-m, --mode <mode>', 'Import mode: default, sync, or reset', 'default')
-    .option('--dry-run', 'Preview import without making changes')
-    .action(async (directory, options) => {
-      try {
-        const resolvedPath = path.resolve(directory);
-        
-        // Check if directory exists
-        const stats = await fs.stat(resolvedPath).catch(() => null);
-        if (!stats || !stats.isDirectory()) {
-          console.error(chalk.red(`Error: Directory not found: ${directory}`));
-          process.exit(1);
-        }
+    // Import system state
+    if (data.systemState) {
+      const stateRepo = AppDataSource.getRepository(SystemState);
+      await stateRepo.save({
+        version: data.systemState.version,
+        content: data.systemState.content,
+        summary: data.systemState.summary,
+        metrics: typeof data.systemState.metrics === 'object' 
+          ? JSON.stringify(data.systemState.metrics) 
+          : data.systemState.metrics,
+        context: typeof data.systemState.context === 'object'
+          ? JSON.stringify(data.systemState.context)
+          : data.systemState.context,
+        checkpoint: typeof data.systemState.checkpoint === 'object'
+          ? JSON.stringify(data.systemState.checkpoint)
+          : data.systemState.checkpoint,
+        relatedItems: Array.isArray(data.systemState.relatedItems)
+          ? JSON.stringify(data.systemState.relatedItems)
+          : data.systemState.relatedItems || '[]',
+        tags: Array.isArray(data.systemState.tags)
+          ? JSON.stringify(data.systemState.tags)
+          : data.systemState.tags || '[]',
+        metadata: typeof data.systemState.metadata === 'object'
+          ? JSON.stringify(data.systemState.metadata)
+          : data.systemState.metadata,
+        isActive: true
+      });
+      console.log(chalk.gray('System state imported'));
+    }
 
-        // Validate mode
-        if (!['default', 'sync', 'reset'].includes(options.mode)) {
-          console.error(chalk.red(`Error: Invalid mode: ${options.mode}. Use 'default', 'sync', or 'reset'`));
-          process.exit(1);
-        }
-
-        console.log(chalk.cyan(`Importing all data from ${directory}...`));
-        console.log(chalk.gray(`Mode: ${options.mode}`));
-        if (options.dryRun) {
-          console.log(chalk.yellow('DRY RUN: No changes will be made'));
-        }
-
-        // Import all data including system state
-        const result = await importManager.importAll(resolvedPath, {
-          mode: options.mode as 'default' | 'sync' | 'reset',
-          dryRun: options.dryRun,
-          useTransaction: true
-        });
-
-        // Display results
-        console.log(chalk.green(`\n✓ Import completed`));
-        console.log(chalk.cyan(`  Imported: ${result.imported || 0} item(s)`));
-        console.log(chalk.yellow(`  Skipped: ${result.skipped || 0} item(s)`));
-        if (result.failed && result.failed > 0) {
-          console.log(chalk.red(`  Failed: ${result.failed} item(s)`));
-        }
-
-        if (result.stateImported) {
-          console.log(chalk.green('  ✓ System state imported'));
-        }
-
-        // Show errors if any
-        if (result.errors && result.errors.length > 0) {
-          console.log(chalk.red('\nErrors:'));
-          for (const error of result.errors) {
-            console.log(chalk.red(`  - ${error.message}`));
-          }
-        }
-
-        await prisma.$disconnect();
-      } catch (error) {
-        console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
-        process.exit(1);
-      }
-    });
-
-  // Preview import without making changes
-  importCmd
-    .command('preview')
-    .description('Preview what would be imported')
-    .argument('<path>', 'File or directory to preview')
-    .action(async (importPath) => {
-      try {
-        const resolvedPath = path.resolve(importPath);
-        
-        // Check if path exists
-        const stats = await fs.stat(resolvedPath).catch(() => null);
-        if (!stats) {
-          console.error(chalk.red(`Error: Path not found: ${importPath}`));
-          process.exit(1);
-        }
-
-        const items: Array<{
-          id: number;
-          type: string;
-          title: string;
-          status: string;
-          priority: string;
-          file: string;
-        }> = [];
-
-        if (stats.isFile()) {
-          // Preview single file
-          if (!resolvedPath.endsWith('.md')) {
-            console.error(chalk.red('Error: Only markdown files can be imported'));
-            process.exit(1);
-          }
-
-          const matter = (await import('gray-matter')).default;
-          const content = await fs.readFile(resolvedPath, 'utf-8');
-          const parsed = matter(content);
-          
-          items.push({
-            id: parsed.data.id,
-            type: parsed.data.type,
-            title: parsed.data.title,
-            status: parsed.data.status,
-            priority: parsed.data.priority || 'MEDIUM',
-            file: path.basename(resolvedPath)
-          });
-        } else if (stats.isDirectory()) {
-          // Preview directory recursively
-          async function scanDirectory(dirPath: string): Promise<void> {
-            const entries = await fs.readdir(dirPath, { withFileTypes: true });
-            
-            for (const entry of entries) {
-              const fullPath = path.join(dirPath, entry.name);
-              
-              if (entry.isDirectory() && entry.name !== '.system') {
-                await scanDirectory(fullPath);
-              } else if (entry.name.endsWith('.md')) {
-                try {
-                  const matter = (await import('gray-matter')).default;
-                  const content = await fs.readFile(fullPath, 'utf-8');
-                  const parsed = matter(content);
-                  
-                  if (parsed.data.id && parsed.data.type && parsed.data.title) {
-                    items.push({
-                      id: parsed.data.id,
-                      type: parsed.data.type,
-                      title: parsed.data.title,
-                      status: parsed.data.status,
-                      priority: parsed.data.priority || 'MEDIUM',
-                      file: path.relative(resolvedPath, fullPath)
-                    });
-                  }
-                } catch {
-                  // Skip invalid files
-                }
-              }
-            }
-          }
-
-          await scanDirectory(resolvedPath);
-        }
-
-        if (items.length === 0) {
-          console.log(chalk.yellow('No valid items found to import'));
-          await prisma.$disconnect();
-          return;
-        }
-
-        // Sort items by ID
-        items.sort((a, b) => a.id - b.id);
-
-        // Display items in table
-        const table = new Table({
-          head: ['ID', 'Type', 'Title', 'Status', 'Priority', 'File'],
-          colWidths: [8, 15, 35, 15, 10, 40],
-          wordWrap: true
-        });
-
-        for (const item of items) {
-          table.push([
-            item.id,
-            item.type,
-            item.title.substring(0, 32) + (item.title.length > 32 ? '...' : ''),
-            item.status,
-            item.priority,
-            item.file
-          ]);
-        }
-
-        console.log(chalk.cyan(`\nFound ${items.length} item(s) to import:\n`));
-        console.log(table.toString());
-
-        // Check for existing items
-        const existingIds = await prisma.item.findMany({
-          where: {
-            id: { in: items.map(i => i.id) }
-          },
-          select: { id: true }
-        });
-
-        if (existingIds.length > 0) {
-          console.log(chalk.yellow(`\n⚠ ${existingIds.length} item(s) already exist in database`));
-          console.log(chalk.gray('  Use --mode sync to skip existing items'));
-          console.log(chalk.gray('  Use --mode reset to overwrite existing items'));
-        }
-
-        await prisma.$disconnect();
-      } catch (error) {
-        console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
-        process.exit(1);
-      }
-    });
-
-  // Show import help
-  importCmd
-    .command('help')
-    .description('Show detailed import help')
-    .action(() => {
-      console.log(chalk.cyan('\nImport Command Usage:\n'));
-      
-      console.log(chalk.yellow('Import Modes:'));
-      console.log('  default - Import new items, skip existing (default behavior)');
-      console.log('  sync    - Import new items only, skip all existing');
-      console.log('  reset   - Import all items, overwrite existing\n');
-
-      console.log(chalk.yellow('Examples:'));
-      console.log('  # Import a single file');
-      console.log('  shirokuma-kb import docs/export/issue/1-bug.md\n');
-      
-      console.log('  # Import a directory');
-      console.log('  shirokuma-kb import docs/export/\n');
-      
-      console.log('  # Import with reset mode (overwrite)');
-      console.log('  shirokuma-kb import docs/export/ --mode reset\n');
-      
-      console.log('  # Import specific type only');
-      console.log('  shirokuma-kb import docs/export/ --type issue\n');
-      
-      console.log('  # Preview without importing');
-      console.log('  shirokuma-kb import preview docs/export/\n');
-      
-      console.log('  # Import all including system state');
-      console.log('  shirokuma-kb import all docs/export/\n');
-
-      console.log(chalk.yellow('Security:'));
-      console.log('  - Path traversal attempts are blocked');
-      console.log('  - Files larger than 10MB are rejected');
-      console.log('  - Invalid YAML is rejected\n');
-    });
-
-  return importCmd;
+    console.log(chalk.bold.green(`\n✨ Import completed! Imported ${importedCount} items`));
+    
+    await AppDataSource.destroy();
+  } catch (error) {
+    console.error(chalk.red('Import failed:'), error);
+    process.exit(1);
+  }
 }

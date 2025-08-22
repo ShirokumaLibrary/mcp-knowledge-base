@@ -85,14 +85,28 @@ export async function autoSeedIfNeeded(prisma: InstanceType<typeof PrismaClient>
       logger.warn('No statuses found in database.');
       logger.info('🌱 Auto-seeding default statuses...');
 
-      // Import and run seed function
-      const { main: seedMain } = await import('../../../prisma/seed.js');
-      await seedMain();
+      // Run seed using TypeORM
+      // For now, just create default statuses inline
+      const defaultStatuses = [
+        'Open', 'Specification', 'Waiting', 'Ready', 
+        'In Progress', 'Review', 'Testing', 'Pending',
+        'Completed', 'Closed', 'Canceled', 'Rejected'
+      ];
+      
+      for (let i = 0; i < defaultStatuses.length; i++) {
+        await prisma.status.create({
+          data: {
+            name: defaultStatuses[i],
+            isClosable: i >= 8, // Last 4 are closable
+            sortOrder: i
+          }
+        });
+      }
 
       logger.success('Default statuses created successfully');
     } else if (statusCount < 12) {
       logger.warn(`Only ${statusCount} statuses found (expected 12).`);
-      logger.info('📝 Run "npx tsx prisma/seed.ts" to add missing statuses.');
+      logger.info('📝 Run "shirokuma-kb migrate --seed" to add missing statuses.');
     }
   } catch (error) {
     logger.error('Error during auto-seed', error);

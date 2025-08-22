@@ -1,6 +1,6 @@
 {
   "name": "@shirokuma-library/mcp-knowledge-base",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "description": "MCP server for AI-powered knowledge management with semantic search, graph analysis, and automatic enrichment",
   "keywords": [
     "mcp",
@@ -50,7 +50,10 @@
     "search-query-parser": "^1.6.0",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "typeorm": "^0.3.20",
+    "sqlite3": "^5.1.7",
+    "reflect-metadata": "^0.2.2"
   },
   "type": "module",
   "main": "./dist/src/mcp/server.js",
@@ -60,14 +63,13 @@
   },
   "files": [
     "dist/",
-    "prisma/",
     "scripts/",
     "LICENSE",
     "README.md",
     "package.json"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/src/cli/index.js dist/src/mcp/server.js",
     "build:prod": "rm -rf dist && tsc --project tsconfig.prod.json && chmod +x dist/src/cli/index.js dist/src/mcp/server.js",
     "dev": "tsx src/cli/index.ts",
     "cli": "tsx src/cli/index.ts",
@@ -87,11 +89,8 @@
     "migrate:deploy": "tsx scripts/migrate.ts deploy",
     "migrate:status": "tsx scripts/migrate.ts status",
     "migrate:reset": "tsx scripts/migrate.ts reset",
-    "prepublishOnly": "prisma generate && npm run build:prod",
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma || true"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "prepublishOnly": "npm run build:prod",
+    "postinstall": "echo 'Post-install complete'"
   },
   "bin": {
     "shirokuma-kb": "./dist/src/cli/index.js"
