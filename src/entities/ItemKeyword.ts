@@ -1,4 +1,6 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Item } from './Item.js';
+import { Keyword } from './Keyword.js';
 
 @Entity('item_keywords')
 export class ItemKeyword {
@@ -10,4 +12,12 @@ export class ItemKeyword {
 
   @Column({ type: 'real', default: 1.0 })
   weight!: number;
+
+  @ManyToOne(() => Item)
+  @JoinColumn({ name: 'item_id' })
+  item!: Item;
+
+  @ManyToOne(() => Keyword)
+  @JoinColumn({ name: 'keyword_id' })
+  keyword!: Keyword;
 }

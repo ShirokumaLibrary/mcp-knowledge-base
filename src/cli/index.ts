@@ -6,7 +6,7 @@ import { AppDataSource } from '../data-source.js';
 import { ItemRepository } from '../repositories/ItemRepository.js';
 import { SystemStateRepository } from '../repositories/SystemStateRepository.js';
 import { runMigration } from './commands/migrate.js';
-import { exportData } from './commands/export.js';
+import { createExportCommand } from './commands/export.js';
 import { importData } from './commands/import.js';
 import { Item } from '../entities/Item.js';
 import { Status } from '../entities/Status.js';
@@ -244,16 +244,7 @@ program
   });
 
 // Export command
-program
-  .command('export')
-  .description('Export data')
-  .option('-d, --dir <dir>', 'Export directory')
-  .option('-f, --format <format>', 'Export format (json, markdown, both)', 'both')
-  .option('-t, --type <type>', 'Filter by type')
-  .option('-s, --status <status>', 'Filter by status')
-  .action(async (options) => {
-    await exportData(options);
-  });
+program.addCommand(createExportCommand());
 
 // Import command
 program

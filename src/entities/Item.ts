@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Status } from './Status.js';
 
 @Entity('items')
 export class Item {
@@ -22,6 +23,10 @@ export class Item {
 
   @Column({ type: 'integer', name: 'status_id' })
   statusId!: number;
+
+  @ManyToOne(() => Status)
+  @JoinColumn({ name: 'status_id' })
+  status!: Status;
 
   @Column({ type: 'text', default: 'MEDIUM' })
   priority!: string;
