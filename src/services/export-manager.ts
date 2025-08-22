@@ -431,17 +431,59 @@ export class ExportManager {
     md += `type: system_state\n`;
     md += `version: "${state.version}"\n`;
 
-    // Parse tags from JSON string
+    // Parse and add tags
     const tags = state.tags ? JSON.parse(state.tags) : [];
     if (tags.length > 0) {
       md += `tags: ${JSON.stringify(tags)}\n`;
     }
 
-    // Parse metadata from JSON string
-    const metadata = state.metadata ? JSON.parse(state.metadata) : {};
-    if (Object.keys(metadata).length > 0) {
-      md += `metadata: ${JSON.stringify(metadata)}\n`;
+    // Parse and add related items
+    const relatedItems = state.relatedItems ? JSON.parse(state.relatedItems) : [];
+    if (relatedItems.length > 0) {
+      md += `relatedItems: ${JSON.stringify(relatedItems)}\n`;
     }
+
+    // Parse and add metrics
+    if (state.metrics) {
+      try {
+        const metrics = JSON.parse(state.metrics);
+        md += `metrics: ${JSON.stringify(metrics)}\n`;
+      } catch {
+        // If not valid JSON, include as string
+        md += `metrics: "${state.metrics}"\n`;
+      }
+    }
+
+    // Parse and add context
+    if (state.context) {
+      try {
+        const context = JSON.parse(state.context);
+        md += `context: ${JSON.stringify(context)}\n`;
+      } catch {
+        // If not valid JSON, include as string
+        md += `context: "${state.context}"\n`;
+      }
+    }
+
+    // Parse and add checkpoint
+    if (state.checkpoint) {
+      md += `checkpoint: "${state.checkpoint}"\n`;
+    }
+
+    // Parse and add metadata
+    if (state.metadata) {
+      try {
+        const metadata = JSON.parse(state.metadata);
+        if (Object.keys(metadata).length > 0) {
+          md += `metadata: ${JSON.stringify(metadata)}\n`;
+        }
+      } catch {
+        md += `metadata: "${state.metadata}"\n`;
+      }
+    }
+
+    // Add active status
+    md += `isActive: ${state.isActive}\n`;
 
     // Timestamps
     md += `createdAt: ${state.createdAt.toISOString()}\n`;
@@ -452,27 +494,16 @@ export class ExportManager {
     // Title
     md += `# System State #${state.id}\n\n`;
 
-    // Summary
-    if (state.summary) {
+    // Summary (if exists and different from content)
+    if (state.summary && state.summary !== state.content) {
       md += `## Summary\n\n${state.summary}\n\n`;
     }
 
-    // Content
-    md += `## Current State\n\n${state.content}\n\n`;
-
-    // Metrics
-    if (state.metrics) {
-      md += `## Metrics\n\n\`\`\`json\n${state.metrics}\n\`\`\`\n\n`;
-    }
-
-    // Context
-    if (state.context) {
-      md += `## Context\n\n${state.context}\n\n`;
-    }
-
-    // Checkpoint
-    if (state.checkpoint) {
-      md += `## Checkpoint\n\n${state.checkpoint}\n\n`;
+    // Content - the main state description
+    md += state.content;
+    
+    if (!state.content.endsWith('\n')) {
+      md += '\n';
     }
 
     return md;

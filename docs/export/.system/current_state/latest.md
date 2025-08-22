@@ -1,9 +1,17 @@
+---
+id: 38
+type: system_state
+version: "v0.8.0"
+tags: ["current_state","v0.9.0","typeorm","session-114","progress"]
+metrics: {"totalItems":114,"totalRelations":522,"avgConnections":9.157894736842104,"maxConnections":30,"isolatedNodes":2,"timestamp":"2025-08-22T08:54:40.990Z"}
+context: {"updatedBy":"session-114"}
+metadata: {"updatedBy":"session-114"}
+isActive: false
+createdAt: 2025-08-22T13:32:40.000Z
+updatedAt: 2025-08-22T13:32:40.000Z
+---
+
 # System State #38
-
-**Updated**: Fri Aug 22 2025 22:32:40 GMT+0900 (Japan Standard Time)
-**Tags**: current_state, v0.9.0, typeorm, session-114, progress
-
-## Content
 
 # System State
 
@@ -62,9 +70,3 @@
 - 開発ブランチ: v0.9.0
 - 実装済みエンティティ: Status
 - テスト: 27/27通過（database.test + status.repository.test）
-
-## Metadata
-
-```json
-"{\"updatedBy\":\"session-114\"}"
-```

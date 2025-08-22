@@ -1,0 +1,73 @@
+---
+id: 58
+type: issue
+title: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題"
+status: Completed
+priority: HIGH
+tags: ["ai-enrichment","update-api","logical-bug","search-indexing"]
+related: [16,24,28,31,32,40,19,39,66,99]
+keywords: {"title":1,"description":1,"handlers":0.57,"const":0.57,"shouldenrich":0.57}
+embedding: "gICAi5+CgICIkIqFgICKgICAgIObgICAl4mLioCAi4CAgICAkoaAgKeBiYuAgIeAgICAhIyOgICpgIOHgICKgICAgI2OkYCAm4eAgYCAhoCAgICRnoyAgKCPgYCAgIGAgICAj6aQgICJiYeDgICAgICAgJGfioCAgJCLgICAhIA="
+createdAt: 2025-08-22T13:32:43.000Z
+updatedAt: 2025-08-22T13:32:43.000Z
+---
+
+# AIエンリッチメントがtitle/description変更時に再実行されない論理的問題
+
+現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。
+
+## AI Summary
+
+AIエンリッチメントがtitle/description変更時に再実行されない論理的問題 現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。 ## 問題の詳細
+
+現在の`crud-handlers.ts`
+
+## 問題の詳細
+
+現在の`crud-handlers.ts`の実装（213行目）で：
+```typescript
+const shouldEnrich = contentChanged;
+```
+
+これは`content`フィールドの変更時のみAIエンリッチメントを再実行しており、`title`や`description`の変更を無視している。
+
+### 問題の根拠
+
+1. **titleの重要性**
+   - "React Hooks" → "Vue Composition API" のような変更は全く異なるキーワードを生成する
+   - タイトルは検索で最も重要な要素
+
+2. **descriptionの重要性**  
+   - "基本的な使い方" → "高度なパフォーマンス最適化" のような変更
+   - 説明文にも重要なキーワードが含まれる
+
+3. **実際の影響**
+   - キーワード抽出が古い情報に基づく
+   - 検索インデックスが不正確になる
+   - 関連アイテム検索の精度低下
+
+### 現在のテストの問題
+
+`tests/unit/mcp/handlers/ai-enrichment-update.test.ts`の603-638行で、titleやdescriptionのみの変更時にAIエンリッチメントが**実行されない**ことを期待値としている。これは論理的に間違った仕様。
+
+### 修正すべき箇所
+
+1. **crud-handlers.ts 213行目**
+   ```typescript
+   // 現在
+   const shouldEnrich = contentChanged;
+   
+   // 修正後
+   const shouldEnrich = contentChanged || titleChanged || descriptionChanged;
+   ```
+
+2. **テストケース**
+   - title変更時にAIエンリッチメントが実行されることをテスト
+   - description変更時にAIエンリッチメントが実行されることをテスト
+
+### 期待される動作
+
+- **title変更**: キーワード、コンセプト、埋め込みベクトルを再生成
+- **description変更**: 同様に再生成
+- **content変更**: 従来通り再生成
+- **複数フィールド変更**: 1回のみ実行（パフォーマンス最適化）
