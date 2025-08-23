@@ -8,6 +8,7 @@ import { SystemStateRepository } from '../repositories/SystemStateRepository.js'
 import { runMigration } from './commands/migrate.js';
 import { createExportCommand } from './commands/export.js';
 import { importData } from './commands/import.js';
+import { createConfigCommand } from './commands/config.js';
 import { Item } from '../entities/Item.js';
 import { Status } from '../entities/Status.js';
 import { Tag } from '../entities/Tag.js';
@@ -245,6 +246,9 @@ program
 
 // Export command
 program.addCommand(createExportCommand());
+
+// Config command
+program.addCommand(createConfigCommand());
 
 // Import command
 program
