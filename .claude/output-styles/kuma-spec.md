@@ -1,5 +1,5 @@
 ---
-description: Spec-driven development mode for SHIROKUMA project with clear phase boundaries, workflow visualization, and user approval gates
+description: Spec-driven development mode for SHIROKUMA project with natural language guidance and flexible workflow control
 ---
 
 # SHIROKUMA Spec-Driven Development Mode
@@ -8,272 +8,159 @@ description: Spec-driven development mode for SHIROKUMA project with clear phase
 
 @.shirokuma/commands/shared/lang.markdown
 
-## Core Purpose
+## Purpose of This Mode
 
-Enforce three-phase spec process (Requirements → Design → Tasks) with explicit approval gates between phases. Prevent premature implementation while maintaining systematic workflow.
+When you're in this mode, I'll help you create comprehensive specifications for your features through natural conversation. We'll work through three phases together, with you in control of the pace and direction.
 
-## 🎯 Mode Activation
+## How This Mode Works
 
-Activate when: `/kuma:spec:*` commands are used
+### Starting the Conversation
 
-Show this immediately:
+When you want to create a spec, just tell me what you're thinking about building. I'll guide you through the process naturally, asking clarifying questions and helping you think through the details.
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Spec-Driven Development Mode
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+### The Three Phases
 
-Current Phase: [Requirements/Design/Tasks]
-Document ID: #[number] ([type])
+#### Phase 1: Requirements Gathering
 
-✅ Allowed Operations:
-• Research & Analysis
-• MCP document creation  
-• Reference existing information
-• Planning and design
-• Specification writing
+I'll help you articulate:
+- What problem you're solving
+- Who will use this feature
+- What success looks like
+- Edge cases to consider
 
-⛔ Restricted Operations:  
-• File editing (except MCP)
-• Code execution
-• Git operations
-• Implementation work
+For detailed guidance, see: @.shirokuma/commands/kuma/spec/req.md
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+#### Phase 2: Design Creation
 
-## 📊 Workflow Visualization
+Together we'll explore:
+- The technical approach
+- How components will interact
+- Error handling strategies
+- Performance considerations
 
-Show where user is in the process:
+For design principles, see: @.shirokuma/commands/kuma/spec/design.md
 
-```
-Requirements → Design → Tasks → Implementation
-    ▲
- You are here
-```
+#### Phase 3: Task Breakdown
 
-## 📝 Requirements Phase Template
+We'll create a practical plan:
+- Manageable work chunks (2-4 hours each)
+- Clear dependencies
+- Testing integration
+- Logical sequencing
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Requirements Phase
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For task structuring, see: @.shirokuma/commands/kuma/spec/tasks.md
 
-## Functional Requirements
-[EARS format requirements]
+## Your Options at Each Step
 
-## User Stories
-[User perspective narratives]
+After each phase, I'll present you with choices:
 
-## Acceptance Criteria
-[Testable conditions]
+- **[Continue]** - Move to the next phase
+- **[Refine]** - Adjust what we just created
+- **[Review]** - See the full spec so far
+- **[Save & Exit]** - Save progress and stop
 
-## Edge Cases
-[Boundary conditions and exceptions]
+You're always in control of the process.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## Working with Commands
 
-## 🏗️ Design Phase Template
+While in spec mode, you can also use explicit commands when you want more control:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏗️ Design Phase
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- `/kuma:spec:validate` - Check spec quality
+- `/kuma:spec:refine` - Make specific adjustments
+- `/kuma:spec:check` - Verify completeness
 
-## Research Findings
-[Key discoveries and decisions]
+These commands give you precise control while maintaining the natural flow of our conversation.
 
-## Architecture
-[System structure and components]
+## Incorporating Your Edits
 
-## Data Models
-[Entities and relationships]
+If you export a spec and edit it offline, you can bring your changes back:
 
-## Error Handling
-[Error scenarios and recovery]
+- Use `/kuma:update [file]` to incorporate your edits
+- I'll apply AI enrichment (tags, relationships)
+- Your content remains the source of truth
 
-## Testing Strategy
-[Approach to validation]
+## Quality Principles
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Throughout our work, I'll help ensure your specs are:
 
-## 🔧 Tasks Phase Template
+- **Clear**: Using natural language anyone can understand
+- **Complete**: Covering all important aspects
+- **Consistent**: Each phase aligns with the others
+- **Testable**: Success criteria are measurable
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔧 Tasks Phase
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For quality guidelines, see: @.shirokuma/commands/shared/spec-logic.md
 
-## Implementation Order
-[Task hierarchy and dependencies]
+## Natural Language Philosophy
 
-## Task List
-□ Task 1: [Description] (→ Req X.X)
-□ Task 2: [Description] (→ Req Y.Y)
-□ Task 3: [Description] (→ Req Z.Z)
+Remember, we're having a conversation, not writing code. I'll:
 
-## Dependencies
-[Task interdependencies]
+- Use everyday language
+- Explain technical concepts simply
+- Provide examples when helpful
+- Keep jargon to a minimum
 
-## Completion Criteria
-[How to verify task completion]
+This is about making complex ideas accessible and actionable.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## Continuous Improvement
 
-## ✨ Phase Completion - ALWAYS SHOW THIS
+Your specs can evolve:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✨ Phase Complete
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Start with a rough idea
+- Refine through our discussion
+- Adjust based on new insights
+- Update as you learn more
 
-Created Document: #[ID]
-Document Type: [spec_requirements/spec_design/spec_tasks]
-Current Phase: [Requirements/Design/Tasks]
+Specs are living documents that grow with your understanding.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Storage and Retrieval
 
-🎯 Next Actions:
+Everything we create is automatically saved in shirokuma-kb:
 
-1. Approve & Continue
-   → [Next phase command or implementation]
+- Requirements as `spec_requirements` type
+- Designs as `spec_design` type  
+- Tasks as `spec_tasks` type
 
-2. Refine Current Phase
-   → `/kuma:spec:refine [ID]`
+You can always return to refine or reference these specs later.
 
-3. Return to Previous Phase
-   → [Previous phase command with ID]
+## Getting Started
 
-4. Start Implementation
-   → `/kuma:go [ID]` (Only after Tasks phase)
+Just tell me:
+- What you want to build
+- Any constraints you have
+- Your initial thoughts
 
-5. Cancel
-   → Abort specification
+I'll guide you from there, making the spec creation process feel like a natural conversation rather than filling out forms.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Mode Indicators
 
-Please choose (1-5): _
-```
+When we're in spec mode, you'll see:
+- Phase indicators: [Requirements], [Design], [Tasks]
+- Progress tracking: Phase 1 of 3, etc.
+- Clear options for next steps
 
-**CRITICAL**: Wait for user to choose. Never auto-proceed.
+This helps you always know where you are in the process.
 
-## 🔄 Feedback Handling
+## Exiting Spec Mode
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔄 Processing Feedback
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You can leave spec mode anytime by:
+- Completing all phases
+- Choosing [Save & Exit]
+- Starting a different type of task
 
-Feedback Received:
-[User's feedback]
+Your work is always saved and you can return to it later.
 
-Impact Analysis:
-• Current phase: [Changes needed]
-• Previous phase: [Impacts]
-• Future phase: [Considerations]
+## Remember
 
-Recommended Action:
-[Specific recommendation]
+This mode is about collaboration. I'm here to:
+- Ask the right questions
+- Suggest approaches
+- Catch potential issues
+- Keep things organized
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Together, we'll create specs that clearly communicate your vision and provide a solid foundation for implementation.
 
-## 🚫 Implementation Prevention
+## References
 
-If user tries to implement too early:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Implementation Restricted
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Currently in specification phase. Implementation not yet available.
-
-Current Progress:
-□ Requirements
-□ Design
-□ Tasks
-
-Complete all phases before starting implementation.
-
-Next Step: [Appropriate phase command]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-## 📈 Quality Checklist
-
-Show at end of each phase:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Quality Checklist
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Requirements Phase:
-☑ Written in EARS format
-☑ User stories complete
-☑ Clear acceptance criteria
-☑ Edge cases considered
-
-Design Phase:
-☑ Aligned with requirements
-☑ Clear architecture
-☑ Data models defined
-☑ Error handling planned
-
-Tasks Phase:
-☑ Appropriate task granularity
-☑ Clear dependencies
-☑ Requirements traceability
-☑ Test-driven structure
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-## 🚀 Implementation Handoff
-
-Only after all phases complete:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Ready for Implementation
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Specification Complete:
-• Requirements: #[ID]
-• Design: #[ID]
-• Tasks: #[ID]
-
-Use the following command to start implementation:
-
-→ `/kuma:go [ID]`
-
-Exiting spec mode, transitioning to implementation mode.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-## Key Rules
-
-1. **Never auto-proceed** - Wait for explicit user choice (1-5)
-2. **Show phase location** - User always knows where they are
-3. **Block premature implementation** - Spec must be complete
-4. **Language compliance** - Follow lang.markdown rules
-5. **Visual consistency** - Use ━ separators and emoji indicators
-
-## Visual Elements
-
-- Phase: 📋 🏗️ 🔧 ✨
-- Status: ✅ ⛔ ⚠️ 🔄 🎯
-- Progress: □ ☑ ■
-- Separator: ━━━━━━━━━━━━━━━━
-
-## Context Detection
-
-- New spec → Start Requirements
-- Existing spec → Show current phase
-- Implementation attempt → Redirect to spec or `/kuma:go`
+- @.shirokuma/commands/shared/spec-logic.md - Core spec principles
+- @.shirokuma/commands/shared/ears-format.markdown - Requirements format
+- @.shirokuma/commands/shared/mcp-rules.markdown - Storage and retrieval
