@@ -11,16 +11,20 @@ keywords: {"api":1,"mcp":1,"design":0.9,"standards":0.9,"implementation":0.8}
 concepts: {"api-design":0.9,"mcp-protocol":0.9,"software-architecture":0.8,"data-management":0.7,"error-handling":0.7}
 embedding: "gICdgICAoYWAgJaAgICPgICAkYCGgKKAgICegICAkICAgIiAjYCegYKAk4CAgIuAgICYgI6Aj4CLgI2AgICQgICAiICIgIODkoCRgICAiICAgI2AgoCCipKAnICAgIGAgICZgICAg46JgKOAgICAgICAoYCEgJKMgYCggICAh4A="
 createdAt: 2025-08-23T01:25:52.000Z
-updatedAt: 2025-08-23T01:32:49.000Z
+updatedAt: 2025-08-23T12:07:04.000Z
 ---
 
 # MCP API Design Standards
+
+## Version Information
+- **Current Version**: v0.9.0
+- **Last Updated**: 2025-08-23
 
 ## ツール命名規則
 - **CRUD操作**: `create_item`, `get_item`, `update_item`, `delete_item`
 - **検索**: `search_items`, `list_items`
 - **関係**: `add_relations`, `get_related_items`
-- **システム**: `get_stats`, `get_current_state`
+- **システム**: `get_stats`, `get_current_state`, `update_current_state`
 
 ## パラメータ設計
 ### 必須パラメータ
@@ -68,13 +72,26 @@ throw new McpError(
 - フィルタリング（type, status）
 - ソート（作成日時、更新日時）
 
+### get_related_items
+- 複数戦略サポート（keywords, concepts, embedding, hybrid）
+- 重み付け設定（hybridモード）
+- 深度設定（depth）
+
 ## AI機能統合
 - 自動エンリッチメント（create/update時）
 - 非同期処理でレスポンス遅延回避
 - エラー時の graceful degradation
+- キーワード・概念抽出
+- 埋め込みベクトル生成
 
 ## パフォーマンス考慮
-- N+1クエリ防止
+- N+1クエリ防止（TypeORM relations活用）
 - 適切なインデックス使用
 - バッチ処理の活用
 - レスポンスサイズの制限
+
+## v0.9.0での更新
+- TypeORMベースの実装継続
+- 関連アイテム検索の戦略強化
+- AI機能の詳細化
+- システム状態更新API追加

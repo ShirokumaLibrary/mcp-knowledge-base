@@ -11,10 +11,14 @@ keywords: {"tdd":1,"testing":1,"test":0.9,"vitest":0.9,"standards":0.9}
 concepts: {"testing":1,"development":0.9,"standards":0.9,"quality":0.8,"methodology":0.8}
 embedding: "gICSgJSBkYCCgICTi4CAgIiAlICXgJSAiICAi5CAgICTgJCAoYiOgIGAgIKNgICAl4CGgKiQhICAgICIhYCAgJCAgIClioCAh4CAgICAgICFgIKAqpGCgI6AgIGDgICAgICMgJyRgICPgICKgICAgIOAlICdiYeAioCAk4SAgIA="
 createdAt: 2025-08-23T01:26:32.000Z
-updatedAt: 2025-08-23T01:37:39.000Z
+updatedAt: 2025-08-23T12:08:11.000Z
 ---
 
 # Testing Standards
+
+## Version Information
+- **Current Version**: v0.9.0
+- **Last Updated**: 2025-08-23
 
 ## テスト戦略
 ### TDD (Test-Driven Development)
@@ -28,6 +32,9 @@ src/
 ├── services/
 │   ├── item.service.ts
 │   └── item.service.test.ts
+├── repositories/
+│   ├── ItemRepository.ts
+│   └── ItemRepository.test.ts
 ├── utils/
 │   ├── validation.ts
 │   └── validation.test.ts
@@ -68,10 +75,10 @@ vi.mock('./module', () => ({
   namedExport: vi.fn()
 }));
 
-// 名前付きエクスポートのモック
-vi.mock('./module', () => ({
-  ...vi.importActual('./module'),
-  specificFunction: vi.fn()
+// TypeORMのモック
+vi.mock('typeorm', () => ({
+  DataSource: vi.fn(),
+  Repository: vi.fn()
 }));
 ```
 
@@ -91,10 +98,15 @@ vi.mock('./module', () => ({
 - 実データベース使用（テスト用）
 - APIエンドポイントテスト
 
-### E2Eテスト
-- CLIコマンドの実行
-- MCPツールの動作確認
-- 実環境に近い条件
+### MCPサーバーテスト
+- STDIOベースのため自動化困難
+- mcp-api-testerエージェントによる半自動テスト
+- ユーザーレビューによる動作確認
+
+### カスタムコマンド/エージェントテスト
+- 自動テスト不可
+- ユーザーレビューによる逐次調整
+- 実使用でのフィードバック反映
 
 ## テスト実行
 ```bash
@@ -117,3 +129,9 @@ npm test validation.test.ts
 3. **速度**: ユニットテストは高速に
 4. **信頼性**: flaky testの排除
 5. **保守性**: DRY原則の適用
+
+## v0.9.0での更新
+- TypeORMベースのテストパターン継続
+- MCPサーバーテストの現実的アプローチ明記
+- カスタムコマンド/エージェントのテスト方針追加
+- ディレクトリ構造をTypeORM対応で維持
