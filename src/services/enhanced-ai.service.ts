@@ -1,67 +1,49 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { DataSource } from 'typeorm';
 import { ClaudeInterface, EnrichedMetadata } from './ai/claude-interface.js';
 import { EmbeddingManager } from './ai/embedding-manager.js';
 import { DataStorage } from './ai/data-storage.js';
-import { SimilaritySearch } from './ai/similarity-search.js';
-import { UnifiedSearch, RelationStrategy, RelatedItem } from './ai/unified-search.js';
+import { Item } from '../entities/Item.js';
 
 /**
- * Enhanced AI Service - Modular architecture for AI-powered features
- *
- * This service orchestrates multiple AI components:
+ * Enhanced AI Service - TypeORM version
+ * 
+ * This service orchestrates AI-powered features:
  * - Claude interface for enrichment
  * - Embedding management for similarity
- * - Data storage for keywords/concepts
- * - Similarity search for recommendations
- * - Unified search with multiple strategies
+ * - Keyword/concept extraction and storage
  */
 export class EnhancedAIService {
   private claudeInterface: ClaudeInterface;
   private embeddingManager: EmbeddingManager;
   private dataStorage: DataStorage;
-  private similaritySearch: SimilaritySearch;
-  private unifiedSearch: UnifiedSearch;
 
-  constructor(private prisma: InstanceType<typeof PrismaClient>) {
+  constructor(private dataSource: DataSource) {
     this.claudeInterface = new ClaudeInterface();
     this.embeddingManager = new EmbeddingManager();
-    this.dataStorage = new DataStorage(prisma);
-    this.similaritySearch = new SimilaritySearch(prisma);
-    this.unifiedSearch = new UnifiedSearch(prisma);
+    this.dataStorage = new DataStorage(dataSource);
   }
-
-  // === Primary Interface Methods ===
 
   /**
    * Generate enrichments with weighted text processing
-   * Integrates title, description, and content with different weights
    */
   async generateEnrichments(params: {
     title?: string;
     description?: string;
     content?: string;
   }): Promise<EnrichedMetadata> {
-    // Combine texts with weights: title(1.0), description(0.8), content(0.6)
+    // Combine texts with weights
     const weightedTexts: string[] = [];
 
     if (params.title) {
-      // Title gets highest weight - repeat it
-      weightedTexts.push(params.title);
       weightedTexts.push(params.title);
     }
-
     if (params.description) {
-      // Description gets medium weight
       weightedTexts.push(params.description);
     }
-
     if (params.content) {
-      // Content gets lower weight but still included
       weightedTexts.push(params.content);
     }
 
-    // Create combined content object with weighted text
     const combinedContent = {
       title: params.title || '',
       description: params.description || '',
@@ -71,75 +53,71 @@ export class EnhancedAIService {
     return this.claudeInterface.extractWeightedKeywords(combinedContent);
   }
 
+
   /**
-   * Extract weighted keywords and generate enriched metadata using Claude
+   * Enrich an item with AI-generated metadata
    */
-  async extractWeightedKeywords(content: Record<string, string>): Promise<EnrichedMetadata> {
-    return this.claudeInterface.extractWeightedKeywords(content);
+  async enrichItem(item: Item): Promise<void> {
+    const enrichments = await this.generateEnrichments({
+      title: item.title,
+      description: item.description,
+      content: item.content
+    });
+
+    // Update item with AI enrichments
+    const itemRepo = this.dataSource.getRepository(Item);
+    await itemRepo.update(item.id, {
+      aiSummary: enrichments.summary,
+      searchIndex: enrichments.keywords.map(k => k.keyword).join(' '),
+      embedding: enrichments.embedding
+    });
+
+    // Store normalized keywords and concepts
+    if (enrichments.keywords.length > 0) {
+      await this.dataStorage.storeKeywordsForItem(item.id, enrichments.keywords);
+    }
+
+    if (enrichments.concepts.length > 0) {
+      await this.dataStorage.storeConceptsForItem(item.id, enrichments.concepts);
+    }
   }
 
   /**
-   * Store concepts for an item in normalized table
+   * Find similar items using embeddings
    */
-  async storeConceptsForItem(itemId: number, concepts: Array<{ concept: string; confidence: number }>): Promise<void> {
-    return this.dataStorage.storeConceptsForItem(itemId, concepts);
-  }
+  async findSimilarItems(
+    itemId: number,
+    limit: number = 10
+  ): Promise<Array<{ id: number; similarity: number }>> {
+    const itemRepo = this.dataSource.getRepository(Item);
+    const item = await itemRepo.findOne({ where: { id: itemId } });
+    
+    if (!item || !item.embedding) {
+      return [];
+    }
 
-  /**
-   * Store keywords for an item in normalized table
-   */
-  async storeKeywordsForItem(itemId: number, keywords: Array<{ keyword?: string; word?: string; weight: number }>): Promise<void> {
-    return this.dataStorage.storeKeywordsForItem(itemId, keywords);
-  }
+    // Get all items with embeddings
+    const items = await itemRepo
+      .createQueryBuilder('item')
+      .select(['item.id', 'item.embedding'])
+      .where('item.embedding IS NOT NULL')
+      .andWhere('item.id != :itemId', { itemId })
+      .getMany();
 
-  /**
-   * Calculate cosine similarity between two embeddings
-   */
-  calculateSimilarity(embedding1: Buffer | Uint8Array | number[], embedding2: Buffer | Uint8Array | number[]): number {
-    return this.embeddingManager.calculateSimilarity(embedding1, embedding2);
-  }
+    // Calculate similarities
+    const similarities = items
+      .map(other => {
+        if (!other.embedding) return null;
+        const similarity = this.embeddingManager.calculateSimilarity(
+          item.embedding!,
+          other.embedding
+        );
+        return { id: other.id, similarity };
+      })
+      .filter((s): s is { id: number; similarity: number } => s !== null)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit);
 
-  /**
-   * Find similar items efficiently using pre-filtered search
-   */
-  async findSimilarItemsEfficiently(itemId: number, threshold: number = 0.5): Promise<number[]> {
-    return this.similaritySearch.findSimilarItemsEfficiently(itemId, threshold);
-  }
-
-  /**
-   * Suggest relations efficiently based on multiple signals
-   */
-  async suggestRelationsEfficiently(itemId: number): Promise<Array<{ id: number; score: number; reason: string }>> {
-    return this.similaritySearch.suggestRelationsEfficiently(itemId);
-  }
-
-  /**
-   * Find related items using unified search strategies
-   */
-  async findRelatedItemsUnified(itemId: number, strategy?: RelationStrategy): Promise<RelatedItem[]> {
-    return this.unifiedSearch.findRelatedItemsUnified(itemId, strategy);
-  }
-
-  // === Utility Methods ===
-
-  /**
-   * Generate embedding from weighted keywords
-   */
-  generateEmbedding(keywords: Array<{ word: string; weight: number }>): number[] {
-    return this.embeddingManager.generateEmbedding(keywords);
-  }
-
-  /**
-   * Quantize embedding for storage
-   */
-  quantizeEmbedding(embedding: number[]): Buffer {
-    return this.embeddingManager.quantizeEmbedding(embedding);
-  }
-
-  /**
-   * Dequantize embedding from storage
-   */
-  dequantizeEmbedding(buffer: Buffer): number[] {
-    return this.embeddingManager.dequantizeEmbedding(buffer);
+    return similarities;
   }
 }

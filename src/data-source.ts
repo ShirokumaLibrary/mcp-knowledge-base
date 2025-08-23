@@ -32,7 +32,7 @@ function getDatabasePath(): string {
   }
 
   // Default to .shirokuma/data in project or home directory
-  const projectPath = path.resolve(__dirname, '../..', '.shirokuma', 'data-prod', 'shirokuma.db');
+  const projectPath = path.resolve(__dirname, '../..', '.shirokuma', 'data', 'shirokuma.db');
   const projectDir = path.dirname(projectPath);
   
   // Try project directory first

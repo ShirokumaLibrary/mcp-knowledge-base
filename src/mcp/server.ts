@@ -15,6 +15,7 @@ import { Status } from '../entities/Status.js';
 import { Tag } from '../entities/Tag.js';
 import { ItemTag } from '../entities/ItemTag.js';
 import { ItemRelation } from '../entities/ItemRelation.js';
+import { EnhancedAIService } from '../services/enhanced-ai.service.js';
 
 const server = new Server(
   {
@@ -208,6 +209,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           priority: args.priority ? String(args.priority) : 'MEDIUM',
           category: args.category ? String(args.category) : undefined,
         });
+
+        // Enrich with AI if content is substantial
+        const hasContent = item.title || item.description || item.content;
+        if (hasContent) {
+          try {
+            const aiService = new EnhancedAIService(AppDataSource);
+            await aiService.enrichItem(item);
+          } catch (error) {
+            // AI enrichment is optional, continue even if it fails
+            console.error('AI enrichment failed:', error);
+            // Add error to response for debugging
+            item.aiSummary = `ERROR: ${error instanceof Error ? error.message : String(error)}`;
+          }
+        }
 
         // Handle tags
         if (args.tags && Array.isArray(args.tags) && args.tags.length > 0) {

@@ -1,109 +1,182 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { DataSource } from 'typeorm';
+import { Keyword } from '../../entities/Keyword.js';
+import { ItemKeyword } from '../../entities/ItemKeyword.js';
+import { Concept } from '../../entities/Concept.js';
+import { ItemConcept } from '../../entities/ItemConcept.js';
 
+/**
+ * Data Storage Service - TypeORM version
+ * Handles normalized storage of keywords and concepts
+ */
 export class DataStorage {
-  constructor(private prisma: InstanceType<typeof PrismaClient>) {}
-
-  /**
-   * Store concepts for an item in normalized table
-   */
-  async storeConceptsForItem(itemId: number, concepts: Array<{ concept: string; confidence: number }>): Promise<void> {
-    if (!concepts || concepts.length === 0) {
-      return;
-    }
-
-    try {
-      // Clear existing concepts for this item
-      await this.prisma.itemConcept.deleteMany({
-        where: { itemId }
-      });
-
-      // Create or find concepts and create relations
-      for (const conceptData of concepts.slice(0, 20)) {
-        if (!conceptData.concept || conceptData.confidence <= 0) {
-          continue;
-        }
-
-        const conceptName = conceptData.concept.toLowerCase().trim();
-        const confidence = Math.min(Math.max(conceptData.confidence, 0), 1);
-
-        // Create or find the concept
-        const concept = await this.prisma.concept.upsert({
-          where: { name: conceptName },
-          update: {},
-          create: { name: conceptName }
-        });
-
-        // Create the relation
-        await this.prisma.itemConcept.upsert({
-          where: {
-            itemId_conceptId: {
-              itemId,
-              conceptId: concept.id
-            }
-          },
-          update: { confidence },
-          create: {
-            itemId,
-            conceptId: concept.id,
-            confidence
-          }
-        });
-      }
-    } catch {
-      // Failed to store concepts, silently continue
-    }
-  }
+  constructor(private dataSource: DataSource) {}
 
   /**
    * Store keywords for an item in normalized table
    */
-  async storeKeywordsForItem(itemId: number, keywords: Array<{ keyword?: string; word?: string; weight: number }>): Promise<void> {
-    if (!keywords || keywords.length === 0) {
-      return;
-    }
+  async storeKeywordsForItem(
+    itemId: number,
+    keywords: Array<{ keyword: string; weight: number }>
+  ): Promise<void> {
+    const keywordRepo = this.dataSource.getRepository(Keyword);
+    const itemKeywordRepo = this.dataSource.getRepository(ItemKeyword);
 
-    try {
-      // Clear existing keywords for this item
-      await this.prisma.itemKeyword.deleteMany({
-        where: { itemId }
+    for (const { keyword, weight } of keywords) {
+      // Get or create keyword
+      let keywordEntity = await keywordRepo.findOne({
+        where: { word: keyword }
       });
 
-      // Create or find keywords and create relations
-      for (const keywordData of keywords.slice(0, 15)) {
-        const keywordText = keywordData.keyword || keywordData.word;
-        if (!keywordText || keywordData.weight <= 0) {
-          continue;
-        }
-
-        const word = keywordText.toLowerCase().trim();
-        const weight = Math.min(Math.max(keywordData.weight, 0), 1);
-
-        // Create or find the keyword
-        const keyword = await this.prisma.keyword.upsert({
-          where: { word },
-          update: {},
-          create: { word }
-        });
-
-        // Create the relation
-        await this.prisma.itemKeyword.upsert({
-          where: {
-            itemId_keywordId: {
-              itemId,
-              keywordId: keyword.id
-            }
-          },
-          update: { weight },
-          create: {
-            itemId,
-            keywordId: keyword.id,
-            weight
-          }
-        });
+      if (!keywordEntity) {
+        keywordEntity = await keywordRepo.save({ word: keyword });
       }
-    } catch {
-      // Failed to store keywords, silently continue
+
+      // Check if relation already exists
+      const existing = await itemKeywordRepo.findOne({
+        where: {
+          itemId,
+          keywordId: keywordEntity.id
+        }
+      });
+
+      if (!existing) {
+        // Create item-keyword relation with weight
+        await itemKeywordRepo.save({
+          itemId,
+          keywordId: keywordEntity.id,
+          weight
+        });
+      } else {
+        // Update weight if relation exists
+        await itemKeywordRepo.update(
+          { itemId, keywordId: keywordEntity.id },
+          { weight }
+        );
+      }
+    }
+  }
+
+  /**
+   * Store concepts for an item in normalized table
+   */
+  async storeConceptsForItem(
+    itemId: number,
+    concepts: Array<{ concept: string; confidence: number }>
+  ): Promise<void> {
+    const conceptRepo = this.dataSource.getRepository(Concept);
+    const itemConceptRepo = this.dataSource.getRepository(ItemConcept);
+
+    for (const { concept, confidence } of concepts) {
+      // Get or create concept
+      let conceptEntity = await conceptRepo.findOne({
+        where: { name: concept }
+      });
+
+      if (!conceptEntity) {
+        conceptEntity = await conceptRepo.save({ name: concept });
+      }
+
+      // Check if relation already exists
+      const existing = await itemConceptRepo.findOne({
+        where: {
+          itemId,
+          conceptId: conceptEntity.id
+        }
+      });
+
+      if (!existing) {
+        // Create item-concept relation with confidence
+        await itemConceptRepo.save({
+          itemId,
+          conceptId: conceptEntity.id,
+          confidence
+        });
+      } else {
+        // Update confidence if relation exists
+        await itemConceptRepo.update(
+          { itemId, conceptId: conceptEntity.id },
+          { confidence }
+        );
+      }
+    }
+  }
+
+  /**
+   * Get keywords for an item
+   */
+  async getKeywordsForItem(itemId: number): Promise<Array<{ keyword: string; weight: number }>> {
+    const itemKeywordRepo = this.dataSource.getRepository(ItemKeyword);
+    
+    const relations = await itemKeywordRepo
+      .createQueryBuilder('ik')
+      .leftJoinAndSelect('ik.keyword', 'k')
+      .where('ik.itemId = :itemId', { itemId })
+      .orderBy('ik.weight', 'DESC')
+      .getMany();
+
+    return relations.map(r => ({
+      keyword: r.keyword.word,
+      weight: r.weight
+    }));
+  }
+
+  /**
+   * Get concepts for an item
+   */
+  async getConceptsForItem(itemId: number): Promise<Array<{ concept: string; confidence: number }>> {
+    const itemConceptRepo = this.dataSource.getRepository(ItemConcept);
+    
+    const relations = await itemConceptRepo
+      .createQueryBuilder('ic')
+      .leftJoinAndSelect('ic.concept', 'c')
+      .where('ic.itemId = :itemId', { itemId })
+      .orderBy('ic.confidence', 'DESC')
+      .getMany();
+
+    return relations.map(r => ({
+      concept: r.concept.name,
+      confidence: r.confidence
+    }));
+  }
+
+  /**
+   * Clean up orphaned keywords and concepts
+   */
+  async cleanupOrphaned(): Promise<void> {
+    // Delete keywords with no items
+    const keywordIds = await this.dataSource
+      .getRepository(ItemKeyword)
+      .createQueryBuilder('ik')
+      .select('DISTINCT ik.keywordId', 'keywordId')
+      .getRawMany();
+    
+    const usedKeywordIds = keywordIds.map(k => k.keywordId);
+    
+    if (usedKeywordIds.length > 0) {
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(Keyword)
+        .where('id NOT IN (:...ids)', { ids: usedKeywordIds })
+        .execute();
+    }
+
+    // Delete concepts with no items
+    const conceptIds = await this.dataSource
+      .getRepository(ItemConcept)
+      .createQueryBuilder('ic')
+      .select('DISTINCT ic.conceptId', 'conceptId')
+      .getRawMany();
+    
+    const usedConceptIds = conceptIds.map(c => c.conceptId);
+    
+    if (usedConceptIds.length > 0) {
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(Concept)
+        .where('id NOT IN (:...ids)', { ids: usedConceptIds })
+        .execute();
     }
   }
 }
