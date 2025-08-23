@@ -336,6 +336,16 @@ export class ExportManager {
     md += `title: "${item.title.replace(/"/g, '\\"')}"\n`;
     md += `status: ${item.status.name}\n`;
     md += `priority: ${item.priority || 'MEDIUM'}\n`;
+    
+    // Description in Front Matter
+    if (item.description) {
+      md += `description: ${JSON.stringify(item.description)}\n`;
+    }
+    
+    // AI Summary in Front Matter
+    if (item.aiSummary) {
+      md += `aiSummary: ${JSON.stringify(item.aiSummary)}\n`;
+    }
 
     if (item.category) {
       md += `category: "${item.category}"\n`;
@@ -398,25 +408,9 @@ export class ExportManager {
 
     md += '---\n\n';
 
-    // Title
-    md += `# ${item.title}\n\n`;
-
-    // Description
-    if (item.description) {
-      md += `${item.description}\n\n`;
-    }
-
-    // AI Summary
-    if (item.aiSummary) {
-      md += `## AI Summary\n\n${item.aiSummary}\n\n`;
-    }
-
-    // Content
+    // Content only (everything else is in front matter)
     if (item.content) {
       md += item.content;
-      if (!item.content.endsWith('\n')) {
-        md += '\n';
-      }
     }
 
     return md;
@@ -485,25 +479,20 @@ export class ExportManager {
     // Add active status
     md += `isActive: ${state.isActive}\n`;
 
+    // Summary in Front Matter
+    if (state.summary) {
+      md += `summary: ${JSON.stringify(state.summary)}\n`;
+    }
+
     // Timestamps
     md += `createdAt: ${state.createdAt.toISOString()}\n`;
     md += `updatedAt: ${state.updatedAt.toISOString()}\n`;
 
     md += '---\n\n';
 
-    // Title
-    md += `# System State #${state.id}\n\n`;
-
-    // Summary (if exists and different from content)
-    if (state.summary && state.summary !== state.content) {
-      md += `## Summary\n\n${state.summary}\n\n`;
-    }
-
-    // Content - the main state description
-    md += state.content;
-    
-    if (!state.content.endsWith('\n')) {
-      md += '\n';
+    // Content only (everything else is in front matter)
+    if (state.content) {
+      md += state.content;
     }
 
     return md;
