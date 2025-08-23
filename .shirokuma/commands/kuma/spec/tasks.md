@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Purpose
 
-Breaks down technical design into actionable implementation tasks. This is Phase 3 of the spec-driven development process.
+Let's turn your design into a practical action plan. I'll help you break down the big picture into manageable pieces that you can tackle one at a time, always knowing what comes next.
 
 ## Usage
 
@@ -23,31 +23,60 @@ Breaks down technical design into actionable implementation tasks. This is Phase
 /kuma:spec:tasks execute <spec-id>   # Load tasks into TodoWrite
 ```
 
-## Implementation
+## What I'll Do When You Call This Command
 
-**Type used**: `type: "spec_tasks"` - Task breakdown phase only (implementation tasks, test tasks, priorities)
+### Understanding Your Design
 
-### Task Generation Process
+When you provide a design spec ID, I'll:
 
-#### Step 1: Load Design
-- Retrieve spec from MCP
-- Parse design document
-- Identify components to implement
-- Extract dependencies
+1. **Study your architecture**
+   - Review the components you've designed
+   - Understand how they fit together
+   - Note the critical paths and dependencies
 
-#### Step 2: Create Task Phases
-Standard phases:
-1. **Foundation and Setup** - Project structure, dependencies
-2. **Core Business Logic** - Services, business rules
-3. **API Layer** - Endpoints, validation
-4. **User Interface** - Components, state management
-5. **Integration and Testing** - E2E, performance
-6. **Deployment** - Configuration, documentation
+2. **Think about the journey**
+   - What needs to be built first?
+   - What can be done in parallel?
+   - Where are the risky parts?
 
-#### Step 3: Break Down Tasks
-- Each task: 2-4 hours completion time
-- Include specific files/functions
-- Add testing requirements
+### Creating Your Task Plan
+
+I'll organize the work into logical phases:
+
+#### Building the Foundation
+- Setting up the project structure
+- Installing what you'll need
+- Creating the basic scaffolding
+- Making sure tests can run
+
+#### Implementing Core Features
+- Starting with the most important parts
+- Building incrementally
+- Testing as we go
+- Keeping things working at each step
+
+#### Connecting Everything
+- Bringing components together
+- Making sure they communicate properly
+- Handling edge cases
+- Polishing the experience
+
+### Task Sizing Philosophy
+
+I believe tasks should be:
+- **Small enough** to complete in one sitting (2-4 hours)
+- **Large enough** to feel meaningful
+- **Clear enough** that you know when you're done
+- **Flexible enough** to adjust as you learn
+
+### Test-Driven Approach
+
+For each task, I'll suggest:
+- What tests to write first
+- How to know it's working
+- What to verify before moving on
+
+See @.shirokuma/commands/shared/spec-logic.md for our task principles
 - Reference requirements
 - Define dependencies
 

@@ -12,7 +12,7 @@ allowed-tools: Read, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__update_item
 
 ## Purpose
 
-Validate specifications using comprehensive checklists to ensure quality and completeness at each phase.
+Let's do a thorough review of your spec together. I'll go through a comprehensive checklist to help ensure nothing important is overlooked and everything is ready for the next step.
 
 ## Usage
 
@@ -24,19 +24,48 @@ Validate specifications using comprehensive checklists to ensure quality and com
 /kuma:spec:check "spec content"          # Check provided content
 ```
 
-## Requirements Phase Checklist
+## How I Review Your Specs
 
-### Content Quality
-- [ ] **Clear Introduction**: Feature overview explains problem and solution
-- [ ] **Business Value**: Clear articulation of why needed
-- [ ] **Scope Definition**: What's included/excluded is explicit
-- [ ] **Stakeholder Identification**: All stakeholders identified
+### My Review Approach
 
-### User Stories
-- [ ] **Complete Format**: All follow "As a [role], I want [feature], so that [benefit]"
-- [ ] **Clear Roles**: User roles are specific and well-defined
-- [ ] **Valuable Features**: Each provides clear user value
-- [ ] **Measurable Benefits**: Benefits are specific where possible
+When you ask me to check your spec, I'll:
+
+1. **Read through everything carefully**
+   - Understanding what you're trying to achieve
+   - Looking for gaps or unclear areas
+   - Checking connections between sections
+
+2. **Use phase-appropriate checklists**
+   - Different phases need different checks
+   - I'll focus on what matters most
+   - Not everything needs to be perfect
+
+3. **Provide constructive feedback**
+   - Celebrating what's working well
+   - Suggesting specific improvements
+   - Explaining why something matters
+
+### What I Look For
+
+#### In Requirements
+- Is the problem clearly stated?
+- Do we know who this helps?
+- Can we tell when we're done?
+- Are edge cases considered?
+
+#### In Design
+- Does it address all requirements?
+- Are the pieces well-defined?
+- Is the approach practical?
+- Have we thought about errors?
+
+#### In Tasks
+- Are tasks the right size?
+- Is the order logical?
+- Do we know the dependencies?
+- Is testing included?
+
+For detailed quality guidelines, see @.shirokuma/commands/shared/spec-logic.md
 
 ### EARS Format Compliance
 - [ ] **WHEN Statements**: Event-driven requirements use WHEN correctly

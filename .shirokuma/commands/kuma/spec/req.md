@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Purpose
 
-Generates comprehensive requirements documents using EARS (Easy Approach to Requirements Syntax) format. This is Phase 1 of the spec-driven development process.
+Help me understand what you want to build and turn it into clear, testable requirements. This is where we start our journey together - understanding the "what" before the "how".
 
 ## Usage
 
@@ -22,32 +22,43 @@ Generates comprehensive requirements documents using EARS (Easy Approach to Requ
 /kuma:spec:req validate <spec-id>       # Validate requirements quality
 ```
 
-## Implementation
+## What I'll Do When You Call This Command
 
-### Requirements Generation Process
+### Understanding Your Vision
 
-#### Step 1: Analyze Feature Request
-- Parse feature description
-- Identify key stakeholders
-- Determine system boundaries
-- Extract core functionality
+When you describe what you want to build, I'll help you by:
 
-#### Step 2: Generate User Stories
-Format: `As a [role], I want [feature], so that [benefit]`
+1. **Asking clarifying questions** to understand:
+   - Who will use this feature?
+   - What problem does it solve?
+   - What does success look like?
+   - What constraints exist?
 
-#### Step 3: Create EARS Acceptance Criteria
-Using patterns from @.shirokuma/commands/shared/ears-format.markdown:
-- WHEN [event] THEN [system] SHALL [response]
-- IF [condition] THEN [system] SHALL [behavior]
-- WHILE [state] [system] SHALL [continuous behavior]
-- WHERE [context] [system] SHALL [contextual behavior]
-- UNLESS [exception] [system] SHALL [default behavior]
+2. **Creating user stories** that capture value:
+   - From the user's perspective
+   - Focused on outcomes, not implementation
+   - Clear about the benefits
 
-#### Step 4: Add Non-Functional Requirements
-- Performance requirements
-- Security requirements
-- Usability requirements
-- Reliability requirements
+3. **Writing testable requirements** using EARS format:
+   - See @.shirokuma/commands/shared/ears-format.markdown for patterns
+   - Each requirement will be specific and measurable
+   - Edge cases and exceptions will be documented
+
+4. **Considering the full picture**:
+   - How fast does it need to be?
+   - How secure must it be?
+   - How easy should it be to use?
+   - What happens when things go wrong?
+
+### My Approach
+
+I won't just generate a document - I'll have a conversation with you:
+- I'll ask about aspects you might not have considered
+- I'll suggest patterns from similar features
+- I'll help you think through edge cases
+- I'll ensure requirements are complete and consistent
+
+For shared principles, see @.shirokuma/commands/shared/spec-logic.md
 
 ### Generation Prompt
 

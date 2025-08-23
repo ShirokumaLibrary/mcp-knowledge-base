@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Purpose
 
-Creates comprehensive technical design documents based on requirements. This is Phase 2 of the spec-driven development process.
+Let's transform your requirements into a thoughtful design. I'll help you explore how to build what you've envisioned, making technical decisions together while keeping things practical and maintainable.
 
 ## Usage
 
@@ -22,32 +22,53 @@ Creates comprehensive technical design documents based on requirements. This is 
 /kuma:spec:design validate <spec-id>  # Validate design quality
 ```
 
-## Implementation
+## What I'll Do When You Call This Command
 
-**Type used**: `type: "spec_design"` - Design phase only (architecture, data models, interfaces)
+### Starting from Your Requirements
 
-### Design Generation Process
+When you provide a requirements spec ID, I'll:
 
-#### Step 1: Load Requirements
-- Retrieve spec from MCP
-- Parse requirements document
-- Extract functional and non-functional requirements
-- Identify integration points
+1. **Review what we're building**
+   - Read through your requirements carefully
+   - Understand the goals and constraints
+   - Note the success criteria
 
-#### Step 2: Architecture Design
-- Define system context
-- Create high-level architecture
-- Identify components and relationships
-- Choose technology stack with rationale
+2. **Explore the solution space**
+   - Research existing patterns that might help
+   - Consider different architectural approaches
+   - Think about what's worked well before
 
-#### Step 3: Component Design
-- Define component responsibilities
-- Specify interfaces (input/output)
-- Document dependencies
-- Add implementation notes
+### Creating Your Design
 
-#### Step 4: Data Model Design
-- Create entity definitions
+I'll work with you to develop:
+
+#### The Big Picture
+- How the system fits into your environment
+- What the major pieces are and how they connect
+- Why we're choosing specific technologies
+- Where the boundaries and interfaces are
+
+#### The Details That Matter
+- How components will talk to each other
+- What data needs to be stored and how
+- How errors will be handled gracefully
+- Where performance might be a concern
+
+#### The Implementation Path
+- What patterns to follow
+- Which frameworks make sense
+- How to keep things testable
+- Where to be flexible for future changes
+
+### My Design Philosophy
+
+I believe good design should be:
+- **Simple** - No more complex than necessary
+- **Clear** - Easy for others to understand
+- **Practical** - Buildable with your resources
+- **Flexible** - Able to evolve as you learn
+
+For design principles, see @.shirokuma/commands/shared/spec-logic.md
 - Define relationships
 - Add validation rules
 - Design data flow

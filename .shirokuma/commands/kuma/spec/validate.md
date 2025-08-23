@@ -12,7 +12,7 @@ allowed-tools: Read, mcp__shirokuma-kb__get_item
 
 ## Purpose
 
-Validate EARS format compliance and spec structure to ensure proper syntax and completeness.
+Let me help you check that your specifications are clear, complete, and ready for implementation. Think of me as a friendly reviewer who wants to make sure nothing important is missed.
 
 ## Usage
 
@@ -22,22 +22,39 @@ Validate EARS format compliance and spec structure to ensure proper syntax and c
 /kuma:spec:validate requirements <spec-id>       # Validate requirements format
 ```
 
-## EARS Format Validation
+## How I'll Help You Validate
 
-### Valid EARS Patterns
+### Checking Your Requirements
 
-#### WHEN Pattern
-```
-WHEN [trigger/event] THEN [system] SHALL [response]
-```
-✅ Valid Examples:
-- `WHEN user clicks submit button THEN system SHALL validate form data`
-- `WHEN file upload completes THEN system SHALL display success message`
-- `WHEN session expires THEN system SHALL redirect to login page`
+When you ask me to validate, I'll look for:
 
-❌ Invalid Examples:
-- `WHEN user clicks THEN validate` (missing SHALL and system)
-- `User clicks submit and system validates` (not EARS format)
+1. **Clarity** - Can anyone understand what's being asked?
+2. **Completeness** - Are all the pieces there?
+3. **Testability** - Can we verify when it's done?
+4. **Consistency** - Do all parts work together?
+
+### Understanding EARS Format
+
+The EARS format helps us write requirements that are precise. I'll check if your requirements follow patterns like:
+
+- **WHEN something happens THEN the system SHALL respond**
+  - Good: Clear trigger and response
+  - Watch for: Missing "SHALL" or vague responses
+
+- **IF a condition exists THEN the system SHALL behave**
+  - Good: Specific conditions and behaviors
+  - Watch for: Ambiguous conditions
+
+For all EARS patterns, see @.shirokuma/commands/shared/ears-format.markdown
+
+### What I'll Tell You
+
+I'll provide friendly feedback like:
+- "This requirement is clear and testable ✓"
+- "Consider adding what happens when the user cancels"
+- "This might be clearer if split into two requirements"
+
+I'm not here to criticize, but to help you succeed!
 - `WHEN clicked SHALL respond` (missing THEN, unclear subject)
 
 #### IF Pattern
