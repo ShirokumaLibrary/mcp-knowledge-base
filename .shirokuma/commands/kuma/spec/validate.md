@@ -239,21 +239,21 @@ Score: 100%
 
 ## Validation API
 
-```typescript
-interface ValidationResult {
-  valid: boolean;
-  score: number;
-  issues: ValidationIssue[];
-  suggestions: string[];
-  corrected?: string;
-}
+### Validation Result Structure
+```yaml
+# Validation Result Format
+ValidationResult:
+  valid: Boolean indicating overall validity
+  score: Numeric score (0-100)
+  issues: List of validation issues
+  suggestions: List of improvement suggestions
+  corrected: Optional corrected version of statement
 
-interface ValidationIssue {
-  type: 'error' | 'warning';
-  position: number;
-  message: string;
-  suggestion: string;
-}
+ValidationIssue:
+  type: "error" or "warning"
+  position: Character position in statement
+  message: Description of the issue
+  suggestion: Recommended correction
 ```
 
 ## References

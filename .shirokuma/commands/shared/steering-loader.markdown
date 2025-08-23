@@ -8,80 +8,83 @@ Automatically selects appropriate steering documents based on execution context.
 ## Loading Strategy
 
 ### 1. Automatic Loading (inclusion:always)
-```typescript
-// Always applied steering
-const alwaysSteering = await mcp.search_items({
-  query: "",
-  types: ["steering"],
-  tags: ["inclusion:always"]
-});
+```yaml
+# Load steering documents that are always applied
+- Tool: mcp__shirokuma-kb__search_items
+  Parameters:
+    query: ""
+    types: ["steering"]
+    tags: ["inclusion:always"]
+  Purpose: Get steering documents that apply to all contexts
 ```
 
 ### 2. Context-Based Loading (inclusion:filematch)
-```typescript
-// Selection based on current file path
-const contextSteering = await mcp.search_items({
-  query: "",
-  types: ["steering"],
-  tags: ["inclusion:filematch"]
-});
+```yaml
+# Load steering documents based on file context
+- Tool: mcp__shirokuma-kb__search_items
+  Parameters:
+    query: ""
+    types: ["steering"]
+    tags: ["inclusion:filematch"]
+  Purpose: Get steering documents with file pattern matching
 
-// Pattern matching
-for (const doc of contextSteering) {
-  const pattern = extractPattern(doc.tags); // pattern:mcp/**
-  if (matchesPattern(currentPath, pattern)) {
-    applySteering(doc);
-  }
-}
+# Pattern Matching Process
+- Extract pattern from document tags (format: pattern:mcp/**)
+- Match current file path against extracted pattern
+- Apply steering if pattern matches current context
 ```
 
 ### 3. Language/Environment Specific (pattern:*)
-```typescript
-// Detect project type and apply relevant steering
-const projectType = detectProjectType(); // 'typescript', 'python', 'react', etc.
+```yaml
+# Load language-specific steering documents
+- Detect Project Type:
+    Purpose: Identify current project technology stack
+    Output: projectType (typescript, python, react, etc.)
 
-// Load language-specific steering
-const languageSteering = await mcp.search_items({
-  query: "",
-  types: ["steering"],
-  tags: [`pattern:${projectType}`]
-});
+- Tool: mcp__shirokuma-kb__search_items
+  Parameters:
+    query: ""
+    types: ["steering"]
+    tags: ["pattern:{projectType}"]
+  Purpose: Get steering documents for detected project type
 
-// Apply based on detected environment
-if (projectType === 'typescript') {
-  const tsSteering = await mcp.search_items({
-    query: "",
-    types: ["steering"],
+# Example for TypeScript projects
+- Tool: mcp__shirokuma-kb__search_items
+  Parameters:
+    query: ""
+    types: ["steering"]
     tags: ["pattern:typescript"]
-  });
-  applySteeringDocs(tsSteering);
-}
+  Purpose: Apply TypeScript-specific steering rules
 ```
 
 ### 4. Manual Loading (inclusion:manual)
-```typescript
-// Only when explicitly requested
-if (userRequestedManual) {
-  const manualSteering = await mcp.search_items({
-    query: "",
-    types: ["steering"],
+```yaml
+# Load manual steering only when explicitly requested
+- Condition: Only when user explicitly requests manual steering
+- Tool: mcp__shirokuma-kb__search_items
+  Parameters:
+    query: ""
+    types: ["steering"]
     tags: ["inclusion:manual"]
-  });
-}
+  Purpose: Get steering documents requiring explicit activation
 ```
 
 ## Priority Handling
 
 Priority management using MCP priority field:
 
-```typescript
-const steeringDocs = [...alwaysSteering, ...contextSteering];
-
-// Sort by priority
-steeringDocs.sort((a, b) => {
-  const priorityOrder = { 'CRITICAL': 5, 'HIGH': 4, 'MEDIUM': 3, 'LOW': 2, 'MINIMAL': 1 };
-  return priorityOrder[b.priority] - priorityOrder[a.priority];
-});
+```yaml
+# Combine and prioritize steering documents
+Process:
+  1. Merge Results:
+     - Combine always-applied steering documents
+     - Add context-based steering documents
+     - Include manually requested steering documents
+  
+  2. Priority Sorting:
+     Order: CRITICAL > HIGH > MEDIUM > LOW > MINIMAL
+     Values: { CRITICAL: 5, HIGH: 4, MEDIUM: 3, LOW: 2, MINIMAL: 1 }
+     Result: Higher priority steering documents processed first
 ```
 
 ## Pattern Extraction
@@ -259,7 +262,7 @@ Graceful Loading Process:
 ### Creating Steering
 ```yaml
 MCP Tool Usage:
-  Tool: mcp.create_item
+  Tool: mcp__shirokuma-kb__create_item
   Parameters:
     - type: 'steering'
     - title: 'Steering: [document-name]'
@@ -272,7 +275,7 @@ MCP Tool Usage:
 ### Updating Steering
 ```yaml
 MCP Tool Usage:
-  Tool: mcp.update_item
+  Tool: mcp__shirokuma-kb__update_item
   Parameters:
     - id: [steering-id]
     - content: [updated-markdown]
@@ -282,14 +285,14 @@ MCP Tool Usage:
 ### Searching Steering
 ```yaml
 Get All Steering Documents:
-  Tool: mcp.list_items
+  Tool: mcp__shirokuma-kb__list_items
   Parameters:
     - type: 'steering'
     - limit: 100
   Purpose: Retrieve all steering documents
 
 Keyword Search:
-  Tool: mcp.search_items
+  Tool: mcp__shirokuma-kb__search_items
   Parameters:
     - query: 'testing TDD'
     - types: ['steering']

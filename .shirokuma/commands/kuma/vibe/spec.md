@@ -111,19 +111,14 @@ Executes development tasks based on existing spec documents. Follows the require
 
 ## TodoWrite Integration
 
-Automatically populates task list:
-
-```typescript
-// Convert spec tasks to TodoWrite
-const tasks = parseTasksFromSpec(spec);
-await TodoWrite({
-  todos: tasks.map(task => ({
-    content: task.description,
-    status: 'pending',
-    activeForm: `Working on ${task.description}`
-  }))
-});
-```
+**Automatic task list population:**
+1. Parse tasks from spec document
+2. Extract task descriptions and dependencies
+3. Create TodoWrite entries with:
+   - content: Task description from spec
+   - status: 'pending' initially
+   - activeForm: Progress message format
+4. Update status as tasks are completed
 
 ## Steering Application
 
@@ -134,20 +129,20 @@ await TodoWrite({
 - Maintains naming conventions
 
 ### Context-Aware Implementation
-```typescript
-// Apply steering based on spec type
-const steering = await loadSteeringDocuments({
-  context: spec.category,
-  filePattern: spec.targetPath
-});
 
-// Generate code with steering
-const implementation = generateCode({
-  spec: spec,
-  steering: steering,
-  patterns: detectProjectPatterns()
-});
-```
+**Steering application process:**
+1. Load relevant steering documents based on:
+   - Spec category
+   - Target file paths
+   - Project context
+2. Detect existing project patterns:
+   - Code style
+   - Architecture patterns
+   - Naming conventions
+3. Generate implementation following:
+   - Spec requirements
+   - Steering guidelines
+   - Project patterns
 
 ## Progress Tracking
 
@@ -170,20 +165,16 @@ const implementation = generateCode({
 ```
 
 ### MCP Updates
-```typescript
-// Update spec status
-await mcp.update_item({
-  id: specId,
-  status: 'In Progress',
-  metadata: {
-    progress: {
-      requirements: 'completed',
-      design: 'in_progress',
-      tasks: '5/7'
-    }
-  }
-});
-```
+
+**Progress tracking via MCP:**
+- Tool: mcp__shirokuma-kb__update_item
+- Updates:
+  - status: Update to 'In Progress', 'Review', or 'Completed'
+  - metadata.progress: Track phase completion
+    - requirements: completed/in_progress/pending
+    - design: completed/in_progress/pending
+    - tasks: X/Y format for task count
+- Frequency: Update after each significant milestone
 
 ## Error Handling
 

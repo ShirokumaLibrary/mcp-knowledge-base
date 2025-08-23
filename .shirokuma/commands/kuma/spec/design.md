@@ -85,188 +85,73 @@ Generate a design document following this structure:
 
 ### MCP Storage
 
-Design is automatically stored in shirokuma-kb as human-readable Markdown:
+```yaml
+# Design Storage Process
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_design"
+    title: "Design: [feature-name]"
+    description: "Design phase of spec-driven development"
+    content: human-readable-markdown-content
+    status: "Specification"
+    priority: "HIGH"
+    tags: ["spec", "design", "architecture"]
+    related: [related-spec-ids]
+  Purpose: Store comprehensive design document
 
-```typescript
-// Generate human-readable Markdown content
-const markdownContent = `# Design: ${featureName}
+# Generated Markdown Structure
+Design Document Sections:
+  - Metadata: Version, dates, status, phase
+  - Design Overview: Goals and key decisions
+  - System Architecture: Context, components, tech stack
+  - Data Architecture: Models, relationships, data flow
+  - API Design: Endpoints, schemas, error responses
+  - Error Handling: Strategy and error types
+  - Testing Approach: Unit, integration, e2e strategies
+  - Security Considerations: Concerns and mitigations
+  - Performance Targets: Metrics and measurements
+  - Migration Strategy: Approach, steps, rollback plan
+  - Open Questions: Unresolved items
 
-## Metadata
-- **Version**: 1.0
-- **Created**: ${new Date().toISOString()}
-- **Status**: Specification
-- **Phase**: Design
-${relatedRequirements ? `- **Requirements Spec**: #${relatedRequirements}` : ''}
-
-## Design Overview
-
-### Goals
-${goals.map(goal => `- ${goal}`).join('\n')}
-
-### Key Design Decisions
-${decisions.map((decision, i) => `
-${i+1}. **Decision**: ${decision.decision}
-   - **Rationale**: ${decision.rationale}
-   - **Trade-offs**: ${decision.tradeoffs || 'None identified'}
-`).join('\n')}
-
-## System Architecture
-
-### System Context
-${architecture.systemContext}
-
-### Component Architecture
-${components.map((comp, i) => `
-#### Component ${i+1}: ${comp.name}
-- **Purpose**: ${comp.purpose}
-- **Responsibilities**: 
-  ${comp.responsibilities.map(r => `  - ${r}`).join('\n')}
-- **Interfaces**:
-  - **Input**: ${comp.interfaces.input}
-  - **Output**: ${comp.interfaces.output}
-  - **Dependencies**: ${comp.interfaces.dependencies.join(', ')}
-`).join('\n')}
-
-### Technology Stack
-${technologyStack.map(tech => `
-- **${tech.layer}**: ${tech.technology}
-  - Rationale: ${tech.rationale}
-`).join('\n')}
-
-## Data Architecture
-
-### Data Models
-${dataModels.map(model => `
-#### ${model.name}
-${model.description ? `*${model.description}*\n` : ''}
-**Fields:**
-${model.fields.map(field => 
-  `- \`${field.name}\`: ${field.type}${field.required ? ' (required)' : ''}${field.description ? ` - ${field.description}` : ''}`
-).join('\n')}
-
-**Relationships:**
-${model.relationships ? model.relationships.map(rel => 
-  `- ${rel.type} ${rel.target}${rel.description ? `: ${rel.description}` : ''}`
-).join('\n') : '- None'}
-`).join('\n')}
-
-### Data Flow
-${dataFlow.map(flow => `
-#### ${flow.name}
-1. ${flow.steps.join('\n2. ')}
-`).join('\n')}
-
-## API Design
-
-### Endpoints
-${apiEndpoints.map(endpoint => `
-#### ${endpoint.method} ${endpoint.path}
-- **Purpose**: ${endpoint.purpose}
-- **Request**: ${endpoint.request || 'None'}
-- **Response**: ${endpoint.response}
-- **Errors**: ${endpoint.errors.join(', ')}
-`).join('\n')}
-
-## Error Handling
-
-### Strategy
-${errorHandling.strategy}
-
-### Error Types
-${errorHandling.types.map(error => `
-- **${error.name}**: ${error.description}
-  - Recovery: ${error.recovery}
-`).join('\n')}
-
-## Testing Approach
-
-### Unit Testing
-${testing.unit.strategy}
-- Coverage Target: ${testing.unit.coverage}%
-
-### Integration Testing
-${testing.integration.strategy}
-- Key Scenarios: ${testing.integration.scenarios.join(', ')}
-
-### End-to-End Testing
-${testing.e2e.strategy}
-- Critical Paths: ${testing.e2e.criticalPaths.join(', ')}
-
-## Security Considerations
-
-${security.map(item => `
-### ${item.concern}
-- **Mitigation**: ${item.mitigation}
-- **Implementation**: ${item.implementation}
-`).join('\n')}
-
-## Performance Targets
-
-${performance.map(metric => `
-- **${metric.metric}**: ${metric.target}
-  - Measurement: ${metric.measurement}
-`).join('\n')}
-
-## Migration Strategy
-${migration ? `
-### Approach
-${migration.approach}
-
-### Steps
-${migration.steps.map((step, i) => `${i+1}. ${step}`).join('\n')}
-
-### Rollback Plan
-${migration.rollback}
-` : 'Not applicable - new feature'}
-
-## Open Questions
-
-${openQuestions.map((q, i) => `${i+1}. ${q}`).join('\n')}
-`;
-
-// Create or update design spec with Markdown content
-const designSpec = await mcp__shirokuma-kb__create_item({
-  type: "spec_design",
-  title: `Design: ${featureName}`,
-  description: "Design phase of spec-driven development",
-  content: markdownContent, // Human-readable Markdown instead of JSON
-  status: "Specification",
-  priority: "HIGH",
-  tags: ["spec", "design", "architecture"],
-  related: relatedSpecs || []
-});
-
-console.log(`✅ Design spec saved to shirokuma-kb with ID: ${designSpec.id}`);
-return designSpec.id; // Return for linking to tasks phase
+# Content Format
+- Human-readable Markdown instead of JSON
+- Structured sections for easy navigation
+- Clear separation of concerns
+- Links to related specifications
 ```
 
 ### Design Refinement
 
-For existing designs:
+```yaml
+# Design Refinement Process
+1. Retrieve Current Design:
+   - Tool: mcp__shirokuma-kb__get_item
+     Parameters:
+       id: spec-id
+     Purpose: Get existing design spec
 
-```typescript
-// 1. Retrieve spec from MCP
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
+2. Analyze Refinement Needs:
+   - Review user feedback or requirements changes
+   - Identify specific areas needing updates
+   - Plan refinement strategy
 
-// 2. Update the Markdown content with design refinements
-// The refinements will be applied directly to the Markdown text
+3. Apply Design Updates:
+   - Update architecture components as needed
+   - Modify API specifications
+   - Adjust data models and relationships
+   - Update technology choices with rationale
 
-// 3. Apply refinement based on feedback
-const refinedDesign = refineDesign(currentDesign, userFeedback);
+4. Update Specification:
+   - Tool: mcp__shirokuma-kb__update_item
+     Parameters:
+       id: spec-id
+       content: refined-design-content
+     Purpose: Save refined design
 
-// 4. Update spec with refined version
-const updatedSpec = await mcp__shirokuma-kb__update_item({
-  id: specId,
-  content: JSON.stringify({
-    ...content,
-    design: refinedDesign,
-    version: incrementVersion(content.version),
-    updatedAt: new Date().toISOString()
-  })
-});
-
-console.log(`✅ Design refined and updated in spec #${specId}`);
-console.log(`📝 Version updated: ${content.version} → ${incrementVersion(content.version)}`);
+5. Version Management:
+   - Increment version number
+   - Update timestamp
+   - Document refinement rationale
 ```
 
 ### Design Validation

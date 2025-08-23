@@ -37,15 +37,17 @@ git diff
 - Get valid types and scopes
 
 ### 3. Message Generation
-```typescript
-// Automatic message based on changes
-const message = generateCommitMessage({
-  changes: analyzedChanges,
-  format: steering.gitWorkflow.format,
-  types: steering.gitWorkflow.types,
-  recentCommits: getRecentCommits(5)
-});
-```
+
+**Process:**
+1. Analyze changes from git diff
+2. Load commit format from Git Workflow steering document
+3. Get valid commit types from configuration
+4. Review recent 5 commits for style consistency
+5. Generate appropriate commit message based on:
+   - Changed files and their patterns
+   - Commit format from steering
+   - Valid types and scopes
+   - Recent commit style
 
 ### 4. Validation
 - Check message format
@@ -90,32 +92,37 @@ Commit Format:
 ## Smart Features
 
 ### Change Classification
-```typescript
-// Analyze changes to determine type
-if (hasNewFiles && hasTests) return 'feat';
-if (hasOnlyTests) return 'test';
-if (hasBugFix) return 'fix';
-if (hasOnlyDocs) return 'docs';
-if (hasRefactoring) return 'refactor';
-```
+
+**Logic for determining commit type:**
+- **feat**: New files with corresponding tests
+- **test**: Only test files modified
+- **fix**: Bug fixes identified in changes
+- **docs**: Only documentation files changed
+- **refactor**: Code structure changes without behavior modification
+- **style**: Formatting changes only
+- **chore**: Build, config, or dependency updates
 
 ### Scope Detection
-```typescript
-// Detect scope from file paths
-if (files.every(f => f.startsWith('src/mcp'))) return 'mcp';
-if (files.every(f => f.startsWith('src/cli'))) return 'cli';
-if (files.some(f => f.includes('entity'))) return 'typeorm';
-```
+
+**Automatic scope detection from file paths:**
+- **mcp**: All files in src/mcp/ directory
+- **cli**: All files in src/cli/ directory
+- **typeorm**: Files containing 'entity' in path
+- **commands**: Files in .shirokuma/commands/
+- **agents**: Files in .claude/agents/
+- **config**: Configuration file changes
+- **Mixed changes**: Use most significant scope or omit
 
 ### Issue Linking
-```typescript
-// Extract issue numbers from branch or changes
-const branchName = getCurrentBranch();
-const issueNumber = extractIssueNumber(branchName);
-if (issueNumber) {
-  message += `\n\nCloses #${issueNumber}`;
-}
-```
+
+**Automatic issue detection:**
+1. Check current branch name for issue pattern (e.g., issue-123, fix-456)
+2. Search commit message for issue references
+3. Check if working on tracked issue from MCP
+4. Add appropriate closing reference:
+   - `Closes #123` for features
+   - `Fixes #456` for bugs
+   - `Part of #789` for partial work
 
 ## Message Examples
 

@@ -190,138 +190,53 @@ Validate specifications using comprehensive checklists to ensure quality and com
 
 Validation results are automatically saved to shirokuma-kb as human-readable Markdown:
 
-```typescript
-// Retrieve spec
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
+## Validation Process
 
-// Run validation against Markdown content
-const results = validateSpec(spec.content, phase);
-
-// Generate human-readable Markdown validation report
-const validationContent = `# Validation Report: ${spec.title}
-
-## Metadata
-- **Spec ID**: #${specId}
-- **Validation Date**: ${new Date().toISOString()}
-- **Phase**: ${phase}
-- **Validator**: /kuma:spec:check
-
-## Overall Score: ${results.score}% (${results.rating})
-
-## Phase Scores
-
-### Requirements Phase: ${results.scores.requirements}%
-- Format Compliance: ${results.scores.requirementsFormat}%
-- Completeness: ${results.scores.requirementsCompleteness}%
-- Testability: ${results.scores.requirementsTestability}%
-- Clarity: ${results.scores.requirementsClarity}%
-
-### Design Phase: ${results.scores.design}%
-- Architecture: ${results.scores.designArchitecture}%
-- Component Detail: ${results.scores.designComponents}%
-- Integration: ${results.scores.designIntegration}%
-- Non-Functional: ${results.scores.designNonFunctional}%
-
-### Tasks Phase: ${results.scores.tasks}%
-- Coverage: ${results.scores.tasksCoverage}%
-- Actionability: ${results.scores.tasksActionability}%
-- Sequencing: ${results.scores.tasksSequencing}%
-- Estimates: ${results.scores.tasksEstimates}%
-
-## Validation Results
-
-### ✅ Strengths
-${results.strengths.map(strength => `- ${strength}`).join('\n')}
-
-### ⚠️ Improvements Needed
-${results.improvements.map(improvement => `- ${improvement}`).join('\n')}
-
-### ❌ Critical Issues
-${results.criticalIssues.length > 0 ? 
-  results.criticalIssues.map(issue => `- ${issue}`).join('\n') : 
-  '- None found'}
-
-## Detailed Findings
-
-### Requirements Validation
-${results.requirementsFindings.map(finding => 
-  `- **${finding.type}**: ${finding.description}`
-).join('\n')}
-
-### Design Validation
-${results.designFindings.map(finding => 
-  `- **${finding.type}**: ${finding.description}`
-).join('\n')}
-
-### Tasks Validation
-${results.tasksFindings.map(finding => 
-  `- **${finding.type}**: ${finding.description}`
-).join('\n')}
-
-## Recommendations
-
-### Priority 1: Critical (Must Fix)
-${results.recommendations.critical.map((rec, i) => 
-  `${i+1}. ${rec}`
-).join('\n')}
-
-### Priority 2: Important (Should Fix)
-${results.recommendations.important.map((rec, i) => 
-  `${i+1}. ${rec}`
-).join('\n')}
-
-### Priority 3: Nice to Have (Could Fix)
-${results.recommendations.niceToHave.map((rec, i) => 
-  `${i+1}. ${rec}`
-).join('\n')}
-
-## Next Steps
-${results.nextSteps.map((step, i) => 
-  `${i+1}. ${step}`
-).join('\n')}
-
-## Compliance Summary
-
-### EARS Format Compliance
-- Properly formatted: ${results.earsCompliance.proper}/${results.earsCompliance.total}
-- Issues: ${results.earsCompliance.issues.join(', ') || 'None'}
-
-### Template Compliance
-- Required sections present: ${results.templateCompliance.present}/${results.templateCompliance.required}
-- Missing sections: ${results.templateCompliance.missing.join(', ') || 'None'}
-
-### Cross-Reference Validation
-- Requirements → Design mapping: ${results.crossReference.reqToDesign}%
-- Design → Tasks mapping: ${results.crossReference.designToTasks}%
-- Tasks → Requirements traceability: ${results.crossReference.tasksToReq}%
-
-## Decision
-${results.score >= 75 ? 
-  '✅ **APPROVED**: Spec meets quality standards and can proceed.' :
-  '❌ **NEEDS REVISION**: Spec requires improvements before proceeding.'}
-
-## Validation History
-${validationHistory ? validationHistory.map(history => 
-  `- ${history.date}: Score ${history.score}% - ${history.status}`
-).join('\n') : '- First validation'}
-`;
-
-// Create validation report with Markdown content
-const validationReport = await mcp__shirokuma-kb__create_item({
-  type: "spec_validation",
-  title: `Validation Report: ${spec.title}`,
-  description: `Validation results for spec #${specId}`,
-  content: validationContent, // Human-readable Markdown instead of JSON
-  status: results.score >= 75 ? "Completed" : "Review",
-  priority: results.criticalIssues.length > 0 ? "HIGH" : "MEDIUM",
-  tags: ["spec", "validation", phase, `score-${Math.floor(results.score)}`],
-  related: [specId]
-});
-
-console.log(`✅ Validation complete for spec #${specId}`);
-console.log(`📊 Score: ${results.score}% (${results.rating})`);
-console.log(`📝 Validation report saved with ID: ${validationReport.id}`);
+1. **Retrieve Spec for Validation**
+```yaml
+# Load spec from shirokuma-kb
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Get spec content for validation
 ```
+
+2. **Run Validation Process**
+   - Validate spec content against phase-specific checklists
+   - Calculate scores for each validation category
+   - Generate comprehensive validation report
+   - Identify strengths, improvements needed, and critical issues
+
+3. **Generate Validation Report**
+   - Create detailed Markdown validation report including:
+     - Overall score and rating
+     - Phase-specific scores breakdown
+     - Validation results (strengths, improvements, critical issues)
+     - Detailed findings by phase
+     - Prioritized recommendations
+     - Compliance summary (EARS, template, cross-reference)
+     - Approval decision and validation history
+
+4. **Store Validation Report**
+```yaml
+# Save validation report to shirokuma-kb
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_validation"
+    title: "Validation Report: [spec.title]"
+    description: "Validation results for spec #[specId]"
+    content: "[Generated comprehensive validation report in Markdown]"
+    status: "Completed" or "Review"  # Based on score >= 75%
+    priority: "HIGH" or "MEDIUM"  # Based on critical issues
+    tags: ["spec", "validation", "[phase]", "score-[score_range]"]
+    related: ["[specId]"]
+  Purpose: Store validation results for review and tracking
+```
+
+5. **Return Validation Results**
+   - Display overall score and rating
+   - Show validation report ID
+   - Provide approval/revision decision
 
 ## Integration with Other Commands
 

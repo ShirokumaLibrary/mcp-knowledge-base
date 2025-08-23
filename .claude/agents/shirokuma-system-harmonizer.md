@@ -411,13 +411,12 @@ For each agent:
      - designer: Must have create_item for 'decisions' type
      - All agents: Must have search and get capabilities
   
-  4. Auto-Fix Missing Tools:
-     if (agentMissingRequiredTools) {
+  4. Auto-Fix Missing Tools Process:
+     When agent missing required tools:
        - Backup agent file
        - Add missing tools to frontmatter
        - Preserve existing tool order
        - Validate YAML syntax after edit
-     }
 ```
 
 **Expected Tool Requirements by Agent**:

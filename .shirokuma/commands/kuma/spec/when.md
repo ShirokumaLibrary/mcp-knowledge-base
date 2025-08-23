@@ -269,91 +269,51 @@ If timeline critical, consider direct implementation with good commit message.
 
 ## MCP Storage
 
-Decision analysis results are automatically saved as human-readable Markdown:
+```yaml
+# Analysis Storage Process
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_analysis"
+    title: "Spec Analysis: [feature-description]"
+    description: "Decision guide analysis for spec-driven development"
+    content: human-readable-markdown-analysis
+    status: "Completed"
+    priority: "LOW"
+    tags: ["spec", "analysis", "decision", spec-type]
+    related: [similar-spec-ids]
+  Purpose: Store decision analysis results
 
-```typescript
-// Generate human-readable Markdown content
-const markdownContent = `# Spec Analysis: ${featureDescription}
+# Generated Analysis Structure
+Analysis Document Sections:
+  - Metadata: Analysis date, analyzer tool, status
+  - Feature Description: What is being analyzed
+  - Complexity Assessment: Detailed scoring breakdown
+  - Recommendation: Suggested spec type with reasoning
+  - Suggested Approach: Step-by-step implementation plan
+  - Alternative Approaches: Other viable options
+  - Similar Existing Specs: Related previous work
+  - Decision Factors: Green/yellow/red light analysis
+  - Next Steps: Immediate actions to take
+  - Notes: Additional considerations
 
-## Metadata
-- **Analysis Date**: ${new Date().toISOString()}
-- **Analyzer**: /kuma:spec:when
-- **Status**: Completed
+# Scoring Categories
+Technical Complexity Factors:
+  - Components affected (1-5 scale)
+  - Integration points (1-5 scale)
+  - Data model changes (1-5 scale)
+  - Business logic complexity (1-5 scale)
 
-## Feature Description
-${featureDescription}
+Risk Level Factors:
+  - Security implications (1-5 scale)
+  - Performance impact (1-5 scale)
+  - Data integrity risk (1-5 scale)
+  - User experience impact (1-5 scale)
 
-## Complexity Assessment
-
-### Scoring Breakdown
-- **Technical Complexity**: ${technicalScore}/5
-  - Components affected: ${componentsAffected}
-  - Integration points: ${integrationPoints}
-  - Data model changes: ${dataModelChanges}
-  - Business logic complexity: ${businessLogicComplexity}
-
-- **Risk Level**: ${riskScore}/5
-  - Security implications: ${securityImplications}
-  - Performance impact: ${performanceImpact}
-  - Data integrity risk: ${dataIntegrityRisk}
-  - User experience impact: ${userExperienceImpact}
-
-- **Team Coordination**: ${teamScore}/5
-  - Number of developers: ${numberOfDevelopers}
-  - Cross-team coordination: ${crossTeamCoordination}
-  - Knowledge gaps: ${knowledgeGaps}
-  - Communication overhead: ${communicationOverhead}
-
-### Total Score: ${totalScore}/15
-
-## Recommendation: ${specType} SPEC
-
-### Reasoning
-${reasoningPoints.map(point => `- ${point}`).join('\n')}
-
-### Suggested Approach
-${approachSteps.map((step, i) => `${i+1}. ${step}`).join('\n')}
-
-### Alternative Approaches
-${alternatives ? alternatives.map(alt => `- ${alt}`).join('\n') : '- None identified'}
-
-## Similar Existing Specs
-${relatedSpecs.length > 0 ? relatedSpecs.map(spec => 
-  `- [#${spec.id}] ${spec.title} - ${spec.recommendation}`
-).join('\n') : 'No similar specs found'}
-
-## Decision Factors Summary
-
-### Green Lights (Supporting Factors)
-${greenLights.map(factor => `✅ ${factor}`).join('\n')}
-
-### Yellow Lights (Considerations)
-${yellowLights.map(factor => `⚠️ ${factor}`).join('\n')}
-
-### Red Lights (Risk Factors)
-${redLights.map(factor => `❌ ${factor}`).join('\n')}
-
-## Next Steps
-${nextSteps.map((step, i) => `${i+1}. ${step}`).join('\n')}
-
-## Notes
-${additionalNotes || 'None'}
-`;
-
-// Save analysis with Markdown content
-const analysisResult = await mcp__shirokuma-kb__create_item({
-  type: "spec_analysis",
-  title: `Spec Analysis: ${featureDescription}`,
-  description: "Decision guide analysis for spec-driven development",
-  content: markdownContent, // Human-readable Markdown instead of JSON
-  status: "Completed",
-  priority: "LOW",
-  tags: ["spec", "analysis", "decision", specType.toLowerCase()],
-  related: relatedSpecs // IDs of similar specs found
-});
-
-console.log(`✅ Analysis saved to shirokuma-kb with ID: ${analysisResult.id}`);
-console.log(`📊 Recommendation: ${specType} SPEC`);
+Team Coordination Factors:
+  - Number of developers (1-5 scale)
+  - Cross-team coordination (1-5 scale)
+  - Knowledge gaps (1-5 scale)
+  - Communication overhead (1-5 scale)
 ```
 
 ## Integration

@@ -105,11 +105,14 @@
 
 ## Data Models
 
-```typescript
-interface EntityName {
-  id: string;
-  // properties
-}
+```yaml
+# Entity data structure definitions
+EntityName:
+  Properties:
+    - id: string (unique identifier)
+    - [additional properties as needed]
+  Purpose: Define data structure for entity
+  Validation: Include required field constraints
 ```
 
 ## API Design

@@ -116,47 +116,6 @@ Please reorganize tasks to:
 - Maintain logical sequencing
 ```
 
-### MCP Update Strategy
-
-Preserve history while updating:
-
-```typescript
-const spec = mcp__shirokuma-kb__get_item({ id: specId });
-const content = JSON.parse(spec.content);
-
-// Store previous version
-content.history = content.history || [];
-content.history.push({
-  version: content.version,
-  timestamp: content.updatedAt,
-  phase: content.phase,
-  snapshot: { /* current state */ }
-});
-
-// Apply refinements
-content.version = incrementVersion(content.version);
-content.updatedAt = new Date();
-
-// Update specific phase
-switch(phase) {
-  case 'requirements':
-    content.requirements = refinedRequirements;
-    break;
-  case 'design':
-    content.design = refinedDesign;
-    break;
-  case 'tasks':
-    content.tasks = refinedTasks;
-    break;
-}
-
-// Save back to MCP
-mcp__shirokuma-kb__update_item({
-  id: specId,
-  content: JSON.stringify(content),
-  description: `Refined ${phase} - v${content.version}`
-});
-```
 
 ### Cross-Phase Impact Analysis
 
@@ -258,13 +217,23 @@ Run validation checks:
 
 ## Rollback Support
 
-If refinement causes issues:
+```yaml
+# Rollback Process
+1. Retrieve spec with refinement issues
+2. Access previous version from history array
+3. Restore previous state with rollback marker
+4. Update spec with restored content
 
-```typescript
-// Retrieve previous version from history
-const previousVersion = content.history[content.history.length - 1];
-// Restore previous state
-content = { ...previousVersion.snapshot, version: content.version + '-rolled-back' };
+# Rollback Steps
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: spec-id
+  Purpose: Get spec needing rollback
+
+- Extract previous version from history
+- Restore previous specification state
+- Mark version as rolled-back
+- Save restored spec to MCP
 ```
 
 ## References

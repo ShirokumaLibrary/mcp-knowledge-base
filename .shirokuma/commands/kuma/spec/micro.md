@@ -53,20 +53,19 @@ Create ultra-lightweight specifications for small changes (< 1 day effort) - bug
 
 Micro specs are automatically saved to shirokuma-kb:
 
-```typescript
-const microSpec = await mcp__shirokuma-kb__create_item({
-  type: "spec_micro",
-  title: `Micro: ${changeDescription}`,
-  description: "Ultra-lightweight spec for small change",
-  content: microSpecContent, // The markdown template filled out
-  status: "Open",
-  priority: "LOW", // Usually low priority for micro changes
-  tags: ["spec", "micro", changeType.toLowerCase()],
-  related: issueId ? [issueId] : []
-});
-
-console.log(`✅ Micro spec saved to shirokuma-kb with ID: ${microSpec.id}`);
-console.log(`⏱️ Estimated effort: ${effort} hours`);
+```yaml
+# Save micro spec to shirokuma-kb
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_micro"
+    title: "Micro: [changeDescription]"
+    description: "Ultra-lightweight spec for small change"
+    content: "[microSpecContent - filled markdown template]"
+    status: "Open"
+    priority: "LOW"  # Usually low priority for micro changes
+    tags: ["spec", "micro", "[changeType.toLowerCase()]"]
+    related: ["[issueId if exists]"]
+  Purpose: Store micro spec for tracking and reference
 ```
 
 ## When to Use
@@ -173,29 +172,28 @@ Files up to 50MB can be uploaded without timeout errors
 - `nginx/nginx.conf` - Update proxy timeout
 ```
 
-## MCP Storage
+## Storage Structure
 
-Store as simplified spec in MCP:
+Micro specs stored as simplified spec with structured content:
 
-```typescript
-{
-  type: "spec",
-  title: "Micro: [Brief Description]",
-  description: "Micro spec for quick change",
-  content: JSON.stringify({
-    phase: "micro",
-    specType: "Bug Fix",
-    effort: "2 hours",
-    what: "...",
-    why: "...",
-    how: [...],
-    acceptance: "...",
-    files: [...]
-  }),
-  status: "Open",
-  priority: "LOW",
-  tags: ["spec", "micro", type.toLowerCase()]
-}
+```yaml
+# Micro Spec Storage Format
+type: "spec"
+title: "Micro: [Brief Description]"
+description: "Micro spec for quick change"
+content: |
+  # Markdown content including:
+  - phase: "micro"
+  - specType: "[Bug Fix/Copy Change/Config Update/Minor Feature]"
+  - effort: "[X hours]"
+  - what: "[One sentence description]"
+  - why: "[Brief justification]"
+  - how: "[Implementation steps list]"
+  - acceptance: "[Pass/fail criteria]"
+  - files: "[File paths and changes]"
+status: "Open"
+priority: "LOW"
+tags: ["spec", "micro", "[type.toLowerCase()]"]
 ```
 
 ## Integration with Other Commands

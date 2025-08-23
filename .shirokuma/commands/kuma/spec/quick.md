@@ -104,29 +104,32 @@ Create lightweight specifications for small-to-medium features (1-3 days effort)
 
 ## MCP Storage
 
-Quick specs are automatically saved to shirokuma-kb:
+```yaml
+# Quick Spec Storage Process
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_quick"
+    title: "Quick Spec: [feature-name]"
+    description: "Lightweight spec for 1-3 day feature"
+    content: filled-markdown-template
+    status: "Open"
+    priority: "MEDIUM" (or specified priority)
+    tags: ["spec", "quick", "feature", feature-name]
+    related: [issue-id] (if exists)
+  Purpose: Store lightweight specification
 
-```typescript
-const quickSpec = await mcp__shirokuma-kb__create_item({
-  type: "spec_quick",
-  title: `Quick Spec: ${featureName}`,
-  description: "Lightweight spec for 1-3 day feature",
-  content: quickSpecContent, // The markdown template filled out
-  status: "Open",
-  priority: priority || "MEDIUM",
-  tags: ["spec", "quick", "feature", featureName.toLowerCase()],
-  related: issueId ? [issueId] : []
-});
-
-console.log(`✅ Quick spec saved to shirokuma-kb with ID: ${quickSpec.id}`);
-console.log(`📅 Estimated effort: ${estimatedDays} days`);
-
-// Optionally create tasks in TodoWrite
-if (createTasks) {
-  const tasks = extractTasksFromSpec(quickSpecContent);
-  await TodoWrite({ todos: tasks });
-  console.log(`✅ Created ${tasks.length} tasks in TodoWrite`);
-}
+# Optional Task Creation
+Task Integration:
+  - Extract tasks from spec content
+  - Convert to TodoWrite format
+  - Create task list for immediate work
+  
+# Task Extraction Process
+1. Parse implementation plan section
+2. Extract core tasks with estimates
+3. Add testing and documentation tasks
+4. Create TodoWrite entries
+5. Link tasks to spec for tracking
 ```
 
 ## When to Use
@@ -244,52 +247,59 @@ Is effort 1-3 days?
 - [ ] Deployed to staging
 ```
 
-## MCP Storage
+## Storage Structure
 
-```typescript
-{
-  type: "spec",
-  title: "Quick: [Feature Name]",
-  description: "Quick spec for medium feature",
-  content: JSON.stringify({
-    phase: "quick",
-    estimatedEffort: "2 days",
-    overview: { what, why, successMetric },
-    requirements: {
-      userStory: {...},
-      acceptanceCriteria: [...],
-      constraints: {...}
-    },
-    implementationPlan: {
-      prerequisites: [...],
-      coreTasks: [...],
-      testingTasks: [...],
-      documentationTasks: [...]
-    },
-    technicalNotes: {...},
-    definitionOfDone: [...]
-  }),
-  status: "Open",
-  priority: "MEDIUM",
+```yaml
+# Quick Spec Data Structure
+Quick Spec Fields:
+  type: "spec_quick"
+  title: "Quick: [Feature Name]"
+  description: "Quick spec for medium feature"
+  content: markdown-template-content
+  status: "Open"
+  priority: "MEDIUM"
   tags: ["spec", "quick", "feature"]
-}
+
+# Content Organization
+Spec Content Sections:
+  - Phase: "quick"
+  - Estimated Effort: "[X] days"
+  - Overview: what/why/success metric
+  - Requirements: user story, acceptance criteria, constraints
+  - Implementation Plan: prerequisites, core tasks, testing, docs
+  - Technical Notes: files, dependencies, risks
+  - Definition of Done: completion checklist
 ```
 
 ## TodoWrite Integration
 
-Convert tasks to TodoWrite format:
+```yaml
+# Task Conversion Process
+- Tool: TodoWrite
+  Parameters:
+    todos: list-of-task-objects
+  Purpose: Create actionable task list
 
-```typescript
-TodoWrite({
-  todos: [
-    { content: "Backend API Endpoint (4h)", status: "pending" },
-    { content: "Frontend Upload Component (3h)", status: "pending" },
-    { content: "Image Processing (2h)", status: "pending" },
-    { content: "Profile Display Update (2h)", status: "pending" },
-    { content: "Unit Tests", status: "pending" },
-    { content: "Integration Tests", status: "pending" }
-  ]
-})
+# Task Format
+Task Structure:
+  content: "Task description with estimate"
+  status: "pending"
+  activeForm: "Present continuous form"
+
+# Example Task Conversion
+From Spec Tasks:
+  - Backend API Endpoint (4h) → pending
+  - Frontend Upload Component (3h) → pending  
+  - Image Processing (2h) → pending
+  - Profile Display Update (2h) → pending
+  - Unit Tests → pending
+  - Integration Tests → pending
+
+# Integration Benefits
+- Immediate actionable tasks
+- Progress tracking
+- Time estimation visibility
+- Clear work breakdown
 ```
 
 ## References

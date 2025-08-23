@@ -36,12 +36,13 @@ For phase-specific operations:
 
 Automatically loads and applies steering documents:
 
-```typescript
-// Load applicable steering documents
-const steering = await loadSteeringDocuments({
-  tags: ['inclusion:always'],
-  currentFile: context.workingDirectory
-});
+```yaml
+# Load applicable steering documents
+- Tool: loadSteeringDocuments
+  Parameters:
+    tags: ['inclusion:always']
+    currentFile: "[context.workingDirectory]"
+  Purpose: Apply project-specific configuration and standards
 ```
 
 See @.shirokuma/commands/shared/steering-loader.markdown for details.
@@ -68,104 +69,54 @@ Specs are automatically stored in shirokuma-kb with Markdown content for human r
 
 **Type used**: `type: "spec"` - Complete specification including all three phases (requirements, design, tasks)
 
-```typescript
-// Generate human-readable Markdown content
-const markdownContent = `# Spec: ${featureName}
+## Complete Spec Generation Process
 
-## Metadata
-- **Created**: ${new Date().toISOString()}
-- **Status**: ${status}
-- **Priority**: ${priority}
-- **Phase**: ${phase}
-- **Related Issues**: ${relatedIssues.map(id => `#${id}`).join(', ')}
+1. **Content Structure Creation**
+   - Generate comprehensive Markdown document with:
+     - Metadata (creation date, status, priority, phase, related issues)
+     - Phase 1: Requirements (introduction, user stories, EARS functional requirements, non-functional requirements, acceptance criteria)
+     - Phase 2: Design (architecture overview, components, data models)
+     - Phase 3: Tasks (task breakdown by phases, summary with metrics)
 
-## Phase 1: Requirements
-
-### Introduction
-${requirements.introduction}
-
-### User Stories
-${requirements.userStories.map(story => 
-  `- As a ${story.role}, I want ${story.want} so that ${story.benefit}`
-).join('\n')}
-
-### Functional Requirements (EARS)
-${requirements.functionalRequirements.map(req => 
-  `- ${req.type} ${req.condition} THEN system SHALL ${req.behavior}`
-).join('\n')}
-
-### Non-Functional Requirements
-${Object.entries(requirements.nonFunctional).map(([category, items]) => 
-  `#### ${category}\n${items.map(item => `- ${item}`).join('\n')}`
-).join('\n\n')}
-
-### Acceptance Criteria
-${requirements.acceptanceCriteria.map(criteria => 
-  `- [ ] ${criteria}`
-).join('\n')}
-
-## Phase 2: Design
-
-### Architecture Overview
-${design.architecture.overview}
-
-### Components
-${design.components.map((comp, i) => 
-  `${i+1}. **${comp.name}**\n   - Purpose: ${comp.purpose}\n   - Responsibilities: ${comp.responsibilities.join(', ')}`
-).join('\n')}
-
-### Data Models
-${design.dataModels.map(model => 
-  `#### ${model.name}\n${model.fields.map(f => `- ${f.name}: ${f.type} ${f.required ? '(required)' : ''}`).join('\n')}`
-).join('\n\n')}
-
-## Phase 3: Tasks
-
-### Task Breakdown
-${tasks.phases.map(phase => 
-  `#### ${phase.name} [${phase.estimate}]\n${phase.tasks.map(task => 
-    `- [ ] ${task.id}: ${task.title} [${task.estimate}]`
-  ).join('\n')}`
-).join('\n\n')}
-
-### Summary
-- **Total Tasks**: ${tasks.totalTasks}
-- **Total Effort**: ${tasks.totalEffort}
-- **Completed**: ${tasks.completedTasks}/${tasks.totalTasks}
-`;
-
-// Create new spec with Markdown content
-const specItem = await mcp__shirokuma-kb__create_item({
-  type: "spec",
-  title: `[Feature]: ${featureName}`,
-  description: "Spec-driven development documentation",
-  content: markdownContent, // Human-readable Markdown instead of JSON
-  status: "Open", // "In Progress", "Review", "Completed"
-  priority: "HIGH",
-  tags: ["spec", "feature", phase],
-  related: [issue_ids]
-});
-
-// Return ID to user
-console.log(`✅ Spec saved to shirokuma-kb with ID: ${specItem.id}`);
+2. **MCP Storage Operation**
+```yaml
+# Store complete spec in shirokuma-kb
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec"
+    title: "[Feature]: [featureName]"
+    description: "Spec-driven development documentation"
+    content: "[Generated comprehensive Markdown document with all three phases]"
+    status: "Open"  # Can be "In Progress", "Review", "Completed"
+    priority: "HIGH"
+    tags: ["spec", "feature", "[phase]"]
+    related: ["[issue_ids]"]
+  Purpose: Store complete specification for development workflow
 ```
+
+3. **Return Process**
+   - Display confirmation message with spec ID
 
 ### List Specs
 
-Retrieves all specs from MCP:
+## Spec Listing Process
 
-```typescript
-const specs = await mcp__shirokuma-kb__list_items({
-  type: "spec",
-  sortBy: "created",
-  sortOrder: "desc"
-});
-
-// Group by status
-const activeSpecs = specs.items.filter(s => s.status === "In Progress");
-const pendingSpecs = specs.items.filter(s => s.status === "Open");
-const completedSpecs = specs.items.filter(s => s.status === "Completed");
+1. **Retrieve All Specs**
+```yaml
+# Get all specs from shirokuma-kb
+- Tool: mcp__shirokuma-kb__list_items
+  Parameters:
+    type: "spec"
+    sortBy: "created"
+    sortOrder: "desc"
+  Purpose: Get all specs for overview display
 ```
+
+2. **Group Specs by Status**
+   - Filter specs into categories:
+     - Active Specs (status = "In Progress")
+     - Pending Specs (status = "Open")
+     - Completed Specs (status = "Completed")
 
 Display format:
 ```
@@ -184,105 +135,77 @@ Display format:
 
 ### Show Spec Details
 
-Retrieves and displays a specific spec:
+## Spec Display Process
 
-```typescript
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
-
-console.log(`## Spec #${spec.id}: ${spec.title}`);
-console.log(`Status: ${spec.status} | Priority: ${spec.priority}`);
-console.log(`Created: ${spec.createdAt} | Updated: ${spec.updatedAt}`);
-console.log("\n---\n");
-
-// Display the human-readable Markdown content directly
-console.log(spec.content);
-
-// For backward compatibility, handle JSON specs if they exist
-if (spec.content.startsWith('{')) {
-  const content = JSON.parse(spec.content);
-  console.log("\n⚠️ Note: This spec uses legacy JSON format. Consider migrating to Markdown format.");
-  
-  // Display summary for JSON specs
-  if (content.requirements) {
-    console.log("\n### Requirements Phase");
-    console.log(`- User Stories: ${content.requirements.userStories?.length || 0}`);
-    console.log(`- Acceptance Criteria: ${content.requirements.acceptanceCriteria?.length || 0}`);
-  }
-  if (content.design) {
-    console.log("\n### Design Phase");
-    console.log(`- Components: ${content.design.components?.length || 0}`);
-    console.log(`- Data Models: ${content.design.dataModels?.length || 0}`);
-  }
-  if (content.tasks) {
-    console.log("\n### Tasks Phase");
-    console.log(`- Total Tasks: ${content.tasks.totalTasks}`);
-    console.log(`- Completed: ${content.tasks.completedTasks}`);
-  }
-}
+1. **Retrieve Specific Spec**
+```yaml
+# Get spec details from shirokuma-kb
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Load specific spec for detailed view
 ```
+
+2. **Display Spec Information**
+   - Show spec header with ID, title, status, priority
+   - Display creation and update timestamps
+   - Present human-readable Markdown content directly
+
+3. **Handle Legacy Format Compatibility**
+   - Detect JSON format specs (content starts with '{')
+   - Display migration warning for legacy specs
+   - Show summarized view for JSON specs:
+     - Requirements Phase (user stories count, acceptance criteria count)
+     - Design Phase (components count, data models count)
+     - Tasks Phase (total tasks, completed tasks)
 
 ### Execute Spec
 
-Loads tasks from a spec into TodoWrite:
+## Spec Execution Process
 
-```typescript
-// 1. Retrieve spec from MCP
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
-
-// 2. Extract tasks from content
-let todoTasks = [];
-
-// Handle Markdown format (new default)
-if (!spec.content.startsWith('{')) {
-  // Parse tasks from Markdown format
-  const taskRegex = /- \[ \] (.+?): (.+?) \[(.+?)\]/g;
-  let match;
-  let taskId = 1;
-  
-  while ((match = taskRegex.exec(spec.content)) !== null) {
-    todoTasks.push({
-      id: match[1] || `TASK-${taskId++}`,
-      title: match[2],
-      estimate: match[3],
-      status: 'todo'
-    });
-  }
-  
-  if (todoTasks.length === 0) {
-    throw new Error("No tasks found in spec. Ensure Phase 3: Tasks section exists");
-  }
-} 
-// Handle legacy JSON format
-else {
-  const content = JSON.parse(spec.content);
-  
-  if (!content.tasks) {
-    throw new Error("Spec has no tasks phase. Run /kuma:spec:tasks first");
-  }
-  
-  todoTasks = content.tasks.phases.flatMap(phase => 
-    phase.tasks.map(task => ({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      phase: phase.name,
-      status: task.status || 'todo'
-    }))
-  );
-}
-
-// 3. Create TodoWrite entries
-await TodoWrite({ tasks: todoTasks });
-
-// 4. Update spec status to "In Progress"
-await mcp__shirokuma-kb__update_item({
-  id: specId,
-  status: "In Progress"
-});
-
-console.log(`✅ Loaded ${todoTasks.length} tasks from spec #${specId} into TodoWrite`);
-console.log(`✅ Spec status updated to "In Progress"`);
+1. **Retrieve Spec from MCP**
+```yaml
+# Load spec from shirokuma-kb
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Load spec for task execution
 ```
+
+2. **Extract Tasks from Content**
+   - **Markdown Format (Default):**
+     - Parse tasks using regex: `/- \[ \] (.+?): (.+?) \[(.+?)\]/g`
+     - Build task objects with ID, title, estimate, status
+     - Validate that Phase 3: Tasks section exists
+   
+   - **Legacy JSON Format:**
+     - Parse JSON content structure
+     - Extract tasks from phases array
+     - Convert to TodoWrite format
+     - Validate tasks phase exists
+
+3. **Create TodoWrite Entries**
+```yaml
+# Load tasks into TodoWrite
+- Tool: TodoWrite
+  Parameters:
+    tasks: "[todoTasks array with parsed task objects]"
+  Purpose: Make spec tasks actionable in workflow
+```
+
+4. **Update Spec Status**
+```yaml
+# Mark spec as in progress
+- Tool: mcp__shirokuma-kb__update_item
+  Parameters:
+    id: "[specId]"
+    status: "In Progress"
+  Purpose: Track spec execution state
+```
+
+5. **Confirmation Process**
+   - Display count of loaded tasks
+   - Confirm spec status update
 
 ## Examples
 

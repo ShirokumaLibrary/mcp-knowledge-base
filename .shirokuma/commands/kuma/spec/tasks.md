@@ -80,182 +80,121 @@ Generate tasks following this structure:
 
 Tasks are automatically stored in shirokuma-kb as human-readable Markdown:
 
-```typescript
-// Generate human-readable Markdown content
-const markdownContent = `# Tasks: ${featureName}
+## Tasks Document Generation Process
 
-## Metadata
-- **Version**: 1.0
-- **Created**: ${new Date().toISOString()}
-- **Status**: Ready
-- **Phase**: Tasks
-${relatedDesign ? `- **Design Spec**: #${relatedDesign}` : ''}
+1. **Content Structure Creation**
+   - Generate comprehensive Markdown document with:
+     - Metadata (version, creation date, status, phase, related design spec)
+     - Overview (implementation strategy, testing approach, deployment strategy)
+     - Task Breakdown (phases with detailed tasks, subtasks, requirements, dependencies, acceptance criteria)
+     - Summary (metrics, milestones, risk assessment, dependencies)
+     - Execution Notes (prerequisites, testing requirements, documentation requirements)
+     - Task Checklist (copy/paste ready format)
 
-## Overview
-
-### Implementation Strategy
-${strategy}
-
-### Testing Approach
-${testingApproach} (Test-Driven Development)
-
-### Deployment Strategy
-${deploymentStrategy}
-
-## Task Breakdown
-
-${phases.map(phase => `
-### Phase ${phase.number}: ${phase.name} [${phase.estimate}]
-
-${phase.tasks.map(task => `
-#### Task ${task.id}: ${task.title} [${task.estimatedHours}h]
-
-**Description**: ${task.description}
-
-**Subtasks**:
-${task.subtasks.map(subtask => `- [ ] ${subtask}`).join('\n')}
-
-**Requirements**: ${task.requirements.join(', ')}
-**Dependencies**: ${task.dependencies.length > 0 ? task.dependencies.join(', ') : 'None'}
-**Acceptance Criteria**:
-${task.acceptanceCriteria.map(criteria => `- [ ] ${criteria}`).join('\n')}
-`).join('\n')}
-
-**Phase Summary**:
-- Tasks: ${phase.tasks.length}
-- Total Effort: ${phase.totalHours}h
-- Critical Path: ${phase.criticalPath.join(' → ')}
-`).join('\n')}
-
-## Summary
-
-### Metrics
-- **Total Tasks**: ${totalTasks}
-- **Total Effort**: ${estimatedTotalHours} hours
-- **Phases**: ${phases.length}
-- **Completed**: ${completedTasks}/${totalTasks}
-
-### Milestones
-${milestones.map((milestone, i) => 
-  `${i+1}. **${milestone.name}**: ${milestone.date} - ${milestone.deliverables.join(', ')}`
-).join('\n')}
-
-### Risk Assessment
-${risks.map(risk => `
-- **${risk.risk}**: ${risk.likelihood} likelihood
-  - Impact: ${risk.impact}
-  - Mitigation: ${risk.mitigation}
-`).join('\n')}
-
-### Dependencies
-${dependencies.map(dep => 
-  `- ${dep.external ? '[External]' : '[Internal]'} ${dep.name}: ${dep.description}`
-).join('\n')}
-
-## Execution Notes
-
-### Prerequisites
-${prerequisites.map(prereq => `- [ ] ${prereq}`).join('\n')}
-
-### Testing Requirements
-${testingRequirements.map(req => `- ${req}`).join('\n')}
-
-### Documentation Requirements
-${documentationRequirements.map(req => `- ${req}`).join('\n')}
-
-## Task Checklist (For Copy/Paste)
-
-\`\`\`markdown
-${phases.flatMap(phase => 
-  phase.tasks.map(task => `- [ ] ${task.id}: ${task.title} [${task.estimatedHours}h]`)
-).join('\n')}
-\`\`\`
-`;
-
-// Create or update tasks spec with Markdown content
-const tasksSpec = await mcp__shirokuma-kb__create_item({
-  type: "spec_tasks",
-  title: `Tasks: ${featureName}`,
-  description: "Tasks phase of spec-driven development",
-  content: markdownContent, // Human-readable Markdown instead of JSON
-  status: "Ready", // Ready for implementation
-  priority: "HIGH",
-  tags: ["spec", "tasks", "implementation"],
-  related: relatedSpecs || []
-});
-
-console.log(`✅ Tasks spec saved to shirokuma-kb with ID: ${tasksSpec.id}`);
-console.log(`📊 Total tasks: ${totalTasks} | Estimated hours: ${estimatedTotalHours}`);
-return tasksSpec.id;
+2. **MCP Storage Operation**
+```yaml
+# Store tasks in shirokuma-kb
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_tasks"
+    title: "Tasks: [featureName]"
+    description: "Tasks phase of spec-driven development"
+    content: "[Generated comprehensive Markdown document]"
+    status: "Ready"  # Ready for implementation
+    priority: "HIGH"
+    tags: ["spec", "tasks", "implementation"]
+    related: "[relatedSpecs if exists]"
+  Purpose: Store task breakdown for execution and tracking
 ```
+
+3. **Return Process**
+   - Display confirmation message with spec ID
+   - Show task count and estimated total hours
+   - Return spec ID for linking and execution
 
 ### Task Execution (TodoWrite Integration)
 
 Load tasks into TodoWrite:
 
-```typescript
-// Retrieve spec from MCP
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
+## Task Execution Process
 
-// Parse tasks from Markdown format
-const taskRegex = /- \[ \] (.+?): (.+?) \[(.+?)h\]/g;
-const tasks = [];
-let match;
-
-while ((match = taskRegex.exec(spec.content)) !== null) {
-  tasks.push({
-    id: match[1],
-    content: `${match[2]} (${match[3]}h)`,
-    status: "pending"
-  });
-}
-
-// Create TodoWrite entries
-await TodoWrite({ todos: tasks });
-
-// Update spec status to In Progress
-await mcp__shirokuma-kb__update_item({
-  id: specId,
-  status: "In Progress"
-});
-
-console.log(`✅ Loaded ${tasks.length} tasks into TodoWrite`);
-console.log(`✅ Spec #${specId} status updated to "In Progress"`);
+1. **Retrieve Spec from MCP**
+```yaml
+# Load tasks spec from shirokuma-kb
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Load task breakdown for execution
 ```
+
+2. **Parse Tasks from Markdown**
+   - Extract tasks using regex pattern: `/- \[ \] (.+?): (.+?) \[(.+?)h\]/g`
+   - Build task objects with ID, content, and time estimate
+   - Convert to TodoWrite format structure
+
+3. **Create TodoWrite Entries**
+```yaml
+# Load tasks into TodoWrite for execution
+- Tool: TodoWrite
+  Parameters:
+    todos: "[parsed task array with id, content, status]"
+  Purpose: Make tasks actionable in development workflow
+```
+
+4. **Update Spec Status**
+```yaml
+# Mark spec as in progress
+- Tool: mcp__shirokuma-kb__update_item
+  Parameters:
+    id: "[specId]"
+    status: "In Progress"
+  Purpose: Track spec execution state
+```
+
+5. **Confirmation Process**
+   - Display count of loaded tasks
+   - Confirm spec status update to "In Progress"
 
 ### Task Refinement
 
 For existing tasks:
 
-```typescript
-// 1. Retrieve spec from MCP
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
-const content = JSON.parse(spec.content);
+## Task Refinement Process
 
-// 2. Parse current tasks
-const currentTasks = content.tasks;
-
-// 3. Apply refinement based on feedback
-const refinedTasks = refineTasks(currentTasks, userFeedback);
-
-// 4. Update spec with refined tasks
-const updatedSpec = await mcp__shirokuma-kb__update_item({
-  id: specId,
-  content: JSON.stringify({
-    ...content,
-    tasks: refinedTasks,
-    version: incrementVersion(content.version),
-    updatedAt: new Date().toISOString()
-  })
-});
-
-console.log(`✅ Tasks refined and updated in spec #${specId}`);
-console.log(`📝 Version updated: ${content.version} → ${incrementVersion(content.version)}`);
+1. **Retrieve Current Spec**
+```yaml
+# Load existing tasks spec
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Get current tasks for refinement
 ```
+
+2. **Parse and Refine Tasks**
+   - Extract current task structure from Markdown content
+   - Apply user feedback to task breakdown
+   - Adjust task sizing, dependencies, and sequencing
+   - Update estimates and acceptance criteria
+
+3. **Update Spec with Refined Tasks**
+```yaml
+# Save refined tasks
+- Tool: mcp__shirokuma-kb__update_item
+  Parameters:
+    id: "[specId]"
+    content: "[Updated Markdown with refined tasks, incremented version, updated timestamp]"
+  Purpose: Store improved task breakdown
+```
+
+4. **Confirmation Process**
+   - Display confirmation message with spec ID
+   - Show version increment (e.g., "1.0 → 1.1")
 
 ### Task Validation
 
-Validation checklist:
+## Task Validation Checklist
+
+**Coverage Validation:**
 - [ ] All design components have tasks
 - [ ] Tasks are 2-4 hours each
 - [ ] Dependencies are clear
@@ -264,6 +203,13 @@ Validation checklist:
 - [ ] Logical sequencing
 - [ ] No circular dependencies
 - [ ] Deployment tasks present
+
+**Quality Assessment:**
+- Verify task atomicity and measurability
+- Check TDD compliance (test-first approach)
+- Validate dependency relationships
+- Confirm realistic time estimates
+- Ensure proper phase sequencing
 
 ## Examples
 

@@ -74,124 +74,78 @@ Requirements are automatically stored in shirokuma-kb as human-readable Markdown
 
 **Type used**: `type: "spec_requirements"` - Requirements phase only (user stories, EARS criteria, non-functional requirements)
 
-```typescript
-// Generate human-readable Markdown content
-const markdownContent = `# Requirements: ${featureName}
+## Requirements Document Generation Process
 
-## Metadata
-- **Version**: 1.0
-- **Created**: ${new Date().toISOString()}
-- **Status**: Specification
-- **Phase**: Requirements
+1. **Content Structure Creation**
+   - Generate comprehensive Markdown document with:
+     - Metadata (version, creation date, status, phase)
+     - Introduction (summary, business value, scope)
+     - User Stories (role-want-benefit format with acceptance criteria)
+     - Functional Requirements (EARS format with rationale)
+     - Non-Functional Requirements (categorized with metrics)
+     - Edge Cases & Error Scenarios (condition-behavior-recovery)
+     - Integration Points (interface-dataflow-errorhandling)
+     - Success Metrics (measurable targets)
+     - Out of Scope (explicit exclusions)
 
-## Introduction
-
-### Summary
-${introduction.summary}
-
-### Business Value
-${introduction.businessValue}
-
-### Scope
-${introduction.scope}
-
-## User Stories
-
-${userStories.map((story, i) => `
-### Story ${i+1}: ${story.title}
-**As a** ${story.role}  
-**I want** ${story.want}  
-**So that** ${story.benefit}
-
-#### Acceptance Criteria
-${story.acceptanceCriteria.map(criteria => `- [ ] ${criteria}`).join('\n')}
-`).join('\n')}
-
-## Functional Requirements (EARS Format)
-
-${functionalRequirements.map((req, i) => 
-  `### REQ-${i+1}: ${req.title}
-**${req.type}** ${req.condition} **THEN** system SHALL ${req.behavior}
-${req.rationale ? `\n*Rationale:* ${req.rationale}` : ''}`
-).join('\n\n')}
-
-## Non-Functional Requirements
-
-${Object.entries(nonFunctionalRequirements).map(([category, items]) => `
-### ${category}
-${items.map(item => `- ${item.description}${item.metric ? ` (Metric: ${item.metric})` : ''}`).join('\n')}
-`).join('\n')}
-
-## Edge Cases & Error Scenarios
-
-${edgeCases.map(edge => `
-### ${edge.scenario}
-- **Condition**: ${edge.condition}
-- **Expected Behavior**: ${edge.expectedBehavior}
-- **Recovery**: ${edge.recovery || 'N/A'}
-`).join('\n')}
-
-## Integration Points
-
-${integrationPoints.map(point => `
-### ${point.system}
-- **Interface**: ${point.interface}
-- **Data Flow**: ${point.dataFlow}
-- **Error Handling**: ${point.errorHandling}
-`).join('\n')}
-
-## Success Metrics
-
-${successMetrics.map(metric => 
-  `- **${metric.name}**: ${metric.target} (Measured by: ${metric.measurement})`
-).join('\n')}
-
-## Out of Scope
-
-${outOfScope.map(item => `- ${item}`).join('\n')}
-`;
-
-// Create new requirements spec with Markdown content
-const reqSpec = await mcp__shirokuma-kb__create_item({
-  type: "spec_requirements",
-  title: `Requirements: ${featureName}`,
-  description: "Requirements phase of spec-driven development",
-  content: markdownContent, // Human-readable Markdown instead of JSON
-  status: "Specification",
-  priority: "HIGH",
-  tags: ["spec", "requirements", "ears"],
-  related: issueIds || []
-});
-
-console.log(`✅ Requirements spec saved to shirokuma-kb with ID: ${reqSpec.id}`);
-return reqSpec.id; // Return for linking to design phase
+2. **MCP Storage Operation**
+```yaml
+# Store requirements in shirokuma-kb
+- Tool: mcp__shirokuma-kb__create_item
+  Parameters:
+    type: "spec_requirements"
+    title: "Requirements: [featureName]"
+    description: "Requirements phase of spec-driven development"
+    content: "[Generated comprehensive Markdown document]"
+    status: "Specification"
+    priority: "HIGH"
+    tags: ["spec", "requirements", "ears"]
+    related: "[issueIds if exists]"
+  Purpose: Store requirements document for reference and design phase input
 ```
+
+3. **Return Process**
+   - Display confirmation message with spec ID
+   - Return spec ID for linking to subsequent design phase
 
 ### Requirements Refinement
 
-For existing requirements:
+## Requirements Refinement Process
 
-```typescript
-// 1. Retrieve spec from MCP
-const spec = await mcp__shirokuma-kb__get_item({ id: specId });
-
-// 2. Update the Markdown content with refinements
-// The refinements will be applied directly to the Markdown text
-// preserving the human-readable format
-
-// 3. Update spec with refined version
-const updatedSpec = await mcp__shirokuma-kb__update_item({
-  id: specId,
-  content: refinedMarkdownContent // Updated Markdown with refinements
-});
-
-console.log(`✅ Requirements refined and updated in spec #${specId}`);
-console.log(`📝 Version updated: ${content.version} → ${incrementVersion(content.version)}`);
+1. **Retrieve Existing Spec**
+```yaml
+# Get current requirements spec
+- Tool: mcp__shirokuma-kb__get_item
+  Parameters:
+    id: "[specId]"
+  Purpose: Load existing requirements for refinement
 ```
+
+2. **Content Refinement**
+   - Apply refinements directly to Markdown content
+   - Preserve human-readable format structure
+   - Update version metadata
+   - Maintain historical context
+
+3. **Update Spec with Refined Version**
+```yaml
+# Update requirements with refinements
+- Tool: mcp__shirokuma-kb__update_item
+  Parameters:
+    id: "[specId]"
+    content: "[refinedMarkdownContent - updated Markdown with refinements]"
+  Purpose: Save refined requirements while preserving readability
+```
+
+4. **Confirmation Process**
+   - Display confirmation message with spec ID
+   - Show version increment (e.g., "1.0 → 1.1")
 
 ### Requirements Validation
 
-Validation checklist:
+## Validation Checklist Process
+
+**Completeness Validation:**
 - [ ] All user stories complete (role, want, benefit)
 - [ ] Acceptance criteria in proper EARS format
 - [ ] Each requirement is testable
@@ -201,6 +155,13 @@ Validation checklist:
 - [ ] Non-functional requirements addressed
 - [ ] No conflicting requirements
 - [ ] Dependencies documented
+
+**Quality Assessment:**
+- Review against project steering documents
+- Check EARS format compliance
+- Verify testability of all criteria
+- Confirm stakeholder coverage
+- Validate business value alignment
 
 ## Examples
 

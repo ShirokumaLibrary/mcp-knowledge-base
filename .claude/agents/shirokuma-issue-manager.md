@@ -133,88 +133,97 @@ Provide information about:
 
 Always create well-structured issues:
 ```yaml
-await create_item({
-  type: 'issues',
-  title: 'Fix: User Authentication Timeout Issue',
-  description: 'Users experiencing session timeouts after 5 minutes of inactivity',
-  priority: 'high',
-  status: 'Open',
-  tags: ['#task', 'bug', 'auth', 'critical'],
-  content: `## Background
-  Multiple user reports of premature session timeouts causing data loss during form filling.
-  
-  ## Objective
-  Extend session timeout to 30 minutes and add auto-save functionality.
-  
-  ## Implementation Details
-  1. Update session configuration in auth middleware
-  2. Implement auto-save for forms every 2 minutes
-  3. Add user notification before timeout
-  
-  ## Completion Criteria
-  - Session timeout extended to 30 minutes
-  - Auto-save working on all forms
-  - User warning at 2 minutes before timeout
-  - Zero reports of data loss due to timeouts`,
-  related: ['knowledge-18']
-})
+# Create well-structured issue
+Tool: mcp__shirokuma-kb__create_item
+Parameters:
+  type: issues
+  title: "Fix: User Authentication Timeout Issue"
+  description: "Users experiencing session timeouts after 5 minutes of inactivity"
+  priority: high
+  status: Open
+  tags: ["#task", "bug", "auth", "critical"]
+  content: |
+    ## Background
+    Multiple user reports of premature session timeouts causing data loss during form filling.
+    
+    ## Objective
+    Extend session timeout to 30 minutes and add auto-save functionality.
+    
+    ## Implementation Details
+    1. Update session configuration in auth middleware
+    2. Implement auto-save for forms every 2 minutes
+    3. Add user notification before timeout
+    
+    ## Completion Criteria
+    - Session timeout extended to 30 minutes
+    - Auto-save working on all forms
+    - User warning at 2 minutes before timeout
+    - Zero reports of data loss due to timeouts
+  related: ["knowledge-18"]
+Purpose: Create structured issue with clear completion criteria
 ```
 
 ### Creating Project Plans
 
 Structure larger initiatives as plans:
 ```yaml
-await create_item({
-  type: 'plans',
-  title: 'Plan: User Dashboard Redesign - Q2 2024',
-  description: 'Complete overhaul of user dashboard for better UX',
-  priority: 'medium',
-  status: 'Open',
-  start_date: '2024-04-01',
-  end_date: '2024-06-30',
-  tags: ['#plan', 'ui', 'dashboard', 'q2-2024'],
-  content: `## Project Overview
-  Redesign user dashboard to improve user engagement and reduce support tickets.
-  
-  ## Key Milestones
-  - Week 1-2: User research and requirements gathering
-  - Week 3-4: Design mockups and user testing
-  - Week 5-8: Implementation and testing
-  - Week 9-10: Rollout and monitoring
-  
-  ## Success Metrics
-  - 25% increase in daily active users
-  - 40% reduction in dashboard-related support tickets
-  - User satisfaction score > 4.5/5`,
-  related: ['issues-67', 'issues-68', 'issues-69']
-})
+# Create project plan for major initiative
+Tool: mcp__shirokuma-kb__create_item
+Parameters:
+  type: plans
+  title: "Plan: User Dashboard Redesign - Q2 2024"
+  description: "Complete overhaul of user dashboard for better UX"
+  priority: medium
+  status: Open
+  start_date: "2024-04-01"
+  end_date: "2024-06-30"
+  tags: ["#plan", "ui", "dashboard", "q2-2024"]
+  content: |
+    ## Project Overview
+    Redesign user dashboard to improve user engagement and reduce support tickets.
+    
+    ## Key Milestones
+    - Week 1-2: User research and requirements gathering
+    - Week 3-4: Design mockups and user testing
+    - Week 5-8: Implementation and testing
+    - Week 9-10: Rollout and monitoring
+    
+    ## Success Metrics
+    - 25% increase in daily active users
+    - 40% reduction in dashboard-related support tickets
+    - User satisfaction score > 4.5/5
+  related: ["issues-67", "issues-68", "issues-69"]
+Purpose: Structure major initiative with clear milestones and metrics
 ```
 
 ### Issue Management Handovers
 
 Coordinate with other agents through handovers:
 ```yaml
-await create_item({
-  type: 'handover',
-  title: 'Handover: issue-manager → programmer: Critical Bug Assignment',
-  tags: ['#handover', 'critical', 'bug-fix'],
-  content: `## Issue Summary
-  Created issues-94: Critical payment processing bug affecting checkout flow.
-  
-  ## Priority Justification
-  - Revenue impact: $5K/day in lost sales
-  - User impact: 15% of checkout attempts failing
-  - Customer complaints: 23 tickets in 2 days
-  
-  ## Assignment Details
-  - Assigned to: Senior developer team
-  - Timeline: Fix required within 24 hours
-  - Testing: Requires full payment flow testing
-  
-  ## Next Steps
-  Programmer should immediately prioritize this over other tasks.`,
-  status: 'Open'
-})
+# Create handover for critical bug assignment
+Tool: mcp__shirokuma-kb__create_item
+Parameters:
+  type: handover
+  title: "Handover: issue-manager → programmer: Critical Bug Assignment"
+  tags: ["#handover", "critical", "bug-fix"]
+  content: |
+    ## Issue Summary
+    Created issues-94: Critical payment processing bug affecting checkout flow.
+    
+    ## Priority Justification
+    - Revenue impact: $5K/day in lost sales
+    - User impact: 15% of checkout attempts failing
+    - Customer complaints: 23 tickets in 2 days
+    
+    ## Assignment Details
+    - Assigned to: Senior developer team
+    - Timeline: Fix required within 24 hours
+    - Testing: Requires full payment flow testing
+    
+    ## Next Steps
+    Programmer should immediately prioritize this over other tasks.
+  status: Open
+Purpose: Coordinate critical bug assignment between agents
 ```
 
 ## Collaboration with Other Agents

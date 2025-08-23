@@ -29,7 +29,7 @@ Project-specific configurations are stored as MCP steering documents (type: stee
 - **Testing Standards** - Test requirements and coverage
 - **Coding Conventions** - Style guides and naming rules
 
-To access: `mcp.list_items({ type: "steering" })`
+To access: Use `mcp__shirokuma-kb__list_items` with type parameter "steering"
 
 ## Core Principles
 
@@ -103,32 +103,49 @@ To access: `mcp.list_items({ type: "steering" })`
 ## Search Strategies
 
 ### Keyword Search
-```typescript
-strategy: 'keywords'
-// TF-IDF based keyword matching
-// API: search_items, get_related_items
+```yaml
+# TF-IDF based keyword matching strategy
+Strategy: keywords
+Tools:
+  - mcp__shirokuma-kb__search_items
+  - mcp__shirokuma-kb__get_related_items
+Purpose: Find items based on text keyword similarity
 ```
 
 ### Concept Search
-```typescript
-strategy: 'concepts'
-// High-level category identification
-// API: get_related_items with strategy='concepts'
+```yaml
+# High-level category identification strategy
+Strategy: concepts
+Tools:
+  - mcp__shirokuma-kb__get_related_items
+Parameters:
+  - strategy: 'concepts'
+Purpose: Find items based on conceptual similarity
 ```
 
 ### Embedding Search
-```typescript
-strategy: 'embedding'
-// Semantic similarity using vectors
-// API: get_related_items with strategy='embedding'
+```yaml
+# Semantic similarity using vector embeddings
+Strategy: embedding
+Tools:
+  - mcp__shirokuma-kb__get_related_items
+Parameters:
+  - strategy: 'embedding'
+Purpose: Find items based on semantic vector similarity
 ```
 
 ### Hybrid Search
-```typescript
-strategy: 'hybrid',
-weights: { keywords: 0.4, embedding: 0.6 }
-// Combined approach for best results
-// API: get_related_items with weights parameter
+```yaml
+# Combined approach using multiple strategies
+Strategy: hybrid
+Tools:
+  - mcp__shirokuma-kb__get_related_items
+Parameters:
+  - strategy: 'hybrid'
+  - weights: 
+      keywords: 0.4
+      embedding: 0.6
+Purpose: Best results using weighted combination of strategies
 ```
 
 ## Memory Management
@@ -242,44 +259,56 @@ weights: { keywords: 0.4, embedding: 0.6 }
 ## API Usage Examples
 
 ### Creating an Issue
-```typescript
-create_item({
-  type: "issue",
-  title: "Fix authentication bug",
-  description: "Users cannot login with valid credentials",
-  status: "Open",  // Available: Open, Specification, Waiting, Ready, In Progress, Review, Testing, Pending, Completed, Closed, Canceled, Rejected
-  priority: "HIGH",
-  tags: ["bug", "authentication", "critical"],
-  related: [45, 46]  // Optional: manually relate to other items
-})
+```yaml
+# Create a new issue item
+Tool: mcp__shirokuma-kb__create_item
+Parameters:
+  type: "issue"
+  title: "Fix authentication bug"
+  description: "Users cannot login with valid credentials"
+  status: "Open"
+  priority: "HIGH"
+  tags: ["bug", "authentication", "critical"]
+  related: [45, 46]  # Optional: manually relate to other items
+
+# Available Statuses: Open, Specification, Waiting, Ready, In Progress, Review, Testing, Pending, Completed, Closed, Canceled, Rejected
 ```
 
 ### Searching for Knowledge
-```typescript
-search_items({
-  query: "React hooks optimization",
-  types: ["knowledge", "pattern"],
+```yaml
+# Search for knowledge items
+Tool: mcp__shirokuma-kb__search_items
+Parameters:
+  query: "React hooks optimization"
+  types: ["knowledge", "pattern"]
   limit: 10
-})
+Purpose: Find relevant knowledge and patterns
 ```
 
 ### Finding Related Items
-```typescript
-get_related_items({
-  id: 123,
-  strategy: "hybrid",
-  weights: { keywords: 0.3, embedding: 0.7 },
+```yaml
+# Find items related to a specific item
+Tool: mcp__shirokuma-kb__get_related_items
+Parameters:
+  id: 123
+  strategy: "hybrid"
+  weights: 
+    keywords: 0.3
+    embedding: 0.7
   depth: 2
-})
+Purpose: Discover related items using multiple strategies
 ```
 
 ### Updating System State
-```typescript
-update_current_state({
-  content: "Working on authentication module refactoring",
-  tags: ["session", "authentication", "refactoring"],
-  metadata: { updatedBy: "ai-session-2025-08-16" }
-})
+```yaml
+# Update current system state
+Tool: mcp__shirokuma-kb__update_current_state
+Parameters:
+  content: "Working on authentication module refactoring"
+  tags: ["session", "authentication", "refactoring"]
+  metadata: 
+    updatedBy: "ai-session-2025-08-16"
+Purpose: Save current work context for session continuity
 ```
 
 ## Specialist Agents
