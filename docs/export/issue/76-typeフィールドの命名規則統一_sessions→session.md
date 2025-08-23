@@ -4,6 +4,8 @@ type: issue
 title: "typeフィールドの命名規則統一: sessions→session"
 status: Completed
 priority: MEDIUM
+description: "エクスポートされたファイルの一部でtypeフィールドが「sessions」（複数形）になっている。正しくは「session」（単数形）であるべき"
+aiSummary: "Issue about inconsistent naming convention where type field uses plural 'sessions' instead of correct singular 'session' form in exported files, requiring correction for consistency"
 tags: ["type-field","naming-convention","import","export","data-integrity"]
 related: [77,105,108]
 keywords: {"type":1,"field":0.9,"session":0.9,"naming":0.8,"convention":0.8}
@@ -12,14 +14,6 @@ embedding: "gIuAhICAkoCOgJOAh4CAgICCgImAgIyAhYOcgJ2AgICAgICCgICUgICJn4CvgICAgIWA
 createdAt: 2025-08-22T13:32:44.000Z
 updatedAt: 2025-08-22T13:32:44.000Z
 ---
-
-# typeフィールドの命名規則統一: sessions→session
-
-エクスポートされたファイルの一部でtypeフィールドが「sessions」（複数形）になっている。正しくは「session」（単数形）であるべき
-
-## AI Summary
-
-Issue about inconsistent naming convention where type field uses plural 'sessions' instead of correct singular 'session' form in exported files, requiring correction for consistency
 
 # typeフィールドの命名規則統一: sessions→session
 

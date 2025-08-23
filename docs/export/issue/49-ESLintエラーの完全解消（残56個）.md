@@ -4,6 +4,8 @@ type: issue
 title: "ESLintエラーの完全解消（残56個）"
 status: Completed
 priority: HIGH
+description: "Vitestは設定完了。ESLintは部分的に動作中だが、56個のエラーが残っている"
+aiSummary: "Complete resolution of ESLint errors (56 remaining) with Vitest setup complete. ESLint partially working but 56 errors remain. Session accomplished full error elimination from 216 to 0, replacing any types with proper TypeScript definitions, improving type safety in error handling, and achieving zero errors in both build and ESLint."
 tags: ["testing","linting","configuration","setup","quality-assurance"]
 related: [5,6,7,18,21,22,40,41,55,63,81,88,94]
 keywords: {"eslint":1,"error":0.9,"type":0.8,"typescript":0.8,"vitest":0.8}
@@ -12,14 +14,6 @@ embedding: "kICTgICAh4CEgICilYCJnoiAlYCAgICAkYCJo5CAkJaOgJGAgICAgJqAlJqGgJGIhYCG
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# ESLintエラーの完全解消（残56個）
-
-Vitestは設定完了。ESLintは部分的に動作中だが、56個のエラーが残っている
-
-## AI Summary
-
-Complete resolution of ESLint errors (56 remaining) with Vitest setup complete. ESLint partially working but 56 errors remain. Session accomplished full error elimination from 216 to 0, replacing any types with proper TypeScript definitions, improving type safety in error handling, and achieving zero errors in both build and ESLint.
 
 ## 現状
 ### ✅ 完了（2025-08-14セッション）

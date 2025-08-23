@@ -4,6 +4,8 @@ type: issue
 title: "embeddingフィールドの出力オプション自体を廃止すべき"
 status: Completed
 priority: HIGH
+description: "includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。"
+aiSummary: "embeddingフィールドの出力オプション自体を廃止すべき includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。 ## 背景\n\n現在、`get_item` APIには`includeEmbedding`パラメータがあり、128次元のInt8量子化ベクトルの出力を制御できます。しかし、*"
 tags: ["embedding","api","cleanup","simplification","breaking-change"]
 related: [24,26,27,49,67]
 keywords: {"128":0.42,"embedding":1,"includeembedding":1,"api":0.83,"typescript":0.83}
@@ -11,16 +13,6 @@ embedding: "gIaAgICAgI2AmJeLiYuAgICAgICAgISQgJ+Zl5SFgICAh4CAgICKmICblJmYgICAgJaA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# embeddingフィールドの出力オプション自体を廃止すべき
-
-includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。
-
-## AI Summary
-
-embeddingフィールドの出力オプション自体を廃止すべき includeEmbeddingオプションは不要。埋め込みベクトルは完全に内部データとして扱い、APIレスポンスから除外すべき。AIも人間も直接使用することはない。 ## 背景
-
-現在、`get_item` APIには`includeEmbedding`パラメータがあり、128次元のInt8量子化ベクトルの出力を制御できます。しかし、*
 
 ## 背景
 

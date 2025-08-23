@@ -4,6 +4,8 @@ type: decision
 title: "Enable type field changes in update_item API"
 status: Open
 priority: HIGH
+description: "Technical design for allowing type field updates while maintaining data integrity"
+aiSummary: "Enable type field changes in update_item API Technical design for allowing type field updates while maintaining data integrity # Design: Enable Type Field Changes in update_item API\n\n## Problem Statem"
 tags: ["api","type_validation","data_integrity","prisma","update_item"]
 related: [8,18,19,21,35,40,81,88,89,90]
 keywords: {"type":0.89,"validation":0.34,"field":0.19,"with":0.18,"existing":0.16}
@@ -11,16 +13,6 @@ embedding: "gIiAhYCCgJeAhoyBgICAgICHgIGAh4WSgIefhYCAgICAiICAgImKioCFs4mAgICAgIeA
 createdAt: 2025-08-22T13:32:41.000Z
 updatedAt: 2025-08-22T13:32:41.000Z
 ---
-
-# Enable type field changes in update_item API
-
-Technical design for allowing type field updates while maintaining data integrity
-
-## AI Summary
-
-Enable type field changes in update_item API Technical design for allowing type field updates while maintaining data integrity # Design: Enable Type Field Changes in update_item API
-
-## Problem Statem
 
 # Design: Enable Type Field Changes in update_item API
 

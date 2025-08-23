@@ -4,6 +4,8 @@ type: issue
 title: "別環境インストール時にprisma/schema.prismaが見つからずDB初期化に失敗"
 status: Completed
 priority: HIGH
+description: "別環境でインストールして利用する際、prisma/schema.prismaファイルが見つからないエラーが発生し、データベースの初期化ができない問題"
+aiSummary: "別環境インストール時にprisma/schema.prismaが見つからずDB初期化に失敗 別環境でインストールして利用する際、prisma/schema.prismaファイルが見つからないエラーが発生し、データベースの初期化ができない問題 ## 問題の詳細\n\n別環境でパッケージをインストールして利用しようとした際、以下のエラーが発生する：\n- `prisma/schema.prisma` ファイ"
 tags: ["prisma","bug","database","npm","installation","deployment"]
 related: [96,98,99,76,104]
 keywords: {"prisma":1,"schema":1,"postinstall":1,"npm":0.74,"package":0.74}
@@ -11,17 +13,6 @@ embedding: "h4CAgICAgIGTgZOjgICAkICAgICAgICAjYSQl4CEgIOFgICAgICAiIOAh4uAjoCAkYCA
 createdAt: 2025-08-22T13:32:44.000Z
 updatedAt: 2025-08-22T13:32:44.000Z
 ---
-
-# 別環境インストール時にprisma/schema.prismaが見つからずDB初期化に失敗
-
-別環境でインストールして利用する際、prisma/schema.prismaファイルが見つからないエラーが発生し、データベースの初期化ができない問題
-
-## AI Summary
-
-別環境インストール時にprisma/schema.prismaが見つからずDB初期化に失敗 別環境でインストールして利用する際、prisma/schema.prismaファイルが見つからないエラーが発生し、データベースの初期化ができない問題 ## 問題の詳細
-
-別環境でパッケージをインストールして利用しようとした際、以下のエラーが発生する：
-- `prisma/schema.prisma` ファイ
 
 ## 問題の詳細
 

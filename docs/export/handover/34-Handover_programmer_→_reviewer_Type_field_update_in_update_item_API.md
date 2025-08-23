@@ -4,6 +4,8 @@ type: handover
 title: "Handover: programmer → reviewer: Type field update in update_item API"
 status: Open
 priority: HIGH
+description: "GREEN phase implementation for type field support in update_item API - minimal code to pass tests"
+aiSummary: "Handover: programmer → reviewer: Type field update in update_item API GREEN phase implementation for type field support in update_item API - minimal code to pass tests ## Handover: Type Field Update I"
 tags: ["api","type-field","tdd","implementation","handover","green-phase","update-item"]
 related: [1,6,18,16,21,22,37,51,53,59,85]
 keywords: {"type":0.47,"field":0.36,"mcp":0.29,"test":0.25,"tests":0.25}
@@ -11,14 +13,6 @@ embedding: "gIecgICAgIWAlJSAgICAgICJm4CAgICAgJGigICAgICAh5GAgICAgYCIo4CAgICAgIqP
 createdAt: 2025-08-22T13:32:42.000Z
 updatedAt: 2025-08-22T13:32:42.000Z
 ---
-
-# Handover: programmer → reviewer: Type field update in update_item API
-
-GREEN phase implementation for type field support in update_item API - minimal code to pass tests
-
-## AI Summary
-
-Handover: programmer → reviewer: Type field update in update_item API GREEN phase implementation for type field support in update_item API - minimal code to pass tests ## Handover: Type Field Update I
 
 ## Handover: Type Field Update Implementation
 

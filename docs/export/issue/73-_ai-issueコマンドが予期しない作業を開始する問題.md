@@ -4,6 +4,8 @@ type: issue
 title: "/ai-issueコマンドが予期しない作業を開始する問題"
 status: Completed
 priority: MEDIUM
+description: "/ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正"
+aiSummary: "/ai-issueコマンドが予期しない作業を開始する問題 /ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正 ## 問題の詳細\n\n`/ai-issue`コマンドの動作が不安定：\n1. 引数を渡すと、イシュー作成ではなく作業を開始してしまう\n2. コマンドの意図と実際の動作が一致しない\n\n## 期待される動作\n\n```bash\n/ai-issue"
 tags: ["command","bug","ai-issue","ux"]
 related: [84,43]
 keywords: {"103":1,"search":1,"issue":1,"claude":0.56,"keyword":0.56}
@@ -11,23 +13,6 @@ embedding: "gICJgJSAgIeBioCAgICAgICAjoCPgICCiJaAgICAgICAgI2Aj4CAiaKagICAgICAgICG
 createdAt: 2025-08-22T13:32:44.000Z
 updatedAt: 2025-08-22T13:32:44.000Z
 ---
-
-# /ai-issueコマンドが予期しない作業を開始する問題
-
-/ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正
-
-## AI Summary
-
-/ai-issueコマンドが予期しない作業を開始する問題 /ai-issueコマンドに引数を渡した際、イシュー作成ではなく意図しない作業を開始してしまう問題を修正 ## 問題の詳細
-
-`/ai-issue`コマンドの動作が不安定：
-1. 引数を渡すと、イシュー作成ではなく作業を開始してしまう
-2. コマンドの意図と実際の動作が一致しない
-
-## 期待される動作
-
-```bash
-/ai-issue
 
 ## 問題の詳細
 

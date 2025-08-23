@@ -4,6 +4,8 @@ type: knowledge
 title: "Code Review Pattern: Security Vulnerabilities in File Operations"
 status: Open
 priority: MEDIUM
+description: "ファイル操作におけるセキュリティ脆弱性の検出パターンとベストプラクティス"
+aiSummary: "A comprehensive guide covering security vulnerabilities in file operations, focusing on path traversal attacks, input validation, access control, and secure coding practices for TypeScript/Node.js applications with testing strategies."
 tags: ["security","testing","best-practices","file-operations","vulnerability"]
 related: [74,72]
 keywords: {"security":1,"file":0.9,"vulnerability":0.9,"validation":0.8,"path":0.8}
@@ -12,14 +14,6 @@ embedding: "hoCIgI+DgJeAgICIjYCSgICAjoCXjYCegICAkJ6AlICGgI6AlIaAnYCAgJKegI2AkoCI
 createdAt: 2025-08-22T13:32:45.000Z
 updatedAt: 2025-08-22T13:32:45.000Z
 ---
-
-# Code Review Pattern: Security Vulnerabilities in File Operations
-
-ファイル操作におけるセキュリティ脆弱性の検出パターンとベストプラクティス
-
-## AI Summary
-
-A comprehensive guide covering security vulnerabilities in file operations, focusing on path traversal attacks, input validation, access control, and secure coding practices for TypeScript/Node.js applications with testing strategies.
 
 # Security Vulnerabilities in File Operations
 

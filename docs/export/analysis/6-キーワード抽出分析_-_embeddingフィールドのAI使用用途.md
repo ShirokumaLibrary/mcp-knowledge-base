@@ -4,6 +4,8 @@ type: analysis
 title: "キーワード抽出分析 - embeddingフィールドのAI使用用途"
 status: Completed
 priority: MEDIUM
+description: "embeddingフィールドのAI使用用途に関するテキストのキーワード分析"
+aiSummary: "Analysis of embedding vector field usage in AI systems, focusing on whether AI models directly use embedding vectors, performance implications, and API design considerations for controlling embedding data output."
 tags: ["embedding","ai-usage","keyword-extraction","api-design","analysis"]
 related: [26,27,45,53,56,18,34,35,41,47,49,81,82,83,88,97,115,116,118]
 keywords: {"embedding":1,"vector":0.9,"ai":0.9,"api":0.8,"claude":0.8}
@@ -12,14 +14,6 @@ embedding: "gImMgICAgICXk6KAhJeAgoCBk4CAgICAkpmlgIuUgImAh5KAgICAgJaWmoCPj4COgICJ
 createdAt: 2025-08-22T13:32:41.000Z
 updatedAt: 2025-08-22T13:32:41.000Z
 ---
-
-# キーワード抽出分析 - embeddingフィールドのAI使用用途
-
-embeddingフィールドのAI使用用途に関するテキストのキーワード分析
-
-## AI Summary
-
-Analysis of embedding vector field usage in AI systems, focusing on whether AI models directly use embedding vectors, performance implications, and API design considerations for controlling embedding data output.
 
 ## 抽出結果
 

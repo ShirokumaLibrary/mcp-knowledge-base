@@ -4,6 +4,8 @@ type: session
 title: "AI-Specコマンドシステム実装セッション"
 status: Completed
 priority: HIGH
+description: "2025-08-21: ai-specコマンドシステムの設計・実装およびTypeORM移行仕様書作成"
+aiSummary: "AI-Spec command system implementation session covering the complete development of specification-driven development tools and TypeORM migration documentation with MCP integration and markdown format conversion"
 tags: ["documentation","ai-spec","implementation","typeorm","v0.9.0","session"]
 related: [98,101,102,103,104,105,106,107,108,109,110,20,27,28,48,117]
 keywords: {"spec":1,"ai":1,"command":0.9,"implementation":0.9,"system":0.9}
@@ -12,14 +14,6 @@ embedding: "iIKngIGAj4CWgICYgICAgI+LooCJgIqAkYCEmoCAgICGk5CAkICRgJaAgJeAgICAgJKe
 createdAt: 2025-08-22T13:32:45.000Z
 updatedAt: 2025-08-22T13:32:45.000Z
 ---
-
-# AI-Specコマンドシステム実装セッション
-
-2025-08-21: ai-specコマンドシステムの設計・実装およびTypeORM移行仕様書作成
-
-## AI Summary
-
-AI-Spec command system implementation session covering the complete development of specification-driven development tools and TypeORM migration documentation with MCP integration and markdown format conversion
 
 # AI-Specコマンドシステム実装セッション
 

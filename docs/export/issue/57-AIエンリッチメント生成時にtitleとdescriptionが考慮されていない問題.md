@@ -4,6 +4,8 @@ type: issue
 title: "AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題"
 status: Completed
 priority: HIGH
+description: "現在のAIエンリッチメント（キーワード抽出、コンセプト検出）はcontentフィールドのみを対象としており、titleとdescriptionが含まれていない。これらの重要なメタデータを見逃している可能性がある。"
+aiSummary: "AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題 現在のAIエンリッチメント（キーワード抽出、コンセプト検出）はcontentフィールドのみを対象としており、titleとdescriptionが含まれていない。これらの重要なメタデータを見逃している可能性がある。 ## 問題の詳細\n\n現在の実装を確認したところ、AIエンリッチメント処理に問題があることが判明しまし"
 tags: ["ai-enrichment","bug","search","keywords","title","description"]
 related: [16,17,24,29,31,32,40,42,38,39,66,82,83]
 keywords: {"title":1,"description":1,"content":0.8,"const":0.4,"params":0.4}
@@ -11,16 +13,6 @@ embedding: "iICAiaSAgICImYaEgICAioiAgIKdgICAmYyAiYCAgIuPgICAjICAgKSBgIqAgICLiYCA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題
-
-現在のAIエンリッチメント（キーワード抽出、コンセプト検出）はcontentフィールドのみを対象としており、titleとdescriptionが含まれていない。これらの重要なメタデータを見逃している可能性がある。
-
-## AI Summary
-
-AIエンリッチメント生成時にtitleとdescriptionが考慮されていない問題 現在のAIエンリッチメント（キーワード抽出、コンセプト検出）はcontentフィールドのみを対象としており、titleとdescriptionが含まれていない。これらの重要なメタデータを見逃している可能性がある。 ## 問題の詳細
-
-現在の実装を確認したところ、AIエンリッチメント処理に問題があることが判明しまし
 
 ## 問題の詳細
 

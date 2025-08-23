@@ -4,6 +4,8 @@ type: solution
 title: "import-manager.test.tsメモリリーク問題の解決"
 status: Completed
 priority: MEDIUM
+description: "Issue #76: テストのメモリリーク問題を解決"
+aiSummary: "Resolved memory leak issue in import-manager.test.ts by disabling problematic tests with complex fs/promises mocks and creating simplified alternative tests to maintain basic functionality coverage while preventing test crashes."
 tags: ["vitest","test","memory-leak","solution"]
 related: [76,91,78,109,111,112,114]
 keywords: {"memory":1,"leak":1,"test":0.9,"vitest":0.8,"mock":0.8}
@@ -12,14 +14,6 @@ embedding: "gICVmoCAgImAgIKigJKAi4CAl5WAgICRgoCAoICUgIGAgJOIgICAjIuAiJSAiYCBgICH
 createdAt: 2025-08-22T13:32:46.000Z
 updatedAt: 2025-08-22T13:32:46.000Z
 ---
-
-# import-manager.test.tsメモリリーク問題の解決
-
-Issue #76: テストのメモリリーク問題を解決
-
-## AI Summary
-
-Resolved memory leak issue in import-manager.test.ts by disabling problematic tests with complex fs/promises mocks and creating simplified alternative tests to maintain basic functionality coverage while preventing test crashes.
 
 ## 問題
 `import-manager.test.ts`実行時にメモリリークが発生し、テストがクラッシュする。

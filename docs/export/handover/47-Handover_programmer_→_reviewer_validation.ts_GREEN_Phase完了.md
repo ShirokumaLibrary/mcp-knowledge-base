@@ -4,6 +4,7 @@ type: handover
 title: "Handover: programmer → reviewer: validation.ts GREEN Phase完了"
 status: Open
 priority: MEDIUM
+aiSummary: "Handover: programmer → reviewer: validation.ts GREEN Phase完了  ## ハンドオーバー概要\n\nTDD GREEN Phaseの実装を完了し、すべてのテストがパスしました。レビューをお願いします。\n\n## 実装内容\n\n### 対象ファイル\n- `/home/webapp/shirokuma-v8/src/utils/validation.ts"
 tags: ["#handover","#tdd","#green-phase","#validation","#review-request"]
 related: [5,6,8,13,9,55,56,66,115]
 keywords: {"phase":0.95,"validation":0.48,"run":0.48,"npm":0.48,"normalizetype":0.48}
@@ -11,19 +12,6 @@ embedding: "i4CAjICAgI+Aj4CYgICHgIWAgISAgICOgImApoCAjoCNgICCgICAh4CCgK6AgI+AkICA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# Handover: programmer → reviewer: validation.ts GREEN Phase完了
-
-## AI Summary
-
-Handover: programmer → reviewer: validation.ts GREEN Phase完了  ## ハンドオーバー概要
-
-TDD GREEN Phaseの実装を完了し、すべてのテストがパスしました。レビューをお願いします。
-
-## 実装内容
-
-### 対象ファイル
-- `/home/webapp/shirokuma-v8/src/utils/validation.ts
 
 ## ハンドオーバー概要
 

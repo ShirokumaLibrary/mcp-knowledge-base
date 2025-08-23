@@ -4,6 +4,8 @@ type: documentation
 title: "AI-Spec 開発フロー実例集"
 status: Completed
 priority: HIGH
+description: "実際の開発シナリオに基づいたAI-Specコマンドの具体的な使用例とベストプラクティス"
+aiSummary: "A comprehensive guide for AI-Spec development workflows featuring 5 practical scenarios ranging from large-scale OAuth authentication to micro-level bug fixes, with specific command usage patterns and best practices for different development scales and types."
 tags: ["documentation","workflow","ai-spec","best-practices","examples"]
 related: [102,111,7,8,9,17,54,55,56,88,95,96,99]
 keywords: {"spec":1,"ai":1,"development":0.9,"flow":0.8,"scenario":0.8}
@@ -12,14 +14,6 @@ embedding: "gICAgICGgICfgI+YgICTgIiAgICCgoCEooCRkICAkoCRgICAiZGAgKqAjYSAgJSAk4CA
 createdAt: 2025-08-22T13:32:42.000Z
 updatedAt: 2025-08-22T13:32:42.000Z
 ---
-
-# AI-Spec 開発フロー実例集
-
-実際の開発シナリオに基づいたAI-Specコマンドの具体的な使用例とベストプラクティス
-
-## AI Summary
-
-A comprehensive guide for AI-Spec development workflows featuring 5 practical scenarios ranging from large-scale OAuth authentication to micro-level bug fixes, with specific command usage patterns and best practices for different development scales and types.
 
 # AI-Spec 開発フロー実例集
 

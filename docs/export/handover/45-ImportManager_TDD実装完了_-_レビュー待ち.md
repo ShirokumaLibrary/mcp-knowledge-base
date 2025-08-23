@@ -4,6 +4,8 @@ type: handover
 title: "ImportManager TDD実装完了 - レビュー待ち"
 status: Completed
 priority: HIGH
+description: "issue-67のインポート機能実装。TDDメソッドでRED-GREEN-REFACTORフェーズ完了"
+aiSummary: "TDD implementation of ImportManager for data import functionality from exported files, including security measures, CLI commands, and transaction support. Implementation completed through RED-GREEN-REFACTOR phases with comprehensive testing."
 tags: ["tdd","import","handover","review-needed"]
 related: [67,85,6,39,40,41,60]
 keywords: {"import":1,"tdd":1,"implementation":0.9,"manager":0.9,"test":0.8}
@@ -12,14 +14,6 @@ embedding: "gI2oi5OBgICAgICRjICHgICRpoKHgICAgICAmJGDj4CAi5iAgIiAgICAgJWOgJGAgIOW
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# ImportManager TDD実装完了 - レビュー待ち
-
-issue-67のインポート機能実装。TDDメソッドでRED-GREEN-REFACTORフェーズ完了
-
-## AI Summary
-
-TDD implementation of ImportManager for data import functionality from exported files, including security measures, CLI commands, and transaction support. Implementation completed through RED-GREEN-REFACTOR phases with comprehensive testing.
 
 # ImportManager TDD実装完了 - レビュー済み
 

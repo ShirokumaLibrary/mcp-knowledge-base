@@ -4,6 +4,8 @@ type: issue
 title: "get_item APIでembeddingフィールドの出力を制御可能にする"
 status: Closed
 priority: MEDIUM
+description: "get_item APIが返すembeddingフィールド（128次元のInt8配列）は大きなデータサイズでコンテキストを消費するが、実際に必要なケースは限定的。オプションで出力を制御できるようにすべき。"
+aiSummary: "get_item APIでembeddingフィールドの出力を制御可能にする get_item APIが返すembeddingフィールド（128次元のInt8配列）は大きなデータサイズでコンテキストを消費するが、実際に必要なケースは限定的。オプションで出力を制御できるようにすべき。 ## 問題の詳細\n\n**このイシューはissue-26と重複のためクローズされました。**\n\n作業はissue-26"
 tags: ["embedding","api","optimization","mcp","performance","closed","get_item","duplicate"]
 related: [24,25,26,33,42,43,47,48,52,6,19,23,38,67,68,101,116]
 keywords: {"128":1,"embedding":1,"api":1,"issue":1,"get_item":1}
@@ -11,18 +13,6 @@ embedding: "gICAgICAgIGQm5OAg4CAgICAgoCAgIKLibGWgI2AgICAgIaAgICFlIStkYCVgICAgICH
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# get_item APIでembeddingフィールドの出力を制御可能にする
-
-get_item APIが返すembeddingフィールド（128次元のInt8配列）は大きなデータサイズでコンテキストを消費するが、実際に必要なケースは限定的。オプションで出力を制御できるようにすべき。
-
-## AI Summary
-
-get_item APIでembeddingフィールドの出力を制御可能にする get_item APIが返すembeddingフィールド（128次元のInt8配列）は大きなデータサイズでコンテキストを消費するが、実際に必要なケースは限定的。オプションで出力を制御できるようにすべき。 ## 問題の詳細
-
-**このイシューはissue-26と重複のためクローズされました。**
-
-作業はissue-26
 
 ## 問題の詳細
 

@@ -4,15 +4,12 @@ type: issue
 title: "export機能が以前と大きく変わってるので戻す"
 status: Completed
 priority: HIGH
+description: "TypeORM移行後、export機能の動作が以前と大きく異なっている。元の動作に戻す必要がある。"
 tags: ["typeorm","v0.9.0","export","regression"]
-related: [66,67,71]
+related: [66,67,71,120]
 createdAt: 2025-08-22T13:53:18.000Z
 updatedAt: 2025-08-22T14:00:47.000Z
 ---
-
-# export機能が以前と大きく変わってるので戻す
-
-TypeORM移行後、export機能の動作が以前と大きく異なっている。元の動作に戻す必要がある。
 
 ## 問題
 TypeORM移行後、export機能の動作が以前と大きく異なっていた。

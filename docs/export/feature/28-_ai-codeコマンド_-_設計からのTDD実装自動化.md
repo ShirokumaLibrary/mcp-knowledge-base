@@ -4,6 +4,8 @@ type: feature
 title: "/ai-codeコマンド - 設計からのTDD実装自動化"
 status: Completed
 priority: HIGH
+description: "承認済み設計からTDDメソッドでコード実装を行うコマンド。RED-GREEN-REFACTORサイクルと自動レビューを含む"
+aiSummary: "AI command for automated TDD implementation from approved design specifications, following RED-GREEN-REFACTOR cycle with automated review"
 tags: ["automation","command","ai-code","tdd","implementation"]
 related: [84,91,92,93,15,36,54,58,85,89,90,97]
 keywords: {"ai":1,"code":1,"test":0.9,"command":0.9,"tdd":0.9}
@@ -12,14 +14,6 @@ embedding: "gIuriY+AgImVgICCgJGAgICPo4KFgICOkYCAi4CVgICAipeAgICAhpWAgJKAkICAgIKb
 createdAt: 2025-08-22T13:32:42.000Z
 updatedAt: 2025-08-22T13:32:42.000Z
 ---
-
-# /ai-codeコマンド - 設計からのTDD実装自動化
-
-承認済み設計からTDDメソッドでコード実装を行うコマンド。RED-GREEN-REFACTORサイクルと自動レビューを含む
-
-## AI Summary
-
-AI command for automated TDD implementation from approved design specifications, following RED-GREEN-REFACTOR cycle with automated review
 
 ## 概要
 

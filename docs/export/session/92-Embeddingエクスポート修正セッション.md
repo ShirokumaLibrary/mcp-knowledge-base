@@ -4,6 +4,8 @@ type: session
 title: "Embeddingエクスポート修正セッション"
 status: Completed
 priority: HIGH
+description: "2025-08-22 07:40-08:03: Issue #112のembeddingエクスポート修正とv0.8.4リリース"
+aiSummary: "Session documenting the fix for embedding field export issue #112 and release of v0.8.4, including Base64 encoding implementation and npm package publication"
 tags: ["embedding","session","release","bugfix","v0.8.4"]
 related: [112,27,28,48,105]
 keywords: {"embedding":1,"export":0.9,"issue":0.8,"session":0.8,"fix":0.8}
@@ -12,14 +14,6 @@ embedding: "gI6AkICGkYmAqICAg4CAiICHgIyAgYuRgLSAgI2AgI+AgICEgImSkoCtgICVgICQgISA
 createdAt: 2025-08-22T13:32:45.000Z
 updatedAt: 2025-08-22T13:32:45.000Z
 ---
-
-# Embeddingエクスポート修正セッション
-
-2025-08-22 07:40-08:03: Issue #112のembeddingエクスポート修正とv0.8.4リリース
-
-## AI Summary
-
-Session documenting the fix for embedding field export issue #112 and release of v0.8.4, including Base64 encoding implementation and npm package publication
 
 ## セッション概要
 開始: 2025-08-22 07:40 JST

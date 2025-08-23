@@ -4,6 +4,8 @@ type: issue
 title: "ステータス \"In Progress\" が存在しないエラーの修正"
 status: Closed
 priority: HIGH
+description: "issue-2と重複のためクローズ"
+aiSummary: "ステータス \"In Progress\" が存在しないエラーの修正 list_items APIでstatus: [\"Open\",\"In Progress\",\"Pending\"]を指定すると、\"Status 'In Progress' not found\"エラーが発生する ## 問題の詳細\n\n`mcp__shirokuma-kb__list_items` APIを呼び出す際に、ステータスフィルターに"
 category: "bug-fix"
 tags: ["api","mcp","status","bug","database","list-items"]
 related: [2,10,12,19,24,34,35,39,38,115]
@@ -12,16 +14,6 @@ embedding: "gICPn4CAgICAj6yCgICAj4CAiKGAgICAgIikgICAg4+AgIGagICAgICBlYGAgJCJgICA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# ステータス "In Progress" が存在しないエラーの修正
-
-issue-2と重複のためクローズ
-
-## AI Summary
-
-ステータス "In Progress" が存在しないエラーの修正 list_items APIでstatus: ["Open","In Progress","Pending"]を指定すると、"Status 'In Progress' not found"エラーが発生する ## 問題の詳細
-
-`mcp__shirokuma-kb__list_items` APIを呼び出す際に、ステータスフィルターに
 
 ## 問題の詳細
 

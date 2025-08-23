@@ -4,6 +4,8 @@ type: handover
 title: "Review: Status Guide Documentation - Missing File Issue"
 status: Open
 priority: CRITICAL
+description: "Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md"
+aiSummary: "Review: Status Guide Documentation - Missing File Issue Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md # Review Report: Status Guide "
 tags: ["documentation","review","handover","status-guide","missing-file","critical"]
 related: [2,3,34,16,21,61,84]
 keywords: {"status":0.64,"file":0.47,"guide":0.44,"mcp":0.34,"documentation":0.27}
@@ -11,14 +13,6 @@ embedding: "gICJgICAgICJh4mPn4CBjoCAhICAgICAioiGi6uAhIqAgICAgICAgIqFgISqgJaDgICB
 createdAt: 2025-08-22T13:32:42.000Z
 updatedAt: 2025-08-22T13:32:42.000Z
 ---
-
-# Review: Status Guide Documentation - Missing File Issue
-
-Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md
-
-## AI Summary
-
-Review: Status Guide Documentation - Missing File Issue Review findings for status guide documentation that was supposed to be created at .shirokuma/docs/status-guide.md # Review Report: Status Guide 
 
 # Review Report: Status Guide Documentation
 

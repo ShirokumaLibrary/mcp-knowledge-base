@@ -4,6 +4,8 @@ type: feature
 title: "/ai-designコマンド - 設計専用コマンドの実装"
 status: Completed
 priority: MEDIUM
+description: "shirokuma-designerエージェントをベースにした設計専用コマンド。設計作成→自己検証→レビュー→ユーザー承認のフローを自動化"
+aiSummary: "/ai-designコマンド - 設計専用コマンドの実装 shirokuma-designerエージェントをベースにした設計専用コマンド。設計作成→自己検証→レビュー→ユーザー承認のフローを自動化 ## 概要\n\n`/ai-design`コマンドは、イシューに対する技術設計を作成し、自動レビューを経てユーザーに提示する専用コマンドです。\n\n## 主な機能\n\n### 1. プロセスフロー\n1. **I"
 tags: ["automation","design","command","ai-design"]
 related: [84,91,92,93,6,8,54,55,60,63,85,94,99]
 keywords: {"design":1,"review":0.65,"issue":0.65,"mcp":0.43,"shirokuma":0.43}
@@ -11,21 +13,6 @@ embedding: "gICVgICAgImZi4CEgICAnoCAgoCDgICInZmEiYGAgJaAgIKAgICAhJyegImGgICIgICV
 createdAt: 2025-08-22T13:32:42.000Z
 updatedAt: 2025-08-22T13:32:42.000Z
 ---
-
-# /ai-designコマンド - 設計専用コマンドの実装
-
-shirokuma-designerエージェントをベースにした設計専用コマンド。設計作成→自己検証→レビュー→ユーザー承認のフローを自動化
-
-## AI Summary
-
-/ai-designコマンド - 設計専用コマンドの実装 shirokuma-designerエージェントをベースにした設計専用コマンド。設計作成→自己検証→レビュー→ユーザー承認のフローを自動化 ## 概要
-
-`/ai-design`コマンドは、イシューに対する技術設計を作成し、自動レビューを経てユーザーに提示する専用コマンドです。
-
-## 主な機能
-
-### 1. プロセスフロー
-1. **I
 
 ## Issue #82: ai-goコマンドの役割再定義
 

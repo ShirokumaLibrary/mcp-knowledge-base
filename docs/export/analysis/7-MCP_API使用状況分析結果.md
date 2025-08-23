@@ -4,6 +4,8 @@ type: analysis
 title: "MCP API使用状況分析結果"
 status: Completed
 priority: MEDIUM
+description: "全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。"
+aiSummary: "MCP API使用状況分析結果 全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。 ## MCP API使用状況分析\n\n全25個のAPIを使用頻度で分類：\n\n### 🔥 頻繁に使用（コア機能）\n1. **create_item** - アイテム作成（イシュー、知識、セッション等）\n2. **update_item** - アイテム更新（"
 tags: ["analysis","api","optimization","cleanup","usage-stats"]
 related: [24,25,26,54,18,40,49,115]
 keywords: {"api":1,"mcp":0.4,"find_shortest_path":0.4,"find_hub_nodes":0.4,"find_clusters":0.4}
@@ -11,20 +13,6 @@ embedding: "gICAgICAhYWAgKiAhoCAjICBgICAgIyEgIC2gICAgIeAiICAgICSgYCArYCBgICOgI6A
 createdAt: 2025-08-22T13:32:41.000Z
 updatedAt: 2025-08-22T13:32:41.000Z
 ---
-
-# MCP API使用状況分析結果
-
-全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。
-
-## AI Summary
-
-MCP API使用状況分析結果 全25個のMCP APIの実際の使用状況を分析。頻繁に使用されるもの、時々使用されるもの、未使用のものに分類。 ## MCP API使用状況分析
-
-全25個のAPIを使用頻度で分類：
-
-### 🔥 頻繁に使用（コア機能）
-1. **create_item** - アイテム作成（イシュー、知識、セッション等）
-2. **update_item** - アイテム更新（
 
 ## MCP API使用状況分析
 

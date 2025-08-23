@@ -4,6 +4,8 @@ type: test_results
 title: "TDD RED Phase: Type Field Update Tests"
 status: Open
 priority: HIGH
+description: "Failing tests for enabling type field updates in update_item API"
+aiSummary: "TDD RED Phase: Type Field Update Tests Failing tests for enabling type field updates in update_item API # TDD RED Phase Test Results\n\n## Test Objective\nEnable type field updates in the update_item MCP"
 tags: ["api","mcp","type-field","testing","tdd","red-phase"]
 related: [1,6,20]
 keywords: {"type":0.92,"field":0.46,"tests":0.44,"test":0.39,"update":0.37}
@@ -11,17 +13,6 @@ embedding: "gISQgICAgIaAh5SDgICAgICAkYCAgISAgIilhoCBgICAgo6AgICIgoCFr4aAhoCAgICF
 createdAt: 2025-08-22T13:32:46.000Z
 updatedAt: 2025-08-22T13:32:46.000Z
 ---
-
-# TDD RED Phase: Type Field Update Tests
-
-Failing tests for enabling type field updates in update_item API
-
-## AI Summary
-
-TDD RED Phase: Type Field Update Tests Failing tests for enabling type field updates in update_item API # TDD RED Phase Test Results
-
-## Test Objective
-Enable type field updates in the update_item MCP
 
 # TDD RED Phase Test Results
 

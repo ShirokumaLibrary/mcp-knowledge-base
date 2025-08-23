@@ -4,6 +4,7 @@ type: knowledge
 title: "TDD GREEN Phase: validation.ts実装詳細"
 status: Open
 priority: MEDIUM
+aiSummary: "TDD GREEN Phase: validation.ts実装詳細  ## 実装概要\n\nvalidation.tsのテストをパスさせるための最小限の実装を完了しました。\n\n## 実装した変更\n\n### 1. validateType関数の修正\n- autoNormalizeがtrueの場合、常にnormalizeType関数を呼ぶように変更\n- これにより、`bug___fix`のような複数アン"
 tags: ["#tdd","#green-phase","#validation","#knowledge","#implementation"]
 related: [4,6,9,13,14,15,20,25,49,54,55,23,68]
 keywords: {"phase":1,"normalizetype":1,"ascii":1,"validation":0.87,"green":0.87}
@@ -11,20 +12,6 @@ embedding: "lYCAkImAgJiAnICOgICQgImIgISDgICWgJGCmoCAmICAlYCAgICAi4CEgJuAgJaAgpyA
 createdAt: 2025-08-22T13:32:45.000Z
 updatedAt: 2025-08-22T13:32:45.000Z
 ---
-
-# TDD GREEN Phase: validation.ts実装詳細
-
-## AI Summary
-
-TDD GREEN Phase: validation.ts実装詳細  ## 実装概要
-
-validation.tsのテストをパスさせるための最小限の実装を完了しました。
-
-## 実装した変更
-
-### 1. validateType関数の修正
-- autoNormalizeがtrueの場合、常にnormalizeType関数を呼ぶように変更
-- これにより、`bug___fix`のような複数アン
 
 ## 実装概要
 

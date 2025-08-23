@@ -4,6 +4,8 @@ type: issue
 title: "MCPアイテムのエクスポート機能と環境変数管理の実装完了"
 status: Completed
 priority: MEDIUM
+description: "MCPデータベース内のアイテムをエクスポートする機能と、環境変数の設定方法を改善する"
+aiSummary: "Implementation of MCP item export functionality and environment variable management system with CLI commands, security features, and comprehensive testing"
 tags: ["configuration","environment","cli","export","feature"]
 related: [46,47,57,58,62,64,67,85,119,102]
 keywords: {"mcp":1,"export":0.9,"environment":0.8,"variable":0.8,"management":0.8}
@@ -12,14 +14,6 @@ embedding: "j4CAkImAgICAgICTg4+NgIeAgIqBgICAgICFl46QkYCOgICRgYCAgICAgJSWlY6AhYCA
 createdAt: 2025-08-22T13:32:44.000Z
 updatedAt: 2025-08-22T13:32:44.000Z
 ---
-
-# MCPアイテムのエクスポート機能と環境変数管理の実装完了
-
-MCPデータベース内のアイテムをエクスポートする機能と、環境変数の設定方法を改善する
-
-## AI Summary
-
-Implementation of MCP item export functionality and environment variable management system with CLI commands, security features, and comprehensive testing
 
 ## 要件（修正版）
 1. **MCPアイテムのエクスポート機能** - データベース内のアイテムを外部ファイル（JSON/Markdown等）にエクスポート ✅

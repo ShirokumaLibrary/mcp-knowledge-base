@@ -4,6 +4,8 @@ type: analysis
 title: "typeフィールド命名規則統一問題の分析"
 status: Completed
 priority: MEDIUM
+description: "MCPアイテムのtypeフィールドにおけるsessions/session混在問題の詳細分析"
+aiSummary: "typeフィールド命名規則統一問題の分析 MCPアイテムのtypeフィールドにおけるsessions/session混在問題の詳細分析 {\n  \"keywords\": [\n    {\"keyword\": \"type\", \"weight\": 1.0},\n    {\"keyword\": \"field\", \"weight\": 0.9},\n    {\"keyword\": \"naming\", \"weight"
 tags: ["mcp","type-field","naming-convention","data-consistency","database-fix"]
 related: [10,17,40,47,65,82,83,88,89,90]
 keywords: {"weight":1,"keyword":1,"concept":0.53,"confidence":0.53,"type":0.35}
@@ -11,18 +13,6 @@ embedding: "gICAgICAipChgI+IgIWAgICAgICAgIaFrICXhoCEgICAgICAgICLlamAlIKAhYCAgICA
 createdAt: 2025-08-22T13:32:41.000Z
 updatedAt: 2025-08-22T13:32:41.000Z
 ---
-
-# typeフィールド命名規則統一問題の分析
-
-MCPアイテムのtypeフィールドにおけるsessions/session混在問題の詳細分析
-
-## AI Summary
-
-typeフィールド命名規則統一問題の分析 MCPアイテムのtypeフィールドにおけるsessions/session混在問題の詳細分析 {
-  "keywords": [
-    {"keyword": "type", "weight": 1.0},
-    {"keyword": "field", "weight": 0.9},
-    {"keyword": "naming", "weight
 
 {
   "keywords": [

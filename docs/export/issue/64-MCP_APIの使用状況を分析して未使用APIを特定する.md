@@ -4,6 +4,8 @@ type: issue
 title: "MCP APIの使用状況を分析して未使用APIを特定する"
 status: Completed
 priority: MEDIUM
+description: "多数のMCP APIが定義されているが、実際に使用されているものはどれか？未使用のAPIを特定して整理の必要性を検討。"
+aiSummary: "Analysis of MCP API usage to identify and clean up unused APIs, resulting in significant codebase reduction and maintenance cost savings"
 tags: ["analysis","api","cleanup","mcp"]
 related: [55,66,67]
 keywords: {"api":1,"mcp":1,"unused":0.9,"analysis":0.9,"usage":0.9}
@@ -12,14 +14,6 @@ embedding: "gIqAjYCAgICAgKWAgI2AgICBgI6FgICAgICmgICWhYCAh4CMgICAgIKAooCAm42AgICA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# MCP APIの使用状況を分析して未使用APIを特定する
-
-多数のMCP APIが定義されているが、実際に使用されているものはどれか？未使用のAPIを特定して整理の必要性を検討。
-
-## AI Summary
-
-Analysis of MCP API usage to identify and clean up unused APIs, resulting in significant codebase reduction and maintenance cost savings
 
 ## 背景
 

@@ -4,6 +4,8 @@ type: documentation
 title: "AI-Spec コマンドシステム 使用ガイド"
 status: Completed
 priority: HIGH
+description: "Spec駆動開発を実現するai-specコマンドシステムの包括的な使用方法ドキュメント"
+aiSummary: "Comprehensive AI-Spec command system guide for Spec-driven development, covering requirement definition, design phases, task decomposition with EARS format validation and MCP integration"
 tags: ["documentation","guide","commands","ai-spec","sdd","ears"]
 related: [103,111,7,10,15,36,53,55,56,57,58,59,62,63,94,95,96]
 keywords: {"spec":1,"ai":1,"specification":0.9,"command":0.9,"development":0.9}
@@ -12,14 +14,6 @@ embedding: "gIKAnICBgICYgICajIyAgICLgImAgYCAkoSAnJCTgICAkoCAgImAgJeMgJiNkICAgJGA
 createdAt: 2025-08-22T13:32:41.000Z
 updatedAt: 2025-08-22T13:32:41.000Z
 ---
-
-# AI-Spec コマンドシステム 使用ガイド
-
-Spec駆動開発を実現するai-specコマンドシステムの包括的な使用方法ドキュメント
-
-## AI Summary
-
-Comprehensive AI-Spec command system guide for Spec-driven development, covering requirement definition, design phases, task decomposition with EARS format validation and MCP integration
 
 # AI-Spec コマンドシステム 使用ガイド
 

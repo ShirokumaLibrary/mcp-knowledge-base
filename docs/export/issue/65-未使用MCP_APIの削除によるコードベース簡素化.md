@@ -4,6 +4,8 @@ type: issue
 title: "未使用MCP APIの削除によるコードベース簡素化"
 status: Completed
 priority: MEDIUM
+description: "分析の結果、44%（11個）のAPIが完全未使用。これらを削除してメンテナンス性を向上させる。"
+aiSummary: "未使用MCP APIの削除によるコードベース簡素化 分析の結果、44%（11個）のAPIが完全未使用。これらを削除してメンテナンス性を向上させる。 ## 背景\n\nanalysis-54の分析結果に基づき、未使用APIを削除する。\n\n## ✅ 削除完了API（11個）\n\n### グラフ分析系（6個）\n1. **find_shortest_path** - 最短パス検索 ✅\n2. **find_hub"
 tags: ["api","cleanup","simplification","breaking-change","maintenance"]
 related: [4,8,13,50,54,68,86]
 keywords: {"mcp":1,"api":0.9,"handlers":0.9,"src":0.79,"typescript":0.34}
@@ -11,22 +13,6 @@ embedding: "gICAgImAgICAm5qNgICAgICAgICBgIKAgI+klICAgICAgICAgoCFgICClpeAgICAgICA
 createdAt: 2025-08-22T13:32:43.000Z
 updatedAt: 2025-08-22T13:32:43.000Z
 ---
-
-# 未使用MCP APIの削除によるコードベース簡素化
-
-分析の結果、44%（11個）のAPIが完全未使用。これらを削除してメンテナンス性を向上させる。
-
-## AI Summary
-
-未使用MCP APIの削除によるコードベース簡素化 分析の結果、44%（11個）のAPIが完全未使用。これらを削除してメンテナンス性を向上させる。 ## 背景
-
-analysis-54の分析結果に基づき、未使用APIを削除する。
-
-## ✅ 削除完了API（11個）
-
-### グラフ分析系（6個）
-1. **find_shortest_path** - 最短パス検索 ✅
-2. **find_hub
 
 ## 背景
 

@@ -4,6 +4,8 @@ type: knowledge
 title: "Status System Guide - Comprehensive Documentation"
 status: Completed
 priority: HIGH
+description: "Complete guide for understanding and using the status system in shirokuma-knowledge-base"
+aiSummary: "Status System Guide - Comprehensive Documentation Complete guide for understanding and using the status system in shirokuma-knowledge-base # Status System Guide\n\n## Overview\n\nThe status system in shir"
 tags: ["documentation","workflow","status","guide","best-practices","lifecycle"]
 related: [35,36,37,27,28,70,71,72,73]
 keywords: {"status":0.37,"review":0.27,"ready":0.21,"waiting":0.21,"testing":0.2}
@@ -11,18 +13,6 @@ embedding: "gICAnoCEgICWjo6AgIOAgIaAgJWAi4CAmpGHgICNhICQgICGgI6AgJmMgYCAlZSAk4CA
 createdAt: 2025-08-22T13:32:44.000Z
 updatedAt: 2025-08-22T13:32:44.000Z
 ---
-
-# Status System Guide - Comprehensive Documentation
-
-Complete guide for understanding and using the status system in shirokuma-knowledge-base
-
-## AI Summary
-
-Status System Guide - Comprehensive Documentation Complete guide for understanding and using the status system in shirokuma-knowledge-base # Status System Guide
-
-## Overview
-
-The status system in shir
 
 # Status System Guide
 

@@ -4,6 +4,8 @@ type: spec_design
 title: "設計書: TypeORM移行（v0.9.0）"
 status: Specification
 priority: HIGH
+description: "PrismaからTypeORMへの移行に関する技術設計書"
+aiSummary: "Technical design document for migrating from Prisma to TypeORM in SHIROKUMA Knowledge Base v0.9.0, covering system architecture, data models, migration strategy, and implementation approach with repository pattern"
 tags: ["design","architecture","typeorm","v0.9.0","migration","spec"]
 related: [98,105,107,109,110,111,31,32,91,93,113]
 keywords: {"typeorm":1,"prisma":0.9,"migration":0.9,"database":0.8,"orm":0.8}
@@ -12,14 +14,6 @@ embedding: "kYCcjoCAgICAgKOTgIWAgJOAlI2BgICAgICXkICLgICLgIuGiICAgICAhoaAg4CAjoCY
 createdAt: 2025-08-22T13:32:46.000Z
 updatedAt: 2025-08-22T13:32:46.000Z
 ---
-
-# 設計書: TypeORM移行（v0.9.0）
-
-PrismaからTypeORMへの移行に関する技術設計書
-
-## AI Summary
-
-Technical design document for migrating from Prisma to TypeORM in SHIROKUMA Knowledge Base v0.9.0, covering system architecture, data models, migration strategy, and implementation approach with repository pattern
 
 # 設計書: TypeORM移行（v0.9.0）
 
