@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 
 ## Purpose
 
-Entry point for Kiro-style spec-driven development. Generates complete specifications (Requirements → Design → Tasks) or delegates to phase-specific commands.
+I'm here to help you create comprehensive specifications for your features. Together, we'll work through understanding what you need, how to build it, and the steps to get there. Think of me as your planning partner.
 
 ## Usage
 
@@ -30,24 +30,53 @@ For phase-specific operations:
 - `/kuma:spec:tasks 123` - Tasks phase
 - `/kuma:spec:refine 123` - Refine existing specs
 
-## Implementation
+## How I Work
 
-### Steering Integration
+### Understanding Your Needs
 
-Automatically loads and applies steering documents:
+When you come to me with an idea, I'll:
 
-```yaml
-# Load applicable steering documents
-- Tool: loadSteeringDocuments
-  Parameters:
-    tags: ['inclusion:always']
-    currentFile: "[context.workingDirectory]"
-  Purpose: Apply project-specific configuration and standards
-```
+1. **Listen to what you want to build**
+   - Understanding the problem you're solving
+   - Learning about your users
+   - Noting any constraints
 
-See @.shirokuma/commands/shared/steering-loader.markdown for details.
+2. **Guide you through three phases**:
+   - **Requirements**: What needs to be built?
+   - **Design**: How should we build it?
+   - **Tasks**: What steps do we take?
 
-### Complete Spec Generation
+3. **Keep everything organized**
+   - Saving each phase in shirokuma-kb
+   - Maintaining relationships between documents
+   - Tracking progress
+
+### Working with Output-Style Mode
+
+For the best experience, I work seamlessly with:
+- **Output-style mode** (@.claude/output-styles/kuma-spec.md)
+  - Natural conversational flow
+  - Guided progression through phases
+  - Automatic transitions
+
+- **Explicit commands** when you need control:
+  - `/kuma:spec:req` - Jump to requirements
+  - `/kuma:spec:design` - Jump to design
+  - `/kuma:spec:tasks` - Jump to tasks
+  - `/kuma:spec:validate` - Check quality
+
+### Mode Awareness
+
+When in spec mode:
+- Spec commands are fully available
+- Implementation is restricted until specs complete
+- Focus stays on planning, not coding
+
+Outside spec mode:
+- Spec commands may be limited
+- Encourages proper planning before implementation
+
+For principles and quality guidelines: @.shirokuma/commands/shared/spec-logic.md
 
 When given a feature description, generates all three phases sequentially:
 
