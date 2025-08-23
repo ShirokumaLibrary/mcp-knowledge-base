@@ -74,14 +74,31 @@ To access: `mcp.list_items({ type: "steering" })`
 | **decision** | Project-specific choices | "Use PostgreSQL for database" |
 | **session** | Work session records | "2025-08-16 work session" |
 | **pattern** | Code patterns & templates | "API error handling pattern" |
-| **task** | Specific task management | "Implement UI components" |
+| **task** | Single/standalone task management | "Fix login button bug" |
 | **research** | Investigation results | "Performance optimization findings" |
 | **standard** | Coding standards & conventions | "TypeScript style guide" |
-| **design** | Technical designs and architecture | "Authentication module design" |
+| **design** | General design documents (non-spec) | "Database schema overview" |
 | **handover** | Implementation records and transitions | "TDD implementation for auth module" |
 | **feature** | Feature specifications and requirements | "Multi-factor authentication feature" |
 | **steering** | Project configuration and settings | "Language rules configuration" |
-| **spec** | Technical specifications | "API endpoint specification" |
+| **spec** | Complete specifications (all phases) | "User authentication full spec" |
+| **spec_requirements** | Spec-driven requirements phase | "OAuth requirements definition" |
+| **spec_design** | Spec-driven design phase | "API architecture design" |
+| **spec_tasks** | Spec-driven task breakdown | "Feature implementation tasks" |
+
+### Type Usage Guidelines
+
+#### Design Types
+- **`design`**: Use for standalone design documents not part of spec-driven development
+  - Examples: UI mockups, database diagrams, system architecture docs
+- **`spec_design`**: Use only within spec-driven development workflow (`/kuma:spec:design`)
+  - Part of the formal spec process: requirements → design → tasks
+
+#### Task Types  
+- **`task`**: Use for individual, standalone tasks not part of a larger spec
+  - Examples: Bug fixes, small improvements, operational tasks
+- **`spec_tasks`**: Use only within spec-driven development workflow (`/kuma:spec:tasks`)
+  - Task breakdown from a formal design specification
 
 ## Search Strategies
 
