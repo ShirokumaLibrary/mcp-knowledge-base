@@ -1,9 +1,10 @@
 ---
 description: Create a new Claude Code slash command
 argument-hint: "<command-name> <description>"
+allowed-tools: Write, Edit, Read, Task
 ---
 
-# ai-create-command - Create custom slash commands
+# /kuma:create-command - Create custom slash commands
 
 ## Usage
 ```
@@ -12,7 +13,7 @@ argument-hint: "<command-name> <description>"
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 <ultrathink>
 The user wants to create a new slash command. I need to:
@@ -29,7 +30,7 @@ Create a new slash command file based on the following Claude Code specification
 **IMPORTANT**: 
 1. Always include the following in the Task section of the created command:
    ```
-   @.shirokuma/configs/lang.md
+   Note: Language settings are configured in MCP steering documents
    ```
 2. For internationalization, use placeholder notation `[text]` for any user-facing text that should be translated.
 3. Structure content in English but mark translatable strings clearly.
@@ -74,8 +75,8 @@ Create a new slash command file based on the following Claude Code specification
 - Subdirectories create namespaces: `tools/format.md` → `/tools:format`
 - Best practices:
   - Use kebab-case: `my-command.md`
-  - Prefix AI commands with `ai-`: `ai-optimize.md`
   - Keep names short but descriptive
+  - Follow the /kuma:* naming pattern for consistency
 
 ### Example Templates
 

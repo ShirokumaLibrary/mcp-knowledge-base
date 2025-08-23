@@ -8,7 +8,7 @@ allowed-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__s
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -43,9 +43,16 @@ When provided with a CLEAR issue description:
 ### 3. View Issue Details (with number)
 Shows complete issue information:
 - Full description and content
-- Related tasks and documents
+- **Related documents**: Linked specs, plans, implementation notes
+- **Related items**: Connected issues, tasks, decisions
 - Current status and priority
 - History of updates
+
+**Important**: Issues serve as the central hub for all related documentation:
+- Spec documents (requirements, design, tasks)
+- Implementation plans and notes
+- Test results and validation
+- Decision records
 
 ### 4. Update Issue Status (with number + action)
 Supports simple status updates:

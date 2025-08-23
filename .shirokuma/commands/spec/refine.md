@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -62,7 +62,7 @@ Refines and updates existing specifications based on feedback, new requirements,
 
 ### Refinement Prompts
 
-From @.shirokuma/commands/spec/shared/spec-prompts.markdown:
+From @.shirokuma/commands/shared/spec-prompts.markdown:
 
 #### Requirements Refinement
 ```

@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Project Configuration
 
@@ -19,7 +19,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 
 ## TDD Methodology
 
-@.shirokuma/rules/tdd-methodology.md
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
 ## Purpose
 

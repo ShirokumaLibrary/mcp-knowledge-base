@@ -1,26 +1,67 @@
 # MCP Usage Rules
 
+AI Pair Programming with shirokuma-knowledge-base MCP
+
+## Quick Start Commands
+
+```bash
+# Session Management
+/kuma:start                  # Restore context and begin work
+/kuma:finish                 # Save context and handoff
+
+# Issue Management  
+/kuma:issue                  # List open issues
+/kuma:issue "bug description" # Create new issue
+/kuma:issue 103              # Show issue details
+
+# Work Execution
+/kuma:go                     # Work on selected issue
+/kuma:commit                 # Create git commit
+/kuma:tests                  # Generate tests
+```
+
+## Project Configuration
+
+Project-specific configurations are stored as MCP steering documents (type: steering):
+- **Language Rules** - Chat response language settings
+- **Core Configuration** - Project architecture and setup
+- **Build Configuration** - Build commands and settings
+- **Testing Standards** - Test requirements and coverage
+- **Coding Conventions** - Style guides and naming rules
+
+To access: `mcp.list_items({ type: "steering" })`
+
 ## Core Principles
 
-### 1. Immediate Idea Capture
+### 1. AI Memory is Not Persistent
+- All context is lost after session ends
+- Continuity depends on externalization to MCP
+- Explicit documentation is mandatory
+
+### 2. Immediate Idea Capture
 - Record ideas **immediately** when they arise
 - Never postpone documentation (risk of forgetting)
 - Use MCP as external memory for AI continuity
 
-### 2. Issue-Driven Development
+### 3. Issue-Driven Development
 - Always create an issue before code changes
 - Every change needs a "why" documented
 - No code without corresponding issue
 
-### 3. Session Management
+### 4. Session Management
 - Start session: Restore context from MCP
 - During work: Record decisions immediately
 - End session: Save state for next AI
 
-### 4. Knowledge Organization
+### 5. Knowledge Organization
 - Generic knowledge: Use appropriate knowledge types
 - Project-specific: Use project-specific types
 - Avoid duplication through proper search
+
+### 6. Quality Through Methodology
+- **TDD**: Test → Code → Refactor (always in this order)
+- **Tidy First**: Separate structural and behavioral changes
+- **Document "why"**: Code shows "what", docs explain "why"
 
 ## Type Classification
 
@@ -39,6 +80,8 @@
 | **design** | Technical designs and architecture | "Authentication module design" |
 | **handover** | Implementation records and transitions | "TDD implementation for auth module" |
 | **feature** | Feature specifications and requirements | "Multi-factor authentication feature" |
+| **steering** | Project configuration and settings | "Language rules configuration" |
+| **spec** | Technical specifications | "API endpoint specification" |
 
 ## Search Strategies
 
@@ -221,6 +264,16 @@ update_current_state({
   metadata: { updatedBy: "ai-session-2025-08-16" }
 })
 ```
+
+## Specialist Agents
+
+For specialized tasks, use these expert agents:
+- **MCP Operations** → `shirokuma-mcp-specialist`
+- **Development Methodology** → `shirokuma-methodology-keeper`
+- **Issue Management** → `shirokuma-issue-manager`
+- **Knowledge Organization** → `shirokuma-knowledge-curator`
+- **Code Review** → `shirokuma-reviewer`
+- **Technical Research** → `shirokuma-researcher`
 
 ## Remember
 

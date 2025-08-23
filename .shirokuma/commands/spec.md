@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -17,27 +17,48 @@ Entry point for Kiro-style spec-driven development. Generates complete specifica
 ## Usage
 
 ```bash
-/kuma:spec "feature description"    # Generate complete spec (all 3 phases)
+/kuma:spec 123                     # Generate specs for item (auto-detect)
+/kuma:spec "feature description"    # Generate complete spec (creates issue)
 /kuma:spec list                    # List all specs
-/kuma:spec show <spec-id>          # Show spec details
-/kuma:spec execute <spec-id>       # Load tasks into TodoWrite
+/kuma:spec show 456                # Show spec details
+/kuma:spec execute 123             # Execute specs from item
 ```
 
-For phase-specific operations, use:
-- `/kuma:spec:req` - Requirements phase only
-- `/kuma:spec:design` - Design phase only
-- `/kuma:spec:tasks` - Tasks phase only
-- `/kuma:spec:refine` - Refine existing specs
+For phase-specific operations:
+- `/kuma:spec:req 123` - Requirements phase
+- `/kuma:spec:design 123` - Design phase
+- `/kuma:spec:tasks 123` - Tasks phase
+- `/kuma:spec:refine 123` - Refine existing specs
 
 ## Implementation
+
+### Steering Integration
+
+Automatically loads and applies steering documents:
+
+```typescript
+// Load applicable steering documents
+const steering = await loadSteeringDocuments({
+  tags: ['inclusion:always'],
+  currentFile: context.workingDirectory
+});
+```
+
+See @.shirokuma/commands/shared/steering-loader.markdown for details.
 
 ### Complete Spec Generation
 
 When given a feature description, generates all three phases sequentially:
 
 1. **Requirements Generation** (@.shirokuma/commands/spec/req.md)
+   - Applies project standards from steering
+   - Incorporates architectural constraints
 2. **Design Generation** (@.shirokuma/commands/spec/design.md)
+   - Uses steering patterns and conventions
+   - Follows established architecture
 3. **Tasks Generation** (@.shirokuma/commands/spec/tasks.md)
+   - Includes testing requirements from steering
+   - Adds git workflow tasks
 
 Each phase automatically saves to shirokuma-kb and returns the item ID.
 

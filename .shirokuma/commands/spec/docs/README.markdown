@@ -10,13 +10,13 @@ AI-Specコマンドシステムは、Spec駆動開発（Spec-Driven Development�
 
 ```bash
 # 新機能の完全なSpec生成（要件→設計→タスク）
-/ai-spec "ユーザー認証機能を追加"
+/kuma:spec "ユーザー認証機能を追加"
 
 # 要件定義のみ生成
-/ai-spec:req "ダッシュボード機能"
+/kuma:spec:req "ダッシュボード機能"
 
 # 既存Specの改善
-/ai-spec:refine 101
+/kuma:spec:refine 101
 ```
 
 ## 📊 Spec規模の判断フロー
@@ -26,10 +26,10 @@ AI-Specコマンドシステムは、Spec駆動開発（Spec-Driven Development�
 ```mermaid
 graph TD
     A[新機能/変更] --> B{作業量は？}
-    B -->|< 1日| C[/ai-spec:micro]
+    B -->|< 1日| C[/kuma:spec:micro]
     B -->|1-3日| D{複数コンポーネント？}
-    B -->|> 3日| E[/ai-spec]
-    D -->|No| F[/ai-spec:quick]
+    B -->|> 3日| E[/kuma:spec]
+    D -->|No| F[/kuma:spec:quick]
     D -->|Yes| G{新技術/パターン？}
     G -->|No| F
     G -->|Yes| E
@@ -39,7 +39,7 @@ graph TD
 
 ```bash
 # 自動判断サポート
-/ai-spec:when "CSV エクスポート機能を追加"
+/kuma:spec:when "CSV エクスポート機能を追加"
 
 # 出力例：
 ## Spec推奨分析
@@ -50,16 +50,16 @@ graph TD
 
 ## 🔧 コマンド詳細
 
-### 1️⃣ メインコマンド：`/ai-spec`
+### 1️⃣ メインコマンド：`/kuma:spec`
 
 完全な3フェーズSpec生成（要件→設計→タスク）
 
 ```bash
 # 基本使用
-/ai-spec "ユーザープロフィール画像アップロード機能"
+/kuma:spec "ユーザープロフィール画像アップロード機能"
 
 # オプション指定
-/ai-spec "決済システム統合" --priority HIGH --type feature
+/kuma:spec "決済システム統合" --priority HIGH --type feature
 ```
 
 **生成される内容：**
@@ -70,19 +70,19 @@ graph TD
 
 ### 2️⃣ フェーズ別コマンド
 
-#### `/ai-spec:req` - 要件定義フェーズ
+#### `/kuma:spec:req` - 要件定義フェーズ
 
 EARS形式で厳密な要件定義を生成：
 
 ```bash
 # 新規要件生成
-/ai-spec:req "通知システム"
+/kuma:spec:req "通知システム"
 
 # 既存Specの要件改善
-/ai-spec:req refine 101
+/kuma:spec:req refine 101
 
 # 要件の検証
-/ai-spec:req validate 101
+/kuma:spec:req validate 101
 ```
 
 **EARS形式の例：**
@@ -92,16 +92,16 @@ IF validation fails THEN system SHALL display error messages
 WHILE file is uploading system SHALL show progress indicator
 ```
 
-#### `/ai-spec:design` - 設計フェーズ
+#### `/kuma:spec:design` - 設計フェーズ
 
 技術設計とアーキテクチャを定義：
 
 ```bash
 # 設計生成
-/ai-spec:design 101
+/kuma:spec:design 101
 
 # アーキテクチャ図生成付き
-/ai-spec:design 101 --with-diagrams
+/kuma:spec:design 101 --with-diagrams
 ```
 
 **設計内容：**
@@ -111,16 +111,16 @@ WHILE file is uploading system SHALL show progress indicator
 - 統合ポイント
 - セキュリティ設計
 
-#### `/ai-spec:tasks` - タスク分解フェーズ
+#### `/kuma:spec:tasks` - タスク分解フェーズ
 
 実装可能なタスクに分解：
 
 ```bash
 # タスク生成
-/ai-spec:tasks 101
+/kuma:spec:tasks 101
 
 # TodoWriteと連携
-/ai-spec:tasks 101 --create-todos
+/kuma:spec:tasks 101 --create-todos
 ```
 
 **タスク構造：**
@@ -131,12 +131,12 @@ WHILE file is uploading system SHALL show progress indicator
 
 ### 3️⃣ 軽量Specコマンド
 
-#### `/ai-spec:micro` - 超軽量Spec（<1日）
+#### `/kuma:spec:micro` - 超軽量Spec（<1日）
 
 シンプルな変更用の最小限Spec：
 
 ```bash
-/ai-spec:micro "ボタンの色を変更"
+/kuma:spec:micro "ボタンの色を変更"
 ```
 
 **テンプレート：**
@@ -156,12 +156,12 @@ WHILE file is uploading system SHALL show progress indicator
 - [ ] ホバー状態も調整
 ```
 
-#### `/ai-spec:quick` - クイックSpec（1-3日）
+#### `/kuma:spec:quick` - クイックSpec（1-3日）
 
 中規模機能用（設計フェーズをスキップ）：
 
 ```bash
-/ai-spec:quick "CSVエクスポート機能"
+/kuma:spec:quick "CSVエクスポート機能"
 ```
 
 **含まれる内容：**
@@ -172,19 +172,19 @@ WHILE file is uploading system SHALL show progress indicator
 
 ### 4️⃣ 検証・品質管理コマンド
 
-#### `/ai-spec:validate` - 形式検証
+#### `/kuma:spec:validate` - 形式検証
 
 EARS形式の構文チェック：
 
 ```bash
 # Spec全体の検証
-/ai-spec:validate 101
+/kuma:spec:validate 101
 
 # 個別ステートメント検証
-/ai-spec:validate "WHEN user clicks THEN validate"
+/kuma:spec:validate "WHEN user clicks THEN validate"
 
 # バッチ検証
-/ai-spec:validate batch
+/kuma:spec:validate batch
 ```
 
 **検証項目：**
@@ -193,18 +193,18 @@ EARS形式の構文チェック：
 - 曖昧な表現の検出
 - テスト可能性の確認
 
-#### `/ai-spec:check` - 包括的チェック
+#### `/kuma:spec:check` - 包括的チェック
 
 品質チェックリストによる検証：
 
 ```bash
 # 全フェーズチェック
-/ai-spec:check 101
+/kuma:spec:check 101
 
 # 特定フェーズのみ
-/ai-spec:check 101 requirements
-/ai-spec:check 101 design
-/ai-spec:check 101 tasks
+/kuma:spec:check 101 requirements
+/kuma:spec:check 101 design
+/kuma:spec:check 101 tasks
 ```
 
 **スコアリング：**
@@ -215,22 +215,22 @@ EARS形式の構文チェック：
 
 ### 5️⃣ プロジェクト設定コマンド
 
-#### `/ai-spec:steering` - ステアリングドキュメント
+#### `/kuma:spec:steering` - ステアリングドキュメント
 
 プロジェクト固有の標準・ガイドライン管理：
 
 ```bash
 # ステアリング作成
-/ai-spec:steering create
+/kuma:spec:steering create
 
 # 一覧表示
-/ai-spec:steering list
+/kuma:spec:steering list
 
 # 特定ドキュメント表示
-/ai-spec:steering show project-standards
+/kuma:spec:steering show project-standards
 
 # 更新
-/ai-spec:steering update api-design
+/kuma:spec:steering update api-design
 ```
 
 **ステアリングタイプ：**
@@ -255,31 +255,31 @@ inclusion: manual
 
 ### 6️⃣ 実行管理コマンド
 
-#### `/ai-spec:execute` - Spec実行
+#### `/kuma:spec:execute` - Spec実行
 
 Specからタスク実行を管理：
 
 ```bash
 # 実行開始
-/ai-spec:execute 101
+/kuma:spec:execute 101
 
 # 進捗確認
-/ai-spec:execute status 101
+/kuma:spec:execute status 101
 
 # 完了マーク
-/ai-spec:execute complete 101
+/kuma:spec:execute complete 101
 ```
 
-#### `/ai-spec:refine` - Spec改善
+#### `/kuma:spec:refine` - Spec改善
 
 既存Specの洗練と改善：
 
 ```bash
 # 全体改善
-/ai-spec:refine 101
+/kuma:spec:refine 101
 
 # 特定フェーズ改善
-/ai-spec:refine 101 requirements
+/kuma:spec:refine 101 requirements
 ```
 
 ## 📁 MCP統合
@@ -326,23 +326,23 @@ mcp__shirokuma-kb__list_items({
 
 ```bash
 # Step 1: 判断
-/ai-spec:when "多要素認証機能"
+/kuma:spec:when "多要素認証機能"
 → 推奨: STANDARD SPEC (3日以上)
 
 # Step 2: Spec生成
-/ai-spec "多要素認証機能の実装"
+/kuma:spec "多要素認証機能の実装"
 → Spec ID: 102 生成
 
 # Step 3: 検証
-/ai-spec:check 102
+/kuma:spec:check 102
 → スコア: 85% (Good)
 
 # Step 4: 改善
-/ai-spec:refine 102 requirements
+/kuma:spec:refine 102 requirements
 → 要件を詳細化
 
 # Step 5: 実行
-/ai-spec:execute 102
+/kuma:spec:execute 102
 → タスク実行開始
 ```
 
@@ -350,7 +350,7 @@ mcp__shirokuma-kb__list_items({
 
 ```bash
 # Step 1: Micro Spec作成
-/ai-spec:micro "ログインボタンが機能しない問題を修正"
+/kuma:spec:micro "ログインボタンが機能しない問題を修正"
 
 # Step 2: 即実装
 → Specに従って修正実施
@@ -360,10 +360,10 @@ mcp__shirokuma-kb__list_items({
 
 ```bash
 # Step 1: Quick Spec生成
-/ai-spec:quick "レポートのPDFエクスポート"
+/kuma:spec:quick "レポートのPDFエクスポート"
 
 # Step 2: タスク確認
-/ai-spec:tasks show-from-quick
+/kuma:spec:tasks show-from-quick
 
 # Step 3: TodoWriteと連携
 → 自動的にタスクリスト作成
@@ -375,20 +375,20 @@ mcp__shirokuma-kb__list_items({
 
 | 作業量 | コマンド | 用途 |
 |--------|----------|------|
-| < 4時間 | `/ai-spec:micro` | 小さな修正、バグフィックス |
-| < 1日 | `/ai-spec:micro` | 単純な機能追加 |
-| 1-3日 | `/ai-spec:quick` | 中規模機能、既知パターン |
-| > 3日 | `/ai-spec` | 複雑な機能、新アーキテクチャ |
+| < 4時間 | `/kuma:spec:micro` | 小さな修正、バグフィックス |
+| < 1日 | `/kuma:spec:micro` | 単純な機能追加 |
+| 1-3日 | `/kuma:spec:quick` | 中規模機能、既知パターン |
+| > 3日 | `/kuma:spec` | 複雑な機能、新アーキテクチャ |
 
 ### 2. ステアリングドキュメントの活用
 
 ```bash
 # プロジェクト開始時に設定
-/ai-spec:steering create
+/kuma:spec:steering create
 → プロジェクト標準を定義
 
 # Spec生成時に自動適用
-/ai-spec "新機能"
+/kuma:spec "新機能"
 → ステアリング内容が自動的に反映
 ```
 
@@ -396,9 +396,9 @@ mcp__shirokuma-kb__list_items({
 
 ```bash
 # 各フェーズ後に検証
-/ai-spec:req "機能" → /ai-spec:validate
-/ai-spec:design → /ai-spec:check design
-/ai-spec:tasks → /ai-spec:check tasks
+/kuma:spec:req "機能" → /kuma:spec:validate
+/kuma:spec:design → /kuma:spec:check design
+/kuma:spec:tasks → /kuma:spec:check tasks
 ```
 
 ### 4. EARSフォーマットの徹底
@@ -434,9 +434,9 @@ System should probably check the input
 ## 📚 関連リソース
 
 ### 内部リファレンス
-- `.claude/commands/ai-spec/shared/ears-format.markdown` - EARS形式詳細
-- `.claude/commands/ai-spec/shared/spec-templates.markdown` - テンプレート集
-- `.claude/commands/ai-spec/shared/spec-prompts.markdown` - AI生成プロンプト
+- `.claude/commands/kuma:spec/shared/ears-format.markdown` - EARS形式詳細
+- `.claude/commands/kuma:spec/shared/spec-templates.markdown` - テンプレート集
+- `.claude/commands/kuma:spec/shared/spec-prompts.markdown` - AI生成プロンプト
 
 ### 関連コマンド
 - `/ai-issue` - イシュー管理
@@ -446,16 +446,16 @@ System should probably check the input
 ## 🔍 トラブルシューティング
 
 ### Q: Specが大きすぎる
-A: `/ai-spec:when`で判断し、必要に応じて分割
+A: `/kuma:spec:when`で判断し、必要に応じて分割
 
 ### Q: EARSエラーが多い
-A: `/ai-spec:validate`で個別検証し、修正箇所を特定
+A: `/kuma:spec:validate`で個別検証し、修正箇所を特定
 
 ### Q: 既存コードとの整合性
 A: ステアリングドキュメントで既存パターンを定義
 
 ### Q: Spec更新の管理
-A: `/ai-spec:refine`で段階的に改善、MCPで履歴管理
+A: `/kuma:spec:refine`で段階的に改善、MCPで履歴管理
 
 ## 📈 効果測定
 
@@ -466,7 +466,7 @@ Specの品質と効果を測定：
 mcp__shirokuma-kb__get_stats()
 
 # Spec完成度
-/ai-spec:check 102
+/kuma:spec:check 102
 → Requirements: 90%
 → Design: 85%
 → Tasks: 95%

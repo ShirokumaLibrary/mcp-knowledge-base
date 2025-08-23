@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -51,7 +51,7 @@ Standard phases:
 
 ### Generation Prompt
 
-From @.shirokuma/commands/spec/shared/spec-prompts.markdown:
+From @.shirokuma/commands/shared/spec-prompts.markdown:
 
 ```
 Now that we have the design approved, please break it down into actionable coding tasks.
@@ -71,7 +71,7 @@ Each task should:
 - Build on previous tasks
 
 Generate tasks following this structure:
-[Template from @.shirokuma/commands/spec/shared/spec-templates.markdown#tasks-template-structure]
+[Template from @.shirokuma/commands/shared/spec-templates.markdown#tasks-template-structure]
 ```
 
 ### MCP Storage

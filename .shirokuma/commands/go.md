@@ -4,7 +4,7 @@ argument-hint: "[issue-id | 'task description']"
 allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, TodoWrite, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items
 ---
 
-# ai-go - General Task Executor
+# /kuma:go - General Task Executor
 
 ## Usage
 ```
@@ -12,15 +12,15 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, TodoWrite, mcp__s
 ```
 
 Examples:
-- `/kuma:go issues-123` - Work on general task issue
-- `/kuma:go "update dependencies"` - Update project dependencies
-- `/kuma:go "add tests for utils"` - Add missing test coverage
-- `/kuma:go "fix eslint warnings"` - Fix code quality issues
-- `/kuma:go "update README"` - Update documentation
+- `/kuma:go 123` - Work on item #123 (auto-detect type)
+- `/kuma:go "update dependencies"` - Update dependencies (creates issue)
+- `/kuma:go "add tests for utils"` - Add tests (creates issue)
+- `/kuma:go "fix eslint warnings"` - Fix warnings (creates issue)
+- `/kuma:go "update README"` - Update docs (creates issue)
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 Execute general maintenance and operational tasks that don't require formal design or new feature implementation. For new features or major changes, use `/kuma:design` followed by `/kuma:code`.
 
@@ -101,7 +101,7 @@ Approach:
 Run pre-flight checks to ensure the development environment is ready.
 
 For detailed pre-flight check procedures and test configurations, see:
-→ @.shirokuma/configs/test.md#pre-flight-checks
+→ See MCP steering document (type: steering, tag: testing) for pre-flight checks
 
 The checks include build validation, lint validation, type checking, test suite execution, and environment validation. Specific checks depend on the project configuration.
 
@@ -141,8 +141,8 @@ Task Type Analysis:
    - #bug (small) → Quick fix workflow
    
 3. Scope Detection:
-   - Large scope (>5 files) → Suggest using ai-design first
-   - New feature detected → Redirect to ai-design
+   - Large scope (>5 files) → Suggest using /kuma:design first
+   - New feature detected → Redirect to /kuma:design
    - Small scope → Proceed with task
 ```
 
@@ -323,22 +323,26 @@ The main agent handles most development tasks directly, invoking only the review
 - **shirokuma-reviewer** - Reviews code quality and security (invoked via Task after GREEN)
 
 **Critical: Reviewer Invocation Pattern**
-```typescript
-// After GREEN phase completion, ALWAYS invoke reviewer:
-const reviewResult = await Task({
-  subagent_type: "shirokuma-reviewer",
-  prompt: `Review the implementation from ${handoverId}.
-    Check: quality, security, performance, TDD compliance.
-    Create handover with decision: APPROVED or NEEDS_REFACTOR.`,
-  context: { phase: "REVIEW", iteration: currentIteration }
-});
+```yaml
+After GREEN Phase Completion:
+  Tool: Task
+  Parameters:
+    - subagent_type: shirokuma-reviewer
+    - prompt: |
+        Review the implementation from [handover-id].
+        Check: quality, security, performance, TDD compliance.
+        Create handover with decision: APPROVED or NEEDS_REFACTOR.
+    - context:
+        phase: REVIEW
+        iteration: [current-iteration]
 
-// Handle review decision:
-if (reviewResult.status === "NEEDS_REFACTOR" && iteration < 3) {
-  // Main agent applies refactoring directly
-  // Apply improvements from review
-  // Return to review phase
-}
+Review Decision Handling:
+  If status is NEEDS_REFACTOR and iteration < 3:
+    - Main agent applies refactoring directly
+    - Apply improvements from review
+    - Return to review phase
+  If status is APPROVED or iteration >= 3:
+    - Complete the task
 ```
 
 The main agent handles all development directly, only invoking the reviewer via Task tool for quality assurance.
@@ -546,23 +550,23 @@ User Escalation (After Recovery Attempts):
 8. Commit changes
 ```
 
-**When to use ai-go vs other commands**:
-- **Use ai-go for**: Maintenance, refactoring, testing, docs, config
-- **Use ai-design for**: New features requiring design
-- **Use ai-code for**: Implementing approved designs
+**When to use /kuma:go vs other commands**:
+- **Use /kuma:go for**: Maintenance, refactoring, testing, docs, config
+- **Use /kuma:design for**: New features requiring design
+- **Use /kuma:code for**: Implementing approved designs
 
 
 ### Integration Points
 
 - **Main agent**: Handles all general tasks directly
 - **shirokuma-reviewer**: May be invoked for code review if needed
-- **ai-design**: Redirect users for new feature design
-- **ai-code**: Redirect users for implementing designs
+- **/kuma:design**: Redirect users for new feature design
+- **/kuma:code**: Redirect users for implementing designs
 
 ### Success Criteria
 
 1. **Task completion** without unnecessary complexity
-2. **Clear scope** - knows when to redirect to ai-design/kuma:code
+2. **Clear scope** - knows when to redirect to /kuma:design or /kuma:code
 3. **Quality maintenance** - ensures tests pass, linting clean
 4. **Documentation** - updates docs when relevant
 5. **User clarity** - clear about what was done
@@ -650,7 +654,7 @@ To see available issues: use /kuma:issue
 
 **No options. No flags. Just intelligence.**
 
-The ai-go command automatically determines the best approach based on:
+The /kuma:go command automatically determines the best approach based on:
 - Task type and complexity
 - Current codebase state
 - Historical patterns
@@ -684,29 +688,29 @@ Automatic Decisions:
 
 ### Task Routing Logic
 
-```typescript
-// Intelligent task routing
-function executeTask(input: string) {
-  const task = analyzeTask(input);
+```yaml
+Task Routing Logic:
+  1. Analyze Input:
+     - Parse and understand task requirements
+     - Determine task type and scope
   
-  if (isNewFeature(task) || needsDesign(task)) {
-    suggest("This needs design. Use /kuma:design first");
-    return;
-  }
-  
-  if (hasApprovedDesign(task)) {
-    suggest("Use /kuma:code to implement this design");
-    return;
-  }
-  
-  // Execute general task
-  performTask(task);
-}
+  2. Route Based on Type:
+     If new feature or needs design:
+       - Suggest: "This needs design. Use /kuma:design first"
+       - Exit workflow
+     
+     If has approved design:
+       - Suggest: "Use /kuma:code to implement this design"
+       - Exit workflow
+     
+     Otherwise:
+       - Execute general task directly
+       - Follow appropriate workflow for task type
 ```
 
 ## When to Use This Command
 
-**✅ Use ai-go for:**
+**✅ Use /kuma:go for:**
 - Updating dependencies
 - Fixing linting/formatting issues
 - Adding missing tests
@@ -716,7 +720,7 @@ function executeTask(input: string) {
 - Configuration changes
 - Build/deployment tasks
 
-**❌ Don't use ai-go for:**
+**❌ Don't use /kuma:go for:**
 - New features (use `/kuma:design`)
 - Implementing designs (use `/kuma:code`)
 - Large architectural changes (use `/kuma:design`)

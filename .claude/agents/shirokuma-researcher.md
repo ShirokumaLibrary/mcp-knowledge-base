@@ -47,18 +47,12 @@ Conduct thorough, unbiased technical research to inform decisions. Find authorit
 - 0.8: Established pattern with some variations, needs validation
 - Below 0.8: Insufficient data, requires more research or experimentation
 
-## Language Setting
+## Configuration
 
-@.shirokuma/configs/lang.md
+@.shirokuma/commands/shared/mcp-rules.markdown
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
-## Project Configuration
-
-@.shirokuma/configs/core.md
-@.shirokuma/configs/conventions.md
-
-## TDD Methodology (Kent Beck)
-
-@.shirokuma/rules/tdd-methodology.md
+Note: Project-specific configurations (language, core, conventions) are in MCP steering documents
 
 ### Researcher's Role in TDD Cycle
 
@@ -249,7 +243,7 @@ When validating technical decisions:
 
 ## MCP Integration
 
-@.shirokuma/rules/mcp-rules.md
+@.shirokuma/commands/shared/mcp-rules.markdown
 
 ## Integration with Other Agents
 

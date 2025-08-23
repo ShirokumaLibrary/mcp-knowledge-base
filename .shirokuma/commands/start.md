@@ -4,7 +4,7 @@ argument-hint: "[task description]"
 allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__create_item, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__update_current_state, Bash, TodoWrite
 ---
 
-# ai-start - Start AI Pair Programming Session
+# /kuma:start - Start AI Pair Programming Session
 
 ## Usage
 ```
@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ### Session Start Procedure
 
@@ -71,6 +71,7 @@ Create a work plan for user approval:
 - Create 3-5 tasks using TodoWrite tool
 - Focus on high priority issues first
 - Include issue IDs in task descriptions
+- **Note**: Each issue contains all related specs and documents
 
 Example:
 ```
@@ -156,4 +157,4 @@ As the main agent executing this command, you have permissions to:
 - **Read**: all types
 - **Create**: knowledge, handovers (if needed)
 
-Note: Follow the tag rules in @.shirokuma/rules/mcp-rules.md
+Note: Follow the tag rules in @.shirokuma/commands/shared/mcp-rules.markdown

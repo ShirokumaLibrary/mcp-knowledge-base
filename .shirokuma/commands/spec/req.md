@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -36,7 +36,7 @@ Generates comprehensive requirements documents using EARS (Easy Approach to Requ
 Format: `As a [role], I want [feature], so that [benefit]`
 
 #### Step 3: Create EARS Acceptance Criteria
-Using patterns from @.shirokuma/commands/spec/shared/ears-format.markdown:
+Using patterns from @.shirokuma/commands/shared/ears-format.markdown:
 - WHEN [event] THEN [system] SHALL [response]
 - IF [condition] THEN [system] SHALL [behavior]
 - WHILE [state] [system] SHALL [continuous behavior]
@@ -51,7 +51,7 @@ Using patterns from @.shirokuma/commands/spec/shared/ears-format.markdown:
 
 ### Generation Prompt
 
-From @.shirokuma/commands/spec/shared/spec-prompts.markdown:
+From @.shirokuma/commands/shared/spec-prompts.markdown:
 
 ```
 I want to create a spec for [FEATURE_NAME]. Here's my initial idea:
@@ -65,7 +65,7 @@ Please help me create comprehensive requirements using the EARS format. Focus on
 - Integration points with existing systems
 
 Generate a requirements document following this structure:
-[Template from @.shirokuma/commands/spec/shared/spec-templates.markdown#requirements-template-structure]
+[Template from @.shirokuma/commands/shared/spec-templates.markdown#requirements-template-structure]
 ```
 
 ### MCP Storage

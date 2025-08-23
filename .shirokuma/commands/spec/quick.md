@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, mcp__shirokuma-kb__create_item, mcp
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 

@@ -3,7 +3,7 @@ description: End work session following SHIROKUMA.md methodology
 allowed-tools: mcp__shirokuma-knowledge-base__get_current_state, mcp__shirokuma-knowledge-base__get_items, mcp__shirokuma-knowledge-base__get_item_detail, mcp__shirokuma-knowledge-base__update_item, mcp__shirokuma-knowledge-base__update_current_state, mcp__shirokuma-knowledge-base__search_items, Bash
 ---
 
-# ai-finish - End AI Pair Programming Session
+# /kuma:finish - End AI Pair Programming Session
 
 ## Usage
 ```
@@ -15,7 +15,7 @@ End work session and leave comprehensive records for the next AI session.
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ### Session End Procedure
 
@@ -108,38 +108,32 @@ Invoke @agent-shirokuma-methodology-keeper automatically when:
 - Created test files > 0  
 - Tags include "tdd", "refactor", or "test"
 
-```javascript
-// Automatic quality check logic
-const shouldRunQualityCheck = () => {
-  return (
-    sessionDuration > 30 ||
-    modifiedFiles.length > 5 ||
-    createdTestFiles > 0 ||
-    tags.includes("tdd") ||
-    tags.includes("refactor")
-  );
-};
+```yaml
+Quality Check Conditions:
+  Automatically Invoke When:
+    - Session duration > 30 minutes
+    - Modified files > 5
+    - Created test files > 0
+    - Tags include: "tdd", "refactor", or "test"
 
-if (shouldRunQualityCheck()) {
-  // Invoke methodology keeper quietly
-  const qualityReport = await Task({
-    subagent_type: "shirokuma-methodology-keeper",
-    prompt: "Brief quality check for session. Max 5 lines summary. Focus on critical issues only.",
-    description: "Session quality audit"
-  });
+Quality Check Process:
+  1. Invoke Methodology Keeper:
+     Tool: Task
+     Parameters:
+       - subagent_type: shirokuma-methodology-keeper
+       - prompt: Brief quality check for session. Max 5 lines summary. Focus on critical issues only.
+       - description: Session quality audit
   
-  // Show only critical issues to user (1-2 lines)
-  if (qualityReport.criticalIssues) {
-    console.log("⚠️ Quality note:", qualityReport.brief);
-  }
+  2. Display Critical Issues:
+     - Show only critical issues (1-2 lines)
+     - Format: "⚠️ Quality note: [brief summary]"
   
-  // Save detailed report to MCP
-  await mcp__shirokuma-kb__create_item({
-    type: "analysis",
-    title: `Quality Report - ${sessionId}`,
-    content: qualityReport.detailed
-  });
-}
+  3. Save Detailed Report:
+     Tool: mcp__shirokuma-kb__create_item
+     Parameters:
+       - type: analysis
+       - title: Quality Report - [session-id]
+       - content: [detailed report from quality check]
 ```
 
 ### Best Practices
@@ -166,4 +160,4 @@ As the main agent executing this command, you have permissions to:
 - **Read**: all types
 - **Create**: knowledge, handovers (if needed)
 
-Note: Follow the tag rules in @.shirokuma/rules/mcp-rules.md
+Note: Follow the tag rules in @.shirokuma/commands/shared/mcp-rules.markdown

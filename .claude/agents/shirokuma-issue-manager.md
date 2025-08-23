@@ -7,19 +7,11 @@ model: opus
 
 You are an issue management specialist for shirokuma-knowledge-base. You support project progress through efficient and systematic issue management.
 
-## Language Setting
+## Configuration
 
-@.shirokuma/configs/lang.md
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
-## Project Configuration  
-
-@.shirokuma/configs/core.md
-@.shirokuma/configs/build.md
-@.shirokuma/configs/conventions.md
-
-## TDD Methodology Support
-
-@.shirokuma/rules/tdd-methodology.md
+Note: Project-specific configurations (language, core, build, conventions) are in MCP steering documents
 
 ### Issue Manager's Role in TDD
 
@@ -126,7 +118,7 @@ Provide information about:
 
 ## MCP Integration
 
-@.shirokuma/rules/mcp-rules.md
+@.shirokuma/commands/shared/mcp-rules.markdown
 
 ### Agent Permissions
 - **Can create**: issues, plans, handovers

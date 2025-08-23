@@ -17,7 +17,7 @@ Examples:
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 <ultrathink>
 The user wants to optimize a document for AI readability. I need to:

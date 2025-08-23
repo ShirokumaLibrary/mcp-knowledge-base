@@ -61,9 +61,11 @@ This directory contains project-specific configuration files that define how the
 ## Usage by AI Agents
 
 These configuration files are referenced by:
-- **Commands**: `/ai-code`, `/ai-design`, `/ai-go`
+- **Commands**: `/kuma:go`, `/kuma:spec:design`, `/kuma:vibe:code`
 - **Agents**: All shirokuma-* agents
 - **Purpose**: Ensure consistent behavior across all AI operations
+
+Note: These configurations are being migrated to MCP steering documents (type: steering)
 
 ## Maintenance
 
@@ -80,7 +82,7 @@ These configuration files are referenced by:
 
 ## Important Notes
 
-1. **These are project-specific**: Different from generic rules in `.shirokuma/rules/`
+1. **These are project-specific**: Different from shared resources in `.shirokuma/commands/shared/`
 2. **Version controlled**: Changes should be tracked in Git
 3. **AI reference**: All AI agents should reference these for project context
 4. **Single source of truth**: Avoid duplicating this information elsewhere
@@ -95,17 +97,17 @@ These configuration files are referenced by:
   - `configs/lang.md`: "This project uses Japanese for chat"
   - `configs/build.md`: "This project uses npm run build"
 
-### `.shirokuma/rules/` (Universal)
+### `.shirokuma/commands/shared/` (Universal)
 - **Purpose**: Methodology for ALL SHIROKUMA projects
 - **Update Policy**: ⚠️ DO NOT MODIFY - Shared across all users
 - **Ownership**: SHIROKUMA methodology maintainers
 - **Examples**:
-  - `rules/mcp-rules.md`: "How to use MCP in any project"
-  - `rules/tdd-methodology.md`: "Universal TDD principles"
+  - `shared/mcp-rules.markdown`: "How to use MCP in any project"
+  - `shared/tdd-methodology.markdown`: "Universal TDD principles"
 
-## ⚠️ IMPORTANT: Never Update Rules
+## ⚠️ IMPORTANT: Never Update Shared Resources
 
-The `.shirokuma/rules/` directory contains universal methodology that is:
+The `.shirokuma/commands/shared/` directory contains universal resources that are:
 1. **Shared across all SHIROKUMA users**
 2. **Version controlled separately**
 3. **Updated only by methodology maintainers**

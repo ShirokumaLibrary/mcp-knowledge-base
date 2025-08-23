@@ -8,7 +8,7 @@ allowed-tools: Read, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__create_
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 

@@ -12,7 +12,7 @@ Actions:
 
 ## Task
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ### Purpose
 
@@ -239,7 +239,7 @@ This command ensures all AI agents have accurate project context for optimal per
 
 ## ⚠️ Critical Warning
 
-**NEVER modify files in `.shirokuma/rules/`** - These are:
+**NEVER modify files in `.shirokuma/commands/shared/`** - These are:
 - Shared across all SHIROKUMA users
 - Updated only by methodology maintainers
 - Should be treated as read-only reference

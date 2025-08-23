@@ -8,7 +8,7 @@ allowed-tools: Task, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, 
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Project Configuration
 
@@ -17,7 +17,7 @@ allowed-tools: Task, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, 
 
 ## TDD Methodology (for testable design)
 
-@.shirokuma/rules/tdd-methodology.md
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
 ## Purpose
 

@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 ## Language
 
-@.shirokuma/configs/lang.md
+Note: Language settings are configured in MCP steering documents
 
 ## Purpose
 
@@ -58,7 +58,7 @@ Creates comprehensive technical design documents based on requirements. This is 
 
 ### Generation Prompt
 
-From @.shirokuma/commands/spec/shared/spec-prompts.markdown:
+From @.shirokuma/commands/shared/spec-prompts.markdown:
 
 ```
 Based on the requirements we've established, I need a comprehensive design for [FEATURE_NAME].
@@ -78,7 +78,7 @@ Consider these technical constraints:
 - Integration points: [FROM_REQUIREMENTS]
 
 Generate a design document following this structure:
-[Template from @.shirokuma/commands/spec/shared/spec-templates.markdown#design-template-structure]
+[Template from @.shirokuma/commands/shared/spec-templates.markdown#design-template-structure]
 ```
 
 ### MCP Storage
