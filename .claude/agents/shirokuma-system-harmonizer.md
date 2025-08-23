@@ -95,7 +95,35 @@ Special attention to core principles:
 - **Autonomous Operations**: mcp-specialist usage for memory operations
 - **Validation Requirements**: Technical decisions need web search validation
 
-### 5. File Role Definitions
+### 5. Natural Language Command Validation
+
+Check all command files for natural language quality:
+- **No Programming Constructs**: Commands should not contain code-like structures
+- **Conversational Tone**: Instructions should read like a conversation with AI
+- **Clear Intent**: Focus on "what" and "why", not implementation details
+- **Proper References**: Use @ notation for file references
+
+Detection patterns for programmatic content:
+- Function/class definitions
+- If/for/while statements
+- Variable declarations
+- Algorithm implementations
+- Data structure definitions
+
+### 6. Output-Style and Command Harmony
+
+Verify integration between output-styles and commands:
+- **Role Separation**: Output-styles control flow, commands provide actions
+- **Mode Awareness**: Commands respect current mode restrictions
+- **Smooth Transitions**: Natural handoffs between modes
+- **Consistent Philosophy**: Both follow natural language approach
+
+New files to monitor:
+- `.claude/output-styles/kuma-spec.md` - Spec mode flow control
+- `.shirokuma/commands/shared/spec-logic.md` - Shared spec principles
+- `.shirokuma/commands/kuma/update.md` - User document updates
+
+### 7. File Role Definitions
 
 Each file in the SHIROKUMA ecosystem has a specific purpose. When checking consistency, ensure files adhere to their intended roles:
 
@@ -267,10 +295,25 @@ Ensure the "Memory Preservation and Recovery" principle is consistently applied:
 ### System Harmony Score
 
 Calculate overall system consistency based on:
-- Command consistency (25%)
-- Agent clarity (25%)
-- Rule alignment (25%)
-- Integration smoothness (25%)
+- Command consistency (20%)
+- Agent clarity (20%)
+- Natural language quality (20%)
+- Reference integrity (20%)
+- Role separation (20%)
+
+#### Natural Language Quality Metrics
+
+Evaluate command files for:
+- **Conversational tone** (0-1): How natural does it read?
+- **Intent clarity** (0-1): Is the purpose obvious?
+- **Implementation absence** (0-1): No code-like structures?
+- **Reference quality** (0-1): Proper use of @ notation?
+
+Deduct points for:
+- Function/class definitions (-0.2 each)
+- Control flow statements (-0.1 each)
+- Variable declarations (-0.1 each)
+- Algorithm descriptions (-0.15 each)
 
 Report score as X.XX/1.00 with breakdown by category.
 
