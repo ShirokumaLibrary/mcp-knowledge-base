@@ -167,18 +167,18 @@ Build connections following this pattern:
 [What it can do]
 
 ## API Specification
-```typescript
-// Interface definition
+```yaml
+# Interface definition structure
 ```
 
 ## Usage
-```typescript
-// Basic usage
+```yaml
+# Basic usage examples
 ```
 
 ## Advanced Usage
-```typescript
-// Advanced usage patterns
+```yaml
+# Advanced usage patterns
 ```
 
 ## Performance

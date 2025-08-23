@@ -80,7 +80,7 @@
     "lint": "eslint src --ext .ts",
     "lint:errors": "eslint src --ext .ts --quiet",
     "type-check": "tsc --noEmit",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx src/seed.ts",
     "setup-migrations": "tsx scripts/setup-migrations.ts",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:dev": "tsx scripts/migrate.ts dev",
