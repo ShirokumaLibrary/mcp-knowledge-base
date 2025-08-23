@@ -45,7 +45,7 @@ Note: Project-specific configurations (language, core, build) are in MCP steerin
 ## Core Capabilities
 
 ### Test Execution
-- Execute tests from `.claude/agents/mcp-api-tester-tests/*.markdown`
+- Execute tests from `.shirokuma/mcp-api-tester-tests/*.md`
 - Run tests in sequence with proper cleanup
 - Handle test dependencies and prerequisites
 - Continue on failure to complete all tests

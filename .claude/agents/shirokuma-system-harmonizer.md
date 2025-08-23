@@ -78,6 +78,7 @@ Compare rules across all documentation files:
 - **Language Versions**: SHIROKUMA.md.ja.example, CLAUDE.md.ja.example
 - **Configuration**: PROJECT_CONFIGURATION.markdown
 - **Component Files**: All command/agent files
+- **Output Styles**: .shirokuma/output-styles/*.md
 - **Spec System**: spec.md and all spec/* subcommands
 - **Vibe System**: vibe.md and all vibe/* subcommands
 - **Session Management**: /kuma:start, /kuma:finish, /kuma:issue, /kuma:go
@@ -102,15 +103,13 @@ Each file in the SHIROKUMA ecosystem has a specific purpose. When checking consi
 
 | File | Role | Purpose |
 |------|------|---------|
-| **SHIROKUMA.md** | AI Methodology Guide (Symlink) | Core principles for AI pair programming; symlink to SHIROKUMA.md.example for consistency |
 | **CLAUDE.md** | Project-Specific Instructions | Project configuration, critical rules, and quick reference for this specific codebase |
+| **README.md** | Project Overview | Basic project information and setup instructions |
 
 #### Example/Template Files
 
 | File | Role | Purpose |
 |------|------|---------|
-| **SHIROKUMA.md.example** | English Template (Master File) | Simple version for new projects (under 100 lines); SHIROKUMA.md is a symlink to this file |
-| **SHIROKUMA.md.ja.example** | Japanese Translation | Direct translation of SHIROKUMA.md.example (NOT the detailed version) |
 | **CLAUDE.md.example** | English Project Template | Basic CLAUDE.md structure for new projects |
 | **CLAUDE.md.ja.example** | Japanese Project Template | Japanese version maintaining exact same structure |
 
@@ -118,40 +117,33 @@ Each file in the SHIROKUMA ecosystem has a specific purpose. When checking consi
 
 | File | Role | Purpose |
 |------|------|---------|
-| **PROJECT_CONFIGURATION.markdown** | Comprehensive Project Config | Detailed project settings, patterns, and code examples |
-| **agents/config-investigator.md** | Configuration Analysis Agent | Analyzes projects and generates configuration |
-| **commands/spec/steering.md** | Steering Document Management | Manages project configuration as MCP steering documents |
-| **agents/LANG.markdown** | Language Setting Reference | Shared language configuration for all agents |
+| **.shirokuma/commands/shared/lang.markdown** | Language Setting Reference | Shared language configuration for all components |
+| **.shirokuma/commands/shared/mcp-rules.markdown** | MCP Usage Rules | Guidelines for MCP operations |
+| **.shirokuma/commands/kuma/spec/steering.md** | Steering Document Management | Manages project configuration as MCP steering documents |
+| **.shirokuma/output-styles/*.md** | Output Style Definitions | Visual output styles for different modes and contexts |
 
 #### Active Specialist Agents
 
 | File | Role | Purpose |
 |------|------|---------|
-| **agents/shirokuma-reviewer.md** | Review Specialist | Reviews code for quality and standards |
-| **agents/shirokuma-researcher.md** | Research Specialist | Investigates technologies and best practices |
-| **agents/shirokuma-mcp-specialist.md** | MCP Operations Expert | Handles all MCP database operations |
-| **agents/shirokuma-issue-manager.md** | Issue Management | Handles issue creation and tracking |
-| **agents/shirokuma-knowledge-curator.md** | Knowledge Organizer | Systematizes technical learning |
-| **agents/shirokuma-methodology-keeper.md** | Methodology Guardian | Ensures adherence to principles |
+| **.claude/agents/shirokuma-reviewer.md** | Review Specialist | Reviews code for quality and standards |
+| **.claude/agents/shirokuma-researcher.md** | Research Specialist | Investigates technologies and best practices |
+| **.claude/agents/shirokuma-mcp-specialist.md** | MCP Operations Expert | Handles all MCP database operations |
+| **.claude/agents/shirokuma-issue-manager.md** | Issue Management | Handles issue creation and tracking |
+| **.claude/agents/shirokuma-knowledge-curator.md** | Knowledge Organizer | Systematizes technical learning |
+| **.claude/agents/shirokuma-methodology-keeper.md** | Methodology Guardian | Ensures adherence to principles |
+| **.claude/agents/shirokuma-system-harmonizer.md** | System Consistency Guardian | Ensures harmony across all components |
+| **.claude/agents/mcp-api-tester.md** | MCP API Test Specialist | Validates MCP server functionality |
 
 #### Session Management Commands
 
 | File | Role | Purpose |
 |------|------|---------|
-| **commands/start.md** | Session Initiator | Start AI pair programming session |
-| **commands/finish.md** | Session Closer | End session with proper handover |
-| **commands/issue.md** | Issue Manager | Create and manage issues |
-| **commands/go.md** | Work Executor | Execute work on selected issue |
-| **commands/commit.md** | Git Committer | Create git commits |
-
-#### Other Core Agents
-
-| File | Role | Purpose |
-|------|------|---------|
-| **agents/shirokuma-mcp-specialist.md** | MCP Operations Expert | Handles all MCP database operations |
-| **agents/shirokuma-knowledge-curator.md** | Knowledge Organizer | Systematizes technical learning |
-| **agents/shirokuma-issue-manager.md** | Issue Management | Handles issue creation and tracking |
-| **agents/shirokuma-methodology-keeper.md** | Methodology Guardian | Ensures adherence to principles |
+| **.shirokuma/commands/kuma/start.md** | Session Initiator | Start AI pair programming session |
+| **.shirokuma/commands/kuma/finish.md** | Session Closer | End session with proper handover |
+| **.shirokuma/commands/kuma/issue.md** | Issue Manager | Create and manage issues |
+| **.shirokuma/commands/kuma/go.md** | Work Executor | Execute work on selected issue |
+| **.shirokuma/commands/kuma/commit.md** | Git Committer | Create git commits |
 
 #### Key Differences to Maintain
 
