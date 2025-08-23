@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.2",
-    "@prisma/client": "^6.13.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "chalk": "^5.5.0",
@@ -46,7 +45,6 @@
     "express": "^5.1.0",
     "gray-matter": "^4.0.3",
     "ora": "^8.2.0",
-    "prisma": "^6.13.0",
     "reflect-metadata": "^0.2.2",
     "search-query-parser": "^1.6.0",
     "sqlite3": "^5.1.7",
