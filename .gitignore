@@ -43,7 +43,7 @@ logs
 !.claude/commands/
 !.shirokuma/tools/
 !.claude/agents/
-!.claude/configs/
+!.claude/output-styles
 *.swp
 *.swo
 *~
