@@ -20,7 +20,9 @@ Examples:
 
 ## Task
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 Execute general maintenance and operational tasks that don't require formal design or new feature implementation. For new features or major changes, use `/kuma:design` followed by `/kuma:code`.
 

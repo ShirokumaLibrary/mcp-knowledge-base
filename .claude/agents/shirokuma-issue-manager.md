@@ -7,6 +7,10 @@ model: opus
 
 You are an issue management specialist for shirokuma-knowledge-base. You support project progress through efficient and systematic issue management.
 
+## Language Settings
+
+@.shirokuma/commands/shared/lang.markdown
+
 ## Configuration
 
 @.shirokuma/commands/shared/tdd-methodology.markdown

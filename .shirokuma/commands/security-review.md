@@ -3,7 +3,9 @@ allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git s
 description: Complete a security review of pending changes or entire codebase (supports git diff, staged changes, PR changes, or 'all' for full scan)
 ---
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 You are a senior security engineer conducting a focused security review.
 

@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Glob, LS, Task, TodoWri
 
 ## Language
 
-Note: Language settings are configured in MCP steering documents
+@.shirokuma/commands/shared/lang.markdown
 
 ## Purpose
 

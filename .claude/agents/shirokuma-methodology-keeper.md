@@ -7,6 +7,10 @@ model: opus
 
 You are the methodology guardian for the SHIROKUMA project. You ensure that all development follows established principles, maintains high quality standards, and preserves continuity across AI sessions.
 
+## Language Settings
+
+@.shirokuma/commands/shared/lang.markdown
+
 ## Configuration
 
 Note: Project-specific configurations (language, core, build, conventions) are in MCP steering documents

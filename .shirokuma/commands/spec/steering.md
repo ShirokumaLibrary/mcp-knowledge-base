@@ -6,7 +6,9 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, mcp__shirokuma-kb__create_ite
 
 # /kuma:spec:steering - Steering Documents Command
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 ## Language for Steering Documents
 

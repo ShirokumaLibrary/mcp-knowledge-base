@@ -8,7 +8,7 @@ allowed-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__s
 
 ## Language
 
-Note: Language settings are configured in MCP steering documents
+@.shirokuma/commands/shared/lang.markdown
 
 ## Purpose
 

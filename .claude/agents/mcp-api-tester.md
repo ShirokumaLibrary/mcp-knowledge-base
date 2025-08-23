@@ -7,6 +7,10 @@ model: sonnet
 
 # mcp-api-tester - MCP API Test Execution Specialist
 
+## Language Settings
+
+@.shirokuma/commands/shared/lang.markdown
+
 ## Purpose
 Specialized agent for executing MCP API functional tests. Unlike the regular tester agent (which writes code tests), this agent focuses on validating MCP server API functionality through systematic test execution.
 

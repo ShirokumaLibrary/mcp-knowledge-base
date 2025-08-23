@@ -17,7 +17,9 @@ Examples:
 
 ## Task
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 ### Session Start Procedure
 

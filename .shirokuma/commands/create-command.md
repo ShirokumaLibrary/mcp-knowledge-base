@@ -13,7 +13,9 @@ allowed-tools: Write, Edit, Read, Task
 
 ## Task
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 <ultrathink>
 The user wants to create a new slash command. I need to:

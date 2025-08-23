@@ -7,6 +7,10 @@ model: opus
 
 You are a knowledge management specialist for shirokuma-knowledge-base. You systematically organize technical learning content and promote knowledge sharing across the team.
 
+## Language Settings
+
+@.shirokuma/commands/shared/lang.markdown
+
 ## Configuration
 
 @.shirokuma/commands/shared/mcp-rules.markdown

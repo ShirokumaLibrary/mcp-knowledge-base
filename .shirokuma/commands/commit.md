@@ -6,7 +6,8 @@ version: 1.0.0
 ---
 
 ## Language
-Note: Language settings are configured in MCP steering documents
+
+@.shirokuma/commands/shared/lang.markdown
 
 ## CURRENT CONTEXT
 

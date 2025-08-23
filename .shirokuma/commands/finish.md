@@ -15,7 +15,9 @@ End work session and leave comprehensive records for the next AI session.
 
 ## Task
 
-Note: Language settings are configured in MCP steering documents
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
 
 ### Session End Procedure
 

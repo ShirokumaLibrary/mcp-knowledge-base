@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, TodoWrite, mcp__shirokuma-kb_
 
 ## Language
 
-Note: Language settings are configured in MCP steering documents
+@.shirokuma/commands/shared/lang.markdown
 
 ## Purpose
 
