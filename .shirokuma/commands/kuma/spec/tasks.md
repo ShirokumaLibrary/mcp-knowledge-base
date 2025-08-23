@@ -25,6 +25,8 @@ Breaks down technical design into actionable implementation tasks. This is Phase
 
 ## Implementation
 
+**Type used**: `type: "spec_tasks"` - Task breakdown phase only (implementation tasks, test tasks, priorities)
+
 ### Task Generation Process
 
 #### Step 1: Load Design

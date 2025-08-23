@@ -24,6 +24,8 @@ Creates comprehensive technical design documents based on requirements. This is 
 
 ## Implementation
 
+**Type used**: `type: "spec_design"` - Design phase only (architecture, data models, interfaces)
+
 ### Design Generation Process
 
 #### Step 1: Load Requirements

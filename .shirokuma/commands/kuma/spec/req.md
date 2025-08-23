@@ -70,7 +70,9 @@ Generate a requirements document following this structure:
 
 ### MCP Storage
 
-Requirements are automatically stored in shirokuma-kb as human-readable Markdown:
+Requirements are automatically stored in shirokuma-kb as human-readable Markdown.
+
+**Type used**: `type: "spec_requirements"` - Requirements phase only (user stories, EARS criteria, non-functional requirements)
 
 ```typescript
 // Generate human-readable Markdown content

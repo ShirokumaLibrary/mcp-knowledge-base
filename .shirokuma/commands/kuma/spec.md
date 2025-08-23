@@ -64,7 +64,9 @@ Each phase automatically saves to shirokuma-kb and returns the item ID.
 
 ### MCP Integration
 
-Specs are automatically stored in shirokuma-kb with Markdown content for human readability:
+Specs are automatically stored in shirokuma-kb with Markdown content for human readability.
+
+**Type used**: `type: "spec"` - Complete specification including all three phases (requirements, design, tasks)
 
 ```typescript
 // Generate human-readable Markdown content
