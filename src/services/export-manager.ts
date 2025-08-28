@@ -317,7 +317,7 @@ export class ExportManager {
 
     return {
       ...item,
-      status: { name: status?.name || 'Unknown' },
+      status: { name: status?.name || 'Open' },
       tags: itemTags.map(it => ({ tag: { name: it.tag.name } })),
       keywords: itemKeywords.map(ik => ({ keyword: { word: ik.keyword.word }, weight: ik.weight })),
       concepts: itemConcepts.map(ic => ({ concept: { name: ic.concept.name }, confidence: ic.confidence })),

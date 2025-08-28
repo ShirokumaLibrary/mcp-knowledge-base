@@ -369,6 +369,15 @@ export class InitialMigration1736500000000 implements MigrationInterface {
       }),
       true
     );
+
+    // Fix is_closable flags after table creation
+    await queryRunner.query(`
+      UPDATE statuses 
+      SET is_closable = 1 
+      WHERE name IN ('Completed', 'Closed', 'Canceled', 'Rejected')
+    `);
+    
+    console.log('✅ Fixed is_closable flags for terminal statuses');
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

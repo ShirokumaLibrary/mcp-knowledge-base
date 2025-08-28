@@ -81,7 +81,9 @@ async function seedDatabase() {
 
   const statusMap = new Map<string, number>();
   for (const statusData of defaultStatuses) {
-    const status = await statusRepo.save(statusData);
+    const status = await statusRepo.save({
+      ...statusData
+    });
     statusMap.set(status.name, status.id);
   }
 
@@ -111,10 +113,10 @@ async function seedDatabase() {
 
   // Create initial system state
   await stateRepo.save({
-    version: 'v0.9.0',  // User's system version
-    content: 'System initialized with TypeORM',
+    version: 'v0.0.0',  // User's system version
+    content: 'System initialized',
     tags: JSON.stringify(['system', 'init']),
-    metadata: JSON.stringify({ migrationVersion: '0.9.0' })
+    metadata: JSON.stringify({})
   });
 
   console.log(chalk.green(`✅ Seeded ${defaultStatuses.length} statuses, ${items.length} items and system state`));

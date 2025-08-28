@@ -108,14 +108,13 @@ export async function importDataJSON(options: ImportOptions) {
       // Get status ID
       let statusId = statusMap.get(itemData.status || 'Open');
       if (!statusId) {
-        // Create status if not found
-        const newStatus = await statusRepo.save({
-          name: itemData.status || 'Open',
-          isClosable: false,
-          sortOrder: 999
-        });
-        statusId = newStatus.id;
-        statusMap.set(itemData.status || 'Open', statusId);
+        // Use default 'Open' status if status not found
+        console.log(chalk.yellow(`Warning: Status '${itemData.status}' not found, using 'Open' instead`));
+        statusId = statusMap.get('Open');
+        if (!statusId) {
+          console.error(chalk.red('Error: Default "Open" status not found'));
+          process.exit(1);
+        }
       }
 
       // Create item

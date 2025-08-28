@@ -100,6 +100,30 @@ To access: Use `mcp__shirokuma-kb__list_items` with type parameter "steering"
 - **`spec_tasks`**: Use only within spec-driven development workflow (`/kuma:spec:tasks`)
   - Task breakdown from a formal design specification
 
+## Known Limitations and Workarounds
+
+### search_items API Issue (v0.9.0)
+**Current Limitation**: The `search_items` API does not properly parse structured queries like `status:Open`.
+
+**Workaround**: Use `list_items` instead:
+```yaml
+# Get Open issues
+Tool: mcp__shirokuma-kb__list_items
+Parameters:
+  type: "issue"
+  status: "Open"  # Will filter by status name
+  limit: 20
+
+# Alternative: Get all issues and filter manually
+Tool: mcp__shirokuma-kb__list_items
+Parameters:
+  type: "issue"
+  limit: 100
+# Then filter by statusId: 14 (Open), 13 (Completed), etc.
+```
+
+**Fix Timeline**: Will be fixed in v0.9.1 with proper structured query support.
+
 ## Search Strategies
 
 ### Keyword Search

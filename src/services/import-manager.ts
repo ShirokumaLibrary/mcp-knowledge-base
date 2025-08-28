@@ -159,9 +159,10 @@ export class ImportManagerTypeORM {
       // Parse front matter
       const parsed = matter(content);
       
-      // Check if this is a system state file (has 'version' and 'metrics' but no 'type')
-      if ('version' in parsed.data && 'metrics' in parsed.data && !('type' in parsed.data)) {
-        return await this.importSystemStateFile(filePath, parsed);
+      // Check if this is a system state file
+      if (parsed.data.type === 'system_state' || 
+          ('version' in parsed.data && !('title' in parsed.data) && !('status' in parsed.data))) {
+        return await this.importSystemStateFile(filePath, parsed, options);
       }
       
       // Validate and normalize data for regular item
@@ -183,7 +184,7 @@ export class ImportManagerTypeORM {
 
       // Create or update item
       const itemRepo = AppDataSource.getRepository(Item);
-      const itemData = {
+      const itemData: any = {
         type: normalizedType,
         title: validated.title,
         description: validated.description || '',
@@ -200,13 +201,12 @@ export class ImportManagerTypeORM {
         endDate: validated.endDate ? new Date(validated.endDate) : undefined,
       };
 
-      let item;
-      if (options.preserveIds && validated.id) {
-        // Try to use the original ID
-        item = await itemRepo.save({ ...itemData, id: validated.id });
-      } else {
-        item = await itemRepo.save(itemData);
+      // If ID is provided in frontmatter, use it (will update if exists, create new otherwise)
+      if (validated.id) {
+        itemData.id = validated.id;
       }
+      
+      const item = await itemRepo.save(itemData);
 
       // Import tags
       if (validated.tags && validated.tags.length > 0) {
@@ -244,7 +244,7 @@ export class ImportManagerTypeORM {
   /**
    * Import a system state Markdown file
    */
-  async importSystemStateFile(filePath: string, parsed: matter.GrayMatterFile<string>): Promise<ImportResult> {
+  async importSystemStateFile(filePath: string, parsed: matter.GrayMatterFile<string>, options: ImportOptions = {}): Promise<ImportResult> {
     try {
       // Validate system state data
       const validated = SystemStateFrontMatterSchema.parse(parsed.data);
@@ -252,7 +252,7 @@ export class ImportManagerTypeORM {
       const stateRepo = AppDataSource.getRepository(SystemState);
       
       // Prepare system state data
-      const stateData = {
+      const stateData: any = {
         version: validated.version,
         content: parsed.content?.trim() || '',
         summary: '', // Extract from content if needed
@@ -274,7 +274,12 @@ export class ImportManagerTypeORM {
         isActive: false // Set to true for the latest/current state
       };
       
-      // Save system state
+      // If ID is provided in frontmatter, use it (will update if exists, create new otherwise)
+      if (parsed.data.id) {
+        stateData.id = parsed.data.id;
+      }
+      
+      // Save system state (will update if ID exists, create new otherwise)
       const state = await stateRepo.save(stateData);
       
       return {
@@ -342,23 +347,48 @@ export class ImportManagerTypeORM {
       }
     }
 
-    // Import system state if exists
-    const stateFile = path.join(dirPath, '.system', 'current_state', 'latest.md');
+    // Import system states from numbered files (skip latest.md)
+    const stateDir = path.join(dirPath, '.system', 'current_state');
     try {
-      const stateStats = await fs.stat(stateFile);
-      if (stateStats.isFile()) {
-        const content = await fs.readFile(stateFile, 'utf-8');
-        const parsed = matter(content);
-        await this.importSystemState({
-          content: parsed.content || '',
-          tags: parsed.data.tags || [],
-          metadata: parsed.data.metadata || {}
+      const stateDirStats = await fs.stat(stateDir);
+      if (stateDirStats.isDirectory()) {
+        const stateFiles = await fs.readdir(stateDir);
+        
+        // Filter for numbered files only (1.md, 2.md, etc.)
+        const numberedFiles = stateFiles.filter(file => 
+          file.endsWith('.md') && /^\d+\.md$/.test(file)
+        ).sort((a, b) => {
+          const numA = parseInt(a.replace('.md', ''));
+          const numB = parseInt(b.replace('.md', ''));
+          return numA - numB;
         });
-        result.stateImported = true;
-        console.log(chalk.green('✓ Imported system state'));
+        
+        let statesImported = 0;
+        for (const file of numberedFiles) {
+          try {
+            const stateFile = path.join(stateDir, file);
+            const content = await fs.readFile(stateFile, 'utf-8');
+            const parsed = matter(content);
+            
+            // Use importSystemStateFile for proper validation and processing
+            const stateResult = await this.importSystemStateFile(stateFile, parsed, options);
+            if (stateResult.stateImported) {
+              statesImported++;
+              console.log(chalk.green(`✓ Imported system state: ${file}`));
+            }
+          } catch (error) {
+            console.log(chalk.yellow(`⚠ Failed to import ${file}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+          }
+        }
+        
+        if (statesImported > 0) {
+          result.stateImported = true;
+          console.log(chalk.green(`✓ Imported ${statesImported} system state(s)`));
+        }
       }
-    } catch {
-      // System state file not found, skip
+    } catch (error) {
+      // System state directory not found, skip
+      console.log(chalk.gray(`System state import skipped: ${error instanceof Error ? error.message : 'Directory not found'}`));
     }
 
     return result;
@@ -374,6 +404,10 @@ export class ImportManagerTypeORM {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
+        // Skip .system directory (handled separately)
+        if (entry.name === '.system') {
+          continue;
+        }
         // Recurse into subdirectory
         const subFiles = await this.findMarkdownFiles(fullPath);
         files.push(...subFiles);
