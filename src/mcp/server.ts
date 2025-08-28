@@ -380,6 +380,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           status: safeArgs.status ? String(safeArgs.status) : undefined,
           limit: typeof safeArgs.limit === 'number' ? safeArgs.limit : 20,
           offset: typeof safeArgs.offset === 'number' ? safeArgs.offset : 0,
+          includeClosable: typeof safeArgs.includeClosable === 'boolean' ? safeArgs.includeClosable : undefined,
+          onlyActive: typeof safeArgs.onlyActive === 'boolean' ? safeArgs.onlyActive : undefined,
         });
 
         // Remove content and embedding from list results

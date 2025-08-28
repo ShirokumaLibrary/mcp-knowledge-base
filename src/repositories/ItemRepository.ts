@@ -25,15 +25,34 @@ export class ItemRepository {
     status?: string;
     limit?: number;
     offset?: number;
+    includeClosable?: boolean;
+    onlyActive?: boolean;
   }): Promise<Item[]> {
     const query = this.repository.createQueryBuilder('item');
+    let needsStatusJoin = false;
+
+    // Handle status filtering
+    if (options?.status) {
+      // If specific status is provided, use it (backward compatibility)
+      query.leftJoinAndSelect('item.status', 'status')
+           .andWhere('LOWER(status.name) = LOWER(:statusName)', { 
+             statusName: options.status 
+           });
+      needsStatusJoin = true;
+    } else if (options?.onlyActive || (!options?.includeClosable && options?.includeClosable !== true)) {
+      // Default behavior: only show active items (is_closable=false)
+      // unless explicitly including closable items
+      query.leftJoinAndSelect('item.status', 'status')
+           .andWhere('status.isClosable = :isClosable', { isClosable: false });
+      needsStatusJoin = true;
+    } else if (options?.includeClosable === true) {
+      // Include all items regardless of is_closable flag
+      query.leftJoinAndSelect('item.status', 'status');
+      needsStatusJoin = true;
+    }
 
     if (options?.type) {
       query.andWhere('item.type = :type', { type: options.type });
-    }
-
-    if (options?.status) {
-      query.andWhere('item.status = :status', { status: options.status });
     }
 
     if (options?.limit) {
