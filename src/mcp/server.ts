@@ -16,6 +16,7 @@ import { Tag } from '../entities/Tag.js';
 import { ItemTag } from '../entities/ItemTag.js';
 import { ItemRelation } from '../entities/ItemRelation.js';
 import { EnhancedAIService } from '../services/enhanced-ai.service.js';
+import { ExportManager } from '../services/export-manager.js';
 
 const server = new Server(
   {
@@ -31,6 +32,7 @@ const server = new Server(
 
 let itemRepo: ItemRepository;
 let stateRepo: SystemStateRepository;
+let exportManager: ExportManager;
 
 // Initialize database connection
 async function initializeDatabase() {
@@ -40,6 +42,7 @@ async function initializeDatabase() {
   }
   itemRepo = new ItemRepository();
   stateRepo = new SystemStateRepository();
+  exportManager = new ExportManager();
 }
 
 // Tool definitions
@@ -247,6 +250,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
+        // Auto-export if environment variable is set (non-blocking)
+        exportManager.autoExportItem(item).catch(error => {
+          console.error('Auto-export failed for created item:', error);
+        });
+
         // Remove embedding from response
         const { embedding, ...itemWithoutEmbedding } = item;
         return {
@@ -351,6 +359,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
+        // Auto-export if environment variable is set (non-blocking)
+        if (updated) {
+          exportManager.autoExportItem(updated).catch(error => {
+            console.error('Auto-export failed for updated item:', error);
+          });
+        }
+
         // Remove embedding from response
         if (updated) {
           const { embedding, ...updatedWithoutEmbedding } = updated;
@@ -453,6 +468,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           metadata: args.metadata ? JSON.stringify(args.metadata) : undefined,
           version: '0.9.0',
           isActive: true,
+        });
+
+        // Auto-export current state if environment variable is set (non-blocking)
+        exportManager.autoExportCurrentState(newState as any).catch(error => {
+          console.error('Auto-export failed for current state:', error);
         });
 
         return {

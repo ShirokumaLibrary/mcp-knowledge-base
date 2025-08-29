@@ -9,11 +9,13 @@ import { ItemTag } from '../entities/ItemTag.js';
 import { ItemKeyword } from '../entities/ItemKeyword.js';
 import { ItemConcept } from '../entities/ItemConcept.js';
 import { ItemRelation } from '../entities/ItemRelation.js';
+import { AutoExportConfig } from '../types/export.types.js';
 
 // Constants
 const SYSTEM_DIR = '.system';
 const CURRENT_STATE_DIR = 'current_state';
 const MAX_FILENAME_LENGTH = 100;
+const DEFAULT_EXPORT_TIMEOUT = 2000;
 
 export interface ExportOptions {
   type?: string;
@@ -47,6 +49,7 @@ export class ExportManager {
   private itemKeywordRepo: Repository<ItemKeyword>;
   private itemConceptRepo: Repository<ItemConcept>;
   private itemRelationRepo: Repository<ItemRelation>;
+  private autoExportConfig: AutoExportConfig;
 
   constructor() {
     this.itemRepo = AppDataSource.getRepository(Item);
@@ -56,6 +59,164 @@ export class ExportManager {
     this.itemKeywordRepo = AppDataSource.getRepository(ItemKeyword);
     this.itemConceptRepo = AppDataSource.getRepository(ItemConcept);
     this.itemRelationRepo = AppDataSource.getRepository(ItemRelation);
+    this.autoExportConfig = this.loadAutoExportConfig();
+  }
+
+  /**
+   * Load auto-export configuration from environment variables
+   */
+  private loadAutoExportConfig(): AutoExportConfig {
+    const exportDir = process.env.SHIROKUMA_EXPORT_DIR;
+    const timeout = process.env.SHIROKUMA_EXPORT_TIMEOUT;
+    
+    return {
+      enabled: !!exportDir,
+      baseDir: exportDir || '',
+      timeout: timeout && !isNaN(Number(timeout)) ? Number(timeout) : DEFAULT_EXPORT_TIMEOUT
+    };
+  }
+
+  /**
+   * Get current auto-export configuration (for testing)
+   */
+  getAutoExportConfig(): AutoExportConfig {
+    // Reload configuration to get current environment values
+    this.autoExportConfig = this.loadAutoExportConfig();
+    return this.autoExportConfig;
+  }
+
+  /**
+   * Automatically export an item (non-blocking)
+   */
+  async autoExportItem(item: Item): Promise<void> {
+    // Reload configuration to get current environment values
+    const config = this.loadAutoExportConfig();
+    if (!config.enabled) {
+      return;
+    }
+
+    try {
+      // Update the cached config for internal methods
+      this.autoExportConfig = config;
+      await this.exportWithTimeout(item, config.timeout);
+    } catch (error) {
+      // Log error but don't propagate it
+      console.error('Auto export failed for item', { itemId: item.id, error });
+    }
+  }
+
+  /**
+   * Automatically export current state (non-blocking)
+   */
+  async autoExportCurrentState(state: SystemState): Promise<void> {
+    // Reload configuration to get current environment values
+    const config = this.loadAutoExportConfig();
+    if (!config.enabled) {
+      return;
+    }
+
+    try {
+      // Update the cached config for internal methods
+      this.autoExportConfig = config;
+      await this.exportCurrentStateWithTimeout(state, config.timeout);
+    } catch (error) {
+      // Log error but don't propagate it
+      console.error('Current state auto export failed', { error });
+    }
+  }
+
+  /**
+   * Export item with timeout
+   */
+  private async exportWithTimeout(item: Item, timeout: number): Promise<void> {
+    return Promise.race([
+      this.exportItemToFile(item),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Export timeout')), timeout)
+      )
+    ]);
+  }
+
+  /**
+   * Export current state with timeout
+   */
+  private async exportCurrentStateWithTimeout(state: SystemState, timeout: number): Promise<void> {
+    return Promise.race([
+      this.exportSystemStateToFile(state),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Export timeout')), timeout)
+      )
+    ]);
+  }
+
+  /**
+   * Export a single item to file (internal method for auto-export)
+   */
+  private async exportItemToFile(item: Item): Promise<void> {
+    const typeDir = path.join(this.autoExportConfig.baseDir, item.type);
+    
+    // Create directory if it doesn't exist
+    await fs.mkdir(typeDir, { recursive: true });
+    
+    // Get enriched item with all relations
+    const enrichedItem = await this.getEnrichedItem(item);
+    
+    // Generate filename
+    const filename = `${item.id}-${this.sanitizeFilename(item.title)}.md`;
+    const filepath = path.join(typeDir, filename);
+    
+    // Check if file with same ID exists and remove it
+    const files = await fs.readdir(typeDir).catch(() => []);
+    const existingFile = files.find(f => f.startsWith(`${item.id}-`));
+    if (existingFile && existingFile !== filename) {
+      await fs.unlink(path.join(typeDir, existingFile)).catch(() => {});
+    }
+    
+    // Write file
+    const content = this.formatItemAsMarkdown(enrichedItem);
+    await fs.writeFile(filepath, content, 'utf-8');
+  }
+
+  /**
+   * Export system state to file (internal method for auto-export)
+   */
+  private async exportSystemStateToFile(state: SystemState): Promise<void> {
+    const stateDir = path.join(this.autoExportConfig.baseDir, SYSTEM_DIR, CURRENT_STATE_DIR);
+    
+    // Create directory if it doesn't exist
+    await fs.mkdir(stateDir, { recursive: true });
+    
+    // Generate filename
+    const filename = `${state.id}.md`;
+    const filepath = path.join(stateDir, filename);
+    
+    // Write file
+    const content = this.formatSystemStateAsMarkdown(state);
+    await fs.writeFile(filepath, content, 'utf-8');
+    
+    // Update latest symlink/copy
+    const latestPath = path.join(stateDir, 'latest.md');
+    await fs.unlink(latestPath).catch(() => {});
+    await fs.copyFile(filepath, latestPath);
+  }
+
+  /**
+   * Build item export path (for testing and external use)
+   */
+  buildItemPath(item: { id: number; type: string; title: string }): string {
+    // Reload configuration to get current environment values
+    const config = this.loadAutoExportConfig();
+    const filename = `${item.id}-${this.sanitizeFilename(item.title)}.md`;
+    return path.join(config.baseDir, item.type, filename);
+  }
+
+  /**
+   * Build current state export path (for testing and external use)
+   */
+  buildCurrentStatePath(): string {
+    // Reload configuration to get current environment values
+    const config = this.loadAutoExportConfig();
+    return path.join(config.baseDir, SYSTEM_DIR, CURRENT_STATE_DIR);
   }
 
   /**
@@ -75,8 +236,8 @@ export class ExportManager {
       sanitized = sanitized.substring(0, MAX_FILENAME_LENGTH);
     }
 
-    // Remove trailing dots, underscores or spaces (Windows compatibility)
-    sanitized = sanitized.replace(/[._\s]+$/, '');
+    // Remove leading and trailing dots, underscores or spaces (Windows compatibility)
+    sanitized = sanitized.replace(/^[._\s]+/, '').replace(/[._\s]+$/, '');
 
     return sanitized || 'untitled';
   }
