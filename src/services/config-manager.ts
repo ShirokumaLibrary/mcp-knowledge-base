@@ -1,12 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// Get directory path for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Configuration schema definition
 interface ConfigField {
@@ -24,11 +17,8 @@ interface ConfigSchema {
 
 // Configuration type
 export interface Config {
-  SHIROKUMA_DATABASE_URL: string;
   SHIROKUMA_DATA_DIR: string;
   SHIROKUMA_EXPORT_DIR: string;
-  NODE_ENV: string;
-  ANTHROPIC_API_KEY?: string;
 }
 
 // Validation result
@@ -42,36 +32,17 @@ export class ConfigManager {
 
   constructor() {
     this.schema = {
-      SHIROKUMA_DATABASE_URL: {
-        type: 'string',
-        required: true,
-        description: 'Prisma database connection URL',
-        default: `file:${path.join(os.homedir(), '.shirokuma', 'data', 'shirokuma.db')}`
-      },
       SHIROKUMA_DATA_DIR: {
         type: 'string',
         required: false,
-        description: 'Data directory path',
-        default: path.join(os.homedir(), '.shirokuma', 'data')
+        description: 'Data directory path (defaults to .shirokuma/data-prod)',
+        default: '.shirokuma/data-prod'
       },
       SHIROKUMA_EXPORT_DIR: {
         type: 'string',
         required: false,
         description: 'Export directory path',
         default: 'docs/export'
-      },
-      ANTHROPIC_API_KEY: {
-        type: 'string',
-        required: false,
-        description: 'Claude API key (optional)',
-        sensitive: true
-      },
-      NODE_ENV: {
-        type: 'enum',
-        required: false,
-        description: 'Environment type',
-        values: ['development', 'production', 'test'],
-        default: 'development'
       }
     };
   }
@@ -87,13 +58,6 @@ export class ConfigManager {
       if (value !== undefined) {
         (config as Record<string, unknown>)[key] = value;
       }
-    }
-
-    // If SHIROKUMA_DATABASE_URL is not set but SHIROKUMA_DATA_DIR is, derive SHIROKUMA_DATABASE_URL from it
-    if (!process.env.SHIROKUMA_DATABASE_URL && config.SHIROKUMA_DATA_DIR) {
-      const dataDir = (config.SHIROKUMA_DATA_DIR as string).replace(/^~/, os.homedir());
-      const dbPath = `file:${dataDir}/shirokuma.db`;
-      config.SHIROKUMA_DATABASE_URL = dbPath;
     }
 
     return config as Config;
@@ -119,7 +83,7 @@ export class ConfigManager {
 
       exportData._metadata = {
         exported_at: new Date().toISOString(),
-        version: '0.8.0'
+        version: '0.9.0'
       };
 
       return JSON.stringify(exportData, null, 2);
@@ -144,48 +108,6 @@ export class ConfigManager {
     }
 
     return envContent;
-  }
-
-  /**
-   * Import configuration from string
-   */
-  importConfig(data: string, format: 'env' | 'json'): void {
-    if (format === 'json') {
-      const parsed = JSON.parse(data);
-      for (const [key, value] of Object.entries(parsed)) {
-        // Skip metadata and redacted values
-        if (key !== '_metadata' && value !== '***REDACTED***') {
-          // Validate against schema before importing
-          if (this.schema[key]) {
-            // Don't import sensitive fields unless explicitly set
-            if (this.schema[key].sensitive && !value) {
-              continue;
-            }
-            process.env[key] = String(value);
-          }
-        }
-      }
-    } else {
-      // Parse env format
-      const lines = data.split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('#')) {
-          const [key, ...valueParts] = trimmed.split('=');
-          const value = valueParts.join('=');
-          if (key && value && value !== '***REDACTED***') {
-            // Validate against schema
-            if (this.schema[key]) {
-              // Don't import sensitive fields with placeholder values
-              if (this.schema[key].sensitive && value === 'your-secret-key-here') {
-                continue;
-              }
-              process.env[key] = value;
-            }
-          }
-        }
-      }
-    }
   }
 
   /**
@@ -214,15 +136,6 @@ export class ConfigManager {
       valid: errors.length === 0,
       errors
     };
-  }
-
-  /**
-   * Switch to different environment
-   * @deprecated Use loadEnvFile() instead
-   */
-  async switchEnvironment(env: 'development' | 'production' | 'test'): Promise<void> {
-    // Now just delegates to loadEnvFile
-    await this.loadEnvFile(env);
   }
 
   /**
@@ -266,88 +179,4 @@ export class ConfigManager {
     });
   }
 
-  /**
-   * Save configuration to file
-   */
-  async saveConfig(filepath: string, format: 'env' | 'json' = 'env'): Promise<void> {
-    const content = this.exportConfig(format);
-
-    // Write with restricted permissions (600 - owner read/write only)
-    await fs.writeFile(filepath, content, {
-      encoding: 'utf-8',
-      mode: 0o600
-    });
-  }
-
-  /**
-   * Load configuration from file
-   */
-  async loadConfig(filepath: string, format: 'env' | 'json' = 'env'): Promise<void> {
-    const content = await fs.readFile(filepath, 'utf-8');
-    this.importConfig(content, format);
-  }
-
-  /**
-   * Validate environment name to prevent path traversal attacks
-   * @param envName - Environment name to validate
-   */
-  private validateEnvName(envName: string): void {
-    // Allow only alphanumeric, dash, and underscore (this also prevents path traversal)
-    if (!/^[a-zA-Z0-9_-]+$/.test(envName)) {
-      throw new Error(`Invalid environment name format: ${envName}`);
-    }
-    // Additional check for path traversal patterns (redundant but explicit)
-    if (envName.includes('/') || envName.includes('\\') || envName.includes('..')) {
-      throw new Error(`Invalid environment name: ${envName}`);
-    }
-  }
-
-  /**
-   * Load environment file based on environment name
-   * @param envName - Environment name (e.g., 'dev', 'test', 'prod')
-   * Loading priority:
-   * 1. .env.[envName] if envName is provided
-   * 2. .env as fallback if specific env file not found
-   * 3. System environment variables if no files exist
-   */
-  async loadEnvFile(envName?: string): Promise<void> {
-    // Validate environment name to prevent security issues
-    if (envName) {
-      this.validateEnvName(envName);
-    }
-
-    const envFile = envName ? `.env.${envName}` : '.env';
-
-    try {
-      const content = await fs.readFile(envFile, 'utf-8');
-      this.importConfig(content, 'env');
-    } catch (error) {
-      if ((error as { code?: string }).code === 'ENOENT') {
-        // If environment-specific file doesn't exist, try to fallback to .env
-        if (envName) {
-          try {
-            const content = await fs.readFile('.env', 'utf-8');
-            this.importConfig(content, 'env');
-          } catch (fallbackError) {
-            // If both files don't exist, silently continue
-            if ((fallbackError as { code?: string }).code !== 'ENOENT') {
-              throw fallbackError;
-            }
-          }
-        }
-        // If no envName and .env doesn't exist, silently continue
-      } else {
-        // Re-throw non-ENOENT errors
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * Initialize ConfigManager with specified environment
-   * @param envName - Environment name (e.g., 'dev', 'test', 'prod')
-   */
-  async initializeWithEnv(envName?: string): Promise<void> {
-    await this.loadEnvFile(envName);
-  }
 }

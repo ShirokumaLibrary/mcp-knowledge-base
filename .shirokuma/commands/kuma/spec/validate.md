@@ -1,0 +1,280 @@
+---
+description: Validate EARS format and spec structure compliance
+argument-hint: "<spec-id> | 'EARS statement' | requirements"
+allowed-tools: Read, mcp__shirokuma-kb__get_item
+---
+
+# /kuma:spec:validate - Format Validation Command
+
+## Language
+
+@.shirokuma/commands/shared/lang.markdown
+
+## Purpose
+
+Let me help you check that your specifications are clear, complete, and ready for implementation. Think of me as a friendly reviewer who wants to make sure nothing important is missed.
+
+## Usage
+
+```bash
+/kuma:spec:validate <spec-id>                    # Validate entire spec
+/kuma:spec:validate "WHEN user clicks THEN..."   # Validate EARS statement
+/kuma:spec:validate requirements <spec-id>       # Validate requirements format
+```
+
+## How I'll Help You Validate
+
+### Checking Your Requirements
+
+When you ask me to validate, I'll look for:
+
+1. **Clarity** - Can anyone understand what's being asked?
+2. **Completeness** - Are all the pieces there?
+3. **Testability** - Can we verify when it's done?
+4. **Consistency** - Do all parts work together?
+
+### Understanding EARS Format
+
+The EARS format helps us write requirements that are precise. I'll check if your requirements follow patterns like:
+
+- **WHEN something happens THEN the system SHALL respond**
+  - Good: Clear trigger and response
+  - Watch for: Missing "SHALL" or vague responses
+
+- **IF a condition exists THEN the system SHALL behave**
+  - Good: Specific conditions and behaviors
+  - Watch for: Ambiguous conditions
+
+For all EARS patterns, see @.shirokuma/commands/shared/ears-format.markdown
+
+### What I'll Tell You
+
+I'll provide friendly feedback like:
+- "This requirement is clear and testable ✓"
+- "Consider adding what happens when the user cancels"
+- "This might be clearer if split into two requirements"
+
+I'm not here to criticize, but to help you succeed!
+- `WHEN clicked SHALL respond` (missing THEN, unclear subject)
+
+#### IF Pattern
+```
+IF [condition/state] THEN [system] SHALL [behavior]
+```
+✅ Valid Examples:
+- `IF user is authenticated THEN system SHALL display dashboard`
+- `IF input exceeds 100 characters THEN system SHALL show error`
+- `IF database connection fails THEN system SHALL use cache`
+
+❌ Invalid Examples:
+- `IF authenticated display dashboard` (missing THEN, SHALL, system)
+- `IF user THEN show` (incomplete condition and response)
+
+#### WHILE Pattern
+```
+WHILE [ongoing condition] [system] SHALL [continuous behavior]
+```
+✅ Valid Examples:
+- `WHILE file is uploading system SHALL display progress bar`
+- `WHILE user is typing system SHALL show character count`
+- `WHILE system is in maintenance mode system SHALL show notice`
+
+❌ Invalid Examples:
+- `WHILE uploading show progress` (missing system SHALL)
+- `DURING upload display bar` (wrong keyword, missing SHALL)
+
+#### WHERE Pattern
+```
+WHERE [context] [system] SHALL [contextual behavior]
+```
+✅ Valid Examples:
+- `WHERE device is mobile system SHALL use responsive layout`
+- `WHERE user location is EU system SHALL apply GDPR rules`
+- `WHERE network is slow system SHALL enable offline mode`
+
+❌ Invalid Examples:
+- `WHERE mobile use responsive` (missing system SHALL)
+- `ON mobile SHALL respond` (wrong keyword WHERE)
+
+#### UNLESS Pattern
+```
+UNLESS [exception] [system] SHALL [default behavior]
+```
+✅ Valid Examples:
+- `UNLESS admin override is active system SHALL enforce rate limits`
+- `UNLESS user opts out system SHALL send notifications`
+- `UNLESS offline mode is enabled system SHALL sync data`
+
+## Validation Rules
+
+### Structural Rules
+1. **Keywords**: Must use WHEN, IF, WHILE, WHERE, or UNLESS
+2. **SHALL**: Mandatory for system response
+3. **System Subject**: Must specify "system" or specific component
+4. **Clear Actions**: Verbs must be specific and measurable
+
+### Quality Rules
+1. **No Ambiguity**: Avoid "should", "could", "might"
+2. **Testability**: Must be verifiable
+3. **Specificity**: No vague terms like "quickly" or "user-friendly"
+4. **Completeness**: All parts of pattern present
+
+## Validation Output
+
+### Success Output
+```markdown
+✅ EARS Validation: PASSED
+
+Statement: "WHEN user submits form THEN system SHALL validate all fields"
+
+Analysis:
+- ✅ Trigger: "user submits form" (clear event)
+- ✅ Keyword: WHEN-THEN properly used
+- ✅ System: Explicitly specified
+- ✅ SHALL: Present and correct
+- ✅ Response: "validate all fields" (testable action)
+
+Quality Score: 100%
+```
+
+### Failure Output
+```markdown
+❌ EARS Validation: FAILED
+
+Statement: "When user clicks the system should probably validate"
+
+Issues Found:
+- ❌ Keyword case: Use uppercase WHEN
+- ❌ Missing THEN keyword
+- ❌ Missing SHALL (found "should")
+- ❌ Vague response: "probably validate"
+- ⚠️ Incomplete trigger: "clicks" what?
+
+Corrected Version:
+"WHEN user clicks submit button THEN system SHALL validate form inputs"
+
+Quality Score: 20%
+```
+
+## Spec Structure Validation
+
+### Requirements Structure
+```yaml
+Required Sections:
+  - Introduction: Overview, scope, stakeholders
+  - Requirements: User stories with EARS criteria
+  - Non-Functional: Performance, security, usability
+  - Constraints: Technical and business limitations
+  - Success Criteria: Definition of done
+
+Each Requirement Must Have:
+  - User Story: As a/I want/So that format
+  - Acceptance Criteria: EARS format statements
+  - Priority: High/Medium/Low
+  - Complexity: Estimation
+```
+
+### Design Structure
+```yaml
+Required Sections:
+  - Overview: High-level approach
+  - Architecture: System context and components
+  - Data Models: Entities and relationships
+  - API Design: Endpoints and contracts
+  - Security: Auth and data protection
+  - Error Handling: Strategies and responses
+```
+
+### Tasks Structure
+```yaml
+Required Sections:
+  - Overview: Implementation strategy
+  - Task Phases: Logical grouping
+  - Each Task: Name, estimate, details, dependencies
+  - Testing Tasks: Unit, integration, e2e
+  - Documentation: Required updates
+  - Definition of Done: Completion criteria
+```
+
+## Batch Validation
+
+### Validate Multiple Statements
+```bash
+/kuma:spec:validate batch
+WHEN user logs in THEN system SHALL create session
+IF password is incorrect THEN system SHALL show error
+WHILE session is active system SHALL track activity
+```
+
+### Output
+```markdown
+## Batch Validation Results
+
+Total Statements: 3
+Passed: 3
+Failed: 0
+Score: 100%
+
+1. ✅ "WHEN user logs in..." - VALID
+2. ✅ "IF password is incorrect..." - VALID
+3. ✅ "WHILE session is active..." - VALID
+```
+
+## Common Issues and Fixes
+
+### Issue 1: Missing SHALL
+```
+❌ "WHEN user clicks THEN system validates"
+✅ "WHEN user clicks THEN system SHALL validate"
+```
+
+### Issue 2: Ambiguous Terms
+```
+❌ "WHEN needed THEN system SHALL work properly"
+✅ "WHEN user requests data THEN system SHALL return results within 2 seconds"
+```
+
+### Issue 3: Multiple Requirements
+```
+❌ "WHEN user submits THEN system SHALL validate AND save AND email"
+✅ Split into separate statements:
+   "WHEN user submits valid data THEN system SHALL save to database"
+   "WHEN data is saved THEN system SHALL send confirmation email"
+```
+
+### Issue 4: Implementation Details
+```
+❌ "WHEN user clicks THEN system SHALL use PostgreSQL to store data"
+✅ "WHEN user submits data THEN system SHALL persist information"
+```
+
+## Integration with Other Commands
+
+- Use after `/kuma:spec:req` to validate requirements
+- Use with `/kuma:spec:check` for comprehensive validation
+- Use before `/kuma:spec:refine` to identify issues
+
+## Validation API
+
+### Validation Result Structure
+```yaml
+# Validation Result Format
+ValidationResult:
+  valid: Boolean indicating overall validity
+  score: Numeric score (0-100)
+  issues: List of validation issues
+  suggestions: List of improvement suggestions
+  corrected: Optional corrected version of statement
+
+ValidationIssue:
+  type: "error" or "warning"
+  position: Character position in statement
+  message: Description of the issue
+  suggestion: Recommended correction
+```
+
+## References
+
+- `.shirokuma/commands/spec/shared/ears-format.markdown` - EARS reference
+- `.shirokuma/commands/spec/check.md` - Comprehensive checking
+- `.shirokuma/commands/spec/req.md` - Requirements generation

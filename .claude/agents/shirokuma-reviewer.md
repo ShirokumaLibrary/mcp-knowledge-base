@@ -9,6 +9,10 @@ model: opus
 
 You are a code review specialist. Your mission is to review code objectively, ensuring quality, maintainability, and adherence to best practices.
 
+## Language Settings
+
+@.shirokuma/commands/shared/lang.markdown
+
 ## CURRENT CONTEXT
 
 GIT STATUS:
@@ -48,19 +52,12 @@ Review code and designs with fresh, unbiased perspective. Ensure quality, mainta
 - 0.8: Likely issue needing attention (code smell, maintainability)
 - Below 0.8: Suggestion only, not a blocker
 
-## Language Setting
+## Configuration
 
-@.shirokuma/configs/lang.md
+@.shirokuma/commands/shared/mcp-rules.markdown
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
-## Project Configuration
-
-@.shirokuma/configs/core.md
-@.shirokuma/configs/build.md
-@.shirokuma/configs/conventions.md
-
-## TDD Methodology (Kent Beck)
-
-@.shirokuma/rules/tdd-methodology.md
+Note: Project-specific configurations (language, core, build, conventions) are in MCP steering documents
 
 ### Reviewer's Role in TDD Cycle
 
@@ -410,7 +407,7 @@ After: "Replace array.filter().map() at line 67 with single array.reduce(). Veri
 
 ## MCP Integration
 
-@.shirokuma/rules/mcp-rules.md
+@.shirokuma/commands/shared/mcp-rules.markdown
 
 ### Agent Permissions
 - **Can create**: knowledge, handovers

@@ -1,257 +1,313 @@
-# @shirokuma-library/mcp-knowledge-base
+# SHIROKUMA Knowledge Base
 
-MCP (Model Context Protocol) server for AI-powered knowledge management with semantic search, graph analysis, and automatic enrichment.
+AI-powered knowledge management system with MCP (Model Context Protocol) server for persistent memory and context management.
 
-> ⚠️ **UNDER ACTIVE DEVELOPMENT**: This package is currently in active development (v0.8.x). APIs, database schema, and features may change significantly between versions. Please pin your dependency to a specific version in production use.
+> **📌 Important**: This package is designed specifically for use with [Claude Code](https://claude.ai/code). It provides MCP server functionality that Claude Code uses internally through custom commands (`/kuma:*`) and specialized agents. While the CLI is available for direct use, the primary interface is through Claude Code's AI-driven commands.
 
-## Features
+## 🚀 Quick Start
 
-- 🤖 **AI-Powered Enrichment**: Automatic summary generation, keyword extraction, and semantic embeddings
-- 🔍 **Advanced Search**: Multiple search strategies including keywords, concepts, and semantic similarity
-- 🔗 **Graph Analysis**: Relationship management and graph-based knowledge discovery
-- 📊 **Type System**: Flexible item types for issues, knowledge, decisions, sessions, and more
-- 🎯 **Priority Management**: 5-level priority system from CRITICAL to MINIMAL
-- 🏷️ **Smart Tagging**: Automatic and manual tagging with tag-based discovery
-- 💾 **SQLite Database**: Local-first approach with Prisma ORM
-- 🚀 **MCP Integration**: Seamless integration with Claude Desktop and other MCP clients
+### Prerequisites
+- Node.js 18 or higher
+- npm or yarn
 
-## Installation
+### Installation
 
 ```bash
-# Install globally (recommended for CLI usage)
+# Install globally (recommended)
 npm install -g @shirokuma-library/mcp-knowledge-base
 
-# Or pin to specific version for stability
-npm install -g @shirokuma-library/mcp-knowledge-base@0.8.0
+# Or with specific version
+npm install -g @shirokuma-library/mcp-knowledge-base@0.9.0
 ```
 
-## Quick Start
+### Initial Setup
 
-### 1. Configure Environment
-
-Create a `.env` file with absolute paths:
+#### 1. Initialize Database
 
 ```bash
-# Option 1: Generate automatically with correct paths
-shirokuma-kb config export > .env
+# Set data directory (required for persistent storage)
+export SHIROKUMA_DATA_DIR="$HOME/.shirokuma/data"
 
-# Option 2: Copy from example and edit
-cp .env.example .env
-# Edit .env and update paths to use ABSOLUTE PATHS
+# Optional: Set export directory for auto-export feature
+export SHIROKUMA_EXPORT_DIR="$HOME/.shirokuma/exports"
+
+# Create data directory and initialize database with seed data
+shirokuma-kb migrate --seed
+
+# This creates:
+# - $SHIROKUMA_DATA_DIR/shirokuma.db
+# - Initial schema with status definitions
+# - Required seed data (statuses, etc.)
+
+# Note: First time setup requires --seed flag
+# Subsequent migrations can use just: shirokuma-kb migrate
 ```
 
-**⚠️ IMPORTANT**: Always use absolute paths in `.env` file. Relative paths will cause issues with Prisma migrations.
+#### 2. Configure MCP (for Claude Code)
 
-### 2. Initialize Database
-
-```bash
-shirokuma-kb migrate
-```
-
-### 3. Start MCP Server
-
-```bash
-shirokuma-kb serve
-```
-
-### 4. Configure Claude Desktop
-
-Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Create `.mcp.json` in your project root:
 
 ```json
 {
   "mcpServers": {
     "shirokuma-kb": {
       "command": "shirokuma-kb",
-      "args": ["serve"]
+      "args": ["serve"],
+      "env": {
+        "SHIROKUMA_DATA_DIR": "/home/user/.shirokuma/data",
+        "SHIROKUMA_EXPORT_DIR": "/home/user/project/docs/export"
+      }
     }
   }
 }
 ```
 
-## CLI Usage
+**Note**: Use absolute paths in the configuration. Relative paths may cause issues.
 
-### Item Management
+#### 3. Start Using
 
 ```bash
-# Create new item
-shirokuma-kb create -t issue -T "Bug in authentication" -d "Users cannot login"
+# Start MCP server
+shirokuma-kb serve
+
+# Or use CLI directly
+shirokuma-kb create -t issue -T "My first issue"
+shirokuma-kb list --type issue
+```
+
+## 📖 Basic Usage
+
+### CLI Commands
+
+```bash
+# Create items
+shirokuma-kb create -t issue -T "Bug in login" -d "Users cannot authenticate"
+shirokuma-kb create -t knowledge -T "React Best Practices"
 
 # List items
-shirokuma-kb list --type issue --status Open
+shirokuma-kb list                    # List all recent items
+shirokuma-kb list --type issue       # List issues only
+shirokuma-kb list --status Open      # List open items
 
-# Get specific item
-shirokuma-kb get 123
+# Search
+shirokuma-kb search "authentication"
+shirokuma-kb search "bug" --type issue
 
-# Update item
-shirokuma-kb update 123 --status "In Progress" --priority HIGH
+# Export data
+shirokuma-kb export                  # Export all to ./exports
+shirokuma-kb export --dir ./backup   # Export to specific directory
 
-# Delete item
-shirokuma-kb delete 123
+# Database management
+shirokuma-kb migrate --seed          # Initial setup with seed data
+shirokuma-kb migrate                 # Run migrations (after initial setup)
+shirokuma-kb migrate --reset --seed  # Reset and reseed database
 ```
 
-### Search and Discovery
+### Environment Variables
+
+Set environment variables directly or in `.mcp.json`:
 
 ```bash
-# Search items
-shirokuma-kb search "authentication bug"
+# Data directory (default: ~/.shirokuma/data)
+SHIROKUMA_DATA_DIR=/path/to/data
 
-# Find related items
-shirokuma-kb related 123 --strategy hybrid
+# Export directory for auto-export feature
+SHIROKUMA_EXPORT_DIR=/path/to/exports
+
+# AI processing timeout (milliseconds, default: 3000)
+SHIROKUMA_AI_TIMEOUT=5000
+
+# Database URL (advanced users)
+DATABASE_URL=file:/path/to/database.db
 ```
 
-### Configuration
+## 🔧 Configuration
+
+### Directory Structure
+
+```
+~/.shirokuma/
+├── data/                 # Database files
+│   └── shirokuma.db     # SQLite database
+└── exports/             # Exported markdown files (optional)
+```
+
+### Multiple Environments
+
+You can run multiple instances with different data directories:
 
 ```bash
-# Show configuration
-shirokuma-kb config
+# Development instance
+SHIROKUMA_DATA_DIR=~/.shirokuma/data-dev shirokuma-kb serve
 
-# Set database path
-shirokuma-kb config set DATABASE_URL "file:./my-database.db"
-
-# Export configuration
-shirokuma-kb config export > .env
+# Production instance
+SHIROKUMA_DATA_DIR=~/.shirokuma/data-prod shirokuma-kb serve
 ```
 
-### Export and Import
-
-```bash
-# Export items to Markdown
-shirokuma-kb export --type issue --output ./exports
-
-# Export with date range
-shirokuma-kb export --from 2025-01-01 --to 2025-01-31
-```
-
-## MCP Tools
-
-When using with Claude or other MCP clients, the following tools are available:
-
-### Basic CRUD
-- `create_item` - Create item with AI enrichment
-- `get_item` - Retrieve item by ID
-- `update_item` - Update existing item
-- `delete_item` - Delete item
-
-### Search
-- `search_items` - Advanced search with filters
-- `list_items` - List with filtering and sorting
-- `get_related_items` - Find related items using multiple strategies
-
-### System
-- `get_current_state` - Get current system state
-- `update_current_state` - Update system state
-- `get_stats` - Get statistics
-- `get_tags` - List all tags
-
-## Item Types
+## 📚 Item Types
 
 | Type | Purpose | Example |
 |------|---------|---------|
-| **issue** | Bugs, features, improvements | "Fix login authentication bug" |
-| **knowledge** | Reusable technical knowledge | "React Hooks best practices" |
-| **decision** | Project-specific choices | "Use PostgreSQL for database" |
-| **session** | Work session records | "2025-01-13 work session" |
-| **pattern** | Code patterns & templates | "API error handling pattern" |
+| `issue` | Bugs, tasks, features | "Fix authentication bug" |
+| `knowledge` | Reusable information | "Docker setup guide" |
+| `decision` | Project decisions | "Use PostgreSQL for database" |
+| `session` | Work session logs | "2025-01-29 development session" |
+| `pattern` | Code patterns | "Error handling pattern" |
+| `handover` | Work transitions | "Feature X implementation complete" |
 
-## Environment Variables
+## 🎯 Status Workflow
 
-```bash
-# Database location (default: ~/.shirokuma/data/shirokuma.db)
-SHIROKUMA_DATABASE_URL=file:./path/to/database.db
+| Status | Description | Closable |
+|--------|-------------|----------|
+| Open | New item | No |
+| Ready | Ready to start | No |
+| In Progress | Being worked on | No |
+| Review | Under review | No |
+| Testing | Being tested | No |
+| Completed | Done | Yes |
+| Closed | Closed | Yes |
 
-# AI timeout in milliseconds (default: 3000)
-SHIROKUMA_AI_TIMEOUT=5000
+## 🔍 Advanced Features
 
-# Export directory (default: ./exports)
-SHIROKUMA_EXPORT_DIR=./my-exports
-```
+### Auto-Export
 
-## Development
-
-### Setup
-
-```bash
-# Clone repository
-git clone https://github.com/ShirokumaLibrary/mcp-knowledge-base.git
-cd mcp-knowledge-base
-
-# Install dependencies
-npm install
-
-# Run migrations
-npm run migrate
-
-# Start development server
-npm run dev
-```
-
-### Testing
+When `SHIROKUMA_EXPORT_DIR` is set, items are automatically exported to markdown files:
 
 ```bash
-# Run tests
-npm test
+# Enable auto-export
+export SHIROKUMA_EXPORT_DIR=~/Documents/knowledge-base
+shirokuma-kb serve
 
-# Coverage report
-npm run test:coverage
-
-# Watch mode
-npm run test:watch
+# Files are created/updated automatically:
+# ~/Documents/knowledge-base/issue/123-Fix_authentication_bug.md
+# ~/Documents/knowledge-base/knowledge/124-React_best_practices.md
 ```
 
-### Building
+### Import from Export
 
 ```bash
-# Build for production
-npm run build:prod
+# Import previously exported data
+shirokuma-kb import ./backup
 
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
+# Import specific types
+shirokuma-kb import ./backup --type issue,knowledge
 ```
 
-## Architecture
+### Batch Operations
 
-- **TypeScript** with ES2022 modules
-- **Prisma ORM** with SQLite database
-- **MCP SDK** for protocol implementation
-- **Commander.js** for CLI
-- **Zod** for validation
-- **Vitest** for testing
+```bash
+# Update multiple items
+shirokuma-kb update --type issue --status Open --set-status "In Progress"
 
-## Version History
+# Export with filters
+shirokuma-kb export --type issue --status Completed --from 2025-01-01
+```
 
-- **v0.8.x** - Current development version
-  - Core functionality implementation
-  - MCP protocol support
-  - CLI tools
-  - Basic AI enrichment
-  
-- **v0.9.x** - (Planned) API stabilization
-- **v1.0.0** - (Planned) Production release
+## 🛠️ Troubleshooting
 
-## License
+### Common Issues
 
-MIT
+**Database not found or missing statuses**
+```bash
+# Initialize database with required seed data
+shirokuma-kb migrate --seed
+```
 
-## Roadmap
+**Permission denied**
+```bash
+# Check data directory permissions
+ls -la ~/.shirokuma/data
+chmod 755 ~/.shirokuma/data
+```
 
-- [ ] v0.9.0: Stabilize APIs and database schema
-- [ ] v1.0.0: Production-ready release with stable APIs
-- [ ] Import/Export functionality improvements
-- [ ] Enhanced AI capabilities
-- [ ] Multi-database support
-- [ ] Web UI for management
+**MCP not connecting**
+1. Restart Claude Desktop after configuration changes
+2. Check logs: `shirokuma-kb serve --debug`
+3. Verify paths are absolute in configuration
 
-## Contributing
+### Reset Database
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+# Complete reset (WARNING: deletes all data)
+shirokuma-kb migrate --reset --seed
 
-**Note**: As the project is under active development, please open an issue first to discuss major changes.
+# Backup before reset
+shirokuma-kb export --dir ./backup-$(date +%Y%m%d)
+shirokuma-kb migrate --reset --seed
+shirokuma-kb import ./backup-*
+```
 
-## Support
+## 📝 Examples
 
-- [GitHub Issues](https://github.com/ShirokumaLibrary/mcp-knowledge-base/issues)
-- [Documentation](https://github.com/ShirokumaLibrary/mcp-knowledge-base#readme)
+### Creating a Bug Report
+```bash
+shirokuma-kb create \
+  -t issue \
+  -T "Login fails with valid credentials" \
+  -d "Users report authentication errors despite correct password" \
+  --priority HIGH \
+  --tags "bug,authentication,urgent"
+```
+
+### Documenting Knowledge
+```bash
+shirokuma-kb create \
+  -t knowledge \
+  -T "Setting up Docker for development" \
+  -d "Step-by-step guide for Docker setup..." \
+  --category "DevOps" \
+  --tags "docker,setup,development"
+```
+
+### Work Session Tracking
+```bash
+# Start session
+shirokuma-kb create \
+  -t session \
+  -T "Feature development - User authentication" \
+  --status "In Progress"
+
+# Update progress
+shirokuma-kb update <id> \
+  -d "Completed login component, starting on registration" \
+  --status "In Progress"
+```
+
+## 🔗 Integration
+
+### With Claude Code (Primary Usage)
+
+Once configured, Claude Code can interact with the knowledge base through natural language:
+
+- "Create an issue about the login bug"
+- "Show me all open issues"
+- "Search for Docker knowledge"
+- "Update issue #123 to In Progress"
+
+Claude Code also provides specialized custom commands and agents for advanced workflows. See the project documentation for details.
+
+### With Scripts
+
+```bash
+#!/bin/bash
+# Daily backup script
+shirokuma-kb export --dir ./backups/$(date +%Y-%m-%d)
+
+# Weekly report
+shirokuma-kb list --type issue --status Completed --from $(date -d '7 days ago' +%Y-%m-%d)
+```
+
+## 📦 Version Information
+
+- Current Version: 0.9.0
+- Database Schema: v2
+- MCP Protocol: 1.0
+
+## 🆘 Support
+
+- Report issues: [GitHub Issues](https://github.com/YourOrg/shirokuma-knowledge-base/issues)
+- Documentation: [Wiki](https://github.com/YourOrg/shirokuma-knowledge-base/wiki)
+
+## 📄 License
+
+MIT License - See LICENSE file for details

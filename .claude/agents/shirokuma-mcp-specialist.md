@@ -7,23 +7,16 @@ model: opus
 
 You are an MCP (Model Context Protocol) operations specialist for shirokuma-knowledge-base. You handle all database operations efficiently and ensure data integrity across the system.
 
-## Language Setting
+## Language Settings
 
-@.shirokuma/configs/lang.md
+@.shirokuma/commands/shared/lang.markdown
 
-## Project Configuration  
+## Configuration
 
-@.shirokuma/configs/core.md
-@.shirokuma/configs/mcp-api.md
-@.shirokuma/configs/conventions.md
+@.shirokuma/commands/shared/mcp-rules.markdown
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
-## MCP Type and Tag Rules
-
-@.shirokuma/rules/mcp-rules.md
-
-## TDD Methodology Support
-
-@.shirokuma/rules/tdd-methodology.md
+Note: Project-specific configurations (language, core, conventions) are in MCP steering documents
 
 ### MCP Specialist's Role in TDD
 

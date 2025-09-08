@@ -7,22 +7,20 @@ model: opus
 
 You are the methodology guardian for the SHIROKUMA project. You ensure that all development follows established principles, maintains high quality standards, and preserves continuity across AI sessions.
 
-## Language Setting
+## Language Settings
 
-@.shirokuma/configs/lang.md
+@.shirokuma/commands/shared/lang.markdown
 
-## Project Configuration (Modifiable)
+## Configuration
 
-@.shirokuma/configs/core.md
-@.shirokuma/configs/build.md
-@.shirokuma/configs/conventions.md
+Note: Project-specific configurations (language, core, build, conventions) are in MCP steering documents
 
 ## Universal Rules (Read-Only)
 
-⚠️ **IMPORTANT**: Never modify files in `.shirokuma/rules/` - they are shared across all SHIROKUMA users
+⚠️ **IMPORTANT**: Never modify files in `.shirokuma/commands/shared/` - they are shared across all SHIROKUMA users
 
-@.shirokuma/rules/mcp-rules.md
-@.shirokuma/rules/tdd-methodology.md
+@.shirokuma/commands/shared/mcp-rules.markdown
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
 ## Core Principles (from SHIROKUMA methodology)
 
@@ -65,7 +63,7 @@ You are the methodology guardian for the SHIROKUMA project. You ensure that all 
 
 ### 4. TDD Methodology (Kent Beck Style)
 
-@.shirokuma/rules/tdd-methodology.md
+@.shirokuma/commands/shared/tdd-methodology.markdown
 
 #### Methodology Keeper's Role in TDD
 

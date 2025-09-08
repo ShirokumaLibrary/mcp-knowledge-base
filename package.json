@@ -1,6 +1,6 @@
 {
   "name": "@shirokuma-library/mcp-knowledge-base",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "description": "MCP server for AI-powered knowledge management with semantic search, graph analysis, and automatic enrichment",
   "keywords": [
     "mcp",
@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.2",
-    "@prisma/client": "^6.13.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "chalk": "^5.5.0",
@@ -46,9 +45,11 @@
     "express": "^5.1.0",
     "gray-matter": "^4.0.3",
     "ora": "^8.2.0",
-    "prisma": "^6.13.0",
+    "reflect-metadata": "^0.2.2",
     "search-query-parser": "^1.6.0",
+    "sqlite3": "^5.1.7",
     "tsx": "^4.20.4",
+    "typeorm": "^0.3.20",
     "typescript": "^5.9.2",
     "zod": "^3.25.76"
   },
@@ -60,14 +61,13 @@
   },
   "files": [
     "dist/",
-    "prisma/",
     "scripts/",
     "LICENSE",
     "README.md",
     "package.json"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/src/cli/index.js dist/src/mcp/server.js",
     "build:prod": "rm -rf dist && tsc --project tsconfig.prod.json && chmod +x dist/src/cli/index.js dist/src/mcp/server.js",
     "dev": "tsx src/cli/index.ts",
     "cli": "tsx src/cli/index.ts",
@@ -80,18 +80,15 @@
     "lint": "eslint src --ext .ts",
     "lint:errors": "eslint src --ext .ts --quiet",
     "type-check": "tsc --noEmit",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx src/seed.ts",
     "setup-migrations": "tsx scripts/setup-migrations.ts",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:dev": "tsx scripts/migrate.ts dev",
     "migrate:deploy": "tsx scripts/migrate.ts deploy",
     "migrate:status": "tsx scripts/migrate.ts status",
     "migrate:reset": "tsx scripts/migrate.ts reset",
-    "prepublishOnly": "prisma generate && npm run build:prod",
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma || true"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "prepublishOnly": "npm run build:prod",
+    "postinstall": "echo 'Post-install complete'"
   },
   "bin": {
     "shirokuma-kb": "./dist/src/cli/index.js"

@@ -1,8 +1,10 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { AppDataSource } from '../../data-source.js';
 import { ExportManager } from '../../services/export-manager.js';
+import { Item } from '../../entities/Item.js';
+import { Status } from '../../entities/Status.js';
+import { ItemTag } from '../../entities/ItemTag.js';
 import Table from 'cli-table3';
 import path from 'path';
 
@@ -10,8 +12,7 @@ export function createExportCommand(): Command {
   const exportCmd = new Command('export')
     .description('Export items to files');
 
-  const prisma = new PrismaClient();
-  const exportManager = new ExportManager(prisma);
+  const exportManager = new ExportManager();
 
   // Export all or filtered items
   exportCmd
@@ -25,6 +26,11 @@ export function createExportCommand(): Command {
     .option('--all-states', 'Export all system state history (with --include-state or "state" command)')
     .action(async (id, options) => {
       try {
+        // Initialize data source
+        if (!AppDataSource.isInitialized) {
+          await AppDataSource.initialize();
+        }
+
         // Override export directory if specified with validation
         if (options.dir) {
           const normalizedPath = path.resolve(options.dir);
@@ -56,7 +62,7 @@ export function createExportCommand(): Command {
             console.log(chalk.yellow('\n⚠ No system state found to export'));
           }
 
-          await prisma.$disconnect();
+          await AppDataSource.destroy();
           return;
         } else if (id) {
           // Export single item
@@ -108,10 +114,10 @@ export function createExportCommand(): Command {
           }
         }
 
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
       } catch (error) {
         console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
         process.exit(1);
       }
     });
@@ -126,49 +132,46 @@ export function createExportCommand(): Command {
     .option('-l, --limit <number>', 'Limit number of items', parseInt)
     .action(async (options) => {
       try {
+        // Initialize data source
+        if (!AppDataSource.isInitialized) {
+          await AppDataSource.initialize();
+        }
+
+        const itemRepo = AppDataSource.getRepository(Item);
+        const statusRepo = AppDataSource.getRepository(Status);
+        const itemTagRepo = AppDataSource.getRepository(ItemTag);
+
         // Build query
-        const where: Record<string, unknown> = {};
+        const query = itemRepo.createQueryBuilder('item')
+          .leftJoinAndSelect('item.status', 'status');
 
         if (options.type) {
-          where.type = options.type;
+          query.andWhere('item.type = :type', { type: options.type });
         }
 
         if (options.status && options.status.length > 0) {
-          where.status = {
-            name: { in: options.status }
-          };
+          query.andWhere('status.name IN (:...statuses)', { statuses: options.status });
         }
 
         if (options.tags && options.tags.length > 0) {
-          where.tags = {
-            some: {
-              tag: {
-                name: { in: options.tags }
-              }
-            }
-          };
+          query.innerJoin('item_tags', 'it', 'it.item_id = item.id')
+               .innerJoin('tags', 't', 't.id = it.tag_id')
+               .andWhere('t.name IN (:...tags)', { tags: options.tags });
         }
 
-        // Fetch items
-        const items = await prisma.item.findMany({
-          where,
-          take: options.limit || 100,
-          include: {
-            status: true,
-            tags: {
-              include: {
-                tag: true
-              }
-            }
-          },
-          orderBy: {
-            updatedAt: 'desc'
-          }
-        });
+        if (options.limit) {
+          query.limit(options.limit);
+        } else {
+          query.limit(100);
+        }
+
+        query.orderBy('item.updatedAt', 'DESC');
+
+        const items = await query.getMany();
 
         if (items.length === 0) {
           console.log(chalk.yellow('No items found matching the criteria'));
-          await prisma.$disconnect();
+          await AppDataSource.destroy();
           return;
         }
 
@@ -180,12 +183,21 @@ export function createExportCommand(): Command {
         });
 
         for (const item of items) {
-          const tags = item.tags.map((t: { tag: { name: string } }) => t.tag.name).join(', ');
+          // Get tags for this item
+          const itemTags = await itemTagRepo.find({
+            where: { itemId: item.id },
+            relations: ['tag']
+          });
+          const tags = itemTags.map(it => it.tag.name).join(', ');
+
+          // Get status name
+          const status = await statusRepo.findOne({ where: { id: item.statusId } });
+
           table.push([
             item.id,
             item.type,
             item.title.substring(0, 37) + (item.title.length > 37 ? '...' : ''),
-            item.status.name,
+            status?.name || 'Unknown',
             tags || '-'
           ]);
         }
@@ -197,10 +209,10 @@ export function createExportCommand(): Command {
         const exportDir = process.env.SHIROKUMA_EXPORT_DIR || 'docs/export';
         console.log(chalk.gray(`\nWould export to: ${exportDir}`));
 
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
       } catch (error) {
         console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
         process.exit(1);
       }
     });
@@ -212,6 +224,11 @@ export function createExportCommand(): Command {
     .option('-d, --dir <directory>', 'Export directory (overrides SHIROKUMA_EXPORT_DIR)')
     .action(async (options) => {
       try {
+        // Initialize data source
+        if (!AppDataSource.isInitialized) {
+          await AppDataSource.initialize();
+        }
+
         // Override export directory if specified with validation
         if (options.dir) {
           const normalizedPath = path.resolve(options.dir);
@@ -256,77 +273,16 @@ export function createExportCommand(): Command {
           for (const [type, files] of filesByType) {
             console.log(chalk.yellow(`\n  ${type}/`));
             for (const file of files) {
-              const filename = file.split('/').pop();
+              const filename = file.split('/').slice(1).join('/');
               console.log(`    ${filename}`);
             }
           }
         }
 
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
       } catch (error) {
         console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
-        process.exit(1);
-      }
-    });
-
-  // Show export statistics
-  exportCmd
-    .command('stats')
-    .description('Show export statistics by type')
-    .action(async () => {
-      try {
-        // Get counts by type
-        const stats = await prisma.item.groupBy({
-          by: ['type'],
-          _count: {
-            _all: true
-          }
-        });
-
-        // Sort by count manually
-        stats.sort((a, b) => {
-          const countA = typeof a._count === 'object' && a._count !== null ?
-            (a._count as Record<string, number>)._all || 0 : 0;
-          const countB = typeof b._count === 'object' && b._count !== null ?
-            (b._count as Record<string, number>)._all || 0 : 0;
-          return countB - countA;
-        });
-
-        if (stats.length === 0) {
-          console.log(chalk.yellow('No items in database'));
-          await prisma.$disconnect();
-          return;
-        }
-
-        // Display statistics
-        const table = new Table({
-          head: ['Type', 'Count', 'Export Path'],
-          colWidths: [20, 10, 50]
-        });
-
-        const exportDir = process.env.SHIROKUMA_EXPORT_DIR || 'docs/export';
-        let total = 0;
-
-        for (const stat of stats) {
-          const count = typeof stat._count === 'object' && stat._count !== null ?
-            (stat._count as Record<string, number>)._all || 0 : 0;
-          table.push([
-            stat.type,
-            count,
-            `${exportDir}/${stat.type}/`
-          ]);
-          total += count;
-        }
-
-        console.log(chalk.cyan('\nExport Statistics:\n'));
-        console.log(table.toString());
-        console.log(chalk.green(`\nTotal items: ${total}`));
-
-        await prisma.$disconnect();
-      } catch (error) {
-        console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-        await prisma.$disconnect();
+        await AppDataSource.destroy();
         process.exit(1);
       }
     });

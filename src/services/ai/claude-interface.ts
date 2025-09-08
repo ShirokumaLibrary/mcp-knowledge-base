@@ -125,7 +125,7 @@ No additional text, only the JSON object.`;
         keywords: keywords.slice(0, 15), // Limit to 15 keywords
         concepts: parsed.concepts || [],
         embedding: this.quantizeEmbedding(embedding),
-        summary: parsed.summary || text.substring(0, 200),
+        summary: parsed.summary || `${text.substring(0, 200)}...`,
         searchIndex: text.substring(0, 500)
       };
 
@@ -204,7 +204,7 @@ No additional text, only the JSON object.`;
       keywords,
       concepts: [],
       embedding: this.quantizeEmbedding(embedding),
-      summary: text.substring(0, 200) || 'No content available',
+      summary: text.length > 200 ? `${text.substring(0, 200)}...` : (text || 'No content available'),
       searchIndex: text.substring(0, 500)
     };
   }
