@@ -6,12 +6,12 @@ status: Open
 priority: HIGH
 description: "既存のmcp-api-testerエージェントを活用した統合テスト戦略"
 aiSummary: "MCP APIテスター再構築案 既存のmcp-api-testerエージェントを活用した統合テスト戦略 MCP APIテスター再構築案 既存のmcp-api-testerエージェントを活用した統合テスト戦略 # MCP APIテスター再構築案\n\n## 背景\n- STDIO接続のMCPサーバーの自動テストが困難\n- 既存の`mcp-api-tester`エージェントが存在するが未活用\n- テストディ..."
-tags: ["mcp","testing","v0.9.0","agent","integration-test"]
+tags: ["mcp","v0.9.0","testing","agent","integration-test"]
 related: [146]
 keywords: {"mcp":1,"api":0.95,"item":0.68,"tester":0.61,"claude":0.34}
 embedding: "gI+RlYCAgIWAiJ2AgICAj4CVl46AgICBgISogICAgJGAkJOWgICAgICAmYCAgICNgIaJlYCAgIOAgJKAgICAhoCOgIqAgICHgISZgICAgIOAhIKBgICAiYCIp4CAgICGgICHgYCAgIaAibCAgICAg4CFjYqAgICCgIWsgICAgIg="
-createdAt: 2025-08-23T06:26:40.000Z
-updatedAt: 2025-08-23T06:28:19.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 # MCP APIテスター活用によるテスト戦略

@@ -10,8 +10,8 @@ tags: ["eslint","typescript","review","code-quality","iteration-2","cli","needs-
 related: [2,3,10,51,55,56,97,115,116]
 keywords: {"error":0.48,"status":0.38,"item":0.31,"cli":0.29,"any":0.21}
 embedding: "lYCDoIWAgICGgICMkICAgIqAipGAgICAmYCFjY2Ag4CSgI+YgYCAgKaAi4iFgJGAh4CNmoiAgICigIeCgICdgICAhZaOgICAkICNgIKAnICDgIuPjoCAgIGAjYSKgJCAj4CDjY+AgICDgIeLhICCgJeAgJmNgICAlICBjoyAgYA="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 # Review Report: CLI List Command Implementation

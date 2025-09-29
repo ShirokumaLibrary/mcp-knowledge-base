@@ -7,11 +7,11 @@ priority: HIGH
 description: "handoverタイプが単数形と複数形（handovers）で混在している。エージェント定義ファイルで複数形が使われている。"
 aiSummary: "typeフィールドの複数形使用の不整合（handovers） handoverタイプが単数形と複数形（handovers）で混在している。エージェント定義ファイルで複数形が使われている。 ## 問題の詳細\n\nMCPデータベースを調査した結果、`handover`タイプが単数形と複数形で混在していることが判明。\n\n### 現状\n- **正しい形（単数形）**: handover - 4件（ID: 6"
 tags: ["bug","consistency","type-validation","data-integrity"]
-related: [1,5,11,19,20,22,33,34,10,54,55,94]
-keywords: {"claude":1,"type":1,"shirokuma":1,"handover":1,"handovers":1}
+related: [1,5,10,11,19,20,22,33,34,54,55,94]
+keywords: {"type":1,"claude":1,"shirokuma":1,"handover":1,"handovers":1}
 embedding: "i4CehICAjICAgICAgICJmoOAnICAgIaAgICMgICAiZKPgJmIgICGgICAloCAgIWGmYCXlYCAiYCAgJCAgICBgJiAmIyAgIyAgICfgICAgIaNgJyXgICGgICAo4CAgIOSgoCSmoCAhYCAgJaAgICIiYGAnJCAgIiAgICGgICAhZY="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 問題の詳細

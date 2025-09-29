@@ -8,11 +8,11 @@ description: "多数のMCP APIが定義されているが、実際に使用さ�
 aiSummary: "Analysis of MCP API usage to identify and clean up unused APIs, resulting in significant codebase reduction and maintenance cost savings"
 tags: ["analysis","api","cleanup","mcp"]
 related: [55,66,67]
-keywords: {"api":1,"mcp":1,"unused":0.9,"analysis":0.9,"usage":0.9}
+keywords: {"api":1,"mcp":1,"analysis":0.9,"unused":0.9,"usage":0.9}
 concepts: {"api management":0.9,"code optimization":0.8,"maintenance":0.8,"analysis":0.7}
 embedding: "gIqAjYCAgICAgKWAgI2AgICBgI6FgICAgICmgICWhYCAh4CMgICAgIKAooCAm42AgICAhYiAgICJgJWAgJ6QgICBgICQgICAkICRgICYjICAioCBkoCAgI+AmICAkISAgJGAiIuAgICIgKWAgIeKgICRgI2DgICAgYCrgICGgoA="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 背景

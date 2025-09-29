@@ -10,8 +10,8 @@ tags: ["testing","vitest","tdd","validation","best-practice"]
 related: [6,8,9,14,15,16,17,49,54,55,104]
 keywords: {"phase":1,"tdd":1,"review":0.69,"validation":0.69,"test":0.34}
 embedding: "h4iKh5mAgKGTgICcgICAgIuLi4GJgICdloCAp4CAgICJh4mAgICAjZWAgKKAgICAi4KDg4WAgIiVgICSgICAgIiAgIiVgICDjICAhYCAgICCg4GLoICAioKAgIiAgICAgIiGiJyAgJeAgICPgICAgIKLioOggICeiICAi4CAgIA="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 ## TDD実装プロセスの成功例

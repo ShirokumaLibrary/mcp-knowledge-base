@@ -14,6 +14,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 
 I'm here to help you create comprehensive specifications for your features. Together, we'll work through understanding what you need, how to build it, and the steps to get there. Think of me as your planning partner.
 
+**IMPORTANT**: This command is for PLANNING and DOCUMENTATION ONLY. I will never start implementation work automatically. After creating specifications, I'll suggest next steps but will NOT execute them without your explicit approval using commands like `/kuma:go` or `/kuma:vibe:code`.
+
 ## Usage
 
 ```bash
@@ -190,6 +192,8 @@ Display format:
 
 ### Execute Spec
 
+**NOTE**: The execute function loads tasks into TodoWrite for visibility but does NOT start implementation. Actual implementation must be initiated separately using `/kuma:go` or `/kuma:vibe:code`.
+
 ## Spec Execution Process
 
 1. **Retrieve Spec from MCP**
@@ -198,7 +202,7 @@ Display format:
 - Tool: mcp__shirokuma-kb__get_item
   Parameters:
     id: "[specId]"
-  Purpose: Load spec for task execution
+  Purpose: Load spec for task tracking (NOT automatic execution)
 ```
 
 2. **Extract Tasks from Content**

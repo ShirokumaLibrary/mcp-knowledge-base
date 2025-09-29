@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "Requirements phase of spec-driven development for automatic file export functionality when SHIROKUMA_EXPORT_DIR environment variable is set"
 aiSummary: "Requirements specification for automatic file export functionality when SHIROKUMA_EXPORT_DIR environment variable is set, enabling real-time synchronization between database and filesystem for MCP server operations."
-tags: ["mcp","ears","export","spec","requirements","environment-variable"]
+tags: ["mcp","ears","export","environment-variable","spec","requirements"]
 related: [168,170,171,172]
 keywords: {"export":1,"environment":0.9,"database":0.9,"automatic":0.9,"api":0.8}
 concepts: {"file management":0.9,"data synchronization":0.9,"configuration management":0.8,"automation":0.8,"api integration":0.8}
 embedding: "kYKAgIeAgICAgICnhoqAgI+JgICAgICAgICDnJiIgICHjoCAgYCAgICAgJimjYCAgI6AgIiAgICAgIOKo5GAgIGHgICQgICAgICLhJ6egICJjICAkICAgICAj4ySnoCAg4WAgIqAgICAgIybh5iAgIuAgICCgICAgICFoICSgIA="
-createdAt: 2025-08-29T06:23:58.000Z
-updatedAt: 2025-08-29T06:24:09.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 ---

@@ -10,8 +10,8 @@ tags: ["mcp","type-field","naming-convention","data-consistency","database-fix"]
 related: [10,17,40,47,65,82,83,88,89,90]
 keywords: {"weight":1,"keyword":1,"concept":0.53,"confidence":0.53,"type":0.35}
 embedding: "gICAgICAipChgI+IgIWAgICAgICAgIaFrICXhoCEgICAgICAgICLlamAlIKAhYCAgICAgICAiqCcgIuAgIOAgICAgICAgIWcj4CRgYCBgICAgICAgICAjY+AmIWAgICAgICAgICAgIGjgJqIgIGAgICAgICAgIWCqYCVhoCEgIA="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:19.000Z
+updatedAt: 2025-08-29T07:33:19.000Z
 ---
 
 {

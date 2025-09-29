@@ -6,13 +6,13 @@ status: Completed
 priority: HIGH
 description: "ai-specコマンド群にshirokuma-kb自動保存機能を追加"
 aiSummary: "Implementation of MCP integration for ai-spec command system, adding automatic specification storage functionality to shirokuma-kb for persistence, search, and version management across all specification phases including requirements, design, tasks, and validation."
-tags: ["automation","ai-spec","mcp-integration","knowledge-base","system-update"]
-related: [111,75,104,106]
-keywords: {"spec":1,"mcp":1,"shirokuma":0.9,"integration":0.9,"specification":0.8}
+tags: ["ai-spec","automation","mcp-integration","knowledge-base","system-update"]
+related: [75,104,106,111]
+keywords: {"mcp":1,"spec":1,"integration":0.9,"shirokuma":0.9,"specification":0.8}
 concepts: {"specification":0.9,"automation":0.9,"integration":0.9,"data_management":0.8,"software_development":0.8}
 embedding: "gIKAj4GAgIiAgICqgICPlYCJgIaKgICRgICFp4CAj4+Aj4CAk4CAkoCAgJuAgImEgI+AgpSAgIuAgIWdgICBgICHgIuLgICCgICQl4CAgISAjYCSkoCAiICAl5qAgIaPgIWAkYiAgIGAgJOggICNh4CAgIiAgICBgICIoYCAiJE="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 # ai-spec コマンドシステムへのMCP統合実装

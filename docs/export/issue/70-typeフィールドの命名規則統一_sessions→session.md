@@ -7,12 +7,12 @@ priority: LOW
 description: "MCPアイテムのtypeフィールドで「sessions」と「session」が混在していた問題を修正。単数形「session」に統一"
 aiSummary: "Standardization of MCP item type field naming from plural 'sessions' to singular 'session' to maintain consistency across the database and test files"
 tags: ["cleanup","type-field","naming-convention","data-integrity"]
-related: [84,90,69]
+related: [69,84,90]
 keywords: {"type":1,"mcp":0.9,"field":0.9,"session":0.9,"item":0.8}
 concepts: {"data_normalization":0.9,"naming_standards":0.8,"database_management":0.7,"code_quality":0.6,"testing":0.5}
 embedding: "gIqAmYCAkY+NgJOPgICAgICCgI6AgIuJhYCfjICAgICAgICRgICTgoCAnYWAgICAgIWAkoCAkoCCgJKAgICAgICNgJCAgImEioCjgoCAgICAkYCFgICBi5GAr4mAgICAgI2Ai4CAgY+PgKyOgICAgICRgJWAgIiLkYCTi4CAgIA="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 ## 問題の詳細

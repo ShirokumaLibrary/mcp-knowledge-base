@@ -19,10 +19,10 @@ You are reviewing the ENTIRE codebase for security vulnerabilities.
 FILES TO REVIEW:
 
 ```
-!`git ls-files | grep -E '\.(js|ts|jsx|tsx|py|rb|go|java|php|sh|bash)$' | grep -v node_modules | grep -v dist | head -100`
+!`git ls-files`
 ```
 
-Note: Showing first 100 source files tracked by git. Use the Glob and Grep tools to systematically scan all source code files for security vulnerabilities.
+Note: All files tracked by git are listed above. Use the Glob and Grep tools to systematically scan source code files (*.js, *.ts, *.jsx, *.tsx, *.py, *.rb, *.go, *.java, *.php, *.sh, *.bash) for security vulnerabilities, excluding node_modules and dist directories.
 
 REVIEW SCOPE: Complete codebase analysis
 

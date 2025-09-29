@@ -6,13 +6,13 @@ status: Completed
 priority: HIGH
 description: "承認済み設計からTDDメソッドでコード実装を行うコマンド。RED-GREEN-REFACTORサイクルと自動レビューを含む"
 aiSummary: "AI command for automated TDD implementation from approved design specifications, following RED-GREEN-REFACTOR cycle with automated review"
-tags: ["automation","command","ai-code","tdd","implementation"]
-related: [84,91,92,93,15,36,54,58,85,89,90,97]
-keywords: {"ai":1,"code":1,"test":0.9,"command":0.9,"tdd":0.9}
-concepts: {"test driven development":0.9,"automation":0.8,"testing":0.8,"software engineering":0.8,"development workflow":0.7}
+tags: ["command","ai-code","tdd","automation","implementation"]
+related: [15,36,54,58,84,85,89,90,91,92,93,97]
+keywords: {"code":1,"ai":1,"command":0.9,"test":0.9,"tdd":0.9}
+concepts: {"test driven development":0.9,"testing":0.8,"automation":0.8,"software engineering":0.8,"development workflow":0.7}
 embedding: "gIuriY+AgImVgICCgJGAgICPo4KFgICOkYCAi4CVgICAipeAgICAhpWAgJKAkICAgIKbhIOAgICOgICRgIaAgICAh4uMgICBhICAk4CAgICAhI2Pk4CAiYCAgI+AhICAgIugi5GAgJCGgICGgICAgICProSTgICQkICAgICGgIA="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 ## 概要

@@ -10,8 +10,8 @@ tags: ["api","mcp","type-field","testing","tdd","red-phase"]
 related: [1,6,20]
 keywords: {"type":0.92,"field":0.46,"tests":0.44,"test":0.39,"update":0.37}
 embedding: "gISQgICAgIaAh5SDgICAgICAkYCAgISAgIilhoCBgICAgo6AgICIgoCFr4aAhoCAgICFgICAiICAgZmEgIqAgICHgICAgImDgISsgICHgICAkIKAgICIi4CAtoCAi4CAgJOKgICAg5CAgK6CgImAgICNkYCAgICNgIORgICEgIA="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # TDD RED Phase Test Results

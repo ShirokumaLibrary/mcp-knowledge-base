@@ -14,6 +14,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 Help me understand what you want to build and turn it into clear, testable requirements. This is where we start our journey together - understanding the "what" before the "how".
 
+**IMPORTANT**: This command is for REQUIREMENTS GATHERING ONLY. I will document requirements but will NEVER start design or implementation automatically. After completing requirements, I'll suggest next steps but will NOT execute them without your explicit approval.
+
 ## Usage
 
 ```bash
@@ -228,9 +230,11 @@ Assistant:
 
 ## Next Phase
 
-After requirements are approved:
+After requirements are approved, I'll suggest these options but will NOT execute them automatically:
 - Use `/kuma:spec:design` to create technical design
 - Or use `/kuma:spec` to continue with all phases
+
+**Remember**: These are suggestions only. You must explicitly choose the next action.
 
 ## References
 

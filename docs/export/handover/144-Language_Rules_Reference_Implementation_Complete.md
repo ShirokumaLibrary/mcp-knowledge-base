@@ -6,12 +6,12 @@ status: Completed
 priority: HIGH
 description: "Successfully updated all command and agent files to reference the centralized language rules file"
 aiSummary: "Language rules implementation for SHIROKUMA system with Japanese chat responses and English code comments, successfully applied across all command and agent files"
-tags: ["configuration","v0.9.0","system-harmonization","language-rules"]
+tags: ["v0.9.0","configuration","system-harmonization","language-rules"]
 keywords: {"language":1,"japanese":0.9,"english":0.9,"configuration":0.8,"rules":0.8}
 concepts: {"language configuration":0.9,"system integration":0.8,"documentation":0.7,"code standards":0.6,"project management":0.5}
 embedding: "joCSgICUiY2KgICCgICAlpWAj4CAlYGDgICAi4CAgJ2KgIaAgJKBgIaAgJKAgICbgYCNgICOiYaAgICQgICAkoGAhICAgpOQhYCAkoCAgJuLgICAgISUlZGAgI+AgICblYCEgICSjJCagICGgICAipeAjYCAnpOUloCAgICAgI0="
-createdAt: 2025-08-23T05:41:35.000Z
-updatedAt: 2025-08-23T05:41:43.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 # Language Rules Reference Implementation

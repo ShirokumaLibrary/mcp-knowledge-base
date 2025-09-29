@@ -7,12 +7,12 @@ priority: HIGH
 description: "/ai-codeコマンド実行時に、REVIEW Phase でshirokuma-reviewerエージェントが呼ばれるべきだが、実際には呼ばれていない"
 aiSummary: "Issue with /ai-code command where shirokuma-reviewer agent is not being called during REVIEW phase of TDD implementation, affecting code quality assurance workflow"
 tags: ["ai-code","tdd","bug","reviewer","task"]
-related: [80,44]
+related: [44,80]
 keywords: {"ai-code":1,"command":0.9,"reviewer":0.9,"shirokuma-reviewer":0.9,"phase":0.8}
 concepts: {"code review":0.9,"software testing":0.9,"development workflow":0.8,"automation":0.8,"bug tracking":0.8}
 embedding: "gIqPgI2HgICPgICZgICAgICNjYCFjoCAkoCAoICDhICAiIWAgI+AgJGAgKWAjY+AgIKLgIOJgICRgICigJSWgICAg4CLgoCAiYCApoCRk4CAg4CAkYCAgIGAgKWAlIiAgIqDgI+FgICAgICdgI+AgICNi4CSjICAh4CAloCFgoA="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 # /ai-codeコマンドでレビュアーが呼ばれない問題

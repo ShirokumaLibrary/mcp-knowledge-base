@@ -10,8 +10,8 @@ tags: ["tdd","update-item","type-validation","session","api-improvement"]
 related: [4,8,24,26,27,30,43,49,51,52,53,105,117]
 keywords: {"2025":0.86,"api":1,"update_item":1,"issue":0.86,"green":0.86}
 embedding: "gI2Aj4qAgJiLh5aAgICAgICagIODgICUjZGggICAgICAnYCEgICAiI2UpICAgICAgJWAkYKAgJGNjpKAgICAgICKgJaJgICFh4STgICAgICAhYChjYCAgIGLl4CAgICAgIuAnYyAgIWAgpqAgICAgICXgI6NgICRhYCagICAgIA="
-createdAt: 2025-08-22T13:32:45.000Z
-updatedAt: 2025-08-22T13:32:45.000Z
+createdAt: 2025-08-29T07:33:26.000Z
+updatedAt: 2025-08-29T07:33:26.000Z
 ---
 
 ## セッション概要

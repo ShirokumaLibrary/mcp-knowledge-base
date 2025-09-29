@@ -7,11 +7,11 @@ priority: HIGH
 description: "ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法"
 aiSummary: "Vitestモックのデフォルトエクスポート対応 ESM/CommonJS互換性のためPrismaインポートをデフォルトエクスポート形式に変更した際のテストモック修正方法 ## 問題\nESM/CommonJS互換性対応でPrismaのインポート形式を変更：\n```javascript\n// 変更前\nimport { PrismaClient } from '@prisma/client';\n\n// "
 tags: ["prisma","testing","vitest","esm","commonjs","mocking"]
-related: [65,23,106]
+related: [23,65,106]
 keywords: {"prisma":1,"prismaclient":0.74,"const":0.59,"client":0.59,"export":0.44}
 embedding: "i5GAj4CVgICAgICNiICAgYCOgISAloCAgICAlYuHgICHhoCAgI6AgICAgJySj4CEmoCAhoCVgICAgICglZGAiYyEgJGAioCAgICAkZyKgIufgICXgIGAgICAgISYgoCIp4OAlICBgICAgICGjIiAgp6MgJeAi4CAgICAlYGBgIY="
-createdAt: 2025-08-22T13:32:45.000Z
-updatedAt: 2025-08-22T13:32:45.000Z
+createdAt: 2025-08-29T07:33:25.000Z
+updatedAt: 2025-08-29T07:33:25.000Z
 ---
 
 ## 問題

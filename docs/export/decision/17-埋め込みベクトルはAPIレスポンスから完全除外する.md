@@ -6,12 +6,12 @@ status: Completed
 priority: HIGH
 description: "embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。"
 aiSummary: "埋め込みベクトルはAPIレスポンスから完全除外する embeddingフィールドは内部処理専用データであり、API利用者（AI・人間問わず）には不要。出力オプションも含めて廃止。 ## 決定事項\n\n**埋め込みベクトル（embedding）はAPIレスポンスから完全に除外する**\n\n## 理由\n\n### 1. 使用者が存在しない\n| 利用者 | 使用可能性 | 理由 |\n|--------|---"
-tags: ["embedding","api-design","simplification","architecture","decision"]
+tags: ["architecture","embedding","api-design","simplification","decision"]
 related: [8,13,25,26,48,57,81,82,83]
 keywords: {"embedding":1,"api":0.86,"phase":0.86,"typescript":0.86,"issue":0.57}
 embedding: "gIOEgICAgICDm5SWgICAgICAh4CAgICDgKuWqYCAgICAg4aAgICAh4OokauAgICAgIuDgICAgISLqYeagICAgICPgICAgICHhZuAhYCAgICAjICAgICAhoySg4CAgICAgI+AgICAgIOPhI6PgICAgICKgYCAgICAioiWg4CAgIA="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:20.000Z
+updatedAt: 2025-08-29T07:33:20.000Z
 ---
 
 ## 決定事項

@@ -7,8 +7,8 @@ priority: HIGH
 description: "参照しているDBのフルPATHとEXPORTのディレクトリが何処になってるかなどの設定情報を表示する機能を追加"
 tags: ["configuration","cli","feature"]
 related: [122]
-createdAt: 2025-08-22T23:29:43.000Z
-updatedAt: 2025-08-23T00:21:35.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # configオプションの追加

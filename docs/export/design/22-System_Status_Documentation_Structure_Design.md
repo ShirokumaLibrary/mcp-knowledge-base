@@ -6,12 +6,12 @@ status: Open
 priority: HIGH
 description: "Design documentation structure for 12 system statuses with detailed explanations and workflow transitions"
 aiSummary: "System Status Documentation Structure Design Design documentation structure for 12 system statuses with detailed explanations and workflow transitions # システムステータス説明ドキュメント構造の設計\n\n## 問題背景\n\n**現状**:\n- データベ"
-tags: ["design","documentation","workflow","status","system","user-guide"]
+tags: ["documentation","design","workflow","status","system","user-guide"]
 related: [34,35,36,38,40,49,51]
 keywords: {"claude":0.65,"ready":0.65,"open":0.54,"completed":0.54,"progress":0.43}
 embedding: "gICUn4CHgICAgJOQgIKAgICApZWAkYCAgICKjICKgYCAgKeGgJSAgICAgYSAkImAgICYh4CTgICAgIGKgI6PgICAhZyAlICAgICAgoCQj4CAgIGpgIyAgICAgoCAjYiAgICDqYCCgICAgIyFgISBgICAj56AgICAgICUjYCAgIA="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:20.000Z
+updatedAt: 2025-08-29T07:33:20.000Z
 ---
 
 # システムステータス説明ドキュメント構造の設計

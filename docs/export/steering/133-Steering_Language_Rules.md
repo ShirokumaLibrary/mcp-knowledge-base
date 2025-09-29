@@ -6,12 +6,12 @@ status: Open
 priority: HIGH
 description: "言語使用ルールとコミュニケーション規約"
 aiSummary: "Language usage rules for multilingual development environment specifying Japanese for user communication and English for technical code elements"
-tags: ["steering","inclusion:always","language","communication"]
+tags: ["steering","language","inclusion:always","communication"]
 keywords: {"language":0.9,"japanese":0.9,"code":0.8,"rule":0.8,"communication":0.8}
 concepts: {"internationalization":0.9,"communication":0.9,"documentation":0.8,"programming":0.8,"localization":0.8}
 embedding: "jIuAgICAgICYgICAgpCAopKDgICAgICAjoCFgIyUgK6JgICAgICAgIyAgICTj4CqgYSAgICAgICAgIiAkoWApIGNgICAgICAhYCRgImAgJqJkYCAgICAgI+AlICBg4CTko6AgICAgICZgI2AgYCAiZORgICAgICAnYCDgICGgJA="
-createdAt: 2025-08-23T01:58:38.000Z
-updatedAt: 2025-08-23T02:07:23.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # 言語使用ルール

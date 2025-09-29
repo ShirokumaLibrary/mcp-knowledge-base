@@ -6,12 +6,12 @@ status: Completed
 priority: HIGH
 description: "AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。"
 aiSummary: "conceptsの登録が正常に動作していない AIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない可能性がある。データベースを確認したところ、conceptsが適切に保存されていない。 ## 問題の詳細\n\nAIエンリッチメント時にconceptsの抽出と登録が期待通りに機能していない問題を調査・修正しました。\n\n### 発見された問題\n\n1. **Claude CLIの出"
-tags: ["ai-enrichment","bug","database","search","concepts"]
-related: [4,11,24,23,66,68,79,100,101]
+tags: ["ai-enrichment","bug","search","database","concepts"]
+related: [4,11,23,24,66,68,79,100,101]
 keywords: {"json":1,"concepts":1,"claude":0.96,"test":0.43,"cli":0.43}
 embedding: "jIChgICDgIChgICAg4CAhoaAroCAgICAloGAgICAgJGLgKmAgIyAgIaFgICCgICbhICUgICcgICAh4CAiYCAm4CAgoCAooCAiYWAgI6AgJCCgISAgJeAgJmCgICLgICGiYCJgICHgICNgICAjoCAgY6AkoCAk4CAnYCAgIqAgII="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 問題の詳細

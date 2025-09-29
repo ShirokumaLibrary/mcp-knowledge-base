@@ -7,8 +7,8 @@ priority: LOW
 description: "システム設定情報を表示するconfigコマンドの実装仕様"
 tags: ["configuration","cli","spec","micro"]
 related: [121]
-createdAt: 2025-08-22T23:30:55.000Z
-updatedAt: 2025-08-22T23:54:00.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # configコマンドの追加 - AI機能テスト更新

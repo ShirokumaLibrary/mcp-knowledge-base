@@ -7,11 +7,11 @@ priority: HIGH
 description: "Major system reorganization achieving 0.92 harmony score"
 aiSummary: "Major system reorganization achieving 0.92 harmony score through directory restructuring, command name unification, code-to-specification conversion, agent configuration updates, and migration to MCP steering documents."
 tags: ["v0.9.0","consistency","system-reorganization","harmony-score"]
-keywords: {"system":1,"reorganization":1,"command":0.9,"consistency":0.9,"configuration":0.8}
+keywords: {"system":1,"reorganization":1,"consistency":0.9,"command":0.9,"configuration":0.8}
 concepts: {"software architecture":0.9,"system refactoring":0.9,"configuration management":0.8,"code organization":0.8,"development workflow":0.7}
 embedding: "gIOllYCAhYCAgIKDgI2AgICOnpqAgICAg4CAjYCRgICAl5yLgICDgICAhZWAjICAgJaggYCAjICHgJCTgISAgICLjoWAgJOAkYCYlYCAgICAk4CUgICQgJWAlJGAg4CAgIiEoICAiICQgImHgICAgICAlpeAgICAhYCAgICFgIA="
-createdAt: 2025-08-23T05:15:12.000Z
-updatedAt: 2025-08-23T05:15:21.000Z
+createdAt: 2025-08-29T07:33:25.000Z
+updatedAt: 2025-08-29T07:33:25.000Z
 ---
 
 ## セッション概要

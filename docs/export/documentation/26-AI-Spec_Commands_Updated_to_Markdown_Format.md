@@ -7,12 +7,12 @@ priority: HIGH
 description: "Documentation of updates to ai-spec commands for human-readable Markdown storage"
 aiSummary: "Documentation of updates to AI specification commands that converts storage format from JSON to human-readable Markdown, improving readability and editability while maintaining backward compatibility"
 tags: ["documentation","ai-spec","markdown","update","human-readable"]
-related: [111,6,7,9,17,53,54,56,60,63,85,94,99]
-keywords: {"spec":0.9,"ai":0.9,"markdown":0.9,"specification":0.8,"json":0.8}
+related: [6,7,9,17,53,54,56,60,63,85,94,99,111]
+keywords: {"ai":0.9,"spec":0.9,"markdown":0.9,"specification":0.8,"json":0.8}
 concepts: {"documentation":0.9,"specification":0.9,"software development":0.8,"data format":0.8,"automation":0.7}
 embedding: "gICHmYCAgICpgIiYgICAi4CAgYiAgICAnoSBmYCAgJSAgIGAgICAgJmOgJaAgICUgICIiYCAgICOk4CcgICAjICAgo2AgICAiZCBlYCAgIKAgIqbgICAgI6GiZCAgICAgICQoYCAgICOgJCQgICAgICAj5mAgICAoYKQk4CAgIE="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 # AI-Spec Commands Markdown Format Update

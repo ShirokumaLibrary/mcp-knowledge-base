@@ -10,8 +10,8 @@ tags: ["tdd","implementation","export","tasks"]
 related: [168,169,170,172]
 keywords: {"test":0.47,"export":0.44,"tests":0.31,"task":0.31,"for":0.25}
 embedding: "gISfgIiMgYCAj4CAhYCAjIWAo4CRloaAgJKAgJWAgIqNgpyAlJaLgICNgICggICFkICLgI+MjICAhICAnYCAgIuIgICPgoyAgIqAgKGAgIGDk4WAhICLgICCgICagICAgJeVgICJhYCAgICAioCAgoKQooCGlICAgIeAgICAgIg="
-createdAt: 2025-08-29T06:49:07.000Z
-updatedAt: 2025-08-29T06:49:37.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Tasks: Automatic Export Implementation

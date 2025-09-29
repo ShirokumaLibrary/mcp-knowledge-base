@@ -7,12 +7,12 @@ priority: MEDIUM
 description: "Spec #108の設計フェーズ検証結果"
 aiSummary: "Verification report for TypeORM migration design specification showing 87% compliance score with detailed architecture analysis, entity definitions, repository patterns, and recommendations for improvement in areas like missing entity definitions and large-scale data migration strategies."
 tags: ["design","typeorm","validation","spec","score-87"]
-related: [98,105,107,108,111,92]
+related: [92,98,105,107,108,111]
 keywords: {"typeorm":0.9,"migration":0.9,"design":0.8,"database":0.8,"architecture":0.8}
 concepts: {"database migration":0.9,"software architecture":0.8,"system verification":0.8,"orm design":0.8,"performance optimization":0.7}
 embedding: "loCek4CAgICAgJGkgIWAgJaAlZGAhICAgICNm4CLgICHgIuIgI2AgICAhImAg4CAgoCbgYCTgICAgICIgICAgIyAioGAkICAgICChICEgICcgIyAgIeAgICAgIyAjICAo4CWg4COgICAgIWagJGAgKKAn4yAhICAgICNnYCOgIA="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # 検証レポート: TypeORM移行設計書

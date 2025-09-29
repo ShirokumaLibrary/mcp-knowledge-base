@@ -7,11 +7,11 @@ priority: HIGH
 description: "現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。"
 aiSummary: "AIエンリッチメントがtitle/description変更時に再実行されない論理的問題 現在、update_item APIでtitleやdescriptionのみが変更された場合、AIエンリッチメントが再実行されていない。これは論理的な問題で、titleやdescriptionの変更は検索キーワードに大きく影響するため修正が必要。 ## 問題の詳細\n\n現在の`crud-handlers.ts`"
 tags: ["ai-enrichment","update-api","logical-bug","search-indexing"]
-related: [16,24,28,31,32,40,19,39,66,99]
+related: [16,19,24,28,31,32,39,40,66,99]
 keywords: {"title":1,"description":1,"handlers":0.57,"const":0.57,"shouldenrich":0.57}
 embedding: "gICAi5+CgICIkIqFgICKgICAgIObgICAl4mLioCAi4CAgICAkoaAgKeBiYuAgIeAgICAhIyOgICpgIOHgICKgICAgI2OkYCAm4eAgYCAhoCAgICRnoyAgKCPgYCAgIGAgICAj6aQgICJiYeDgICAgICAgJGfioCAgJCLgICAhIA="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 問題の詳細

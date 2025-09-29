@@ -6,12 +6,12 @@ status: Completed
 priority: HIGH
 description: "ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析"
 aiSummary: "未使用MCP APIの想定用途と実態のギャップ分析 ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析 ## 未使用APIの想定用途分析\n\n### 🔍 グラフ分析系API\n\n#### find_shortest_path（最短パス検索）\n**想定用途**: \n- 「このバグとこの機能の関連を辿りたい」\n- 「AとBの知識がどう繋がっているか知りたい」\n\n**使われない理"
-tags: ["api-design","analysis","simplification","over-engineering","yagni"]
-related: [19,25,27,54,10,14,17,40,47,65,81,82,83,94,96]
+tags: ["analysis","yagni","api-design","simplification","over-engineering"]
+related: [10,14,17,19,25,27,40,47,54,65,81,82,83,94,96]
 keywords: {"api":1,"get_related_items":0.83,"git":0.5,"type":0.33,"find_similar_items":0.33}
 embedding: "gICCiICAg4CAgKGAgoCAgICAgJeFgJGAgICqgICAgICAgIWei4ChgICAp4CAgICAgICOmIuAooCAgJOAg4CAgICAkomHgJWAgICQgIGAgICAgJCAgYCOgICAl4CEgICAgICRhICAi4CAgKKAhoCAgICAi5OEgIKAgICngIWAgIA="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:19.000Z
+updatedAt: 2025-08-29T07:33:19.000Z
 ---
 
 ## 未使用APIの想定用途分析

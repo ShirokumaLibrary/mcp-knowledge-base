@@ -6,12 +6,12 @@ status: In Progress
 priority: MEDIUM
 description: "古いAPI名を現在の仕様に合わせて全テストケースを更新する詳細計画"
 aiSummary: "MCP APIテストケース更新計画 古いAPI名を現在の仕様に合わせて全テストケースを更新する詳細計画 MCP APIテストケース更新計画 古いAPI名を現在の仕様に合わせて全テストケースを更新する詳細計画 # MCP APIテストケース更新計画\n\n## 現状分析\n\n### テストファイル一覧（17ファイル）\n**Phase 1 テスト（15ファイル）**\n1. 1.01-initial-stat..."
-tags: ["testing","update","v0.9.0","mcp-api"]
+tags: ["v0.9.0","testing","update","mcp-api"]
 related: [141,142,146,149,150]
 keywords: {"api":1,"mcp__shirokuma":1,"tests":0.57,"type":0.47,"phase":0.43}
 embedding: "gIqAgICAgICAgKOQgICAgICHgICAgYCAgICujICAgICAiICAgISAgICArJKAgICAgIOAgICFgICAgJqegICAgICHgICAhICAgICWj4CAgICAj4CAgIKAgICAmpyAgICAgJSAgICEgICAgKGmgICAgICSgICAgYCAgICmmYCAgIA="
-createdAt: 2025-08-23T06:31:31.000Z
-updatedAt: 2025-08-23T06:31:41.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # MCP APIテストケース更新計画

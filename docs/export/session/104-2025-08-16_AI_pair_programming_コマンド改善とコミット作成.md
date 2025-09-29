@@ -11,8 +11,8 @@ related: [77,79,80,81,82,83,91]
 keywords: {"command":0.9,"ai":0.8,"tdd":0.8,"improvement":0.8,"commit":0.8}
 concepts: {"software development":0.9,"testing":0.8,"code quality":0.8,"version control":0.8,"automation":0.7}
 embedding: "gICAgICAjYCRkZyEgICAgICAgICAgImAjZCkkYCAgICAgICAgICOgJGPrZOAgICAgICAgICAjYCLj6WSgICAgICAgICAgIeAg5CgmoCAgICAgICAgICBgICPoJuAgICAgICAgICAgICEkJ+TgICAgICAgICAgIaAjZGVh4CAgIA="
-createdAt: 2025-08-22T13:32:45.000Z
-updatedAt: 2025-08-22T13:32:45.000Z
+createdAt: 2025-08-29T07:33:25.000Z
+updatedAt: 2025-08-29T07:33:25.000Z
 ---
 
 ## セッション概要

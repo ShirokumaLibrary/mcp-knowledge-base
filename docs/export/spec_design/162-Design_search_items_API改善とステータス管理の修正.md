@@ -6,13 +6,13 @@ status: Specification
 priority: CRITICAL
 description: "search_items APIの構造化クエリ対応とステータス管理改善の技術設計"
 aiSummary: "Technical design document for improving search_items API with structured query support and status management enhancements, including backward compatibility and performance optimization strategies."
-tags: ["design","api","architecture","search","spec","issue-160"]
-related: [160,161]
+tags: ["api","architecture","design","search","spec","issue-160"]
+related: [160,161,163]
 keywords: {"api":1,"search":1,"status":1,"query":0.9,"management":0.8}
-concepts: {"search_functionality":1,"api_design":0.9,"database_management":0.8,"system_architecture":0.8,"software_engineering":0.8}
+concepts: {"search_functionality":1,"api_design":0.9,"database_management":0.8,"software_engineering":0.8,"system_architecture":0.8}
 embedding: "gIqAgICAgICPgKGRgISAgICQgICAgICAk4CgjYCMgoCAlICAgICAgJ+AlIWAkYuAgJKAgICAgICpgIaAgI6UgICLgICAgICAmYCCgoCQk4CAkYCAgICAgJ6Ag4qAi4qAgIqAgICAgICigJGQgIOBgICHgICAgICAoYCgjICAgIA="
-createdAt: 2025-08-24T01:48:23.000Z
-updatedAt: 2025-08-24T02:41:32.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # 設計書: search_items API改善とステータス管理の修正

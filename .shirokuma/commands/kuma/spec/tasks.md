@@ -14,6 +14,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 Let's turn your design into a practical action plan. I'll help you break down the big picture into manageable pieces that you can tackle one at a time, always knowing what comes next.
 
+**IMPORTANT**: This command is for TASK PLANNING ONLY. I will create task breakdowns and can load them into TodoWrite for tracking, but will NEVER start implementation automatically. The `execute` subcommand loads tasks for visibility, NOT for automatic execution. Use `/kuma:go` or `/kuma:vibe:code` when you're ready to actually implement.
+
 ## Usage
 
 ```bash
@@ -143,7 +145,7 @@ Tasks are automatically stored in shirokuma-kb as human-readable Markdown:
 
 ### Task Execution (TodoWrite Integration)
 
-Load tasks into TodoWrite:
+**CLARIFICATION**: This loads tasks into TodoWrite for TRACKING ONLY, not for automatic execution. Actual implementation requires explicit commands.
 
 ## Task Execution Process
 

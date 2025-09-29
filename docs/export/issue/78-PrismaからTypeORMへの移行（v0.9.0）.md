@@ -6,13 +6,13 @@ status: Open
 priority: HIGH
 description: "CLIツールのグローバル配布を考慮し、PrismaからTypeORMへ移行する。これによりグローバルインストール時の問題を根本的に解決し、より柔軟な設定管理を実現する。"
 aiSummary: "Migration plan from Prisma to TypeORM for v0.9.0 to solve global CLI distribution issues and improve configuration flexibility. Includes phased implementation, risk mitigation, and timeline for complete transition."
-tags: ["architecture","refactoring","typeorm","v0.9.0","migration"]
+tags: ["architecture","v0.9.0","refactoring","typeorm","migration"]
 related: [96,97,105,107,108,109,111,114,115,116,117]
 keywords: {"prisma":1,"typeorm":1,"migration":0.9,"orm":0.9,"cli":0.8}
 concepts: {"database migration":0.9,"software architecture":0.8,"development tools":0.8,"system refactoring":0.8,"project management":0.7}
 embedding: "n4CTgICAgICAgICBjY6AiZiAkYCBgICAgICAhYaNgIKYgIiAiICAgICAgICAg4CAk4CPgI6AgICAgICAgYWAhYqAhoCNgICAgICAhoeQgIyhgICAh4CAgICAgIuNlICHtYCCgIGAgICAgICMjp+AjbSAjICFgICAgICAh46cgI4="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 ## 背景

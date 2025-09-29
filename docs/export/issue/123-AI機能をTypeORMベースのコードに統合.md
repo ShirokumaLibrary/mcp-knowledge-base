@@ -7,8 +7,8 @@ priority: HIGH
 description: "PrismaベースのAI機能（EnhancedAIService）をTypeORMベースのMCPサーバーに統合する"
 tags: ["typeorm","critical","bug","migration"]
 related: [98]
-createdAt: 2025-08-22T23:37:15.000Z
-updatedAt: 2025-08-22T23:59:15.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # AI機能をTypeORMベースのコードに統合

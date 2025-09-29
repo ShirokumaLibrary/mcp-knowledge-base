@@ -7,11 +7,11 @@ priority: HIGH
 description: "Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project"
 aiSummary: "Unit Testing and Linter Setup Technical Design Technical design for implementing unit testing framework and ESLint configuration for TypeScript ESM project # Design: Unit Testing and Linter Setup\n\n## "
 tags: ["design","testing","linting","vitest","eslint","typescript","esm"]
-related: [1,6,7,9,18,14,30,34,49,52,60,61]
+related: [1,6,7,9,14,18,30,34,49,52,60,61]
 keywords: {"test":0.47,"eslint":0.3,"typescript":0.23,"for":0.23,"tests":0.21}
 embedding: "gIOkgICAhoCAkIChgICAmYSAqICAgIeAgJOAooCAgJOJgaCAgICMgICNgJiAgICGi4CNgICAkYCAhICRgICAgIiGgICAgJaAgIqAhYCAgIOCj4WAgICWgICCgIiAgICAgJGYgICAjICAgICYgICAiIGMp4CAgIuAgIeAloCAgJQ="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:20.000Z
+updatedAt: 2025-08-29T07:33:20.000Z
 ---
 
 # Design: Unit Testing and Linter Setup

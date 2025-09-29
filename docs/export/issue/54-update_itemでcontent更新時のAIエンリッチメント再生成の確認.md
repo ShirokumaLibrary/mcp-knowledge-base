@@ -7,11 +7,11 @@ priority: HIGH
 description: "update_item APIでcontentフィールドが更新された場合、関連するAIエンリッチメント（キーワード、コンセプト、埋め込みベクトル）が適切に再生成されているか確認が必要。現在の実装では見落とされている可能性がある。"
 aiSummary: "update_itemでcontent更新時のAIエンリッチメント再生成の確認 update_item APIでcontentフィールドが更新された場合、関連するAIエンリッチメント（キーワード、コンセプト、埋め込みベクトル）が適切に再生成されているか確認が必要。現在の実装では見落とされている可能性がある。 ## 問題の詳細\n\nupdate_item APIでcontentフィールドが変更された場"
 tags: ["api","ai-enrichment","update-item","data-integrity"]
-related: [2,3,4,25,26,27,28,29,30,31,32,44,48,51,54,7,8,65,81,88]
+related: [2,3,4,7,8,25,26,27,28,29,30,31,32,44,48,51,54,65,81,88]
 keywords: {"content":1,"update_item":1,"api":0.87,"handlers":0.87,"src":0.87}
 embedding: "gICAgIeAgJiAqJOIgICJgICAgICAgICZgJWcioCAioCAgICAgoCAkoCDmYmAgIaAgICAgIuAgJeAgpKKgICJgICAgICTgICPgJONhoCAhYCAgICAk4CAiYCnjoGAgICAgICAgJSAgImAopWAgICAgICAgICRgICRgKqbg4CAhIA="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 問題の詳細

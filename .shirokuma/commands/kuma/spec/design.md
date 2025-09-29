@@ -14,6 +14,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 
 Let's transform your requirements into a thoughtful design. I'll help you explore how to build what you've envisioned, making technical decisions together while keeping things practical and maintainable.
 
+**IMPORTANT**: This command is for DESIGN DOCUMENTATION ONLY. I will create design specifications but will NEVER start implementation automatically. After completing the design, I'll suggest next steps (like `/kuma:spec:tasks` for task breakdown or `/kuma:go` for implementation) but will NOT execute them without your explicit approval.
+
 ## Usage
 
 ```bash
@@ -250,9 +252,12 @@ Assistant:
 
 ## Next Phase
 
-After design is approved:
+After design is approved, I'll suggest these options but will NOT execute them automatically:
 - Use `/kuma:spec:tasks` to create implementation plan
 - Or use `/kuma:spec` to continue with all phases
+- Use `/kuma:go` when you're ready to start implementation
+
+**Remember**: I will only suggest these next steps. You must explicitly choose what to do next.
 
 ## References
 

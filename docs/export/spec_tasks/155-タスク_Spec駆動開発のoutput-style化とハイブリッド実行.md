@@ -6,13 +6,13 @@ status: Ready
 priority: HIGH
 description: "Issue #152の実装タスク分解（設計ID: 154に基づく）"
 aiSummary: "Comprehensive task breakdown for implementing specification-driven development with output-style integration and hybrid execution capabilities, including natural language command refactoring, system harmonization, and testing phases."
-tags: ["implementation","spec","tasks","output-style","issue-152","natural-language"]
+tags: ["natural-language","implementation","output-style","spec","issue-152","tasks"]
 related: [152,153,154]
 keywords: {"spec":1,"implementation":0.9,"development":0.9,"task":0.9,"command":0.8}
-concepts: {"software development":0.9,"project management":0.8,"documentation":0.8,"testing":0.8,"workflow":0.8}
+concepts: {"software development":0.9,"project management":0.8,"testing":0.8,"documentation":0.8,"workflow":0.8}
 embedding: "gJKXgJGOgICFgICZj4CAjICNk4CIl4CAj4CAkJSAgJyAhIiAgKCAgJSAgISQgICigIqQgIKggICQgICMhoCAmYCChYCLj4CAhoCAgoCAgImAgICAk5eAgICAgIGEgICIgIaFgJOegICEgICLgICAgYCOkICKn4CAgICAloWAgII="
-createdAt: 2025-08-23T13:26:44.000Z
-updatedAt: 2025-08-23T13:26:56.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Tasks: Spec駆動開発のoutput-style化とハイブリッド実行

@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "PrismaからTypeORMへの移行に関する詳細な要件定義（EARS形式）"
 aiSummary: "Requirements specification for migrating SHIROKUMA Knowledge Base from Prisma ORM to TypeORM in version 0.9.0, addressing global npm installation issues and improving CLI tool distribution while maintaining data integrity and API compatibility."
-tags: ["requirements","ears","typeorm","v0.9.0","migration","spec"]
-related: [98,105,108,109,111,5,24,25,26,78,80,110,112,114]
+tags: ["v0.9.0","ears","typeorm","migration","spec","requirements"]
+related: [5,24,25,26,78,80,98,105,108,109,110,111,112,114]
 keywords: {"prisma":1,"typeorm":1,"migration":0.9,"database":0.8,"cli":0.8}
 concepts: {"database migration":0.95,"orm framework":0.9,"cli tool development":0.85,"software requirements":0.85,"data persistence":0.8}
 embedding: "oIKTgICAgICAgJCRgICOj5mAkoCBgICAgICJjoCAjouZg4mAiYCAgICAgYWAgIiDlIqPgI6AgICAgICAgICBgIqNhoCOgICAgICHgoCAgIOii4CAh4CAgICAj4qAgIWLt42DgIGAgICAgImRgICNhbaIjICFgICAgICQjYCAiIw="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # 要件定義書: TypeORM移行（v0.9.0）

@@ -9,10 +9,10 @@ aiSummary: "Issue about inconsistent naming convention where type field uses plu
 tags: ["type-field","naming-convention","import","export","data-integrity"]
 related: [77,105,108]
 keywords: {"type":1,"field":0.9,"session":0.9,"naming":0.8,"convention":0.8}
-concepts: {"data_management":0.9,"naming_convention":0.9,"file_system":0.8,"standardization":0.8,"database":0.7}
+concepts: {"data_management":0.9,"naming_convention":0.9,"standardization":0.8,"file_system":0.8,"database":0.7}
 embedding: "gIuAhICAkoCOgJOAh4CAgICCgImAgIyAhYOcgJ2AgICAgICCgICUgICJn4CvgICAgIWAgICAkoCCjY6Aq4CAgICOgIOAgIqAi4uWgJ+AgICAkoCKgICBgJKEnYCOgICAgI2AjYCAgYCQgJ6AhoCAgICSgIuAgImAkoGNgICAgIA="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 # typeフィールドの命名規則統一: sessions→session

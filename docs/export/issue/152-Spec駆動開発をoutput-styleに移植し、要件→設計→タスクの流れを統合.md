@@ -6,13 +6,13 @@ status: Completed
 priority: HIGH
 description: "コマンドベースのSpec駆動開発を.claude/output-styles/kuma-spec.mdに移植し、より流れるような開発プロセスを実現する"
 aiSummary: "Migration of spec-driven development from command-based to output-style format, integrating requirements, design, and task phases into a unified workflow with automation and interactive controls"
-tags: ["automation","workflow","spec-driven","output-style","dx-improvement"]
+tags: ["workflow","automation","spec-driven","output-style","dx-improvement"]
 related: [153,154,155,158]
-keywords: {"spec":1,"design":0.9,"requirements":0.9,"development":0.9,"driven":0.9}
+keywords: {"spec":1,"design":0.9,"development":0.9,"requirements":0.9,"driven":0.9}
 concepts: {"software development":0.9,"development methodology":0.8,"workflow management":0.8,"process automation":0.8,"system integration":0.7}
 embedding: "hZKZgICLgICAgICXj4CAjY+NkICAkoCAgICAj5WAgJ2VhIiAgJuAgICAgISRgICkkIuXgICcgICAgICLh4CAo4aCiICAjoCAgICAgYCAgJiAgI2AgJWAgICAgIGEgICIg4aXgICbgICAgICKgICAgYCPnYCAmoCAgICAlIWAgII="
-createdAt: 2025-08-23T12:25:43.000Z
-updatedAt: 2025-08-23T13:44:59.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # Issue: Spec駆動開発をoutput-styleとコマンドのハイブリッドに移植

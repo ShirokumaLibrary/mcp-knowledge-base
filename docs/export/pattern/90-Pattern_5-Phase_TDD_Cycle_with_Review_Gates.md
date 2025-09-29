@@ -11,8 +11,8 @@ tags: ["testing","refactoring","tdd","quality-assurance","kent-beck","pattern","
 related: [13,14,15,28,70]
 keywords: {"input":0.42,"review":0.38,"phase":0.34,"test":0.27,"tdd":0.23}
 embedding: "iYCSgJuAgICYgICNgIuAgYOAlICRgICAnICGmICOgIeAgJCAhYCAgJuAlZiAioCUgYCGgI2AgICbgJ+OgIOAm4aAgICPgICAj4CZgoCAgJaLgIKAkYCAgIKAn4CAgoCKioCMgJKAgICAgJeJgICAjIuAk4CbgICAi4CIgoCEgIc="
-createdAt: 2025-08-22T13:32:45.000Z
-updatedAt: 2025-08-22T13:32:45.000Z
+createdAt: 2025-08-29T07:33:25.000Z
+updatedAt: 2025-08-29T07:33:25.000Z
 ---
 
 ## 5-Phase TDD Cycle Pattern

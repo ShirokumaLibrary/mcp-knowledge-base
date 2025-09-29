@@ -6,12 +6,12 @@ status: Open
 priority: HIGH
 description: "MCP APIの設計規約とツール実装標準"
 aiSummary: "MCP API design standards document covering tool naming conventions, CRUD operations, parameter design, response formats, error handling, search functionality, and performance considerations for MCP server implementation."
-tags: ["design","api","mcp","steering","inclusion:filematch","pattern:mcp/**"]
+tags: ["api","mcp","design","steering","inclusion:filematch","pattern:mcp/**"]
 keywords: {"api":1,"mcp":1,"design":0.9,"standards":0.9,"implementation":0.8}
-concepts: {"api-design":0.9,"mcp-protocol":0.9,"software-architecture":0.8,"data-management":0.7,"error-handling":0.7}
+concepts: {"api-design":0.9,"mcp-protocol":0.9,"software-architecture":0.8,"error-handling":0.7,"data-management":0.7}
 embedding: "gICdgICAoYWAgJaAgICPgICAkYCGgKKAgICegICAkICAgIiAjYCegYKAk4CAgIuAgICYgI6Aj4CLgI2AgICQgICAiICIgIODkoCRgICAiICAgI2AgoCCipKAnICAgIGAgICZgICAg46JgKOAgICAgICAoYCEgJKMgYCggICAh4A="
-createdAt: 2025-08-23T01:25:52.000Z
-updatedAt: 2025-08-23T12:07:04.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # MCP API Design Standards

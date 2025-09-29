@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "Issue #152のSpec駆動開発システム要件定義（EARS形式）"
 aiSummary: "Requirements specification for migrating spec-driven development to output-style format with hybrid execution capabilities, enabling automated workflow progression from requirements to design to tasks while maintaining command-based control options."
-tags: ["requirements","ears","spec","output-style","issue-152","hybrid"]
+tags: ["ears","output-style","spec","issue-152","hybrid","requirements"]
 related: [152,154,155]
 keywords: {"spec":1,"specification":0.9,"development":0.9,"requirement":0.9,"design":0.8}
 concepts: {"software development":0.95,"requirements engineering":0.9,"specification management":0.9,"workflow automation":0.85,"documentation system":0.85}
 embedding: "gJKJoJKBgICEgICaj4CAg4CNgYqIgYCAjYCAkZWAgI2AhIGAgIqAgJKAgISRgICUgIqJjIKVgICOgICNh4CAk4CCg5CLjYCAhoCAgoCAgImAgIyjlJaAgICAgIGEgICBgIaUq5OVgICDgICLgICAgYCPk6KLi4CAgICAl4WAgIA="
-createdAt: 2025-08-23T12:43:55.000Z
-updatedAt: 2025-08-23T12:49:22.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Requirements: Spec駆動開発のoutput-style化とハイブリッド実行

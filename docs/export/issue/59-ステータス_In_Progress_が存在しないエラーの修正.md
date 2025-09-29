@@ -8,11 +8,11 @@ description: "issue-2と重複のためクローズ"
 aiSummary: "ステータス \"In Progress\" が存在しないエラーの修正 list_items APIでstatus: [\"Open\",\"In Progress\",\"Pending\"]を指定すると、\"Status 'In Progress' not found\"エラーが発生する ## 問題の詳細\n\n`mcp__shirokuma-kb__list_items` APIを呼び出す際に、ステータスフィルターに"
 category: "bug-fix"
 tags: ["api","mcp","status","bug","database","list-items"]
-related: [2,10,12,19,24,34,35,39,38,115]
+related: [2,10,12,19,24,34,35,38,39,115]
 keywords: {"progress":1,"status":1,"api":0.86,"open":0.57,"list_items":0.57}
 embedding: "gICPn4CAgICAj6yCgICAj4CAiKGAgICAgIikgICAg4+AgIGagICAgICBlYGAgJCJgICAkICAgICAgImFgICbgYCAh4yAgICAgIaEgoCAm4CAgI6OgICAgICOjoaAgI+AgICQjYCAgICAiZ+IgICCgYCAipWAgICAgI+whoCAgYg="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 問題の詳細

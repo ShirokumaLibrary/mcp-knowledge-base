@@ -10,8 +10,8 @@ tags: ["architecture","steering","standards","project-standards","inclusion:alwa
 keywords: {"shirokuma":1,"typescript":0.9,"architecture":0.9,"knowledge":0.9,"project":0.9}
 concepts: {"software-development":0.9,"architecture":0.9,"database":0.8,"standards":0.8,"testing":0.7}
 embedding: "kYSAl4CLgJiAgICLgJSWmoeAgJWAlICSgICElYCUlpOAhYCKgJSAhoCAgJeAi42GgpCAgYCVgICAgISOgJKCgIyVgIGAkoCEgICNg4CIgIaUkoCAgIiAkICAkoCAgImTk5WAg4CAgIeAgI+HgIKUiZWOgI+AgYCTgICGgYCLjJY="
-createdAt: 2025-08-23T01:24:43.000Z
-updatedAt: 2025-08-23T12:05:53.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # SHIROKUMA Project Standards

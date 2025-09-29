@@ -7,11 +7,11 @@ priority: MEDIUM
 description: "仕様書の型（type）をフェーズ別に使い分けるルール"
 aiSummary: "Classification rules for specification document types across different development phases including requirements, design, and task definition with associated command usage and tagging strategies"
 tags: ["mcp","spec","knowledge","convention"]
-keywords: {"spec":1,"specification":0.9,"type":0.9,"design":0.8,"requirements":0.8}
-concepts: {"specification management":0.9,"software development":0.8,"project management":0.8,"requirements engineering":0.7,"system design":0.7}
+keywords: {"spec":1,"type":0.9,"specification":0.9,"design":0.8,"requirements":0.8}
+concepts: {"specification management":0.9,"project management":0.8,"software development":0.8,"requirements engineering":0.7,"system design":0.7}
 embedding: "hYCJkoCAj4CAgICkgICJgI+AgYeAgJGAgICIqYCAhICUgIGAgICKgICAk6OAgIuAkICJg4CAgoCAgIukgICYgIaAg42AgICAgICVk4CAn4CAgIyWgICFgICAlY2AgJmAg4CTlICAgYCAgIyWgICMgICAkoqAgIiAgICCmICAj4A="
-createdAt: 2025-08-23T06:06:49.000Z
-updatedAt: 2025-08-23T06:11:02.000Z
+createdAt: 2025-08-29T07:33:24.000Z
+updatedAt: 2025-08-29T07:33:24.000Z
 ---
 
 # Spec型の使い分けルール

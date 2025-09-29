@@ -10,8 +10,8 @@ tags: ["testing","vitest","tdd","handover","red-phase","validation"]
 related: [1,5,7,8,9,13,14,15,21,22,23,40,45,46,49,57,58,60,96]
 keywords: {"vitest":1,"test":0.78,"phase":0.5,"run":0.5,"validation":0.39}
 embedding: "gIqXgIeAgIyGgICtgICAgICLmoCCgICLg4CAqoCAgICAiJWAgICAhYeAgKOAgICAgIKIgIGAgICJgICsgICAgICDgICGgICAhoCAloCAgICAi4OAiYCAhoKAgI+AgICAgJGPgIiAgIyAgICggICAgICRmYCJgICMgoCAroCAgIA="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # Vitest環境セットアップとTDD RED phaseテスト実装

@@ -10,8 +10,8 @@ tags: ["api","cleanup","simplification","breaking-change","maintenance"]
 related: [4,8,13,50,54,68,86]
 keywords: {"mcp":1,"api":0.9,"handlers":0.9,"src":0.79,"typescript":0.34}
 embedding: "gICAgImAgICAm5qNgICAgICAgICBgIKAgI+klICAgICAgICAgoCFgICClpeAgICAgICAgI+Ah4CAgZCUgICAgICAgICbgIWAgIuXjYCAgICAgICAm4CBgICZpIqAgICAgICAgJuAhICAj6yKgICAgICAgICWgIGAgJunioCAgIA="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 背景

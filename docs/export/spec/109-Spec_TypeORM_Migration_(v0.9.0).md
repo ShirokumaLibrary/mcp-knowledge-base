@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "Complete specification for migrating from Prisma to TypeORM to solve global CLI distribution issues"
 aiSummary: "Complete specification for migrating SHIROKUMA Knowledge Base from Prisma to TypeORM to resolve global CLI distribution issues, including detailed requirements, architecture design, entities, repositories, and implementation tasks."
-tags: ["architecture","typeorm","v0.9.0","migration","spec","orm"]
-related: [98,107,108,109,111,115,116,117,78,91,110]
+tags: ["architecture","v0.9.0","typeorm","migration","spec","orm"]
+related: [78,91,98,107,108,109,110,111,115,116,117]
 keywords: {"typeorm":1,"migration":1,"database":0.9,"prisma":0.9,"entity":0.8}
 concepts: {"database_migration":0.95,"orm_framework":0.9,"software_architecture":0.85,"system_design":0.8,"api_compatibility":0.75}
 embedding: "koSZgICAgICAg5OXgICDgJSAl4CCgICAgImQkoCAgICMgYuAioCAgICMjoeAgIKAj4iUgJGAgICAioiAgICJgIuDiICQgICAgIOXg4CAhICiiYCAiICAgICIoI6AgIqAsIyDgIGAgICAgpSWgICMgKiKj4CGgICAgICVkYCAiYA="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:26.000Z
+updatedAt: 2025-08-29T07:33:26.000Z
 ---
 
 # Spec: TypeORM Migration (v0.9.0)

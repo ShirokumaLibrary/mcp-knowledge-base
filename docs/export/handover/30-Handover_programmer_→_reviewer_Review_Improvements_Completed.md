@@ -10,8 +10,8 @@ tags: ["tdd","review","code-quality","#handover","improvements"]
 related: [4,10,18,41,44,54,85,94,96]
 keywords: {"shirokuma":0.65,"src":0.65,"home":0.65,"webapp":0.65,"console":0.5}
 embedding: "j4CCmIqAgImCkICAgIGAoIeAh42AgICBh4mAgICGgJKNgIuCgoCAgYuBgICAioCLhYCJio6AgImKgICAgIeAkYCAhICYgICShIeAgICLgJ+CgIiCmICAjICPgICAiYCnioCCjpmAgJOAiYCAgISAo5CAgJiWgICShZCAgICAgKg="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 ## 実装完了した改善事項

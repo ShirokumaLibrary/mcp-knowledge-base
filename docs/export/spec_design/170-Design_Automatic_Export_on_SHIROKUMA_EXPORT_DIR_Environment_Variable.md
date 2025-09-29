@@ -11,8 +11,8 @@ related: [168,169,171,172]
 keywords: {"design":1,"export":1,"shirokuma":0.9,"automatic":0.9,"api":0.8}
 concepts: {"software architecture":0.9,"configuration management":0.8,"automation":0.8,"system integration":0.8,"file management":0.8}
 embedding: "gICKgIeAgICJgICahoqAk4CAgYCAgICAjYCAmpiBgI6AgIGAgYCAgIqAgKGmhoCEgICKgIiAgICEgICTo5SAgICAg4CQgICAiYCAj56fgISAgI2AkICAgIKAgIiSn4COgICVgIqAgICAgICJh5+Ah4CAk4CCgICAg4CAkoCYgJA="
-createdAt: 2025-08-29T06:39:56.000Z
-updatedAt: 2025-08-29T06:40:06.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Design: Automatic Export on SHIROKUMA_EXPORT_DIR Environment Variable

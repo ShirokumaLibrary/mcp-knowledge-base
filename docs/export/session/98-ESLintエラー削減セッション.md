@@ -7,11 +7,11 @@ priority: HIGH
 description: "2025-08-14 09:00 - 09:30 (約30分)"
 aiSummary: "ESLintエラー削減セッション 2025-08-14 09:00 - 09:30 (約30分) ## 📊 セッション成果\n\n### 作業内容\nESLintエラーの大幅削減とコードベースの型安全性向上\n\n### 主な成果\n\n#### 1. ESLintエラーの削減\n- **開始時**: 56個のエラー\n- **終了時**: 29個のエラー（**-48%削減**）\n- 削減数: 27個\n\n####"
 tags: ["testing","eslint","code-quality","session","type-safety"]
-related: [1,4,11,120,123,31,32,77,91,93,107,109,110,111,112,113]
+related: [1,4,11,31,32,77,91,93,107,109,110,111,112,113,120,123]
 keywords: {"eslint":0.57,"prisma":0.57,"fix":0.43,"zod":0.43,"mcp":0.29}
 embedding: "iICAjICHgICAgYCNj4CAooCAgIWAgYCAgICDhoyAgKOFgICAgIuAgICGgICPgICjlICAgoCUgICAjYOEioCAl4mAgImAloCAgI+KgIOAgKOYgICDgI2AgICKj4OAgICinoCAi4CDgICAgoyKg4CAoZeAgI+AgICAgIiFj4qAgKE="
-createdAt: 2025-08-22T13:32:45.000Z
-updatedAt: 2025-08-22T13:32:45.000Z
+createdAt: 2025-08-29T07:33:26.000Z
+updatedAt: 2025-08-29T07:33:26.000Z
 ---
 
 ## 📊 セッション成果

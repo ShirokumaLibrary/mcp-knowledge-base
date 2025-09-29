@@ -6,12 +6,12 @@ status: Open
 priority: MEDIUM
 description: "開発環境のセットアップと設定ガイド"
 aiSummary: "Development environment setup guide covering required tools, configuration, database management, and troubleshooting for a Node.js TypeScript project with SQLite database"
-tags: ["environment","setup","development","steering","inclusion:manual"]
+tags: ["environment","steering","setup","development","inclusion:manual"]
 keywords: {"environment":1,"development":1,"setup":1,"database":0.9,"node":0.9}
 concepts: {"development":0.9,"database":0.8,"configuration":0.8,"tooling":0.7,"testing":0.6}
 embedding: "gICKgICBgICAgICWgKWAgICAj4CBgICAgICAjYCggICAgJOAiIeAgICAgIaAm4CAgICUgI2PgICAgICHgJmAgICAj4CNioCAgICAj4CdgICAgI2Ah5GAgICAgJeAooCAgICUgIGQgICAgICdgKqAgICAloCFiICAgICAmICkgIA="
-createdAt: 2025-08-23T01:27:09.000Z
-updatedAt: 2025-08-23T01:38:01.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # Development Environment Setup

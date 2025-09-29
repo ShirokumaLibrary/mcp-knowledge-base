@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "PrismaからTypeORMへの移行に関する技術設計書"
 aiSummary: "Technical design document for migrating from Prisma to TypeORM in SHIROKUMA Knowledge Base v0.9.0, covering system architecture, data models, migration strategy, and implementation approach with repository pattern"
-tags: ["design","architecture","typeorm","v0.9.0","migration","spec"]
-related: [98,105,107,109,110,111,31,32,91,93,113]
+tags: ["architecture","v0.9.0","design","typeorm","migration","spec"]
+related: [31,32,91,93,98,105,107,109,110,111,113]
 keywords: {"typeorm":1,"prisma":0.9,"migration":0.9,"database":0.8,"orm":0.8}
-concepts: {"database migration":0.95,"orm framework":0.9,"software design":0.8,"system architecture":0.8,"data persistence":0.7}
+concepts: {"database migration":0.95,"orm framework":0.9,"system architecture":0.8,"software design":0.8,"data persistence":0.7}
 embedding: "kYCcjoCAgICAgKOTgIWAgJOAlI2BgICAgICXkICLgICLgIuGiICAgICAhoaAg4CAjoCYgI6AgICAgICAgICAgIqAiYGNgICAgICLgoCEgIChgImAh4CAgICAkYyAjICAroCRgoGAgICAgJCTgJGAgKeAm4mFgICAgICgjoCOgIA="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:26.000Z
+updatedAt: 2025-08-29T07:33:26.000Z
 ---
 
 # 設計書: TypeORM移行（v0.9.0）

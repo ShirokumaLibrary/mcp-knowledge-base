@@ -6,13 +6,13 @@ status: Completed
 priority: MEDIUM
 description: "ほぼ使われていないAPIが何を想定して作られたのか、なぜ使われないのかを分析"
 aiSummary: "Analysis of unused MCP APIs revealing gap between intended complex graph analysis features and actual simple knowledge base usage patterns, suggesting overengineering and need for API simplification"
-tags: ["analysis","api","optimization","yagni","mcp","usage"]
-related: [25,26,47,18,40,81,88]
+tags: ["analysis","api","yagni","mcp","optimization","usage"]
+related: [18,25,26,40,47,81,88]
 keywords: {"api":1,"unused":0.9,"analysis":0.8,"graph":0.8,"search":0.7}
 concepts: {"api design":0.9,"graph analysis":0.8,"knowledge management":0.8,"system analysis":0.8,"software architecture":0.7}
 embedding: "gIiAgICFlYCAgKqAgICDgICBgICFiYqAg4CmgICAgICAgICAgIeDgIuAp4CAgIWAgICAgIiViICQgJOAgICOgICAgICQnJOAjoCCgICAiICAhoCAkpaVgJCAhICAgJCAgIyAgIuJnoCMgJaAgICSgICNgICDipuAhICpgICAjIA="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:20.000Z
+updatedAt: 2025-08-29T07:33:20.000Z
 ---
 
 # 未使用APIの想定用途と実態のギャップ分析

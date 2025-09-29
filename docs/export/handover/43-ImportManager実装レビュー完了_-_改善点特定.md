@@ -7,12 +7,12 @@ priority: HIGH
 description: "ImportManagerクラスの包括的コードレビューを実施。セキュリティ、パフォーマンス、エラーハンドリングに関する重要な改善点を特定"
 aiSummary: "Comprehensive code review of ImportManager class implementation identifying critical security vulnerabilities (path injection, YAML parsing), performance issues, and areas for improvement including transaction management, error handling, and test coverage enhancement."
 tags: ["security","performance","code-review","testing","typescript","import-export"]
-related: [73,89,38,52,55,56,85,94,96]
+related: [38,52,55,56,73,85,89,94,96]
 keywords: {"import":1,"security":1,"review":0.9,"manager":0.9,"vulnerability":0.9}
-concepts: {"security":0.9,"code review":0.9,"testing":0.8,"performance":0.8,"software quality":0.8}
+concepts: {"code review":0.9,"security":0.9,"testing":0.8,"performance":0.8,"software quality":0.8}
 embedding: "hY6AgI+DgJaTgICRgICNgICRgICWjICEloCAmYCDg4CFjICAk4WAjJWAgJWAgICAkYSAgImPgIyVgICJgIaFgImAgICAlICTjICAgICRj4CVg4CAgo+AlYKAgIaAloiAmYCAgIyGgKWAgICAgJKRgJKGgICVgICliYCAhYCHlIA="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # ImportManager実装レビュー完了

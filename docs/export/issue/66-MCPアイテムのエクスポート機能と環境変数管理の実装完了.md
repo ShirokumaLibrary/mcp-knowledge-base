@@ -6,13 +6,13 @@ status: Completed
 priority: MEDIUM
 description: "MCPデータベース内のアイテムをエクスポートする機能と、環境変数の設定方法を改善する"
 aiSummary: "Implementation of MCP item export functionality and environment variable management system with CLI commands, security features, and comprehensive testing"
-tags: ["configuration","environment","cli","export","feature"]
-related: [46,47,57,58,62,64,67,85,119,102]
+tags: ["configuration","environment","export","cli","feature"]
+related: [46,47,57,58,62,64,67,85,102,119]
 keywords: {"mcp":1,"export":0.9,"environment":0.8,"variable":0.8,"management":0.8}
 concepts: {"data_management":0.9,"configuration":0.8,"cli_tools":0.8,"security":0.7,"file_system":0.7}
 embedding: "j4CAkImAgICAgICTg4+NgIeAgIqBgICAgICFl46QkYCOgICRgYCAgICAgJSWlY6AhYCAkImAgICAgIaOlJqRgICAgIiSgICAgICSkZemjICCgICBk4CAgICAmZeRoYOAi4CAgYuAgICAgJWWh5eAgJGAgIiCgICAgICIjYCShIA="
-createdAt: 2025-08-22T13:32:44.000Z
-updatedAt: 2025-08-22T13:32:44.000Z
+createdAt: 2025-08-29T07:33:23.000Z
+updatedAt: 2025-08-29T07:33:23.000Z
 ---
 
 ## 要件（修正版）

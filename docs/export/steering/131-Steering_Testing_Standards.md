@@ -10,8 +10,8 @@ tags: ["testing","vitest","tdd","steering","inclusion:always"]
 keywords: {"tdd":1,"testing":1,"test":0.9,"vitest":0.9,"standards":0.9}
 concepts: {"testing":1,"development":0.9,"standards":0.9,"quality":0.8,"methodology":0.8}
 embedding: "gICSgJSBkYCCgICTi4CAgIiAlICXgJSAiICAi5CAgICTgJCAoYiOgIGAgIKNgICAl4CGgKiQhICAgICIhYCAgJCAgIClioCAh4CAgICAgICFgIKAqpGCgI6AgIGDgICAgICMgJyRgICPgICKgICAgIOAlICdiYeAioCAk4SAgIA="
-createdAt: 2025-08-23T01:26:32.000Z
-updatedAt: 2025-08-23T12:08:11.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # Testing Standards

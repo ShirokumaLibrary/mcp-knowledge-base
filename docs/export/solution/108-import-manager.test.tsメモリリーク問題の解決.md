@@ -7,12 +7,12 @@ priority: MEDIUM
 description: "Issue #76: テストのメモリリーク問題を解決"
 aiSummary: "Resolved memory leak issue in import-manager.test.ts by disabling problematic tests with complex fs/promises mocks and creating simplified alternative tests to maintain basic functionality coverage while preventing test crashes."
 tags: ["vitest","test","memory-leak","solution"]
-related: [76,91,78,109,111,112,114]
+related: [76,78,91,109,111,112,114]
 keywords: {"memory":1,"leak":1,"test":0.9,"vitest":0.8,"mock":0.8}
 concepts: {"testing":0.9,"memory_management":0.9,"debugging":0.8,"file_system":0.7,"security":0.6}
 embedding: "gICVmoCAgImAgIKigJKAi4CAl5WAgICRgoCAoICUgIGAgJOIgICAjIuAiJSAiYCBgICHgICAgJKRgJKQgIeAjICAgIOAgICQjYCUgYCWgJiAgIOPgICAh5KAjoeAlYCZgICOhoCAgICOgISKgJOAj4CAl5OAgICBhoCAmICRgJc="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:26.000Z
+updatedAt: 2025-08-29T07:33:26.000Z
 ---
 
 ## 問題

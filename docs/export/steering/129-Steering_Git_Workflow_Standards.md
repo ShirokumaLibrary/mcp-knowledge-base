@@ -6,12 +6,12 @@ status: Open
 priority: HIGH
 description: "SHIROKUMA Knowledge Baseのgit運用ルールとコミット規約"
 aiSummary: "Git workflow standards and commit conventions for SHIROKUMA Knowledge Base project management"
-tags: ["workflow","commit","steering","git","inclusion:always"]
+tags: ["workflow","steering","commit","inclusion:always","git"]
 keywords: {"git":1,"workflow":1,"commit":0.9,"shirokuma":0.8,"standard":0.8}
 concepts: {"version-control":0.9,"software-development":0.8,"project-management":0.7,"collaboration":0.7,"quality-assurance":0.6}
 embedding: "gIKDgICAgICDlICAgICPpICAgICAgYCAgJCAgICAla6AhIeAgIeAgIOGgICAgJemgIuSgICMgICAgICAgICTnoCPloCAiYCAhoOAgICAjZmAjZSAgI2AgI2AgICAgJeVgI+WgICLgICPhYCAgICXi4CKjYCAhYCAio+AgICAipw="
-createdAt: 2025-08-23T01:25:17.000Z
-updatedAt: 2025-08-23T12:06:32.000Z
+createdAt: 2025-08-29T07:33:28.000Z
+updatedAt: 2025-08-29T07:33:28.000Z
 ---
 
 # Git Workflow Standards

@@ -6,13 +6,13 @@ status: Specification
 priority: HIGH
 description: "Issue #152のSpec駆動開発システム設計（要件ID: 153に基づく）"
 aiSummary: "Design specification for implementing spec-driven development with output-style integration and hybrid execution architecture, featuring phase management, component design, and system integration patterns."
-tags: ["design","architecture","spec","output-style","issue-152","hybrid"]
+tags: ["architecture","design","output-style","spec","issue-152","hybrid"]
 related: [152,153,155]
 keywords: {"spec":1,"design":0.9,"development":0.9,"phase":0.8,"architecture":0.8}
 concepts: {"software architecture":0.9,"system design":0.9,"development methodology":0.8,"workflow automation":0.7,"data management":0.7}
 embedding: "gIKJn5CBgICEgIClgICAgICJgZ+HgYCAjICAq4CAgICAkIGRgImAgJCAgJiAgICAgI+Kg4GTgICNgICXgICAgICIg4GKjICAhYCAjICAgICAjY2EkpSAgICAgJKAgICAgIWVjpKTgICDgICkgICAgICAk5qKioCAgICAo4CAgIA="
-createdAt: 2025-08-23T12:54:38.000Z
-updatedAt: 2025-08-23T13:20:54.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Design: Spec駆動開発のoutput-style化とハイブリッド実行

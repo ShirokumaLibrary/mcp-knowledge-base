@@ -7,12 +7,12 @@ priority: CRITICAL
 description: "search_items APIでOpen状態のイシューを検索しても結果が返ってこない。list_itemsやget_itemでは取得できるが、search_itemsの検索機能が正しく動作していない"
 aiSummary: "Critical bug in search_items API where Open status issues cannot be retrieved through search functionality, while list_items works correctly. Affects issue management commands and requires urgent fix before v0.9.0 release."
 tags: ["api","mcp","critical","bug","search","urgent"]
-related: [161,162]
+related: [161,162,163,165,166]
 keywords: {"search":1,"issue":1,"open":0.9,"items":0.9,"status":0.8}
 concepts: {"search functionality":0.9,"api bug":0.9,"issue management":0.8,"database query":0.8,"system malfunction":0.7}
 embedding: "iYCCgICAgICKkKGAgICKgJKAiYCAgICAh5SagICAhoCTgI2AgICAgI+YjoCAgJWAjICLgICAgICbmIaAgICfgJKAhYCAgICAlJWAgICAm4CJgIqAgICAgJ6ehYCAgIyAgYCDgICAgICflJaAgICBgIGAgICAgICAlZCjgICAg4A="
-createdAt: 2025-08-24T01:23:47.000Z
-updatedAt: 2025-08-24T03:13:58.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # search_itemsでOpen状態のイシューが取得できない問題

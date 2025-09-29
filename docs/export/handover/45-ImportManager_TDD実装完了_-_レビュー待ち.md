@@ -7,12 +7,12 @@ priority: HIGH
 description: "issue-67のインポート機能実装。TDDメソッドでRED-GREEN-REFACTORフェーズ完了"
 aiSummary: "TDD implementation of ImportManager for data import functionality from exported files, including security measures, CLI commands, and transaction support. Implementation completed through RED-GREEN-REFACTOR phases with comprehensive testing."
 tags: ["tdd","import","handover","review-needed"]
-related: [67,85,6,39,40,41,60]
+related: [6,39,40,41,60,67,85]
 keywords: {"import":1,"tdd":1,"implementation":0.9,"manager":0.9,"test":0.8}
 concepts: {"testing":0.9,"data_management":0.9,"file_processing":0.8,"development":0.8,"security":0.7}
 embedding: "gI2oi5OBgICAgICRjICHgICRpoKHgICAgICAmJGDj4CAi5iAgIiAgICAgJWOgJGAgIOWhYSRgICAgICJhYaQgICAhY2Qi4CAgICAgICQj4CAhIKRmJOAgICAgIaDloiAgI2RjZWSgICAgICAgJGBgICRo4WZiYCAgICAhYSHgIA="
-createdAt: 2025-08-22T13:32:43.000Z
-updatedAt: 2025-08-22T13:32:43.000Z
+createdAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-08-29T07:33:22.000Z
 ---
 
 # ImportManager TDD実装完了 - レビュー済み

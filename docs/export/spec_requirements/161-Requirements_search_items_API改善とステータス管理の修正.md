@@ -6,12 +6,12 @@ status: Specification
 priority: CRITICAL
 description: "search_items APIの検索機能改善とステータスのis_closableフラグ活用に関する要件定義"
 aiSummary: "Requirements: search_items API改善とステータス管理の修正 search_items APIの検索機能改善とステータスのis_closableフラグ活用に関する要件定義 Requirements: search_items API改善とステータス管理の修正 search_items APIの検索機能改善とステータスのis_closableフラグ活用に関する要件定義 # ..."
-tags: ["requirements","api","search","bug-fix","spec","issue-160"]
-related: [160,162]
+tags: ["api","search","spec","bug-fix","issue-160","requirements"]
+related: [160,162,163]
 keywords: {"search_items":0.66,"then":0.61,"is_closable":0.57,"when":0.57,"api":0.48}
 embedding: "goCAgICAgImAjqyAj5WAgIeAgICAgICNgIivgJWPgYCJgICAgICAi4CKpICRloiAh4CAgICAgIWAkpuAh5SOgIOAgICAgICAgJiTgICJjYCAgICAgICAg4CcjoCEgIeAgYCAgICAgICAmZeAgIKBgICAgICAgICCgJalgIWMgIA="
-createdAt: 2025-08-24T01:40:41.000Z
-updatedAt: 2025-08-24T01:40:51.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # Requirements: search_items API改善とステータス管理の修正

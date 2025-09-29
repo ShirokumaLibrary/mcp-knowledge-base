@@ -6,13 +6,13 @@ status: Completed
 priority: MEDIUM
 description: "Spec #105の包括的検証結果 - スコア87% (Good)"
 aiSummary: "Comprehensive verification report of TypeORM migration specification achieving 87% quality score with detailed analysis of requirements, design, and task phases, including compliance validation and improvement recommendations."
-tags: ["typeorm","v0.9.0","validation","spec","score-87"]
-related: [98,105,110,50]
+tags: ["v0.9.0","typeorm","validation","spec","score-87"]
+related: [50,98,105,110]
 keywords: {"typeorm":0.9,"migration":0.9,"verification":0.9,"design":0.8,"specification":0.8}
-concepts: {"software architecture":0.9,"database migration":0.9,"requirements engineering":0.8,"system design":0.8,"quality assurance":0.8}
+concepts: {"software architecture":0.9,"database migration":0.9,"quality assurance":0.8,"requirements engineering":0.8,"system design":0.8}
 embedding: "j4CeoICCgICAgICAgIuAgKCAlZaAjoCAgICAgICRgoCagIuIgJ+AgICAgICAjouAj4Cag4ClgICAgICAgIaSgImAio2Am4CAgICAgICAkoCOgIyTgImAgICAgICAhIqAmICWlICWgICAgICAgICBgJOAn5SAhYCAgICAgICDgIA="
-createdAt: 2025-08-22T13:32:46.000Z
-updatedAt: 2025-08-22T13:32:46.000Z
+createdAt: 2025-08-29T07:33:27.000Z
+updatedAt: 2025-08-29T07:33:27.000Z
 ---
 
 # 検証レポート: TypeORM Migration (v0.9.0)

@@ -7,11 +7,11 @@ priority: HIGH
 description: "shirokuma-knowledge-base MCPサーバーの全25個のAPIを個別に分析。使用頻度、有用性、問題点、改善提案を記録。"
 aiSummary: "MCP API完全分析レポート - 全25個のAPI詳細評価 shirokuma-knowledge-base MCPサーバーの全25個のAPIを個別に分析。使用頻度、有用性、問題点、改善提案を記録。 # MCP API完全分析レポート\n\n## 概要\n- **総API数**: 25個\n- **分析日**: 2025-08-14\n- **プロジェクト**: shirokuma-knowledge-b"
 tags: ["analysis","api","cleanup","yagni","documentation","architecture"]
-related: [8,13,24,51,52,55,30,33,53,59,96]
+related: [8,13,24,30,33,51,52,53,55,59,96]
 keywords: {"api":1,"get_related_items":0.56,"get_stats":0.56,"mcp":0.28,"phase":0.28}
 embedding: "gIGAh4CAgoCAiqmGgICIiICAgJOAgI2AgJCxjICAiIaAgoCagICYgICQpIyAgISCgIaAlICAmYCAjpGHgICAgICIgIiAgI6AgIeJgYCAgIKAh4CAgICDgICGlICAgIOGgIiAhICAgICAgaeEgICHg4CFgJCAgIGAgIKygYCAhIc="
-createdAt: 2025-08-22T13:32:41.000Z
-updatedAt: 2025-08-22T13:32:41.000Z
+createdAt: 2025-08-29T07:33:19.000Z
+updatedAt: 2025-08-29T07:33:19.000Z
 ---
 
 # MCP API完全分析レポート

@@ -6,13 +6,13 @@ status: Ready
 priority: MEDIUM
 description: "Issue-56の実装完了。環境変数管理とエクスポート機能のレビュー準備"
 aiSummary: "Implementation of ConfigManager class with environment variable management, export/import functionality, CLI commands, and comprehensive testing. Includes security features like sensitive data masking and validation capabilities."
-tags: ["issue-56","review","handover","config-manager"]
-related: [43,56,57,59,16,21,22]
+tags: ["issue-56","handover","review","config-manager"]
+related: [16,21,22,43,56,57,59]
 keywords: {"config":1,"environment":0.9,"manager":0.9,"variable":0.8,"cli":0.8}
 concepts: {"configuration management":0.95,"environment management":0.9,"cli tools":0.85,"security":0.8,"software development":0.8}
 embedding: "lICAgIiAgI+AgICNgomRgIiAgICAgICOgICAmYuEloCSgICAgYCAh4CAgJyRgZKAkoCAgIiAgICAgICUkI6WgIaAgICQgICBgICAkJKhj4CSgICAkYCAh4CAgJCOqISAnYCAgIqAgI6AgICFhaSAgJ6AgICCgICPgICAg4CZhoA="
-createdAt: 2025-08-22T13:32:42.000Z
-updatedAt: 2025-08-22T13:32:42.000Z
+createdAt: 2025-08-29T07:33:21.000Z
+updatedAt: 2025-08-29T07:33:21.000Z
 ---
 
 ## 実装概要
