@@ -38,11 +38,10 @@ logs
 /.vscode/
 /.cursor/
 /.idea/
-# Claude directory - exclude everything except commands
-.claude/*
-!.claude/commands/
-!.shirokuma/tools/
-!.claude/agents/
+# Claude directory - exclude generated files
+.claude/agents/
+.claude/commands/
+# Keep output-styles in version control
 !.claude/output-styles
 *.swp
 *.swo
@@ -76,6 +75,7 @@ Thumbs.db
 /.shirokuma/checkpoints/*
 /.shirokuma/test-reports/
 /.shirokuma/test-reports/*
+/.shirokuma/setup.log
 
 # Development scripts - temporary debugging tools
 /poc

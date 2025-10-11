@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shirokuma-kb": {
+      "command": "shirokuma-kb",
+      "args": ["serve"],
+      "env": {
+        "SHIROKUMA_DATA_DIR": "${workspaceFolder}/.shirokuma/data",
+        "SHIROKUMA_EXPORT_DIR": "${workspaceFolder}/docs/export"
+      }
+    }
+  }
+}
