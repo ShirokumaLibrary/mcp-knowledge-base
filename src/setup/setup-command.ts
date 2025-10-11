@@ -66,6 +66,9 @@ export class SetupCommand {
 
     // Step 4: Create directories
     await this.createDirectories(projectDir);
+
+    // Step 5: Run migration (placeholder for now)
+    await this.runMigration(projectDir);
   }
 
   /**
@@ -185,5 +188,18 @@ export class SetupCommand {
     // Create export directory
     const exportDir = join(projectDir, 'docs', 'export');
     await this.fileOps.ensureDir(exportDir);
+  }
+
+  /**
+   * Run database migration
+   *
+   * Note: This is a placeholder implementation. In production, this would
+   * execute the actual migration command (shirokuma-kb migrate).
+   * The full implementation will be added when CLI integration is complete.
+   */
+  private async runMigration(_projectDir: string): Promise<void> {
+    // Placeholder: Migration execution will be implemented in CLI integration phase
+    // This method is called to ensure the setup workflow includes migration step
+    // Future implementation will execute: `shirokuma-kb migrate`
   }
 }
