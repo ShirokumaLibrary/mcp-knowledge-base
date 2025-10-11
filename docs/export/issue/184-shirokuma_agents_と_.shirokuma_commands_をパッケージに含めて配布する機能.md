@@ -2,16 +2,17 @@
 id: 184
 type: issue
 title: ".shirokuma/agents と .shirokuma/commands をパッケージに含めて配布する機能"
-status: Open
+status: Completed
 priority: MEDIUM
 description: "shirokuma-kbパッケージに .shirokuma/agents と .shirokuma/commands を含めて、使用中のプロジェクト内にコピーし、.claude 内にシンボリックリンクを作成するコマンドオプションを追加する"
 aiSummary: "Feature to bundle and distribute .shirokuma/agents and .shirokuma/commands in shirokuma-kb package, with CLI command to copy them to user projects and create symbolic links in .claude directory"
 tags: ["feature","setup","enhancement","packaging"]
+related: [186,188,189,190,191,192,193]
 keywords: {"package":1,"command":0.9,"shirokuma":0.9,"distribution":0.9,"agent":0.9}
 concepts: {"package-management":0.9,"configuration":0.8,"deployment":0.8,"automation":0.7,"tooling":0.7}
 embedding: "jICIgICZgICAgKCCk5OAlYaAgYCAnICAgICkjImNgI+LgICAgJaAgICAmZSBhICEhICAgICNgICAgJqTgYCAgICAgYCAiYCAgICHlYqEgIWCgImAgI6AgICAgJGTjYCPiYCQgICXgICAgIuHlJOAh46Aj4CAoYCAgICSgJWQgJE="
 createdAt: 2025-10-09T00:58:33.000Z
-updatedAt: 2025-10-09T01:23:22.000Z
+updatedAt: 2025-10-11T07:09:48.000Z
 ---
 
 ## 背景
