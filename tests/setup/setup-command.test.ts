@@ -234,6 +234,85 @@ describe('SetupCommand', () => {
       const updatedConfig = JSON.parse(readFileSync(mcpPath, 'utf-8'));
       expect(updatedConfig.mcpServers['shirokuma-kb'].args).toEqual(['serve']);
     });
+
+    it('should only regenerate changed files in rebuild mode (incremental update)', async () => {
+      const projectDir = join(testDir, 'test-project');
+      mkdirSync(projectDir);
+
+      // Create source files with placeholders
+      const shiroKumaAgentsDir = join(projectDir, '.shirokuma', 'agents');
+      mkdirSync(shiroKumaAgentsDir, { recursive: true });
+      writeFileSync(join(shiroKumaAgentsDir, 'agent1.md'), 'Tool: {{MCP_NAME}}__create_item');
+      writeFileSync(join(shiroKumaAgentsDir, 'agent2.md'), 'Tool: {{MCP_NAME}}__get_item');
+
+      // First setup
+      await command.execute(projectDir, { force: true });
+
+      // Verify generated files
+      const claudeAgentsDir = join(projectDir, '.claude', 'agents');
+      expect(existsSync(join(claudeAgentsDir, 'agent1.md'))).toBe(true);
+      expect(existsSync(join(claudeAgentsDir, 'agent2.md'))).toBe(true);
+
+      // Wait to ensure time difference
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Modify only agent1 in source
+      writeFileSync(join(shiroKumaAgentsDir, 'agent1.md'), 'Tool: {{MCP_NAME}}__create_item (updated)');
+
+      // Get modification time of agent2 before rebuild
+      const agent2TargetPath = join(claudeAgentsDir, 'agent2.md');
+      const agent2MtimeBefore = require('fs').statSync(agent2TargetPath).mtime;
+
+      // Wait to ensure time difference
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Rebuild with incremental mode (enabled by default in rebuild)
+      await command.execute(projectDir, { rebuild: true });
+
+      // Check agent1 was updated
+      const agent1Content = readFileSync(join(claudeAgentsDir, 'agent1.md'), 'utf-8');
+      expect(agent1Content).toContain('(updated)');
+
+      // Check agent2 was NOT regenerated (mtime should be same)
+      const agent2MtimeAfter = require('fs').statSync(agent2TargetPath).mtime;
+      expect(agent2MtimeAfter.getTime()).toBe(agent2MtimeBefore.getTime());
+    });
+
+    it('should detect and use different MCP names in rebuild mode', async () => {
+      const projectDir = join(testDir, 'test-project');
+      mkdirSync(projectDir);
+
+      // Create source file with placeholder
+      const shiroKumaAgentsDir = join(projectDir, '.shirokuma', 'agents');
+      mkdirSync(shiroKumaAgentsDir, { recursive: true });
+      writeFileSync(join(shiroKumaAgentsDir, 'agent.md'), 'Tool: {{MCP_NAME}}__create_item');
+
+      // First setup with custom MCP name
+      await command.execute(projectDir, { force: true, mcpName: 'my-custom-kb' });
+
+      // Verify generated file uses custom name
+      const claudeAgentsDir = join(projectDir, '.claude', 'agents');
+      let agentContent = readFileSync(join(claudeAgentsDir, 'agent.md'), 'utf-8');
+      expect(agentContent).toBe('Tool: mcp__my-custom-kb__create_item');
+
+      // Verify MCP config has custom name
+      const mcpPath = join(projectDir, '.mcp.json');
+      const config = JSON.parse(readFileSync(mcpPath, 'utf-8'));
+      expect(config.mcpServers['my-custom-kb']).toBeDefined();
+
+      // Wait to ensure time difference
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Update source file
+      writeFileSync(join(shiroKumaAgentsDir, 'agent.md'), 'Tool: {{MCP_NAME}}__get_item');
+
+      // Rebuild (should auto-detect 'my-custom-kb' from .mcp.json)
+      await command.execute(projectDir, { rebuild: true });
+
+      // Verify generated file still uses custom name
+      agentContent = readFileSync(join(claudeAgentsDir, 'agent.md'), 'utf-8');
+      expect(agentContent).toBe('Tool: mcp__my-custom-kb__get_item');
+    });
   });
 
   describe('error handling', () => {

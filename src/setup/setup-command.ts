@@ -79,7 +79,8 @@ export class SetupCommand {
     }
 
     // Step 5: Generate .claude files with placeholder replacement
-    await this.generateClaudeFiles(projectDir, effectiveMcpName);
+    // Enable incremental mode in rebuild to skip unchanged files
+    await this.generateClaudeFiles(projectDir, effectiveMcpName, rebuild);
 
     // Step 6: Run migration (skip in rebuild mode)
     if (!rebuild) {
@@ -211,19 +212,54 @@ export class SetupCommand {
    *
    * Reads files from .shirokuma/agents and .shirokuma/commands,
    * replaces placeholders, and writes to .claude/agents and .claude/commands
+   *
+   * @param projectDir - Project directory
+   * @param mcpName - MCP instance name
+   * @param incremental - Enable incremental updates (only process changed files)
    */
-  private async generateClaudeFiles(projectDir: string, mcpName: string): Promise<void> {
+  private async generateClaudeFiles(
+    projectDir: string,
+    mcpName: string,
+    incremental: boolean = false
+  ): Promise<void> {
     const placeholderEngine = new PlaceholderEngine(mcpName, projectDir);
 
     // Process agents directory
     const sourceAgentsDir = join(projectDir, '.shirokuma', 'agents');
     const targetAgentsDir = join(projectDir, '.claude', 'agents');
-    await placeholderEngine.processDirectory(sourceAgentsDir, targetAgentsDir);
+    const agentsResult = await placeholderEngine.processDirectory(
+      sourceAgentsDir,
+      targetAgentsDir,
+      { incremental }
+    );
 
     // Process commands directory
     const sourceCommandsDir = join(projectDir, '.shirokuma', 'commands');
     const targetCommandsDir = join(projectDir, '.claude', 'commands');
-    await placeholderEngine.processDirectory(sourceCommandsDir, targetCommandsDir);
+    const commandsResult = await placeholderEngine.processDirectory(
+      sourceCommandsDir,
+      targetCommandsDir,
+      { incremental }
+    );
+
+    // Log results if incremental mode is enabled
+    if (incremental) {
+      const totalProcessed = agentsResult.processedFiles.length + commandsResult.processedFiles.length;
+      const totalSkipped = agentsResult.skippedFiles.length + commandsResult.skippedFiles.length;
+      const totalFiles = agentsResult.totalFiles + commandsResult.totalFiles;
+
+      console.log(`\n📝 File Processing Summary:`);
+      console.log(`  Total files: ${totalFiles}`);
+      console.log(`  Processed: ${totalProcessed}`);
+      console.log(`  Skipped (unchanged): ${totalSkipped}`);
+
+      if (totalProcessed > 0) {
+        console.log(`\n✅ Updated files:`);
+        [...agentsResult.processedFiles, ...commandsResult.processedFiles].forEach(file => {
+          console.log(`  - ${file}`);
+        });
+      }
+    }
   }
 
   /**
