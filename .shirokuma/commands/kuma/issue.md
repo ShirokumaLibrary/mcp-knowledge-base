@@ -39,6 +39,7 @@ When provided with a CLEAR issue description:
 - Ambiguous text triggers confirmation dialog
 - Sets priority based on keywords (bug=high, improvement=medium, etc.)
 - Returns the new issue number
+- **Analyzes task complexity and suggests appropriate next commands**
 
 ### 3. View Issue Details (with number)
 Shows complete issue information:
@@ -125,8 +126,200 @@ Please choose 1, 2, or 3.
 /kuma:issue fix the authentication system  # → Asks what you want to do
 ```
 
+## Work Suggestion After Issue Creation
+
+After creating a new issue, **automatically analyze task complexity and suggest appropriate next commands** to guide the user:
+
+### Complexity Analysis Algorithm
+
+Analyze the issue based on these factors:
+
+**Technical Complexity (1-5 scale):**
+- Keywords: "refactor", "migrate", "redesign", "architecture" → Higher complexity
+- Keywords: "fix", "update", "adjust", "change" → Lower complexity
+- Multiple components mentioned → Higher complexity
+- Single file/component → Lower complexity
+
+**Scope Indicators (1-5 scale):**
+- Keywords: "integration", "API", "database", "authentication" → Larger scope
+- Keywords: "button", "text", "config", "style" → Smaller scope
+- Number of acceptance criteria → More = larger scope
+- External dependencies mentioned → Larger scope
+
+**Risk Level (1-5 scale):**
+- Keywords: "security", "payment", "data", "migration" → Higher risk
+- Keywords: "UI", "copy", "formatting", "comment" → Lower risk
+- Production impact mentioned → Higher risk
+- Reversibility → Irreversible = higher risk
+
+### Suggestion Logic
+
+Based on total complexity score (3-15 range):
+
+**Score 3-5: Micro Change (< 1 day)**
+```
+次の作業:
+- 直接実装: `/kuma:go [issue-id]` または `/kuma:vibe [issue-id]`
+- または軽量仕様: `/kuma:spec:micro [issue-id]` (仕様後は /kuma:vibe で実装)
+
+推奨: 小規模な変更のため、直接実装で問題ありません。
+プロジェクトのvibes（ステアリング設定）を適用する場合は /kuma:vibe を使用してください。
+```
+
+**Score 6-9: Small Feature (1-3 days)**
+```
+次の作業:
+- クイック仕様作成: `/kuma:spec:quick [issue-id]` → 仕様完成後に /kuma:vibe で実装
+- または直接実装: `/kuma:go [issue-id]` または `/kuma:vibe [issue-id]`
+
+推奨: 要件とタスク分解のため、クイック仕様の作成を推奨します。
+仕様作成後は /kuma:vibe:tdd または /kuma:vibe:code で実装できます。
+```
+
+**Score 10-12: Medium Feature (3-5 days)**
+```
+次の作業:
+- 完全仕様作成: `/kuma:spec [issue-id]` → 仕様完成後に /kuma:vibe:spec で段階的実装
+- または仕様判断: `/kuma:spec:when [issue-id]`
+
+推奨: 設計フェーズを含む完全な仕様作成を推奨します。
+仕様作成後は /kuma:vibe:spec で要件→設計→タスクを段階的に実装できます。
+```
+
+**Score 13-15: Large Feature (> 5 days)**
+```
+次の作業:
+- 完全仕様作成(必須): `/kuma:spec [issue-id]` → 仕様完成後に /kuma:vibe:spec で段階的実装
+- 複雑度確認: `/kuma:spec:when [issue-id]`
+
+推奨: 大規模な変更のため、要件・設計・タスクの3フェーズ仕様が必要です。
+仕様作成後は /kuma:vibe:spec で段階的に実装し、品質ゲートを確認してください。
+```
+
+### Suggestion Output Format
+
+After creating issue #XXX, display:
+
+```markdown
+✅ Issue #XXX created successfully
+
+**作業規模分析:**
+- 複雑度: [Low/Medium/High/Very High]
+- 推定作業時間: [X hours/days]
+- リスクレベル: [Low/Medium/High]
+
+**推奨される次のステップ:**
+
+1. **[Primary Command]** - [Reason]
+2. **[Alternative Command]** - [When to use]
+
+**コマンド説明:**
+
+**仕様作成コマンド:**
+- `/kuma:spec:micro` - 1日未満の小規模変更（What/Why/Howのみ)
+- `/kuma:spec:quick` - 1-3日の機能（要件+タスク、設計スキップ）
+- `/kuma:spec` - 3日以上の機能（要件+設計+タスクの完全仕様）
+- `/kuma:spec:when` - 仕様の必要性を判断（複雑度チェック）
+
+**実装コマンド:**
+- `/kuma:vibe` - プロジェクトのvibes（ステアリング設定）に基づく適応的実装
+- `/kuma:vibe:spec` - 仕様ベースの段階的実装（要件→設計→タスク）
+- `/kuma:vibe:tdd` - テスト駆動開発（RED-GREEN-REFACTOR）
+- `/kuma:vibe:code` - 仕様から直接コード生成
+- `/kuma:go` - 仕様なしで直接実装開始（手動品質管理）
+
+**Vibeコマンドの利点:**
+- プロジェクト固有のルール（TDD、コーディング規約等）を自動適用
+- 品質ゲート（テスト、リント、ビルド）の自動チェック
+- エラー時の自動リトライとロールバック機能
+```
+
+### Implementation Guidelines
+
+1. **Parse issue content** - Extract keywords and structure
+2. **Calculate complexity score** - Use algorithm above
+3. **Determine recommendation** - Match score to suggestion tier
+4. **Format output** - Clear, actionable guidance
+5. **Explain reasoning** - Help users understand the choice
+
+### Example Outputs
+
+**Example 1: Bug Fix (Score: 4)**
+```
+✅ Issue #184 created successfully
+
+**作業規模分析:**
+- 複雑度: Low
+- 推定作業時間: 2-4 hours
+- リスクレベル: Low
+
+**推奨される次のステップ:**
+
+1. `/kuma:go 184` - 小規模な修正のため直接実装
+2. `/kuma:spec:micro 184` - 変更内容を記録したい場合
+
+**理由:** ボタンの配置修正は単一ファイルの変更で、リスクも低いため、
+仕様作成なしで直接実装できます。
+```
+
+**Example 2: New Feature (Score: 8)**
+```
+✅ Issue #185 created successfully
+
+**作業規模分析:**
+- 複雑度: Medium
+- 推定作業時間: 2-3 days
+- リスクレベル: Medium
+
+**推奨される次のステップ:**
+
+1. `/kuma:spec:quick 185` - 要件整理とタスク分解（推奨）
+2. `/kuma:go 185` - すぐに実装を始める場合
+
+**理由:** 複数コンポーネントに影響する機能追加のため、
+要件とタスクを整理してから実装することを推奨します。
+設計フェーズは不要と判断しました。
+```
+
+**Example 3: Complex Feature (Score: 12)**
+```
+✅ Issue #186 created successfully
+
+**作業規模分析:**
+- 複雑度: High
+- 推定作業時間: 5-7 days
+- リスクレベル: High
+
+**推奨される次のステップ:**
+
+1. `/kuma:spec 186` - 完全仕様の作成（強く推奨）
+2. `/kuma:spec:when 186` - 複雑度の詳細分析
+
+**理由:** 認証システムの実装は高リスクで複雑なため、
+要件定義→設計→タスク分解の3フェーズを経た仕様作成が必要です。
+```
+
+### Special Cases
+
+**Very Simple Changes (typos, comments, etc.)**
+```
+このような軽微な変更は、イシュー登録せずに直接修正できます。
+必要であれば `/kuma:go "fix typo in README"` で実行できます。
+```
+
+**Emergency Hotfixes**
+```
+緊急度が高い場合:
+1. `/kuma:go [issue-id]` - 即座に修正
+2. 修正後に `/kuma:spec:micro [issue-id]` で記録
+```
+
 ## Related Commands
 
 - `/kuma:start` - Begin work session and see context
 - `/kuma:go` - Execute work on selected issue
+- `/kuma:spec:micro` - Ultra-lightweight spec (< 1 day)
+- `/kuma:spec:quick` - Quick spec (1-3 days)
+- `/kuma:spec` - Full spec (> 3 days)
+- `/kuma:spec:when` - Complexity analysis and recommendation
 - `/kuma:finish` - End session with handover
