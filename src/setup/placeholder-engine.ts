@@ -5,6 +5,10 @@
  * Supports recursive directory processing for batch file generation.
  */
 
+import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
+
 export interface PlaceholderConfig {
   MCP_NAME: string;           // e.g., "mcp__shirokuma-kb"
   WORKSPACE_FOLDER: string;   // Project root path
@@ -33,15 +37,44 @@ export class PlaceholderEngine {
 
   /**
    * Process directory recursively, replacing placeholders in all files
-   * @param _sourceDir - Source directory with template files
-   * @param _targetDir - Target directory for processed files
+   * @param sourceDir - Source directory with template files
+   * @param targetDir - Target directory for processed files
    */
   async processDirectory(
-    _sourceDir: string,
-    _targetDir: string
+    sourceDir: string,
+    targetDir: string
   ): Promise<void> {
-    // TODO: Implement recursive directory processing
-    // This will be implemented in a future task
-    throw new Error('Not implemented yet');
+    // Check if source directory exists
+    if (!existsSync(sourceDir)) {
+      return; // Skip if source doesn't exist
+    }
+
+    // Ensure target directory exists
+    if (!existsSync(targetDir)) {
+      await mkdir(targetDir, { recursive: true });
+    }
+
+    // Read directory contents
+    const entries = await readdir(sourceDir, { withFileTypes: true });
+
+    // Process each entry
+    for (const entry of entries) {
+      const sourcePath = join(sourceDir, entry.name);
+      const targetPath = join(targetDir, entry.name);
+
+      if (entry.isDirectory()) {
+        // Recursively process subdirectory
+        await this.processDirectory(sourcePath, targetPath);
+      } else if (entry.isFile()) {
+        // Read file content
+        const content = await readFile(sourcePath, 'utf-8');
+
+        // Replace placeholders
+        const processedContent = this.replace(content);
+
+        // Write to target directory
+        await writeFile(targetPath, processedContent, 'utf-8');
+      }
+    }
   }
 }

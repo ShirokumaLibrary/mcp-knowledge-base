@@ -3,6 +3,7 @@ import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { McpConfigManager } from './mcp-config-manager';
 import { FileOperations } from './file-operations';
+import { PlaceholderEngine } from './placeholder-engine';
 
 /**
  * Setup command options
@@ -53,22 +54,37 @@ export class SetupCommand {
     // Validate inputs
     await this.validateInputs(projectDir);
 
+    // In rebuild mode, detect MCP name from existing config
+    let effectiveMcpName = mcpName;
+    if (rebuild) {
+      effectiveMcpName = await this.detectMcpName(projectDir) || mcpName;
+    }
+
     // Step 1: Copy master files (skip in rebuild mode)
     if (!rebuild) {
       await this.copyMasterFiles(projectDir, force);
     }
 
-    // Step 2: Create/update .env file
-    await this.createEnvFile(projectDir, force);
+    // Step 2: Create/update .env file (skip in rebuild mode)
+    if (!rebuild) {
+      await this.createEnvFile(projectDir, force);
+    }
 
     // Step 3: Integrate MCP configuration
-    await this.integrateMcpConfig(projectDir, mcpName);
+    await this.integrateMcpConfig(projectDir, effectiveMcpName);
 
-    // Step 4: Create directories
-    await this.createDirectories(projectDir);
+    // Step 4: Create directories (skip in rebuild mode)
+    if (!rebuild) {
+      await this.createDirectories(projectDir);
+    }
 
-    // Step 5: Run migration (placeholder for now)
-    await this.runMigration(projectDir);
+    // Step 5: Generate .claude files with placeholder replacement
+    await this.generateClaudeFiles(projectDir, effectiveMcpName);
+
+    // Step 6: Run migration (skip in rebuild mode)
+    if (!rebuild) {
+      await this.runMigration(projectDir);
+    }
   }
 
   /**
@@ -188,6 +204,61 @@ export class SetupCommand {
     // Create export directory
     const exportDir = join(projectDir, 'docs', 'export');
     await this.fileOps.ensureDir(exportDir);
+  }
+
+  /**
+   * Generate .claude files with placeholder replacement
+   *
+   * Reads files from .shirokuma/agents and .shirokuma/commands,
+   * replaces placeholders, and writes to .claude/agents and .claude/commands
+   */
+  private async generateClaudeFiles(projectDir: string, mcpName: string): Promise<void> {
+    const placeholderEngine = new PlaceholderEngine(mcpName, projectDir);
+
+    // Process agents directory
+    const sourceAgentsDir = join(projectDir, '.shirokuma', 'agents');
+    const targetAgentsDir = join(projectDir, '.claude', 'agents');
+    await placeholderEngine.processDirectory(sourceAgentsDir, targetAgentsDir);
+
+    // Process commands directory
+    const sourceCommandsDir = join(projectDir, '.shirokuma', 'commands');
+    const targetCommandsDir = join(projectDir, '.claude', 'commands');
+    await placeholderEngine.processDirectory(sourceCommandsDir, targetCommandsDir);
+  }
+
+  /**
+   * Detect MCP name from existing .mcp.json
+   *
+   * Looks for shirokuma-kb related server configuration in .mcp.json
+   * Returns the first matching server name or null if not found
+   */
+  private async detectMcpName(projectDir: string): Promise<string | null> {
+    const mcpPath = join(projectDir, '.mcp.json');
+
+    // Check if .mcp.json exists
+    if (!existsSync(mcpPath)) {
+      return null;
+    }
+
+    try {
+      // Read and parse .mcp.json
+      const config = await this.mcpConfigManager.read(mcpPath);
+      if (!config || !config.mcpServers) {
+        return null;
+      }
+
+      // Look for shirokuma-kb server (any name containing "shirokuma" or "kb")
+      const serverNames = Object.keys(config.mcpServers);
+      const shiroKumaServer = serverNames.find(name =>
+        name.toLowerCase().includes('shirokuma') ||
+        name.toLowerCase().includes('kb')
+      );
+
+      return shiroKumaServer || null;
+    } catch (_error) {
+      // If parsing fails, return null
+      return null;
+    }
   }
 
   /**
