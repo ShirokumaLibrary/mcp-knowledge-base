@@ -1,4 +1,6 @@
-.mcp.json
+/.mcp.json
+# Include template file
+!.shirokuma/templates/.mcp.json
 
 # Dependencies
 node_modules/
