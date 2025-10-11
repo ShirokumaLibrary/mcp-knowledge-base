@@ -7,7 +7,7 @@ priority: HIGH
 description: "issue #173を作成したが、SHIROKUMA_EXPORT_DIR環境変数が設定されているにも関わらず自動エクスポートされなかった"
 aiSummary: "Auto-export functionality not working for new issues despite environment variable configuration, requiring MCP handler integration completion"
 tags: ["mcp","export","bug","auto-export"]
-related: [175]
+related: [175,178,180]
 keywords: {"export":0.9,"auto":0.9,"mcp":0.8,"integration":0.8,"issue":0.8}
 concepts: {"automation":0.9,"configuration":0.8,"integration":0.8,"file-management":0.7,"error-handling":0.7}
 embedding: "gICAhIeAgICAhoCAho2ApYCAgImAgICAgI+EgJmNgJ+AgICCgYCAgICSgICojoCYgICAgIeAgICAjISApI+AkICAgIOOgICAgIONgKmQgIuAgICKj4CAgICKkoCgj4CNgICAjYmAgICAgY+AjJOAiYCAgIqCgICAgICGgICZgJo="

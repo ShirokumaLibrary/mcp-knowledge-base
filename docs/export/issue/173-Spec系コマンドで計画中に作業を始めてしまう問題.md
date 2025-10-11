@@ -7,7 +7,7 @@ priority: HIGH
 description: "Spec系コマンド（/kuma:spec等）で計画フェーズ中に自動的に実装作業を開始してしまう問題を修正する必要がある"
 aiSummary: "Spec系コマンドで計画中に作業を始めてしまう問題 Spec系コマンド（/kuma:spec等）で計画フェーズ中に自動的に実装作業を開始してしまう問題を修正する必要がある Spec系コマンドで計画中に作業を始めてしまう問題 Spec系コマンド（/kuma:spec等）で計画フェーズ中に自動的に実装作業を開始してしまう問題を修正する必要がある # Spec系コマンドで計画中に作業を始めてしまう問題\n..."
 tags: ["commands","bug","ai-behavior","spec"]
-related: [149,176]
+related: [149,176,183]
 keywords: {"spec":1,"kuma":1,"design":0.38,"tasks":0.26,"plan":0.26}
 embedding: "gIuHgoCAh4CAhICqgICZgYCIgICBgIqAgICAm4CAh4aAgoGBg4CGgICDgIeAgIaKgIaHgIGAgYCAgICVgICZiYCBgoOEgICAgIGAg4CArYWAgIqJhYCEgICHgIGAgLGAgIOQi4SAiYCAioCSgICggICJj4iBgIuAgImApoCAqoA="
 createdAt: 2025-08-29T07:33:22.000Z

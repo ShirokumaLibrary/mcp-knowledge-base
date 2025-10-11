@@ -7,7 +7,7 @@ priority: HIGH
 description: "spec:design等で計画を作成した後、承認なしに実装作業を開始してしまう"
 aiSummary: "Issue about spec commands automatically starting implementation work after planning phase without user approval, requiring clearer boundaries between planning and execution phases"
 tags: ["process","ai-behavior","spec-command","user-control"]
-related: [173,176,141,146,148,142,150]
+related: [173,176,183,141,146,148,142,150]
 keywords: {"spec":1,"command":0.9,"design":0.8,"implementation":0.8,"automatic":0.7}
 concepts: {"workflow management":0.9,"automation":0.8,"software development":0.7,"user interface":0.7,"system design":0.6}
 embedding: "gICbgoCAjoCEgICqgIWAh4CAkYCAgImAjICApoCNgI2AgIiFgICCgJCAgKiAkICNgICWjYCAgICNgICngIyAjoCAh4eAgISAhYCAmICEgIyAgIuOgICAgICAgJOAioCFgICWkICAhoCDgICYgIKAgICAnoqAgIyAgICAo4CAgIE="

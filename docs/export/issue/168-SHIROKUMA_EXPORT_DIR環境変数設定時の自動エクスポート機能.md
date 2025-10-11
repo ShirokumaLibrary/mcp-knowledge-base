@@ -7,7 +7,7 @@ priority: MEDIUM
 description: "MCPサーバー実行時にSHIROKUMA_EXPORT_DIR環境変数が定義されている場合、アイテムの作成・更新時およびカレントステート更新時に自動的にファイルエクスポートする機能を実装する"
 aiSummary: "Implementation of automatic file export functionality for MCP server when SHIROKUMA_EXPORT_DIR environment variable is set, automatically exporting items to files during create/update operations"
 tags: ["mcp","export","feature","auto-sync","environment-variable"]
-related: [169,170,171,172,175]
+related: [169,170,171,172,175,178,180]
 keywords: {"export":1,"environment":0.9,"variable":0.9,"mcp":0.8,"item":0.8}
 concepts: {"automation":0.9,"file_management":0.9,"api":0.8,"configuration":0.7,"data_synchronization":0.7}
 embedding: "gICAkIqAgIWAgICShouAgICAgIuIgICAgICEi5iLgICAgICSkICAgYCAgJGmkoCAgICAkJmAgICAgISJo5aAgICAgIicgICDgICNgZ6lgICAgICBloCAi4CAkoCTpICAgICAgYyAgJCAgI+IiJuAgICAgIiIgICNgICGkICTgIA="
