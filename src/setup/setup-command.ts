@@ -51,8 +51,8 @@ export class SetupCommand {
   async execute(projectDir: string, options: SetupOptions = {}): Promise<void> {
     const { force = false, mcpName = 'shirokuma-kb', rebuild = false } = options;
 
-    // Validate inputs
-    await this.validateInputs(projectDir);
+    // Validate inputs including MCP name
+    await this.validateInputs(projectDir, mcpName);
 
     // In rebuild mode, detect MCP name from existing config
     let effectiveMcpName = mcpName;
@@ -91,7 +91,7 @@ export class SetupCommand {
   /**
    * Validate inputs before starting setup
    */
-  private async validateInputs(projectDir: string): Promise<void> {
+  private async validateInputs(projectDir: string, mcpName?: string): Promise<void> {
     // Check if package root exists
     const templatesDir = join(this.packageRoot, '.shirokuma', 'templates');
     if (!existsSync(templatesDir)) {
@@ -101,6 +101,47 @@ export class SetupCommand {
     // Check if project directory exists
     if (!existsSync(projectDir)) {
       throw new Error(`Project directory does not exist: ${projectDir}`);
+    }
+
+    // Validate MCP name if provided
+    if (mcpName !== undefined) {
+      this.validateMcpName(mcpName);
+    }
+  }
+
+  /**
+   * Validate MCP name format
+   *
+   * MCP names must:
+   * - Contain only lowercase letters, numbers, and hyphens
+   * - Start and end with alphanumeric characters
+   * - Be between 1 and 50 characters long
+   *
+   * @param mcpName - MCP instance name to validate
+   * @throws Error if name is invalid
+   */
+  private validateMcpName(mcpName: string): void {
+    // Check if empty
+    if (!mcpName || mcpName.trim().length === 0) {
+      throw new Error('MCP name cannot be empty');
+    }
+
+    // Check length
+    if (mcpName.length > 50) {
+      throw new Error(`MCP name too long: "${mcpName}" (max 50 characters)`);
+    }
+
+    // Check format: only lowercase letters, numbers, and hyphens
+    const validFormat = /^[a-z0-9]+([a-z0-9-]*[a-z0-9]+)?$/;
+    if (!validFormat.test(mcpName)) {
+      throw new Error(
+        `Invalid MCP name: "${mcpName}"\n` +
+        'MCP names must:\n' +
+        '  - Contain only lowercase letters, numbers, and hyphens\n' +
+        '  - Start and end with alphanumeric characters\n' +
+        '  - Not contain consecutive hyphens\n' +
+        'Examples: "shirokuma-kb", "my-kb", "kb2"'
+      );
     }
   }
 

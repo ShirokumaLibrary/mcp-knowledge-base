@@ -332,4 +332,90 @@ describe('SetupCommand', () => {
       ).rejects.toThrow();
     });
   });
+
+  describe('MCP name validation', () => {
+    let projectDir: string;
+
+    beforeEach(() => {
+      projectDir = join(testDir, 'test-project');
+      mkdirSync(projectDir);
+    });
+
+    it('should accept valid MCP names', async () => {
+      const validNames = [
+        'shirokuma-kb',
+        'my-kb',
+        'kb2',
+        'a',
+        'test-123',
+        'my-custom-kb-name'
+      ];
+
+      for (const name of validNames) {
+        await expect(
+          command.execute(projectDir, { force: true, mcpName: name })
+        ).resolves.not.toThrow();
+      }
+    });
+
+    it('should reject empty MCP name', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: '' })
+      ).rejects.toThrow('MCP name cannot be empty');
+    });
+
+    it('should reject MCP name with uppercase letters', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: 'MyKB' })
+      ).rejects.toThrow('Invalid MCP name');
+    });
+
+    it('should reject MCP name with spaces', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: 'my kb' })
+      ).rejects.toThrow(/Invalid MCP name/);
+    });
+
+    it('should reject MCP name with underscores', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: 'my_kb' })
+      ).rejects.toThrow(/Invalid MCP name/);
+    });
+
+    it('should reject MCP name starting with hyphen', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: '-mykb' })
+      ).rejects.toThrow(/Invalid MCP name/);
+    });
+
+    it('should reject MCP name ending with hyphen', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: 'mykb-' })
+      ).rejects.toThrow(/Invalid MCP name/);
+    });
+
+    it('should reject MCP name with special characters', async () => {
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: 'my@kb' })
+      ).rejects.toThrow(/Invalid MCP name/);
+    });
+
+    it('should reject MCP name that is too long', async () => {
+      const longName = 'a'.repeat(51);
+      await expect(
+        command.execute(projectDir, { force: true, mcpName: longName })
+      ).rejects.toThrow('MCP name too long');
+    });
+
+    it('should provide helpful error message for invalid names', async () => {
+      try {
+        await command.execute(projectDir, { force: true, mcpName: 'Invalid_Name' });
+        throw new Error('Should have thrown');
+      } catch (error) {
+        expect(error.message).toContain('Invalid MCP name');
+        expect(error.message).toContain('lowercase letters');
+        expect(error.message).toContain('Examples:');
+      }
+    });
+  });
 });
