@@ -284,6 +284,50 @@ Assistant:
 - `.shirokuma/commands/spec/tasks.md` - Tasks phase
 - `.shirokuma/commands/spec/refine.md` - Refinement operations
 
+## Next Steps After Spec Creation
+
+After successfully creating a complete specification, display the following guidance to help users transition smoothly from planning to implementation:
+
+```markdown
+✅ Spec #[spec-id] created successfully (Requirements + Design + Tasks)
+
+## 次のステップ
+
+仕様が完成しました。以下のコマンドで実装を開始できます:
+
+**推奨ワークフロー:**
+1. `/kuma:vibe:spec [spec-id]` - 仕様ベースの段階的実装
+   - 要件フェーズ → 設計フェーズ → タスクフェーズを順次実行
+   - ステアリング設定に準拠した実装
+   - 品質ゲート（テスト、リント、ビルド）を自動チェック
+
+**代替ワークフロー:**
+2. `/kuma:vibe:code [spec-id]` - 仕様から直接実装
+   - 全フェーズを一括実行
+   - ステアリング設定を自動適用
+
+3. `/kuma:go [spec-id]` - 自由な実装
+   - 仕様を参照しながら独自のアプローチで実装
+   - 手動で品質管理
+
+**Vibeコマンドとは:**
+プロジェクトの「vibes」（開発方針、ステアリング設定）に基づいて、
+適応的に開発ワークフローを調整するコマンド群です。
+
+**Vibeの利点:**
+- プロジェクト固有のルール（TDD、コーディング規約等）を自動適用
+- 品質ゲート（テスト、リント、ビルド）の自動チェック
+- エラー時の自動リトライとロールバック機能
+
+**主なVibeコマンド:**
+- `/kuma:vibe` - プロジェクトのvibesに基づく適応的開発
+- `/kuma:vibe:tdd` - テスト駆動開発（RED-GREEN-REFACTOR）
+- `/kuma:vibe:code` - 仕様からの直接実装
+- `/kuma:vibe:spec` - 既存仕様ベースの段階的実装
+- `/kuma:vibe:visual` - モックアップ/スクリーンショットからの開発
+- `/kuma:vibe:commit` - コンベンショナルコミット作成
+```
+
 ## References
 
 - `.shirokuma/commands/spec/shared/ears-format.markdown` - EARS format reference
