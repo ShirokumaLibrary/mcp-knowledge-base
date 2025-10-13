@@ -2,17 +2,17 @@
 id: 158
 type: issue
 title: "README.mdおよび主要ドキュメントの全面改訂が必要"
-status: Open
+status: Completed
 priority: HIGH
 description: "v0.9.0の現在の機能を正確に反映するため、README.mdを始めとする主要ドキュメントの全面的な書き換えが必要。新機能や変更された仕様が文書化されていない状態"
 aiSummary: "Complete revision of README.md and major documentation needed to accurately reflect v0.9.0 features, including hybrid spec-driven development, new commands, and updated installation procedures"
 tags: ["documentation","v0.9.0","user-experience","readme","high-priority"]
-related: [152,157,165,166,175]
+related: [152,157,165,166,175,188,194]
 keywords: {"documentation":1,"readme":1,"update":0.9,"revision":0.9,"version":0.8}
 concepts: {"documentation":1,"software maintenance":0.9,"project management":0.8,"version management":0.8,"development workflow":0.7}
 embedding: "gICTj4+QgIiIgJSSgJWAgICAhoaHl4CAgICCi4CRgICAgICAgJOAgoGAhIOAh4CAgICGgoGYgICLgI6JgICAgICAkouKkYCFk4CXgYCCgICAgImSkYWAkY6AoYCAjICAgICWkJGAgJeVgKKIgJSAgICAmoiJhYCTkoCZkICPgIA="
 createdAt: 2025-08-29T07:33:22.000Z
-updatedAt: 2025-08-29T07:33:22.000Z
+updatedAt: 2025-10-12T03:11:23.000Z
 ---
 
 # README.mdおよび主要ドキュメントの全面改訂
