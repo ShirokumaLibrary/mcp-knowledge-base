@@ -151,7 +151,7 @@ describe('FileOperations', () => {
       expect(content).toBe('new content');
     });
 
-    it('should throw error when target exists and overwrite is false', async () => {
+    it('should skip existing files when overwrite is false', async () => {
       const sourceDir = path.join(testDir, 'source');
       const targetDir = path.join(testDir, 'target');
       await fs.mkdir(sourceDir);
@@ -159,9 +159,12 @@ describe('FileOperations', () => {
       await fs.writeFile(path.join(targetDir, 'existing-file.txt'), 'existing');
       await fs.writeFile(path.join(sourceDir, 'existing-file.txt'), 'source');
 
-      await expect(
-        fileOps.copyDir(sourceDir, targetDir, { overwrite: false })
-      ).rejects.toThrow();
+      // Should not throw, just skip existing files
+      await fileOps.copyDir(sourceDir, targetDir, { overwrite: false });
+
+      // Verify existing file was not overwritten
+      const content = await fs.readFile(path.join(targetDir, 'existing-file.txt'), 'utf-8');
+      expect(content).toBe('existing');
     });
 
     it('should handle empty directories', async () => {

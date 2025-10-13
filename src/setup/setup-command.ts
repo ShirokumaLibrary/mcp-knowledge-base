@@ -147,15 +147,43 @@ export class SetupCommand {
 
   /**
    * Copy master files from package to project
+   *
+   * Copies agent and command template directories from the package
+   * to the project's .shirokuma directory. Source directories that
+   * don't exist are silently skipped.
+   *
+   * @param projectDir - Target project directory
+   * @param force - If true, overwrite existing files; if false, skip them
    */
-  private async copyMasterFiles(projectDir: string, _force: boolean): Promise<void> {
+  private async copyMasterFiles(projectDir: string, force: boolean): Promise<void> {
     const targetDir = join(projectDir, '.shirokuma');
 
     // Ensure target directory exists
     await this.fileOps.ensureDir(targetDir);
 
-    // Note: In a complete implementation, this would copy agent/command definitions
-    // For now, we just ensure the directory structure exists
+    // Copy agents directory
+    const sourceAgentsDir = join(this.packageRoot, '.shirokuma', 'agents');
+    const targetAgentsDir = join(targetDir, 'agents');
+
+    if (existsSync(sourceAgentsDir)) {
+      await this.fileOps.copyDir(
+        sourceAgentsDir,
+        targetAgentsDir,
+        { overwrite: force }
+      );
+    }
+
+    // Copy commands directory
+    const sourceCommandsDir = join(this.packageRoot, '.shirokuma', 'commands');
+    const targetCommandsDir = join(targetDir, 'commands');
+
+    if (existsSync(sourceCommandsDir)) {
+      await this.fileOps.copyDir(
+        sourceCommandsDir,
+        targetCommandsDir,
+        { overwrite: force }
+      );
+    }
   }
 
   /**

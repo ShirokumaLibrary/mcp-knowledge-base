@@ -42,9 +42,8 @@ export class FileOperations {
         const targetExists = await this.fileExists(targetPath);
 
         if (targetExists && !options.overwrite) {
-          throw new Error(
-            `File already exists and overwrite is disabled: ${targetPath}`
-          );
+          // Skip existing file when overwrite is disabled
+          continue;
         }
 
         // Copy file

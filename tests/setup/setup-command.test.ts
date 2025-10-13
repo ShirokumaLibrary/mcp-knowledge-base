@@ -333,6 +333,116 @@ describe('SetupCommand', () => {
     });
   });
 
+  describe('copyMasterFiles', () => {
+    let projectDir: string;
+
+    beforeEach(() => {
+      projectDir = join(testDir, 'test-project');
+      mkdirSync(projectDir);
+
+      // Create mock agents directory in package
+      const agentsDir = join(packageRoot, '.shirokuma', 'agents');
+      mkdirSync(agentsDir, { recursive: true });
+      writeFileSync(join(agentsDir, 'agent1.md'), 'Agent 1 content');
+      writeFileSync(join(agentsDir, 'agent2.md'), 'Agent 2 content');
+
+      // Create mock commands directory in package
+      const commandsDir = join(packageRoot, '.shirokuma', 'commands');
+      mkdirSync(commandsDir, { recursive: true });
+      writeFileSync(join(commandsDir, 'command1.md'), 'Command 1 content');
+      writeFileSync(join(commandsDir, 'command2.md'), 'Command 2 content');
+
+      // Create subdirectory to test recursive copying
+      const commandsSubDir = join(commandsDir, 'subdir');
+      mkdirSync(commandsSubDir);
+      writeFileSync(join(commandsSubDir, 'nested.md'), 'Nested command content');
+    });
+
+    it('should copy agents directory from package to project', async () => {
+      await command.execute(projectDir, { force: true });
+
+      const targetAgentsDir = join(projectDir, '.shirokuma', 'agents');
+      expect(existsSync(targetAgentsDir)).toBe(true);
+      expect(existsSync(join(targetAgentsDir, 'agent1.md'))).toBe(true);
+      expect(existsSync(join(targetAgentsDir, 'agent2.md'))).toBe(true);
+
+      const agent1Content = readFileSync(join(targetAgentsDir, 'agent1.md'), 'utf-8');
+      expect(agent1Content).toBe('Agent 1 content');
+    });
+
+    it('should copy commands directory from package to project', async () => {
+      await command.execute(projectDir, { force: true });
+
+      const targetCommandsDir = join(projectDir, '.shirokuma', 'commands');
+      expect(existsSync(targetCommandsDir)).toBe(true);
+      expect(existsSync(join(targetCommandsDir, 'command1.md'))).toBe(true);
+      expect(existsSync(join(targetCommandsDir, 'command2.md'))).toBe(true);
+
+      const command1Content = readFileSync(join(targetCommandsDir, 'command1.md'), 'utf-8');
+      expect(command1Content).toBe('Command 1 content');
+    });
+
+    it('should copy nested directories recursively', async () => {
+      await command.execute(projectDir, { force: true });
+
+      const nestedPath = join(projectDir, '.shirokuma', 'commands', 'subdir', 'nested.md');
+      expect(existsSync(nestedPath)).toBe(true);
+
+      const nestedContent = readFileSync(nestedPath, 'utf-8');
+      expect(nestedContent).toBe('Nested command content');
+    });
+
+    it('should handle missing source directories gracefully', async () => {
+      // Remove agents directory to simulate missing source
+      rmSync(join(packageRoot, '.shirokuma', 'agents'), { recursive: true, force: true });
+
+      // Should not throw, just skip missing directory
+      await expect(
+        command.execute(projectDir, { force: true })
+      ).resolves.not.toThrow();
+
+      // Commands should still be copied
+      const targetCommandsDir = join(projectDir, '.shirokuma', 'commands');
+      expect(existsSync(targetCommandsDir)).toBe(true);
+    });
+
+    it('should not overwrite existing files without force option', async () => {
+      // First setup
+      await command.execute(projectDir, { force: true });
+
+      // Modify a file
+      const agent1Path = join(projectDir, '.shirokuma', 'agents', 'agent1.md');
+      writeFileSync(agent1Path, 'Modified content');
+
+      // Second setup without force
+      await command.execute(projectDir, { force: false });
+
+      // File should still have modified content
+      const content = readFileSync(agent1Path, 'utf-8');
+      expect(content).toBe('Modified content');
+    });
+
+    it('should overwrite existing files with force option', async () => {
+      // First setup
+      await command.execute(projectDir, { force: true });
+
+      // Modify a file
+      const agent1Path = join(projectDir, '.shirokuma', 'agents', 'agent1.md');
+      writeFileSync(agent1Path, 'Modified content');
+
+      // Update source file in package
+      const sourceAgent1Path = join(packageRoot, '.shirokuma', 'agents', 'agent1.md');
+      writeFileSync(sourceAgent1Path, 'Updated agent 1 content');
+
+      // Second setup with force
+      await command.execute(projectDir, { force: true });
+
+      // File should have new content from package
+      const content = readFileSync(agent1Path, 'utf-8');
+      expect(content).toBe('Updated agent 1 content');
+    });
+  });
+
   describe('MCP name validation', () => {
     let projectDir: string;
 
