@@ -9,6 +9,7 @@ import { runMigration } from './commands/migrate.js';
 import { createExportCommand } from './commands/export.js';
 import { importData } from './commands/import.js';
 import { createConfigCommand } from './commands/config.js';
+import { SetupCommand } from '../setup/setup-command.js';
 import { Item } from '../entities/Item.js';
 import { Status } from '../entities/Status.js';
 import { Tag } from '../entities/Tag.js';
@@ -325,6 +326,33 @@ program
       await AppDataSource.destroy();
     } catch (error) {
       console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+// Setup command
+program
+  .command('setup')
+  .description('Initialize shirokuma-kb in current project')
+  .option('-f, --force', 'Overwrite existing files')
+  .option('--mcp-name <name>', 'Custom MCP instance name', 'shirokuma-kb')
+  .option('--rebuild', 'Rebuild .claude/ files from .shirokuma/')
+  .action(async (options) => {
+    try {
+      // Get package root directory (where .shirokuma/ templates are located)
+      const packageRoot = new URL('../../', import.meta.url).pathname;
+      const projectDir = process.cwd();
+
+      const setupCmd = new SetupCommand(packageRoot);
+      await setupCmd.execute(projectDir, {
+        force: options.force,
+        mcpName: options.mcpName,
+        rebuild: options.rebuild
+      });
+
+      console.log(chalk.green('✅ Setup completed successfully'));
+    } catch (error) {
+      console.error(chalk.red('Setup failed:'), error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
   });
