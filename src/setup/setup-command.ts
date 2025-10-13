@@ -1,9 +1,9 @@
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
-import { McpConfigManager } from './mcp-config-manager';
-import { FileOperations } from './file-operations';
-import { PlaceholderEngine } from './placeholder-engine';
+import { McpConfigManager } from './mcp-config-manager.js';
+import { FileOperations } from './file-operations.js';
+import { PlaceholderEngine } from './placeholder-engine.js';
 
 /**
  * Setup command options
