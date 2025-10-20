@@ -681,6 +681,36 @@ The automated setup system handles:
 - MCP config manager merges with existing `.mcp.json`
 - File operations include backup and rollback capabilities
 
+### Template Customization
+
+All agent and command definitions use placeholders that adapt to your configuration:
+
+**Available Placeholders**:
+- `{{MCP_NAME}}` - MCP tool prefix (e.g., `mcp__shirokuma-kb`, `mcp__my-kb`)
+- `{{WORKSPACE_FOLDER}}` - Project root path
+
+**Usage Example** (in `.shirokuma/agents/*.md`):
+```markdown
+tools: {{MCP_NAME}}__get_items, {{MCP_NAME}}__create_item
+```
+
+**After `shirokuma-kb setup --mcp-name my-kb`** (in `.claude/agents/*.md`):
+```markdown
+tools: mcp__my-kb__get_items, mcp__my-kb__create_item
+```
+
+**Workflow**:
+1. Edit master files in `.shirokuma/agents/` or `.shirokuma/commands/`
+2. Use placeholders like `{{MCP_NAME}}__` for MCP tool references
+3. Run `shirokuma-kb setup --rebuild` to regenerate `.claude/` files
+4. Placeholders replaced based on your MCP configuration
+
+**Benefits**:
+- Share templates across projects with different MCP names
+- Easy maintenance: Edit once in `.shirokuma/`, apply everywhere
+- Version control: Commit `.shirokuma/`, ignore `.claude/` (generated files)
+- Custom configurations: `--mcp-name` adapts templates automatically
+
 ### CI/CD Integration
 
 ```yaml
