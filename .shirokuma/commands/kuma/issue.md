@@ -1,7 +1,7 @@
 ---
 description: Simple and intuitive issue management for AI pair programming
 argument-hint: "[issue-id | 'issue description' | search 'keyword' | export]"
-allowed-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__list_items
+allowed-tools: mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__search_items, mcp__{{MCP_NAME}}__list_items
 ---
 
 # /kuma:issue

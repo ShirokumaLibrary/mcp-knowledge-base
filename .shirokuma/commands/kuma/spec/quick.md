@@ -1,7 +1,7 @@
 ---
 description: Quick spec for 1-3 day features (requirements + tasks, skip design)
 argument-hint: "'feature description'"
-allowed-tools: Read, Write, Edit, MultiEdit, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:quick - Quick Spec Command
@@ -106,7 +106,7 @@ Create lightweight specifications for small-to-medium features (1-3 days effort)
 
 ```yaml
 # Quick Spec Storage Process
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_quick"
     title: "Quick Spec: [feature-name]"

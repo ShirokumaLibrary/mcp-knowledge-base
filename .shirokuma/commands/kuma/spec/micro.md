@@ -1,7 +1,7 @@
 ---
 description: Ultra-lightweight spec for changes under 1 day effort
 argument-hint: "'brief change description'"
-allowed-tools: Read, Write, Edit, MultiEdit, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item
+allowed-tools: Read, Write, Edit, MultiEdit, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item
 ---
 
 # /kuma:spec:micro - Micro Spec Command
@@ -55,7 +55,7 @@ Micro specs are automatically saved to shirokuma-kb:
 
 ```yaml
 # Save micro spec to shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_micro"
     title: "Micro: [changeDescription]"

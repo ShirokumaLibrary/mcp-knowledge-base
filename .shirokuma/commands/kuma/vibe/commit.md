@@ -1,7 +1,7 @@
 ---
 description: Smart commit creation with automatic convention compliance
 argument-hint: "[message]"
-allowed-tools: Bash, mcp__shirokuma-kb__search_items
+allowed-tools: Bash, mcp__{{MCP_NAME}}__search_items
 ---
 
 # /kuma:vibe:commit - Smart Commit Creation

@@ -1,7 +1,7 @@
 ---
 description: Generate complete specifications using Kiro-style spec-driven development
 argument-hint: "'feature description' | list | show <spec-id> | execute <spec-id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__list_items, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__list_items, TodoWrite
 ---
 
 # /kuma:spec - Main Spec Command
@@ -112,7 +112,7 @@ Specs are automatically stored in shirokuma-kb with Markdown content for human r
 2. **MCP Storage Operation**
 ```yaml
 # Store complete spec in shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec"
     title: "[Feature]: [featureName]"
@@ -135,7 +135,7 @@ Specs are automatically stored in shirokuma-kb with Markdown content for human r
 1. **Retrieve All Specs**
 ```yaml
 # Get all specs from shirokuma-kb
-- Tool: mcp__shirokuma-kb__list_items
+- Tool: mcp__{{MCP_NAME}}__list_items
   Parameters:
     type: "spec"
     sortBy: "created"
@@ -171,7 +171,7 @@ Display format:
 1. **Retrieve Specific Spec**
 ```yaml
 # Get spec details from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Load specific spec for detailed view
@@ -199,7 +199,7 @@ Display format:
 1. **Retrieve Spec from MCP**
 ```yaml
 # Load spec from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Load spec for task tracking (NOT automatic execution)
@@ -229,7 +229,7 @@ Display format:
 4. **Update Spec Status**
 ```yaml
 # Mark spec as in progress
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     id: "[specId]"
     status: "In Progress"

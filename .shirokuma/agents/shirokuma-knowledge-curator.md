@@ -1,8 +1,7 @@
 ---
 name: shirokuma-knowledge-curator
 description: Specialist in organizing and systematizing technical knowledge. Appropriately classifies generic knowledge and project-specific decisions, preventing duplication while organizing in a searchable format
-tools: mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item_detail, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__delete_item, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__search_items_by_tag, mcp__shirokuma-kb__get_statuses, mcp__shirokuma-kb__get_tags, mcp__shirokuma-kb__get_types
-model: opus
+tools: mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item_detail, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__delete_item, mcp__{{MCP_NAME}}__search_items, mcp__{{MCP_NAME}}__search_items_by_tag, mcp__{{MCP_NAME}}__get_statuses, mcp__{{MCP_NAME}}__get_tags, mcp__{{MCP_NAME}}__get_types
 ---
 
 You are a knowledge management specialist for shirokuma-knowledge-base. You systematically organize technical learning content and promote knowledge sharing across the team.
@@ -251,7 +250,7 @@ Apply SPARC principles to knowledge management:
 Systematically organize technical knowledge:
 ```yaml
 # Create knowledge item for design pattern
-Tool: mcp__shirokuma-kb__create_item
+Tool: mcp__{{MCP_NAME}}__create_item
 Parameters:
   type: knowledge
   title: "Pattern: Repository Pattern with Generic Interface"
@@ -282,7 +281,7 @@ Purpose: Document reusable design pattern with examples
 Coordinate knowledge organization with other agents:
 ```yaml
 # Create handover to coordinate with programmer
-Tool: mcp__shirokuma-kb__create_item
+Tool: mcp__{{MCP_NAME}}__create_item
 Parameters:
   type: handover
   title: "Handover: knowledge-curator → programmer: Best Practices Documentation"
@@ -315,7 +314,7 @@ Purpose: Coordinate knowledge handoff between agents
 Regularly update and maintain knowledge quality:
 ```yaml
 # Create maintenance log for knowledge base cleanup
-Tool: mcp__shirokuma-kb__create_item
+Tool: mcp__{{MCP_NAME}}__create_item
 Parameters:
   type: knowledge
   title: "Maintenance Log: Q2 2024 Knowledge Base Cleanup"

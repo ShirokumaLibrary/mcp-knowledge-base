@@ -1,7 +1,7 @@
 ---
 description: Decision guide for when to use spec-driven development
 argument-hint: "'feature description' | complexity-check"
-allowed-tools: Read, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__create_item
+allowed-tools: Read, mcp__{{MCP_NAME}}__search_items, mcp__{{MCP_NAME}}__create_item
 ---
 
 # /kuma:spec:when - Spec Usage Decision Guide
@@ -271,7 +271,7 @@ If timeline critical, consider direct implementation with good commit message.
 
 ```yaml
 # Analysis Storage Process
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_analysis"
     title: "Spec Analysis: [feature-description]"

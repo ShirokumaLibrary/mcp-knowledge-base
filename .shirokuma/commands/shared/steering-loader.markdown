@@ -10,7 +10,7 @@ Automatically selects appropriate steering documents based on execution context.
 ### 1. Automatic Loading (inclusion:always)
 ```yaml
 # Load steering documents that are always applied
-- Tool: mcp__shirokuma-kb__search_items
+- Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     query: ""
     types: ["steering"]
@@ -21,7 +21,7 @@ Automatically selects appropriate steering documents based on execution context.
 ### 2. Context-Based Loading (inclusion:filematch)
 ```yaml
 # Load steering documents based on file context
-- Tool: mcp__shirokuma-kb__search_items
+- Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     query: ""
     types: ["steering"]
@@ -41,7 +41,7 @@ Automatically selects appropriate steering documents based on execution context.
     Purpose: Identify current project technology stack
     Output: projectType (typescript, python, react, etc.)
 
-- Tool: mcp__shirokuma-kb__search_items
+- Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     query: ""
     types: ["steering"]
@@ -49,7 +49,7 @@ Automatically selects appropriate steering documents based on execution context.
   Purpose: Get steering documents for detected project type
 
 # Example for TypeScript projects
-- Tool: mcp__shirokuma-kb__search_items
+- Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     query: ""
     types: ["steering"]
@@ -61,7 +61,7 @@ Automatically selects appropriate steering documents based on execution context.
 ```yaml
 # Load manual steering only when explicitly requested
 - Condition: Only when user explicitly requests manual steering
-- Tool: mcp__shirokuma-kb__search_items
+- Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     query: ""
     types: ["steering"]
@@ -262,7 +262,7 @@ Graceful Loading Process:
 ### Creating Steering
 ```yaml
 MCP Tool Usage:
-  Tool: mcp__shirokuma-kb__create_item
+  Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     - type: 'steering'
     - title: 'Steering: [document-name]'
@@ -275,7 +275,7 @@ MCP Tool Usage:
 ### Updating Steering
 ```yaml
 MCP Tool Usage:
-  Tool: mcp__shirokuma-kb__update_item
+  Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     - id: [steering-id]
     - content: [updated-markdown]
@@ -285,14 +285,14 @@ MCP Tool Usage:
 ### Searching Steering
 ```yaml
 Get All Steering Documents:
-  Tool: mcp__shirokuma-kb__list_items
+  Tool: mcp__{{MCP_NAME}}__list_items
   Parameters:
     - type: 'steering'
     - limit: 100
   Purpose: Retrieve all steering documents
 
 Keyword Search:
-  Tool: mcp__shirokuma-kb__search_items
+  Tool: mcp__{{MCP_NAME}}__search_items
   Parameters:
     - query: 'testing TDD'
     - types: ['steering']

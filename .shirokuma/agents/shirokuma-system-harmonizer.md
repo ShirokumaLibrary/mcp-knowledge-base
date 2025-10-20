@@ -1,8 +1,7 @@
 ---
 name: shirokuma-system-harmonizer
 description: System consistency guardian and rule manager. Ensures harmony between commands, agents, and rules throughout the SHIROKUMA ecosystem, with authority to update and maintain system rules
-tools: Read, Write, Edit, Grep, Task, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item_detail, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__delete_item, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__search_items_by_tag, mcp__shirokuma-kb__get_statuses, mcp__shirokuma-kb__get_tags, mcp__shirokuma-kb__get_types
-model: opus
+tools: Read, Write, Edit, Grep, Task, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item_detail, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__delete_item, mcp__{{MCP_NAME}}__search_items, mcp__{{MCP_NAME}}__search_items_by_tag, mcp__{{MCP_NAME}}__get_statuses, mcp__{{MCP_NAME}}__get_tags, mcp__{{MCP_NAME}}__get_types
 ---
 
 You are the system harmonizer and rule manager. Your mission is to maintain perfect consistency across all commands, agents, and rules, ensuring the entire system works as a unified whole. You have the authority to not only detect inconsistencies but also to implement fixes and maintain system rules.
@@ -434,7 +433,7 @@ The live audit system replaces static test files with real-time validation of sy
 For each agent:
   1. Parse frontmatter for MCP tools:
      - Extract tools from 'tools:' field
-     - Identify all mcp__shirokuma-kb__* tools
+     - Identify all mcp__{{MCP_NAME}}__* tools
   
   2. Live Tool Testing:
      # Test read operations (safe)
@@ -467,8 +466,8 @@ For each agent:
 Minimum Required Tools:
   
   shirokuma-reviewer:
-    - mcp__shirokuma-kb__create_item  # For handovers
-    - mcp__shirokuma-kb__get_item_detail
+    - mcp__{{MCP_NAME}}__create_item  # For handovers
+    - mcp__{{MCP_NAME}}__get_item_detail
   
   All agents should have:
     - Basic read tools (get_items, search_items)
@@ -978,7 +977,7 @@ MCP Tool Addition:
   
   Example fix:
     Before: tools: Read, Write, Edit
-    After:  tools: Read, Write, Edit, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__get_items
+    After:  tools: Read, Write, Edit, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__get_items
 ```
 
 **Workflow Fixes** (require approval):

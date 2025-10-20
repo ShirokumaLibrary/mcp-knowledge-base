@@ -1,7 +1,7 @@
 ---
 description: Break down design into actionable implementation tasks following TDD
 argument-hint: "<spec-id> | refine <spec-id> | validate <spec-id> | execute <spec-id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:tasks - Tasks Phase Command
@@ -125,7 +125,7 @@ Tasks are automatically stored in shirokuma-kb as human-readable Markdown:
 2. **MCP Storage Operation**
 ```yaml
 # Store tasks in shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_tasks"
     title: "Tasks: [featureName]"
@@ -152,7 +152,7 @@ Tasks are automatically stored in shirokuma-kb as human-readable Markdown:
 1. **Retrieve Spec from MCP**
 ```yaml
 # Load tasks spec from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Load task breakdown for execution
@@ -175,7 +175,7 @@ Tasks are automatically stored in shirokuma-kb as human-readable Markdown:
 4. **Update Spec Status**
 ```yaml
 # Mark spec as in progress
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     id: "[specId]"
     status: "In Progress"
@@ -195,7 +195,7 @@ For existing tasks:
 1. **Retrieve Current Spec**
 ```yaml
 # Load existing tasks spec
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Get current tasks for refinement
@@ -210,7 +210,7 @@ For existing tasks:
 3. **Update Spec with Refined Tasks**
 ```yaml
 # Save refined tasks
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     id: "[specId]"
     content: "[Updated Markdown with refined tasks, incremented version, updated timestamp]"

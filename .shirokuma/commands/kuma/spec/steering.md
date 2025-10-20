@@ -1,7 +1,7 @@
 ---
 description: Create and manage project-specific steering documents
 argument-hint: "create | list | show <name> | update <name>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__list_items
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__list_items
 ---
 
 # /kuma:spec:steering - Steering Documents Command
