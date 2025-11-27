@@ -442,13 +442,13 @@ ID: 106
 ### Spec利用統計の確認
 ```bash
 # MCPから統計取得
-mcp__shirokuma-kb__search_items({
+mcp__{{MCP_NAME}}__search_items({
   query: "type:spec",
   limit: 100
 })
 
 # 完了率分析
-mcp__shirokuma-kb__list_items({
+mcp__{{MCP_NAME}}__list_items({
   type: "spec",
   status: ["Completed"],
   sortBy: "updated"

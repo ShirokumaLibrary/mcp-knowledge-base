@@ -1,7 +1,7 @@
 ---
 description: Ultra-lightweight spec for changes under 1 day effort
 argument-hint: "'brief change description'"
-allowed-tools: Read, Write, Edit, MultiEdit, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item
+allowed-tools: Read, Write, Edit, MultiEdit, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item
 ---
 
 # /kuma:spec:micro - Micro Spec Command
@@ -55,7 +55,7 @@ Micro specs are automatically saved to shirokuma-kb:
 
 ```yaml
 # Save micro spec to shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_micro"
     title: "Micro: [changeDescription]"
@@ -202,6 +202,42 @@ tags: ["spec", "micro", "[type.toLowerCase()]"]
 - For complex features: Use `/kuma:spec`
 - To validate: Use `/kuma:spec:validate micro`
 - To execute: Direct implementation (no task breakdown needed)
+
+## Next Steps After Spec Creation
+
+After successfully creating a micro specification, display the following guidance:
+
+```markdown
+✅ Micro Spec #[spec-id] created successfully
+
+## 次のステップ
+
+マイクロ仕様が完成しました。小規模な変更のため、すぐに実装を開始できます:
+
+**推奨ワークフロー:**
+1. `/kuma:go [spec-id]` - 直接実装
+   - 小規模な変更のため、直接実装が効率的
+   - 仕様を参照しながら実装
+
+2. `/kuma:vibe [spec-id]` - プロジェクトのvibesに基づく実装
+   - ステアリング設定を適用したい場合
+   - TDDやコーディング規約を自動適用
+
+**Vibeコマンドとは:**
+プロジェクトの「vibes」（開発方針、ステアリング設定）に基づいて、
+適応的に開発ワークフローを調整するコマンド群です。
+
+**注意:**
+- マイクロ仕様は1日未満の小規模変更向けです
+- 複雑な場合は `/kuma:spec:quick` または `/kuma:spec` の使用を検討してください
+- 非常に軽微な変更の場合、仕様なしで直接実装も可能です
+
+**主なVibeコマンド:**
+- `/kuma:vibe` - プロジェクトのvibesに基づく適応的開発
+- `/kuma:vibe:tdd` - テスト駆動開発（RED-GREEN-REFACTOR）
+- `/kuma:vibe:code` - 仕様からの直接実装
+- `/kuma:vibe:commit` - コンベンショナルコミット作成
+```
 
 ## References
 

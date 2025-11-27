@@ -1,7 +1,7 @@
 ---
 description: Quick spec for 1-3 day features (requirements + tasks, skip design)
 argument-hint: "'feature description'"
-allowed-tools: Read, Write, Edit, MultiEdit, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:quick - Quick Spec Command
@@ -106,7 +106,7 @@ Create lightweight specifications for small-to-medium features (1-3 days effort)
 
 ```yaml
 # Quick Spec Storage Process
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_quick"
     title: "Quick Spec: [feature-name]"
@@ -300,6 +300,54 @@ From Spec Tasks:
 - Progress tracking
 - Time estimation visibility
 - Clear work breakdown
+```
+
+## Next Steps After Spec Creation
+
+After successfully creating a quick specification, display the following guidance:
+
+```markdown
+✅ Quick Spec #[spec-id] created successfully (Requirements + Tasks)
+
+## 次のステップ
+
+クイック仕様が完成しました。以下のコマンドで実装を開始できます:
+
+**推奨ワークフロー:**
+1. `/kuma:vibe [spec-id]` - 適応的な実装ワークフロー
+   - プロジェクトのvibes（開発方針）に基づく実装
+   - ステアリング設定を自動適用
+   - 品質ゲート（テスト、リント、ビルド）を自動チェック
+
+2. `/kuma:vibe:tdd [spec-id]` - TDD重視の実装
+   - RED-GREEN-REFACTORサイクル
+   - テストファーストアプローチ
+   - 品質保証と回帰防止
+
+**代替ワークフロー:**
+3. `/kuma:vibe:code [spec-id]` - 仕様から直接実装
+   - 要件とタスクから直接コード生成
+   - ステアリング設定を自動適用
+
+4. `/kuma:go [spec-id]` - 自由な実装
+   - 仕様を参照しながら独自のアプローチで実装
+   - 手動で品質管理
+
+**Vibeコマンドとは:**
+プロジェクトの「vibes」（開発方針、ステアリング設定）に基づいて、
+適応的に開発ワークフローを調整するコマンド群です。
+
+**Vibeの利点:**
+- プロジェクト固有のルール（TDD、コーディング規約等）を自動適用
+- 品質ゲート（テスト、リント、ビルド）の自動チェック
+- エラー時の自動リトライとロールバック機能
+
+**主なVibeコマンド:**
+- `/kuma:vibe` - プロジェクトのvibesに基づく適応的開発
+- `/kuma:vibe:tdd` - テスト駆動開発（RED-GREEN-REFACTOR）
+- `/kuma:vibe:code` - 仕様からの直接実装
+- `/kuma:vibe:visual` - モックアップ/スクリーンショットからの開発
+- `/kuma:vibe:commit` - コンベンショナルコミット作成
 ```
 
 ## References

@@ -1,7 +1,7 @@
 ---
 description: General-purpose task executor for non-design/coding work
 argument-hint: "[issue-id | 'task description']"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, TodoWrite, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, TodoWrite, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__search_items
 ---
 
 # /kuma:go - General Task Executor

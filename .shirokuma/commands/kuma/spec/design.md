@@ -1,7 +1,7 @@
 ---
 description: Create technical design from requirements using architecture patterns
 argument-hint: "<spec-id> | refine <spec-id> | validate <spec-id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:design - Design Phase Command
@@ -13,6 +13,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 ## Purpose
 
 Let's transform your requirements into a thoughtful design. I'll help you explore how to build what you've envisioned, making technical decisions together while keeping things practical and maintainable.
+
+**IMPORTANT**: This command is for DESIGN DOCUMENTATION ONLY. I will create design specifications but will NEVER start implementation automatically. After completing the design, I'll suggest next steps (like `/kuma:spec:tasks` for task breakdown or `/kuma:go` for implementation) but will NOT execute them without your explicit approval.
 
 ## Usage
 
@@ -108,7 +110,7 @@ Generate a design document following this structure:
 
 ```yaml
 # Design Storage Process
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_design"
     title: "Design: [feature-name]"
@@ -146,7 +148,7 @@ Design Document Sections:
 ```yaml
 # Design Refinement Process
 1. Retrieve Current Design:
-   - Tool: mcp__shirokuma-kb__get_item
+   - Tool: mcp__{{MCP_NAME}}__get_item
      Parameters:
        id: spec-id
      Purpose: Get existing design spec
@@ -163,7 +165,7 @@ Design Document Sections:
    - Update technology choices with rationale
 
 4. Update Specification:
-   - Tool: mcp__shirokuma-kb__update_item
+   - Tool: mcp__{{MCP_NAME}}__update_item
      Parameters:
        id: spec-id
        content: refined-design-content
@@ -250,9 +252,12 @@ Assistant:
 
 ## Next Phase
 
-After design is approved:
+After design is approved, I'll suggest these options but will NOT execute them automatically:
 - Use `/kuma:spec:tasks` to create implementation plan
 - Or use `/kuma:spec` to continue with all phases
+- Use `/kuma:go` when you're ready to start implementation
+
+**Remember**: I will only suggest these next steps. You must explicitly choose what to do next.
 
 ## References
 

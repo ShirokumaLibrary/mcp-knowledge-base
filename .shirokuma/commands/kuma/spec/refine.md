@@ -1,7 +1,7 @@
 ---
 description: Refine and update existing specifications based on feedback
 argument-hint: "<spec-id> [phase] | <spec-id> 'specific change'"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:refine - Spec Refinement Command
@@ -225,7 +225,7 @@ Run validation checks:
 4. Update spec with restored content
 
 # Rollback Steps
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: spec-id
   Purpose: Get spec needing rollback

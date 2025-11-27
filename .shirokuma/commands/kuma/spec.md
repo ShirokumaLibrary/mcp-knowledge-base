@@ -1,7 +1,7 @@
 ---
 description: Generate complete specifications using Kiro-style spec-driven development
 argument-hint: "'feature description' | list | show <spec-id> | execute <spec-id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__list_items, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__list_items, TodoWrite
 ---
 
 # /kuma:spec - Main Spec Command
@@ -13,6 +13,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Task, mcp__shirokuma-kb
 ## Purpose
 
 I'm here to help you create comprehensive specifications for your features. Together, we'll work through understanding what you need, how to build it, and the steps to get there. Think of me as your planning partner.
+
+**IMPORTANT**: This command is for PLANNING and DOCUMENTATION ONLY. I will never start implementation work automatically. After creating specifications, I'll suggest next steps but will NOT execute them without your explicit approval using commands like `/kuma:go` or `/kuma:vibe:code`.
 
 ## Usage
 
@@ -110,7 +112,7 @@ Specs are automatically stored in shirokuma-kb with Markdown content for human r
 2. **MCP Storage Operation**
 ```yaml
 # Store complete spec in shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec"
     title: "[Feature]: [featureName]"
@@ -133,7 +135,7 @@ Specs are automatically stored in shirokuma-kb with Markdown content for human r
 1. **Retrieve All Specs**
 ```yaml
 # Get all specs from shirokuma-kb
-- Tool: mcp__shirokuma-kb__list_items
+- Tool: mcp__{{MCP_NAME}}__list_items
   Parameters:
     type: "spec"
     sortBy: "created"
@@ -169,7 +171,7 @@ Display format:
 1. **Retrieve Specific Spec**
 ```yaml
 # Get spec details from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Load specific spec for detailed view
@@ -190,15 +192,17 @@ Display format:
 
 ### Execute Spec
 
+**NOTE**: The execute function loads tasks into TodoWrite for visibility but does NOT start implementation. Actual implementation must be initiated separately using `/kuma:go` or `/kuma:vibe:code`.
+
 ## Spec Execution Process
 
 1. **Retrieve Spec from MCP**
 ```yaml
 # Load spec from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
-  Purpose: Load spec for task execution
+  Purpose: Load spec for task tracking (NOT automatic execution)
 ```
 
 2. **Extract Tasks from Content**
@@ -225,7 +229,7 @@ Display format:
 4. **Update Spec Status**
 ```yaml
 # Mark spec as in progress
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     id: "[specId]"
     status: "In Progress"
@@ -279,6 +283,50 @@ Assistant:
 - `.shirokuma/commands/spec/design.md` - Design phase
 - `.shirokuma/commands/spec/tasks.md` - Tasks phase
 - `.shirokuma/commands/spec/refine.md` - Refinement operations
+
+## Next Steps After Spec Creation
+
+After successfully creating a complete specification, display the following guidance to help users transition smoothly from planning to implementation:
+
+```markdown
+✅ Spec #[spec-id] created successfully (Requirements + Design + Tasks)
+
+## 次のステップ
+
+仕様が完成しました。以下のコマンドで実装を開始できます:
+
+**推奨ワークフロー:**
+1. `/kuma:vibe:spec [spec-id]` - 仕様ベースの段階的実装
+   - 要件フェーズ → 設計フェーズ → タスクフェーズを順次実行
+   - ステアリング設定に準拠した実装
+   - 品質ゲート（テスト、リント、ビルド）を自動チェック
+
+**代替ワークフロー:**
+2. `/kuma:vibe:code [spec-id]` - 仕様から直接実装
+   - 全フェーズを一括実行
+   - ステアリング設定を自動適用
+
+3. `/kuma:go [spec-id]` - 自由な実装
+   - 仕様を参照しながら独自のアプローチで実装
+   - 手動で品質管理
+
+**Vibeコマンドとは:**
+プロジェクトの「vibes」（開発方針、ステアリング設定）に基づいて、
+適応的に開発ワークフローを調整するコマンド群です。
+
+**Vibeの利点:**
+- プロジェクト固有のルール（TDD、コーディング規約等）を自動適用
+- 品質ゲート（テスト、リント、ビルド）の自動チェック
+- エラー時の自動リトライとロールバック機能
+
+**主なVibeコマンド:**
+- `/kuma:vibe` - プロジェクトのvibesに基づく適応的開発
+- `/kuma:vibe:tdd` - テスト駆動開発（RED-GREEN-REFACTOR）
+- `/kuma:vibe:code` - 仕様からの直接実装
+- `/kuma:vibe:spec` - 既存仕様ベースの段階的実装
+- `/kuma:vibe:visual` - モックアップ/スクリーンショットからの開発
+- `/kuma:vibe:commit` - コンベンショナルコミット作成
+```
 
 ## References
 

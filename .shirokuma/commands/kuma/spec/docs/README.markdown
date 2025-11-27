@@ -308,13 +308,13 @@ Specからタスク実行を管理：
 
 ```bash
 # Spec検索
-mcp__shirokuma-kb__search_items({
+mcp__{{MCP_NAME}}__search_items({
   query: "type:spec authentication",
   limit: 10
 })
 
 # 特定フェーズのSpec
-mcp__shirokuma-kb__list_items({
+mcp__{{MCP_NAME}}__list_items({
   type: "spec",
   tags: ["requirements"]
 })
@@ -463,7 +463,7 @@ Specの品質と効果を測定：
 
 ```bash
 # 統計情報
-mcp__shirokuma-kb__get_stats()
+mcp__{{MCP_NAME}}__get_stats()
 
 # Spec完成度
 /kuma:spec:check 102

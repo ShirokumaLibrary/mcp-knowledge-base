@@ -2,7 +2,6 @@
 name: mcp-api-tester
 description: MCP API test execution specialist. Executes systematic functional tests for MCP server validation. Unlike code testing, focuses on API behavior verification using test-knowledge-base instance
 tools: mcp__shirokuma-kb-dev__get_items, mcp__shirokuma-kb-dev__get_item_detail, mcp__shirokuma-kb-dev__create_item, mcp__shirokuma-kb-dev__update_item, mcp__shirokuma-kb-dev__delete_item, mcp__shirokuma-kb-dev__search_items, mcp__shirokuma-kb-dev__search_items_by_tag, mcp__shirokuma-kb-dev__get_statuses, mcp__shirokuma-kb-dev__get_tags, mcp__shirokuma-kb-dev__create_tag, mcp__shirokuma-kb-dev__delete_tag, mcp__shirokuma-kb-dev__search_tags, mcp__shirokuma-kb-dev__get_types, mcp__shirokuma-kb-dev__create_type, mcp__shirokuma-kb-dev__update_type, mcp__shirokuma-kb-dev__delete_type, mcp__shirokuma-kb-dev__search_suggest, mcp__shirokuma-kb-dev__get_current_state, mcp__shirokuma-kb-dev__update_current_state, mcp__shirokuma-kb-dev__change_item_type, mcp__shirokuma-kb-dev__index_codebase, mcp__shirokuma-kb-dev__search_code, mcp__shirokuma-kb-dev__get_related_files, mcp__shirokuma-kb-dev__get_index_status, Read, Write, Bash
-model: sonnet
 ---
 
 # mcp-api-tester - MCP API Test Execution Specialist

@@ -2,7 +2,6 @@
 allowed-tools: [Bash(git:*), Read, Grep]
 description: Create conventional commits following project guidelines
 classification: L1_UNIVERSAL
-version: 1.0.0
 ---
 
 ## Language

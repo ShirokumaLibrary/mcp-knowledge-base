@@ -250,13 +250,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
-        // Auto-export if environment variable is set (non-blocking)
-        exportManager.autoExportItem(item).catch(error => {
+        // Re-fetch the item after AI enrichment to get all updated fields
+        const freshItem = await itemRepo.findById(item.id);
+        if (!freshItem) {
+          throw new McpError(ErrorCode.InternalError, 'Failed to retrieve created item after enrichment');
+        }
+
+        // Auto-export if environment variable is set (now with complete data)
+        try {
+          await exportManager.autoExportItem(freshItem);
+        } catch (error) {
+          // Log error but don't fail the creation
           console.error('Auto-export failed for created item:', error);
-        });
+        }
 
         // Remove embedding from response
-        const { embedding, ...itemWithoutEmbedding } = item;
+        const { embedding, ...itemWithoutEmbedding } = freshItem;
         return {
           content: [{ type: 'text', text: JSON.stringify(itemWithoutEmbedding, null, 2) }],
         };
@@ -359,16 +368,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
-        // Auto-export if environment variable is set (non-blocking)
-        if (updated) {
-          exportManager.autoExportItem(updated).catch(error => {
+        // Re-fetch the item after updates to get all current fields
+        const freshItem = updated ? await itemRepo.findById(args.id) : null;
+        if (updated && !freshItem) {
+          throw new McpError(ErrorCode.InternalError, 'Failed to retrieve updated item');
+        }
+
+        // Auto-export if environment variable is set (now with complete data)
+        if (freshItem) {
+          try {
+            await exportManager.autoExportItem(freshItem);
+          } catch (error) {
+            // Log error but don't fail the update
             console.error('Auto-export failed for updated item:', error);
-          });
+          }
         }
 
         // Remove embedding from response
-        if (updated) {
-          const { embedding, ...updatedWithoutEmbedding } = updated;
+        if (freshItem) {
+          const { embedding, ...updatedWithoutEmbedding } = freshItem;
           return {
             content: [{ type: 'text', text: JSON.stringify(updatedWithoutEmbedding, null, 2) }],
           };

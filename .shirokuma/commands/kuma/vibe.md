@@ -1,7 +1,7 @@
 ---
 description: Adaptive development workflow based on project vibes and best practices  
 argument-hint: "'task description' | list subcommands"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Glob, LS, Task, TodoWrite, WebFetch, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, mcp__shirokuma-kb__search_items, mcp__shirokuma-kb__get_related_items
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, Glob, LS, Task, TodoWrite, WebFetch, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, mcp__{{MCP_NAME}}__search_items, mcp__{{MCP_NAME}}__get_related_items
 ---
 
 # /kuma:vibe - Adaptive Development Command

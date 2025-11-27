@@ -59,6 +59,8 @@ After each phase, I'll present you with choices:
 - **[Review]** - See the full spec so far
 - **[Save & Exit]** - Save progress and stop
 
+**IMPORTANT**: I will NEVER automatically proceed to implementation after planning. These options are for you to choose. Implementation requires explicit commands like `/kuma:go` or `/kuma:vibe:code`.
+
 You're always in control of the process.
 
 ## Working with Commands

@@ -1,7 +1,7 @@
 ---
 description: Generate comprehensive requirements using EARS format
 argument-hint: "'feature description' | refine <spec-id> | validate <spec-id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_items, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__create_item, mcp__shirokuma-kb__update_item, TodoWrite
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__{{MCP_NAME}}__get_items, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__create_item, mcp__{{MCP_NAME}}__update_item, TodoWrite
 ---
 
 # /kuma:spec:req - Requirements Phase Command
@@ -13,6 +13,8 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, mcp__shirokuma-kb__get_
 ## Purpose
 
 Help me understand what you want to build and turn it into clear, testable requirements. This is where we start our journey together - understanding the "what" before the "how".
+
+**IMPORTANT**: This command is for REQUIREMENTS GATHERING ONLY. I will document requirements but will NEVER start design or implementation automatically. After completing requirements, I'll suggest next steps but will NOT execute them without your explicit approval.
 
 ## Usage
 
@@ -102,7 +104,7 @@ Requirements are automatically stored in shirokuma-kb as human-readable Markdown
 2. **MCP Storage Operation**
 ```yaml
 # Store requirements in shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_requirements"
     title: "Requirements: [featureName]"
@@ -126,7 +128,7 @@ Requirements are automatically stored in shirokuma-kb as human-readable Markdown
 1. **Retrieve Existing Spec**
 ```yaml
 # Get current requirements spec
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Load existing requirements for refinement
@@ -141,7 +143,7 @@ Requirements are automatically stored in shirokuma-kb as human-readable Markdown
 3. **Update Spec with Refined Version**
 ```yaml
 # Update requirements with refinements
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
   Parameters:
     id: "[specId]"
     content: "[refinedMarkdownContent - updated Markdown with refinements]"
@@ -228,9 +230,11 @@ Assistant:
 
 ## Next Phase
 
-After requirements are approved:
+After requirements are approved, I'll suggest these options but will NOT execute them automatically:
 - Use `/kuma:spec:design` to create technical design
 - Or use `/kuma:spec` to continue with all phases
+
+**Remember**: These are suggestions only. You must explicitly choose the next action.
 
 ## References
 

@@ -1,7 +1,7 @@
 ---
 description: Execute development from existing spec document
 argument-hint: "<spec-id> [phase]"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, TodoWrite, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__get_related_items
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, TodoWrite, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__get_related_items
 ---
 
 # /kuma:vibe:spec - Spec-Based Development
@@ -167,7 +167,7 @@ Executes development tasks based on existing spec documents. Follows the require
 ### MCP Updates
 
 **Progress tracking via MCP:**
-- Tool: mcp__shirokuma-kb__update_item
+- Tool: mcp__{{MCP_NAME}}__update_item
 - Updates:
   - status: Update to 'In Progress', 'Review', or 'Completed'
   - metadata.progress: Track phase completion

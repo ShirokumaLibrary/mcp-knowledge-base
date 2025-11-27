@@ -29,7 +29,7 @@ Project-specific configurations are stored as MCP steering documents (type: stee
 - **Testing Standards** - Test requirements and coverage
 - **Coding Conventions** - Style guides and naming rules
 
-To access: Use `mcp__shirokuma-kb__list_items` with type parameter "steering"
+To access: Use `mcp__{{MCP_NAME}}__list_items` with type parameter "steering"
 
 ## Core Principles
 
@@ -108,14 +108,14 @@ To access: Use `mcp__shirokuma-kb__list_items` with type parameter "steering"
 **Workaround**: Use `list_items` instead:
 ```yaml
 # Get Open issues
-Tool: mcp__shirokuma-kb__list_items
+Tool: mcp__{{MCP_NAME}}__list_items
 Parameters:
   type: "issue"
   status: "Open"  # Will filter by status name
   limit: 20
 
 # Alternative: Get all issues and filter manually
-Tool: mcp__shirokuma-kb__list_items
+Tool: mcp__{{MCP_NAME}}__list_items
 Parameters:
   type: "issue"
   limit: 100
@@ -131,8 +131,8 @@ Parameters:
 # TF-IDF based keyword matching strategy
 Strategy: keywords
 Tools:
-  - mcp__shirokuma-kb__search_items
-  - mcp__shirokuma-kb__get_related_items
+  - mcp__{{MCP_NAME}}__search_items
+  - mcp__{{MCP_NAME}}__get_related_items
 Purpose: Find items based on text keyword similarity
 ```
 
@@ -141,7 +141,7 @@ Purpose: Find items based on text keyword similarity
 # High-level category identification strategy
 Strategy: concepts
 Tools:
-  - mcp__shirokuma-kb__get_related_items
+  - mcp__{{MCP_NAME}}__get_related_items
 Parameters:
   - strategy: 'concepts'
 Purpose: Find items based on conceptual similarity
@@ -152,7 +152,7 @@ Purpose: Find items based on conceptual similarity
 # Semantic similarity using vector embeddings
 Strategy: embedding
 Tools:
-  - mcp__shirokuma-kb__get_related_items
+  - mcp__{{MCP_NAME}}__get_related_items
 Parameters:
   - strategy: 'embedding'
 Purpose: Find items based on semantic vector similarity
@@ -163,7 +163,7 @@ Purpose: Find items based on semantic vector similarity
 # Combined approach using multiple strategies
 Strategy: hybrid
 Tools:
-  - mcp__shirokuma-kb__get_related_items
+  - mcp__{{MCP_NAME}}__get_related_items
 Parameters:
   - strategy: 'hybrid'
   - weights: 
@@ -285,7 +285,7 @@ Purpose: Best results using weighted combination of strategies
 ### Creating an Issue
 ```yaml
 # Create a new issue item
-Tool: mcp__shirokuma-kb__create_item
+Tool: mcp__{{MCP_NAME}}__create_item
 Parameters:
   type: "issue"
   title: "Fix authentication bug"
@@ -301,7 +301,7 @@ Parameters:
 ### Searching for Knowledge
 ```yaml
 # Search for knowledge items
-Tool: mcp__shirokuma-kb__search_items
+Tool: mcp__{{MCP_NAME}}__search_items
 Parameters:
   query: "React hooks optimization"
   types: ["knowledge", "pattern"]
@@ -312,7 +312,7 @@ Purpose: Find relevant knowledge and patterns
 ### Finding Related Items
 ```yaml
 # Find items related to a specific item
-Tool: mcp__shirokuma-kb__get_related_items
+Tool: mcp__{{MCP_NAME}}__get_related_items
 Parameters:
   id: 123
   strategy: "hybrid"
@@ -326,7 +326,7 @@ Purpose: Discover related items using multiple strategies
 ### Updating System State
 ```yaml
 # Update current system state
-Tool: mcp__shirokuma-kb__update_current_state
+Tool: mcp__{{MCP_NAME}}__update_current_state
 Parameters:
   content: "Working on authentication module refactoring"
   tags: ["session", "authentication", "refactoring"]

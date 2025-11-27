@@ -1,7 +1,7 @@
 ---
 description: Validate specs with comprehensive checklists for each phase
 argument-hint: "<spec-id> [phase] | 'spec content'"
-allowed-tools: Read, mcp__shirokuma-kb__get_item, mcp__shirokuma-kb__update_item
+allowed-tools: Read, mcp__{{MCP_NAME}}__get_item, mcp__{{MCP_NAME}}__update_item
 ---
 
 # /kuma:spec:check - Spec Validation Command
@@ -224,7 +224,7 @@ Validation results are automatically saved to shirokuma-kb as human-readable Mar
 1. **Retrieve Spec for Validation**
 ```yaml
 # Load spec from shirokuma-kb
-- Tool: mcp__shirokuma-kb__get_item
+- Tool: mcp__{{MCP_NAME}}__get_item
   Parameters:
     id: "[specId]"
   Purpose: Get spec content for validation
@@ -249,7 +249,7 @@ Validation results are automatically saved to shirokuma-kb as human-readable Mar
 4. **Store Validation Report**
 ```yaml
 # Save validation report to shirokuma-kb
-- Tool: mcp__shirokuma-kb__create_item
+- Tool: mcp__{{MCP_NAME}}__create_item
   Parameters:
     type: "spec_validation"
     title: "Validation Report: [spec.title]"

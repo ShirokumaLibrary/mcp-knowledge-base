@@ -1,7 +1,7 @@
 ---
 description: Implementation with automatic steering compliance
 argument-hint: "'feature to implement' | from-plan | from-spec <id>"
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, TodoWrite, mcp__shirokuma-kb__get_item
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, TodoWrite, mcp__{{MCP_NAME}}__get_item
 ---
 
 # /kuma:vibe:code - Smart Implementation Mode

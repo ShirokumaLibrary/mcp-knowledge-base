@@ -1,7 +1,7 @@
 ---
 description: Validate EARS format and spec structure compliance
 argument-hint: "<spec-id> | 'EARS statement' | requirements"
-allowed-tools: Read, mcp__shirokuma-kb__get_item
+allowed-tools: Read, mcp__{{MCP_NAME}}__get_item
 ---
 
 # /kuma:spec:validate - Format Validation Command

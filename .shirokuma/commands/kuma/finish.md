@@ -131,7 +131,7 @@ Quality Check Process:
      - Format: "⚠️ Quality note: [brief summary]"
   
   3. Save Detailed Report:
-     Tool: mcp__shirokuma-kb__create_item
+     Tool: mcp__{{MCP_NAME}}__create_item
      Parameters:
        - type: analysis
        - title: Quality Report - [session-id]
